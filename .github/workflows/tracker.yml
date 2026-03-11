@@ -1,0 +1,22 @@
+name: Learning Tracker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-log:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run script
+        run: python scripts/tracker.py
+
+      - name: Commit changes
+        run: |
+          git config --global user.name "tracker-bot"
+          git config --global user.email "bot@example.com"
+          git add .
+          git commit -m "update learning log"
+          git push
