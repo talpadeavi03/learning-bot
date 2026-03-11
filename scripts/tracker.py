@@ -3,21 +3,38 @@ import requests
 from datetime import datetime
 import pytz
 
-# read secrets
 token = os.environ["TELEGRAM_BOT_TOKEN"]
-chat_id = os.environ["TELEGRAM_CHAT_ID"]
 
-# telegram api
 url = f"https://api.telegram.org/bot{token}/getUpdates"
 
-response = requests.get(url).json()
+data = requests.get(url).json()
 
-if "result" not in response or len(response["result"]) == 0:
+updates = data.get("result", [])
+
+if len(updates) == 0:
     print("No messages found")
     exit()
 
-# latest message
-message = response["result"][-1]["message"]["text"]
+latest = updates[-1]
+
+update_id = latest["update_id"]
+message = latest["message"]["text"]
+
+# read last processed update
+os.makedirs("state", exist_ok=True)
+
+state_file = "state/last_update.txt"
+
+if not os.path.exists(state_file):
+    with open(state_file, "w") as f:
+        f.write("0")
+
+with open(state_file, "r") as f:
+    last_update = int(f.read().strip())
+
+if update_id <= last_update:
+    print("Message already logged")
+    exit()
 
 # timezone IST
 tz = pytz.timezone("Asia/Kolkata")
@@ -26,14 +43,15 @@ now = datetime.now(tz)
 date = now.strftime("%Y-%m-%d")
 time = now.strftime("%H:%M")
 
-# log entry
 entry = f"\n## {date}\n{time} | {message}\n"
 
-# ensure logs directory exists
 os.makedirs("logs", exist_ok=True)
 
-# write log
 with open("logs/learning-log.md", "a") as f:
     f.write(entry)
 
-print("Log updated successfully")
+# update state
+with open(state_file, "w") as f:
+    f.write(str(update_id))
+
+print("New message logged")
