@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Learning Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body {
+font-family: Arial;
+background:#0f172a;
+color:white;
+margin:40px;
+}
+
+h1{
+margin-bottom:30px;
+}
+
+.container{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+}
+
+canvas{
+background:white;
+border-radius:8px;
+padding:10px;
+}
+
+.heatmap span{
+display:inline-block;
+width:12px;
+height:12px;
+margin:2px;
+background:#22c55e;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🚀 Personal Learning Dashboard</h1>
+
+<div class="container">
+
+<div class="card">
+<h2>📊 Topic Distribution</h2>
+<canvas id="topicChart"></canvas>
+</div>
+
+<div class="card">
+<h2>📈 Learning Activity</h2>
+<canvas id="activityChart"></canvas>
+</div>
+
+<div class="card">
+<h2>📅 Learning Heatmap</h2>
+<div id="heatmap" class="heatmap"></div>
+</div>
+
+<div class="card">
+<h2>🧠 Weekly Summary</h2>
+<ul id="summary"></ul>
+</div>
+
+</div>
+
+<script>
+
+fetch("data/dashboard.json")
+.then(res=>res.json())
+.then(data=>{
+
+const topics=data.topics
+const daily=data.daily_activity
+const summary=data.weekly_summary||[]
+
+new Chart(document.getElementById("topicChart"),{
+type:"bar",
+data:{
+labels:Object.keys(topics),
+datasets:[{
+label:"Sessions",
+data:Object.values(topics),
+backgroundColor:"#38bdf8"
+}]
+}
+})
+
+new Chart(document.getElementById("activityChart"),{
+type:"line",
+data:{
+labels:Object.keys(daily),
+datasets:[{
+label:"Daily Learning",
+data:Object.values(daily),
+borderColor:"#22c55e",
+fill:false
+}]
+}
+})
+
+const heatmap=document.getElementById("heatmap")
+
+Object.values(daily).forEach(v=>{
+for(let i=0;i<v;i++){
+const box=document.createElement("span")
+heatmap.appendChild(box)
+}
+})
+
+const list=document.getElementById("summary")
+
+summary.forEach(item=>{
+const li=document.createElement("li")
+li.innerText=item
+list.appendChild(li)
+})
+
+})
+
+</script>
+
+</body>
+</html>
