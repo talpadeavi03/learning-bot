@@ -2,11 +2,11 @@
 # Learning Dashboard
 
 ## Total Study Sessions
-9
+10
 
 ## Topic Distribution
 
-DevOps: 3
+DevOps: 4
 
 MLOps: 3
 
@@ -18,7 +18,7 @@ Interview Prep: 0
 
 ## Progress Bar
 
-DevOps   : ███
+DevOps   : ████
 MLOps    : ███
 Projects : ███
 Interview: 
