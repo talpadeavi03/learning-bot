@@ -16,3 +16,9 @@ DO:test | MO:test | PR:test
 
 ## 2026-03-12
 01:17 | DO: Kubernetes services
+
+## 2026-03-12
+02:18 | Applied to microsoft today 
+Studied mlflow tracking 
+drank 2.5 ltr water
+feeling productive
