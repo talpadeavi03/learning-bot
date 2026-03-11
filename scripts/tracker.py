@@ -1,10 +1,12 @@
 import datetime
-
-log = "DO:k8s service | MO:mlflow run | PR:job parser"
+import os
 
 today = datetime.date.today()
 
-entry = f"\n## {today}\n{log}\n"
+# create logs folder if it doesn't exist
+os.makedirs("logs", exist_ok=True)
+
+entry = f"\n## {today}\nDO:test | MO:test | PR:test\n"
 
 with open("logs/learning-log.md","a") as f:
     f.write(entry)
