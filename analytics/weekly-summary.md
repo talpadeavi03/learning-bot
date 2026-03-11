@@ -27,6 +27,7 @@ Total Study Sessions: **4**
 - Studied mlflow tracking
 - drank 2.5 ltr water
 - feeling productive
+- 02:36 | Studied Kubernetes ingress today.
 
 
 ---
