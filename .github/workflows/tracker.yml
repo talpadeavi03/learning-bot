@@ -37,18 +37,22 @@ jobs:
         run: |
           python scripts/tracker.py
 
-      - name: Run analytics generator
+      - name: Generate analytics dashboard
         run: |
           python scripts/analytics.py
 
-      - name: Run dashboard generator
+      - name: Generate learning dashboard
         run: |
           python scripts/dashboard.py
+
+      - name: Generate learning heatmap
+        run: |
+          python scripts/heatmap.py
 
       - name: Commit updates
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "update learning logs and dashboard" || echo "no changes"
+          git commit -m "update logs analytics dashboard heatmap" || echo "no changes"
           git push
