@@ -19,15 +19,16 @@ Total Study Sessions: **4**
 
 ## 🧠 Key Learning Activities
 
-- DO:test | MO:test | PR:test
-- 01:00 | Test: learning tracker
-- 01:11 | Test: learning tracker
-- 01:17 | DO: Kubernetes services
-- 02:18 | Applied to microsoft today
-- Studied mlflow tracking
-- drank 2.5 ltr water
-- feeling productive
-- 02:36 | Studied Kubernetes ingress today.
+- 03:01 | above was data
+- today learned:
+- tried LearningTrackerBot implementation still working on nlp parser adding mlflow and llm or slm to the pipeline
+- workflow for job apply pending
+- interview UST implementation pending
+- interview preparation done from LearningTrackerBot only
+- note: how the graph will be or the event connected mindmap needed as well to project as 2 times LearningTrackerBot mentioned
+- happy all day
+- left at 3 am after completing few satisfactory pipelines
+- this is more important project i guess
 
 
 ---

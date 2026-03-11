@@ -25,3 +25,16 @@ feeling productive
 
 ## 2026-03-12
 02:36 | Studied Kubernetes ingress today.
+
+## 2026-03-12
+03:01 | above was data 
+today learned:
+tried LearningTrackerBot implementation still working on nlp parser adding mlflow and llm or slm to the pipeline 
+workflow for job apply pending 
+interview UST implementation pending 
+interview preparation done from LearningTrackerBot only
+
+note: how the graph will be or the event connected mindmap needed as well to project as 2 times LearningTrackerBot mentioned 
+happy all day
+left at 3 am after completing few satisfactory pipelines 
+this is more important project i guess
