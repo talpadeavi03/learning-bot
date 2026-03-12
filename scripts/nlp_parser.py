@@ -1,26 +1,32 @@
 import csv
 import re
 from datetime import datetime
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 
 log_file = "logs/learning-log.md"
 events_file = "data/events.csv"
 
-rules = {
-    "task": ["apply", "applied", "resume", "interview", "job"],
-    "study": ["study", "studied", "learn", "learning", "course", "reading"],
-    "health": ["water", "drink", "drank", "sleep", "gym"],
-    "mood": ["feel", "feeling", "happy", "tired", "productive"],
-    "goal": ["goal", "target", "finish"],
-    "progress": ["completed", "done", "finished"]
-}
+# semantic categories
+categories = [
+    "task",
+    "study",
+    "health",
+    "mood",
+    "goal",
+    "progress"
+]
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+category_embeddings = model.encode(categories)
+
 
 def classify(sentence):
-    s = sentence.lower()
-    for category, keywords in rules.items():
-        for word in keywords:
-            if word in s:
-                return category
-    return None
+    embedding = model.encode([sentence])
+    scores = cosine_similarity(embedding, category_embeddings)
+    index = scores.argmax()
+    return categories[index]
 
 
 events = []
@@ -33,10 +39,9 @@ for line in lines:
     if "|" not in line:
         continue
 
-    parts = line.split("|", 1)
-    text = parts[1].strip()
+    text = line.split("|", 1)[1].strip()
 
-    sentences = re.split(r'[.!?]', text)
+    sentences = re.split(r"[.!?]", text)
 
     for s in sentences:
 
@@ -47,13 +52,11 @@ for line in lines:
 
         category = classify(s)
 
-        if category:
-            events.append([
-                datetime.now().strftime("%Y-%m-%d"),
-                category,
-                s
-            ])
-
+        events.append([
+            datetime.now().strftime("%Y-%m-%d"),
+            category,
+            s
+        ])
 
 with open(events_file, "w", newline="") as f:
 
