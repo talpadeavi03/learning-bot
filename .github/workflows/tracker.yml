@@ -1,13 +1,10 @@
 name: Learning Tracker
 
 on:
-  push:
-    branches: [ master ]
-
   workflow_dispatch:
 
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: write
@@ -36,6 +33,10 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           python scripts/tracker.py
+
+      - name: Run NLP parser
+        run: |
+          python scripts/nlp_parser.py
 
       - name: Generate analytics dashboard
         run: |
