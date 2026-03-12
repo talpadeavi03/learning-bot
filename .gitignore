@@ -1,0 +1,15 @@
+# Auto-generated logs
+logs/learning-log.md
+
+# Generated dataset
+data/events.csv
+
+# Dashboard data
+site/data/dashboard.json
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local environment
+.env
