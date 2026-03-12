@@ -1,11 +1,11 @@
 # Auto-generated logs
-logs/learning-log.md
+#logs/learning-log.md
 
 # Generated dataset
-data/events.csv
+#data/events.csv
 
 # Dashboard data
-site/data/dashboard.json
+#site/data/dashboard.json
 
 # Python cache
 __pycache__/

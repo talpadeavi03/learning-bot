@@ -63,5 +63,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "update learning logs, analytics, dashboard, heatmap, weekly summary, charts" || echo "no changes"
+          git commit -m "update learning logs, analytics, dashboard" || echo "no changes"
           git push
