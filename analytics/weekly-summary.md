@@ -19,7 +19,6 @@ Total Study Sessions: **4**
 
 ## 🧠 Key Learning Activities
 
-- tried LearningTrackerBot implementation still working on nlp parser adding mlflow and llm or slm to the pipeline
 - workflow for job apply pending
 - interview UST implementation pending
 - interview preparation done from LearningTrackerBot only
@@ -29,6 +28,7 @@ Total Study Sessions: **4**
 - this is more important project i guess
 - 10:36 | diary: its morning i will be working sharp 11 on my goals consistency is important.
 - Visited KT . yet no intake of food yet
+- 12:06 | hi
 
 
 ---
