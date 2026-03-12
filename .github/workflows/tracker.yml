@@ -1,10 +1,10 @@
 name: Learning Tracker
 
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [telegram_message]
 
-  schedule:
-    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
