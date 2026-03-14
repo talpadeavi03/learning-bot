@@ -1,0 +1,43 @@
+name: Learning Analytics
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analytics:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Generate analytics
+        run: |
+          python scripts/analytics.py
+          python scripts/dashboard.py
+          python scripts/heatmap.py
+          python scripts/weekly_summary.py
+          python scripts/dashboard_data.py
+
+      - name: Commit updates
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add analytics site
+          git commit -m "update analytics dashboard" || echo "no changes"
+          git push
