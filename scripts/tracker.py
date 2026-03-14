@@ -1,22 +1,28 @@
+import json
 import os
-import datetime
 
-text = os.environ.get("MSG_TEXT")
-user = os.environ.get("MSG_USER", "unknown")
-timestamp = os.environ.get("MSG_TIME")
+BATCH_FILE = "events.json"
+LOG_FILE = "logs/learning-log.md"
 
-if not text:
-    print("No message received")
+if not os.path.exists(BATCH_FILE):
+    print("No events.json found")
     exit()
 
-if not timestamp:
-    timestamp = datetime.datetime.utcnow().isoformat()
-
-entry = f"- {timestamp} | {text}\n"
+with open(BATCH_FILE) as f:
+    events = json.load(f)
 
 os.makedirs("logs", exist_ok=True)
 
-with open("logs/learning-log.md", "a") as f:
-    f.write(entry)
+with open(LOG_FILE, "a") as log:
 
-print("Logged:", text)
+    for event in events:
+
+        text = event.get("text")
+        timestamp = event.get("timestamp")
+
+        if not text:
+            continue
+
+        log.write(f"{timestamp} | {text}\n")
+
+print(f"Logged {len(events)} messages")

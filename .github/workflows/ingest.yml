@@ -16,27 +16,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-          cache: "pip"
-          cache-dependency-path: requirements-ingest.txt
 
       - name: Install dependencies
-        run: pip install -r requirements-ingest.txt
-
-      - name: Show payload
-        run: echo '${{ toJson(github.event.client_payload) }}'
-
-      - name: Export payload
         run: |
-          echo "MSG_TEXT=${{ github.event.client_payload.text }}" >> $GITHUB_ENV
-          echo "MSG_USER=${{ github.event.client_payload.user }}" >> $GITHUB_ENV
-          echo "MSG_TIME=${{ github.event.client_payload.timestamp }}" >> $GITHUB_ENV
+          pip install pandas
+
+      - name: Save batch payload
+        run: |
+          echo '${{ toJson(github.event.client_payload.events) }}' > events.json
+          cat events.json
 
       - name: Run tracker
         run: python scripts/tracker.py
@@ -58,6 +56,6 @@ jobs:
 
           git commit -m "update learning dataset"
 
-          git pull origin master --strategy-option ours
+          git pull origin master --strategy-option ours || true
 
           git push
