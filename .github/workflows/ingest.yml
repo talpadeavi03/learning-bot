@@ -18,7 +18,9 @@ jobs:
     steps:
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        -uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -50,9 +52,20 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+          # save local changes
+          git stash
+
+          # pull latest repo state
           git pull --rebase
 
-          git add logs/learning-log.md data/events.csv
-          git commit -m "update learning dataset" || echo "no changes"
+          # restore local changes
+          git stash pop || true
 
-          git push
+          git add logs/learning-log.md data/events.csv
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "update learning dataset"
+            git push
+          fi

@@ -15,12 +15,13 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           cache: "pip"
+          cache-dependency-path: requirements-analytics.txt
 
       - name: Install dependencies
         run: |
@@ -38,6 +39,15 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add analytics site
-          git commit -m "update analytics dashboard" || echo "no changes"
+
+          git add logs/learning-log.md data/events.csv
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "update learning dataset"
+
+          git pull --rebase
           git push
