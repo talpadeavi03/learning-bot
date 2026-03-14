@@ -23,19 +23,22 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run:  run: pip install -r requirements.txt
+        run: pip install -r requirements.txt
+
+      - name: Show payload
+        run: echo '${{ toJson(github.event.client_payload) }}'
 
       - name: Export payload
         run: |
           echo "MSG_TEXT=${{ github.event.client_payload.text }}" >> $GITHUB_ENV
+          echo "MSG_USER=${{ github.event.client_payload.user }}" >> $GITHUB_ENV
+          echo "MSG_TIME=${{ github.event.client_payload.timestamp }}" >> $GITHUB_ENV
 
       - name: Run tracker
-        run: |
-          python scripts/tracker.py
+        run: python scripts/tracker.py
 
       - name: Run NLP parser
-        run: |
-          python scripts/nlp_parser.py
+        run: python scripts/nlp_parser.py
 
       - name: Commit updates
         run: |
