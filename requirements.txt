@@ -1,2 +1,4 @@
 requests
 pytz
+sentence-transformers
+scikit-learn

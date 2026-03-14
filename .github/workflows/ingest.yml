@@ -23,8 +23,7 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: |
-          pip install requests pytz
+        run:  run: pip install -r requirements.txt
 
       - name: Export payload
         run: |
