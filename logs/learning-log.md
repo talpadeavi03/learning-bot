@@ -54,3 +54,4 @@ Visited KT . yet no intake of food yet
 04:14 | test50
 
 04:38 | testing ingestion pipline
+- 2026-03-14T08:42:53.085Z | testing 58 / i have added different ml which will just analyze and main will run fast the ingest one
