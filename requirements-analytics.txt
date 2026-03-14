@@ -1,4 +1,5 @@
-requests
-pytz
+pandas
 sentence-transformers
 scikit-learn
+matplotlib
+seaborn
