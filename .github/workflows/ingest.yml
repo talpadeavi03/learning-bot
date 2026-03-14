@@ -2,7 +2,7 @@ name: Telegram Ingestion
 
 on:
   repository_dispatch:
-    types: [telegram_message]
+    types: [telegram_batch]
 
 permissions:
   contents: write
@@ -58,5 +58,6 @@ jobs:
 
           git commit -m "update learning dataset"
 
-          git pull --rebase
+          git pull origin master --strategy-option ours
+
           git push
