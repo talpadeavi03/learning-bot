@@ -27,10 +27,18 @@ jobs:
         run: |
           pip install requests pytz sentence-transformers scikit-learn
 
+      - name: Show payload
+        run: echo '${{ toJson(github.event.client_payload) }}'
+
+      - name: Export payload
+        run: |
+          echo "MSG_TEXT=${{ github.event.client_payload.text }}" >> $GITHUB_ENV
+          echo "MSG_USER=${{ github.event.client_payload.user }}" >> $GITHUB_ENV
+          echo "MSG_TIME=${{ github.event.client_payload.timestamp }}" >> $GITHUB_ENV
+
       - name: Run tracker script
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TEXT: ${{ github.event.client_payload.text }}
         run: |
           python scripts/tracker.py
 
