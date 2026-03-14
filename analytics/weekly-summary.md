@@ -19,7 +19,6 @@ Total Study Sessions: **4**
 
 ## 🧠 Key Learning Activities
 
-- note: how the graph will be or the event connected mindmap needed as well to project as 2 times LearningTrackerBot mentioned
 - happy all day
 - left at 3 am after completing few satisfactory pipelines
 - this is more important project i guess
@@ -29,6 +28,7 @@ Total Study Sessions: **4**
 - 16:21 | Studied Kubernetes. Applied for jobs. eat go food.
 - 03:41 | Studied Kubernetes networking today
 - 04:14 | test50
+- 04:38 | testing ingestion pipline
 
 
 ---
