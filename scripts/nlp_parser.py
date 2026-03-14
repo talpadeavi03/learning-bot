@@ -1,69 +1,40 @@
 import csv
-import re
+import os
 from datetime import datetime
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 
-log_file = "logs/learning-log.md"
-events_file = "data/events.csv"
+EVENT_FILE = "data/events.csv"
 
-# semantic categories
-categories = [
-    "task",
-    "study",
-    "health",
-    "mood",
-    "goal",
-    "progress"
-]
+text = os.environ.get("MSG_TEXT", "")
+user = os.environ.get("MSG_USER", "unknown")
+timestamp = os.environ.get("MSG_TIME", datetime.utcnow().isoformat())
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
+text_lower = text.lower()
 
-category_embeddings = model.encode(categories)
+category = "learning"
+topic = "general"
 
+if "kubernetes" in text_lower:
+    topic = "devops"
 
-def classify(sentence):
-    embedding = model.encode([sentence])
-    scores = cosine_similarity(embedding, category_embeddings)
-    index = scores.argmax()
-    return categories[index]
+elif "terraform" in text_lower:
+    topic = "iac"
 
+elif "python" in text_lower:
+    topic = "programming"
 
-events = []
+elif "ml" in text_lower:
+    topic = "mlops"
 
-with open(log_file, "r") as f:
-    lines = f.readlines()
+row = [timestamp, user, text, category, topic]
 
-for line in lines:
+file_exists = os.path.exists(EVENT_FILE)
 
-    if "|" not in line:
-        continue
-
-    text = line.split("|", 1)[1].strip()
-
-    sentences = re.split(r"[.!?]", text)
-
-    for s in sentences:
-
-        s = s.strip()
-
-        if not s:
-            continue
-
-        category = classify(s)
-
-        events.append([
-            datetime.now().strftime("%Y-%m-%d"),
-            category,
-            s
-        ])
-
-with open(events_file, "w", newline="") as f:
-
+with open(EVENT_FILE, "a", newline="") as f:
     writer = csv.writer(f)
-    writer.writerow(["timestamp", "type", "value"])
 
-    for e in events:
-        writer.writerow(e)
+    if not file_exists:
+        writer.writerow(["timestamp", "user", "text", "category", "topic"])
 
-print("events parsed:", len(events))
+    writer.writerow(row)
+
+print("Event added to dataset")
