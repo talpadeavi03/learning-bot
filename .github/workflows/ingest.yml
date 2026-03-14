@@ -56,6 +56,8 @@ jobs:
 
           git commit -m "update learning dataset"
 
-          git pull origin master --strategy-option ours || true
+          # Pull latest changes safely
+          git pull --rebase origin master || true
 
-          git push
+          # Push again
+          git push origin master
