@@ -1,6 +1,7 @@
 import csv
 import os
 import json
+import re
 
 INPUT_FILE = "events.json"
 DATA_FILE = "data/raw/events.csv"
@@ -37,27 +38,43 @@ with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
         if not timestamp or not text:
             continue
 
-        category = "general"
-        topic = "general"
+        # Split multiline Telegram messages
+        lines = text.split("\n")
 
-        text_lower = text.lower()
+        for line in lines:
 
-        if "study" in text_lower:
-            category = "learning"
+            line = line.strip()
 
-        elif "apply" in text_lower:
-            category = "career"
+            if not line:
+                continue
 
-        elif "eat" in text_lower:
-            category = "health"
+            # Remove numbering like "1 ", "2 "
+            line = re.sub(r'^\d+\s+', '', line)
 
-        writer.writerow([
-            timestamp,
-            user,
-            text,
-            category,
-            topic,
-            "telegram"
-        ])
+            category = "general"
+            topic = "general"
+
+            text_lower = line.lower()
+
+            if "study" in text_lower or "learn" in text_lower:
+                category = "learning"
+
+            elif "football" in text_lower or "ride" in text_lower or "exercise" in text_lower:
+                category = "health"
+
+            elif "spent" in text_lower or "bought" in text_lower:
+                category = "finance"
+
+            elif "workflow" in text_lower or "pipeline" in text_lower:
+                category = "project"
+
+            writer.writerow([
+                timestamp,
+                user,
+                line,
+                category,
+                topic,
+                "telegram"
+            ])
 
 print("Events parsed successfully")
