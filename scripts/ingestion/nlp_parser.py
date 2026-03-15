@@ -20,7 +20,6 @@ with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
 
     writer = csv.writer(f)
 
-    # write header if file doesn't exist
     if not file_exists:
         writer.writerow([
             "timestamp",
@@ -40,33 +39,46 @@ with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
         if not timestamp or not text:
             continue
 
-        category = "general"
-        topic = "general"
+        # SPLIT MULTILINE MESSAGE
+        messages = text.split("\n")
 
-        text_lower = text.lower()
+        for msg in messages:
 
-        if "study" in text_lower or "learn" in text_lower:
-            category = "learning"
+            msg = msg.strip()
 
-        elif "apply" in text_lower or "job" in text_lower:
-            category = "career"
+            if not msg:
+                continue
 
-        elif "eat" in text_lower or "food" in text_lower:
-            category = "health"
+            category = "general"
+            topic = "general"
 
-        elif "football" in text_lower or "exercise" in text_lower:
-            category = "health"
+            text_lower = msg.lower()
 
-        elif "spent" in text_lower or "buy" in text_lower:
-            category = "finance"
+            if any(word in text_lower for word in ["study","studied","learn","learning"]):
+                category = "learning"
 
-        writer.writerow([
-            timestamp,
-            user,
-            text,
-            category,
-            topic,
-            "telegram"
-        ])
+            elif any(word in text_lower for word in ["apply","job","interview"]):
+                category = "career"
+
+            elif any(word in text_lower for word in ["eat","food","diet"]):
+                category = "health"
+
+            elif any(word in text_lower for word in ["football","exercise","gym","run"]):
+                category = "health"
+
+            elif any(word in text_lower for word in ["spent","buy","bought","groceries"]):
+                category = "finance"
+
+            elif any(word in text_lower for word in ["python","coding","github","script"]):
+                category = "project"
+
+            writer.writerow([
+                timestamp,
+                user,
+                msg,
+                category,
+                topic,
+                "telegram"
+            ])
 
 print("Events parsed successfully")
