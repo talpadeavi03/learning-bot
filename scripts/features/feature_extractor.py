@@ -1,8 +1,11 @@
 import pandas as pd
 import re
+import os
 
 INPUT_FILE = "data/raw/events.csv"
 OUTPUT_FILE = "data/features/behavior_features.parquet"
+
+os.makedirs("data/features", exist_ok=True)
 
 df = pd.read_csv(INPUT_FILE, on_bad_lines="skip")
 
@@ -10,7 +13,7 @@ signals = []
 
 for _, row in df.iterrows():
 
-    text = str(row["value"]).lower()
+    text = str(row.get("text", "")).lower()
 
     study_hours = 0
     coding_hours = 0
@@ -32,7 +35,7 @@ for _, row in df.iterrows():
     if "code" in text or "python" in text:
         coding_hours = 1
 
-    if "task" in text or "do:" in text:
+    if "task" in text:
         task_event = 1
 
     if "eat" in text or "food" in text:
@@ -51,17 +54,18 @@ for _, row in df.iterrows():
         productivity_event = 1
         deep_work_event = 1
 
-    money = re.findall(r"\d+", text)
-
-    if "spent" in text and money:
-        expenses_today = int(money[0])
+    # detect expenses
+    if "spent" in text or "bought" in text:
+        money = re.findall(r"\d+", text)
+        if money:
+            expenses_today = int(money[0])
 
     if "kubernetes" in text:
         topic = "kubernetes"
 
     signals.append({
         "timestamp": row["timestamp"],
-        "user": "avi",
+        "user": row["user"],
         "study_hours": study_hours,
         "coding_hours": coding_hours,
         "learning_event": learning_event,
