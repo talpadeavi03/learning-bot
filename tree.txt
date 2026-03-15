@@ -1,0 +1,46 @@
+.
+├── analytics
+│   ├── dashboard.md
+│   ├── heatmap.md
+│   └── weekly-summary.md
+├── data
+│   ├── events.csv
+│   ├── features
+│   │   ├── behavior_features.parquet
+│   │   └── daily_state_vector.parquet
+│   └── processed
+├── experiments
+│   └── mlruns
+├── logs
+│   └── learning-log.md
+├── models
+│   └── saved_models
+├── requirements-analytics.txt
+├── requirements-ingest.txt
+├── scripts
+│   ├── ai_summary.py
+│   ├── analytics
+│   │   ├── dashboard.py
+│   │   ├── heatmap.py
+│   │   └── weekly_summary.py
+│   ├── analytics.py
+│   ├── dashboard_data.py
+│   ├── features
+│   │   ├── feature_extractor.py
+│   │   └── state_vector_builder.py
+│   ├── ingestion
+│   │   ├── nlp_parser.py
+│   │   └── tracker.py
+│   ├── ml
+│   │   ├── predict.py
+│   │   └── train_models.py
+│   └── nlp_parser_ml.py
+├── site
+│   ├── data
+│   │   └── dashboard.json
+│   └── index.html
+├── state
+│   └── last_update.txt
+└── tree.txt
+
+18 directories, 26 files
