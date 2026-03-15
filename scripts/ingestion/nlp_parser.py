@@ -68,13 +68,6 @@ with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
             elif "workflow" in text_lower or "pipeline" in text_lower:
                 category = "project"
 
-            writer.writerow([
-                timestamp,
-                user,
-                line,
-                category,
-                topic,
-                "telegram"
-            ])
+            with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
 
 print("Events parsed successfully")
