@@ -29,11 +29,11 @@ jobs:
 
       - name: Generate analytics
         run: |
-          python scripts/analytics.py
-          python scripts/dashboard.py
-          python scripts/heatmap.py
-          python scripts/weekly_summary.py
-          python scripts/dashboard_data.py
+          python scripts/analytics/analytics.py
+          python scripts/analytics/dashboard.py
+          python scripts/analytics/heatmap.py
+          python scripts/analytics/weekly_summary.py
+          python scripts/analytics/dashboard_data.py
 
       - name: Commit updates
         run: |
