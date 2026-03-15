@@ -1,7 +1,6 @@
 import csv
 import os
 import json
-import re
 
 INPUT_FILE = "events.json"
 DATA_FILE = "data/raw/events.csv"
@@ -13,12 +12,15 @@ if not os.path.exists(INPUT_FILE):
 with open(INPUT_FILE) as f:
     events = json.load(f)
 
+os.makedirs("data/raw", exist_ok=True)
+
 file_exists = os.path.isfile(DATA_FILE)
 
 with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
 
     writer = csv.writer(f)
 
+    # write header if file doesn't exist
     if not file_exists:
         writer.writerow([
             "timestamp",
@@ -38,36 +40,33 @@ with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
         if not timestamp or not text:
             continue
 
-        # Split multiline Telegram messages
-        lines = text.split("\n")
+        category = "general"
+        topic = "general"
 
-        for line in lines:
+        text_lower = text.lower()
 
-            line = line.strip()
+        if "study" in text_lower or "learn" in text_lower:
+            category = "learning"
 
-            if not line:
-                continue
+        elif "apply" in text_lower or "job" in text_lower:
+            category = "career"
 
-            # Remove numbering like "1 ", "2 "
-            line = re.sub(r'^\d+\s+', '', line)
+        elif "eat" in text_lower or "food" in text_lower:
+            category = "health"
 
-            category = "general"
-            topic = "general"
+        elif "football" in text_lower or "exercise" in text_lower:
+            category = "health"
 
-            text_lower = line.lower()
+        elif "spent" in text_lower or "buy" in text_lower:
+            category = "finance"
 
-            if "study" in text_lower or "learn" in text_lower:
-                category = "learning"
-
-            elif "football" in text_lower or "ride" in text_lower or "exercise" in text_lower:
-                category = "health"
-
-            elif "spent" in text_lower or "bought" in text_lower:
-                category = "finance"
-
-            elif "workflow" in text_lower or "pipeline" in text_lower:
-                category = "project"
-
-            with open(DATA_FILE, "a", newline="", encoding="utf-8") as f:
+        writer.writerow([
+            timestamp,
+            user,
+            text,
+            category,
+            topic,
+            "telegram"
+        ])
 
 print("Events parsed successfully")
