@@ -29,7 +29,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas
+          pip install pandas numpy
+
+      - name: Ensure directories exist
+        run: |
+          mkdir -p data/raw
 
       - name: Save batch payload
         run: |
@@ -39,22 +43,18 @@ jobs:
       - name: Run NLP parser
         run: python scripts/ingestion/nlp_parser.py
 
-      - name: Commit updates
+      - name: Commit dataset
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add logs/learning-log.md data/events.csv
+          git add data/raw/events.csv
 
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
 
-          git commit -m "update learning dataset"
+          git commit -m "update dataset"
 
-          # Pull latest changes safely
-          git pull --rebase origin master || true
-
-          # Push again
-          git push origin master
+          git push
