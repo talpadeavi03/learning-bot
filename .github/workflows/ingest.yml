@@ -36,11 +36,8 @@ jobs:
           echo '${{ toJson(github.event.client_payload.events) }}' > events.json
           cat events.json
 
-      - name: Run tracker
-        run: python scripts/tracker.py
-
       - name: Run NLP parser
-        run: python scripts/nlp_parser.py
+        run: python scripts/ingestion/nlp_parser.py
 
       - name: Commit updates
         run: |

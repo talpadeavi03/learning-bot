@@ -4,37 +4,40 @@
 │   ├── heatmap.md
 │   └── weekly-summary.md
 ├── data
-│   ├── events.csv
 │   ├── features
 │   │   ├── behavior_features.parquet
 │   │   └── daily_state_vector.parquet
-│   └── processed
+│   ├── processed
+│   └── raw
+│       └── events.csv
 ├── experiments
 │   └── mlruns
 ├── logs
 │   └── learning-log.md
 ├── models
 │   └── saved_models
+│       └── productivity_model.pkl
 ├── requirements-analytics.txt
 ├── requirements-ingest.txt
 ├── scripts
-│   ├── ai_summary.py
 │   ├── analytics
+│   │   ├── analytics.py
 │   │   ├── dashboard.py
+│   │   ├── dashboard_data.py
 │   │   ├── heatmap.py
 │   │   └── weekly_summary.py
-│   ├── analytics.py
-│   ├── dashboard_data.py
 │   ├── features
 │   │   ├── feature_extractor.py
 │   │   └── state_vector_builder.py
 │   ├── ingestion
 │   │   ├── nlp_parser.py
+│   │   ├── nlp_parser_ml.py
 │   │   └── tracker.py
-│   ├── ml
-│   │   ├── predict.py
-│   │   └── train_models.py
-│   └── nlp_parser_ml.py
+│   └── ml
+│       ├── ai_summary.py
+│       ├── generate_synthetic_data.py
+│       ├── predict.py
+│       └── train_models.py
 ├── site
 │   ├── data
 │   │   └── dashboard.json
@@ -43,4 +46,4 @@
 │   └── last_update.txt
 └── tree.txt
 
-18 directories, 26 files
+19 directories, 28 files

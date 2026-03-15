@@ -1,0 +1,57 @@
+name: Model Training
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # daily at 3 AM
+
+  push:
+    paths:
+      - data/raw/events.csv
+      - data/events.csv
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: "pip"
+          cache-dependency-path: requirements-analytics.txt
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-analytics.txt
+
+      - name: Run feature extraction
+        run: |
+          python scripts/features/feature_extractor.py
+
+      - name: Build state vectors
+        run: |
+          python scripts/features/state_vector_builder.py
+
+      - name: Train models
+        run: |
+          python scripts/ml/train_models.py
+
+      - name: Commit trained models
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+
+          git add models/
+          git commit -m "auto: retrained models" || echo "no changes"
+
+          git push
