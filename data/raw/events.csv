@@ -1,7 +1,4 @@
-timestamp,user,text,category,topic,source2026-03-15T16:11:22.887Z,devilcry6929,"1 Working on improving the ingestion pipeline today
-Learning about ML feature extraction and vector memory
-Revised the architecture of my AI system
-Practiced Python scripting and GitHub workflows",health,general,telegram
+timestamp,user,text,category,topic,source
 2026-03-15T16:11:29.176Z,devilcry6929,"Played football for 1 hour in the morning
 Went for a 3 km ride to Akole
 Felt tired today after workout
@@ -78,8 +75,8 @@ Practiced Python scripting and GitHub workflows",health,general,telegram
 2026-03-16T00:54:48.382Z,devilcry6929,Gym 45 minutes,health,general,telegram
 2026-03-16T00:54:51.146Z,devilcry6929,Spent 350 groceries,finance,general,telegram
 2026-03-16T00:54:54.620Z,devilcry6929,Watched ML lecture 30 minutes,general,general,telegram
-"2026-03-16T01:02:23.994Z","devilcry6929","Studied Kubernetes for 2 hours","learning","kubernetes","telegram"
-"2026-03-16T01:02:27.166Z","devilcry6929","Practiced Python for 1 hour","project","python","telegram"
-"2026-03-16T01:02:30.852Z","devilcry6929","Gym 45 minutes","health","general","telegram"
-"2026-03-16T01:02:35.211Z","devilcry6929","Spent 350 groceries","finance","general","telegram"
-"2026-03-16T01:02:39.324Z","devilcry6929","Watched ML lecture 30 minutes","general","ml","telegram"
+2026-03-16T01:02:23.994Z,devilcry6929,Studied Kubernetes for 2 hours,learning,kubernetes,telegram
+2026-03-16T01:02:27.166Z,devilcry6929,Practiced Python for 1 hour,project,python,telegram
+2026-03-16T01:02:30.852Z,devilcry6929,Gym 45 minutes,health,general,telegram
+2026-03-16T01:02:35.211Z,devilcry6929,Spent 350 groceries,finance,general,telegram
+2026-03-16T01:02:39.324Z,devilcry6929,Watched ML lecture 30 minutes,general,ml,telegram
