@@ -1,87 +1,98 @@
 import pandas as pd
 import re
-import os
+from pathlib import Path
 
 INPUT_FILE = "data/raw/events.csv"
 OUTPUT_FILE = "data/features/behavior_features.parquet"
 
-os.makedirs("data/features", exist_ok=True)
 
-df = pd.read_csv(INPUT_FILE, on_bad_lines="skip")
+def extract_minutes(text):
+    """Extract duration from text"""
+    text = text.lower()
 
-signals = []
+    hours = re.search(r'(\d+)\s*hour', text)
+    minutes = re.search(r'(\d+)\s*minute', text)
 
-for _, row in df.iterrows():
+    total = 0
 
-    text = str(row.get("text", "")).lower()
+    if hours:
+        total += int(hours.group(1)) * 60
 
-    study_hours = 0
-    coding_hours = 0
-    learning_event = 0
-    task_event = 0
-    health_event = 0
-    productivity_event = 0
-    deep_work_event = 0
-    fatigue_score = None
-    mood_score = None
-    reflection_event = 0
-    expenses_today = 0
-    topic = None
+    if minutes:
+        total += int(minutes.group(1))
 
-    if "study" in text or "learn" in text:
-        learning_event = 1
-        study_hours = 1
+    return total
 
-    if "code" in text or "python" in text:
-        coding_hours = 1
 
-    if "task" in text:
-        task_event = 1
+def extract_expense(text):
+    """Extract money spent"""
+    match = re.search(r'(\d+)', text)
+    if match and "spent" in text.lower():
+        return int(match.group(1))
+    return 0
 
-    if "eat" in text or "food" in text:
-        health_event = 1
 
-    if "tired" in text or "fatigue" in text:
-        fatigue_score = 7
+def extract_topic(text):
+    """Detect learning topic"""
+    text = text.lower()
 
-    if "happy" in text or "enjoyed" in text:
-        mood_score = 8
+    topics = [
+        "kubernetes",
+        "python",
+        "mlops",
+        "docker",
+        "devops",
+        "ai",
+        "linux"
+    ]
 
-    if "diary" in text:
-        reflection_event = 1
+    for t in topics:
+        if t in text:
+            return t
 
-    if "work" in text or "focus" in text:
-        productivity_event = 1
-        deep_work_event = 1
+    return "general"
 
-    # detect expenses
-    if "spent" in text or "bought" in text:
-        money = re.findall(r"\d+", text)
-        if money:
-            expenses_today = int(money[0])
 
-    if "kubernetes" in text:
-        topic = "kubernetes"
+def process_events(df):
 
-    signals.append({
-        "timestamp": row["timestamp"],
-        "user": row["user"],
-        "study_hours": study_hours,
-        "coding_hours": coding_hours,
-        "learning_event": learning_event,
-        "topic": topic,
-        "task_event": task_event,
-        "productivity_event": productivity_event,
-        "deep_work_event": deep_work_event,
-        "health_event": health_event,
-        "fatigue_score": fatigue_score,
-        "mood_score": mood_score,
-        "reflection_event": reflection_event,
-        "expenses_today": expenses_today
-    })
+    rows = []
 
-features_df = pd.DataFrame(signals)
+    for _, row in df.iterrows():
 
-features_df.to_parquet(OUTPUT_FILE, index=False)
+        text = row["text"]
 
-print("Feature extraction complete")
+        minutes = extract_minutes(text)
+        expense = extract_expense(text)
+        topic = extract_topic(text)
+
+        category = row["category"]
+
+        study_minutes = minutes if category == "learning" else 0
+        exercise_minutes = minutes if category == "exercise" else 0
+
+        rows.append({
+            "date": row["timestamp"][:10],
+            "study_minutes": study_minutes,
+            "exercise_minutes": exercise_minutes,
+            "expense_amount": expense,
+            "topic": topic
+        })
+
+    return pd.DataFrame(rows)
+
+
+def main():
+
+    df = pd.read_csv(INPUT_FILE)
+
+    features = process_events(df)
+
+    Path("data/features").mkdir(parents=True, exist_ok=True)
+
+    features.to_parquet(OUTPUT_FILE, index=False)
+
+    print("Feature dataset created:", OUTPUT_FILE)
+
+
+if __name__ == "__main__":
+    main()
