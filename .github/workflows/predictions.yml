@@ -1,0 +1,30 @@
+name: prediction_engine
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 * * * *"
+
+jobs:
+
+  predict:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: |
+          pip install -r requirements-ingest.txt
+          pip install -r requirements-analytics.txt
+          pip install scikit-learn joblib
+
+      - run: |
+          python scripts/ml/predict.py

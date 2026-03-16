@@ -1,40 +1,39 @@
 import pandas as pd
 import joblib
 
-MODEL_FILE = "models/saved_models/productivity_model.pkl"
-DATA_FILE = "data/features/daily_state_vector.parquet"
+MODEL_PATH = "models/productivity_model.pkl"
+FEATURE_FILE = "data/features/behavior_features.parquet"
 
-model = joblib.load(MODEL_FILE)
 
-df = pd.read_parquet(DATA_FILE)
+def load_data():
+    return pd.read_parquet(FEATURE_FILE)
 
-latest = df.iloc[-1]
 
-features = [
-    "learning_index",
-    "health_index",
-    "emotion_index",
-    "finance_index"
-]
+def load_model():
+    return joblib.load(MODEL_PATH)
 
-X = pd.DataFrame([latest[features]])
 
-prediction = model.predict(X)[0]
-probability = model.predict_proba(X)[0][1]
+def generate_predictions(df, model):
 
-print("\nAI Prediction Report")
-print("-------------------")
+    X = df[["study_minutes", "exercise_minutes", "expense_amount"]]
 
-print("Learning index:", latest["learning_index"])
-print("Health index:", latest["health_index"])
-print("Emotion index:", latest["emotion_index"])
-print("Finance index:", latest["finance_index"])
+    df["predicted_productivity"] = model.predict(X)
 
-print("\nPrediction:")
+    return df
 
-if prediction == 1:
-    print("Tomorrow likely PRODUCTIVE")
-else:
-    print("Tomorrow may be LOW productivity")
 
-print("Confidence:", round(probability * 100, 2), "%")
+def main():
+
+    df = load_data()
+    model = load_model()
+
+    df = generate_predictions(df, model)
+
+    latest = df.tail(1)
+
+    print("\nLatest Behavior Prediction\n")
+    print(latest)
+
+
+if __name__ == "__main__":
+    main()
