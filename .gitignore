@@ -13,3 +13,7 @@ __pycache__/
 
 # Local environment
 .env
+
+data/raw/events.csv
+data/features/*.parquet
+models/*.pkl
