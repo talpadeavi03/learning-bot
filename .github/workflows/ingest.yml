@@ -38,16 +38,18 @@ jobs:
       - name: Save batch payload
         run: |
           echo '${{ toJson(github.event.client_payload.events) }}' > events.json
-          cat events.json
 
       - name: Run NLP parser
-        run: python scripts/ingestion/nlp_parser.py
+        run: |
+          python scripts/ingestion/nlp_parser.py
 
       - name: Commit dataset
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
-          git add .
+
+          git add data/raw/events.csv
+
           git commit -m "update dataset" || echo "no changes"
 
           git pull --rebase origin master
