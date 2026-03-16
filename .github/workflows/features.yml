@@ -1,0 +1,47 @@
+name: feature_pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  features:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-ingest.txt
+          pip install -r requirements-analytics.txt
+
+      - name: Run feature extractor
+        run: |
+          python scripts/features/feature_extractor.py
+
+      - name: Commit features dataset
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+
+          git add data/features/
+
+          git commit -m "update feature dataset" || echo "no changes"
+
+          git pull --rebase origin master
+          git push origin master
