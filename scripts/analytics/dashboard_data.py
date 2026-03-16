@@ -3,26 +3,36 @@ import json
 from collections import Counter
 from datetime import datetime
 
-log_file = "logs/learning-log.md"
+LOG_FILE = "logs/learning-log.md"
+OUTPUT_FILE = "site/data/dashboard.json"
 
-if not os.path.exists(log_file):
+
+if not os.path.exists(LOG_FILE):
     print("No logs found")
     exit()
+
 
 topics = Counter()
 daily_activity = Counter()
 
 current_date = None
 
-with open(log_file) as f:
+
+with open(LOG_FILE, encoding="utf-8") as f:
     lines = f.readlines()
+
 
 for line in lines:
 
     line = line.strip()
 
+    # Detect date sections
     if line.startswith("## "):
-        current_date = line.replace("## ", "")
+        try:
+            current_date = line.replace("## ", "")
+            datetime.strptime(current_date, "%Y-%m-%d")
+        except Exception:
+            current_date = None
         continue
 
     if not line:
@@ -31,6 +41,7 @@ for line in lines:
     if current_date:
         daily_activity[current_date] += 1
 
+    # Topic tagging
     if "DO:" in line:
         topics["DevOps"] += 1
 
@@ -45,13 +56,15 @@ for line in lines:
 
 
 data = {
-    "topics": topics,
-    "daily_activity": daily_activity
+    "topics": dict(topics),
+    "daily_activity": dict(daily_activity)
 }
+
 
 os.makedirs("site/data", exist_ok=True)
 
-with open("site/data/dashboard.json", "w") as f:
+with open(OUTPUT_FILE, "w") as f:
     json.dump(data, f, indent=4)
 
-print("Dashboard data generated")
+
+print("Dashboard data generated:", OUTPUT_FILE)
