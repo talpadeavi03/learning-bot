@@ -11,14 +11,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
 
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -33,15 +28,3 @@ jobs:
       - name: Run ML pipeline
         run: |
           python scripts/pipeline/run_pipeline.py
-
-      - name: Commit model updates
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions@github.com"
-
-          git add models/
-
-          git commit -m "update trained model" || echo "no changes"
-
-          git pull --rebase origin master
-          git push origin master
