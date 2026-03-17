@@ -1,8 +1,9 @@
 name: ML Pipeline
 
 on:
-  schedule:
-    - cron: "0 * * * *"   # every hour
+  push:
+    paths:
+      - data/raw/events.csv
 
   workflow_dispatch:
 
@@ -26,6 +27,6 @@ jobs:
           pip install -r requirements-analytics.txt
           pip install scikit-learn joblib
 
-      - name: Run pipeline
+      - name: Run full pipeline
         run: |
           python scripts/pipeline/run_pipeline.py
