@@ -1,22 +1,24 @@
-# Auto-generated logs
-#logs/learning-log.md
+# Logs
+pipeline.log
 
-# Generated dataset
-#data/events.csv
+# Generated insights
+analytics/daily_insights.md
 
-# Dashboard data
-#site/data/dashboard.json
+# Feature datasets
+data/features/*.parquet
+
+# Raw ingestion dataset
+data/raw/events.csv
+
+# Trained models
+models/*.pkl
+
+# Worker payload
+events.json
 
 # Python cache
 __pycache__/
 *.pyc
 
-# Local environment
+# Environment
 .env
-
-data/raw/events.csv
-data/features/*.parquet
-models/*.pkl
-events.json
-pipline.log
-analytics/daily_insights.md
