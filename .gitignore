@@ -17,4 +17,4 @@ __pycache__/
 data/raw/events.csv
 data/features/*.parquet
 models/*.pkl
-events.json
+events.jsonpipline.log
