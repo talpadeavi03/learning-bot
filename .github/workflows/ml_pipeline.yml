@@ -14,8 +14,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+ 
+      - name: Show pipeline file
+        run: |
+          echo "---- run_pipeline.py ----"
+          cat scripts/pipeline/run_pipeline.py
 
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
