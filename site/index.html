@@ -13,14 +13,13 @@
 
 <body>
 
-<!-- Boot Screen -->
 <div id="boot-screen">
   <div class="boot-text" id="boot-text"></div>
 </div>
 
 <canvas id="bg-canvas"></canvas>
 
-<div class="container" id="main-ui">
+<div class="container">
 
   <!-- CORE -->
   <div class="core">
@@ -29,45 +28,54 @@
     <p id="status">Initializing...</p>
   </div>
 
-  <!-- LEFT -->
-  <div class="left-panel">
+  <!-- MAIN GRID ROW -->
+  <div class="main-row">
 
-    <h2>Activity Stream</h2>
+    <!-- ACTIVITY -->
+    <div class="panel">
+      <h2>Activity</h2>
+      <div id="activity"></div>
+      <canvas id="activityChart"></canvas>
+    </div>
 
-    <div id="activity"></div>
+    <!-- CHAT -->
+    <div class="panel chatbot">
+      <h2>AETHER Chat</h2>
 
-    <canvas id="activityChart"></canvas>
+      <div id="chat-box"></div>
+
+      <div class="chat-input">
+        <input id="input" placeholder="Ask AETHER...">
+        <button onclick="send()">Send</button>
+      </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="panel">
+      <h2>Insights</h2>
+      <div id="insights"></div>
+    </div>
 
   </div>
 
-  <!-- RIGHT -->
-  <div class="right-panel">
+  <!-- BOTTOM ROW -->
+  <div class="bottom-row">
 
-    <h2>Insights</h2>
+    <div class="panel">
+      <h2>System Monitor</h2>
+      <div id="system-monitor"></div>
+    </div>
 
-    <div id="insights"></div>
-
-    <h2>System Logs</h2>
-
-    <div id="system-logs"></div>
-
-  </div>
-
-  <!-- CHAT -->
-  <div class="chat">
-
-    <input id="input" placeholder="Ask AETHER...">
-
-    <button onclick="send()">Send</button>
-
-    <div id="chat-box"></div>
+    <div class="panel">
+      <h2>System Logs</h2>
+      <div id="system-logs"></div>
+    </div>
 
   </div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="app.js"></script>
 
 </body>

@@ -18,63 +18,96 @@ z-index:0;
 .container{
 position:relative;
 z-index:1;
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-grid-template-rows:auto auto 1fr auto;
+display:flex;
+flex-direction:column;
 height:100vh;
-gap:10px;
-padding:20px;
+padding:15px;
+gap:15px;
 }
 
+/* CORE */
 .core{
-grid-column:1/4;
 text-align:center;
+border:1px solid #00f7ff;
+padding:10px;
+border-radius:10px;
 }
 
+/* ORB */
 .orb{
-width:120px;
-height:120px;
+width:100px;
+height:100px;
 margin:auto;
 border-radius:50%;
 background:radial-gradient(circle,#00f7ff,#001f2f);
 animation:pulse 2s infinite;
-box-shadow:0 0 40px #00f7ff;
+box-shadow:0 0 30px #00f7ff;
 }
 
 @keyframes pulse{
 0%{transform:scale(1)}
-50%{transform:scale(1.15)}
+50%{transform:scale(1.1)}
 100%{transform:scale(1)}
 }
 
-.avatar-panel{
-display:flex;
-justify-content:center;
-align-items:center;
+/* MAIN ROW */
+.main-row{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:15px;
+flex:1;
 }
 
-#ai-avatar{
-width:120px;
-height:120px;
-border-radius:50%;
-background:radial-gradient(circle,#00ff88,#002211);
-box-shadow:0 0 50px #00ff88;
-animation:pulse 3s infinite;
+/* BOTTOM */
+.bottom-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
 }
 
-.left-panel,.right-panel,.monitor-panel{
-background:rgba(0,0,0,0.6);
+/* PANEL */
+.panel{
+background:rgba(0,0,0,0.7);
 border:1px solid #00f7ff;
-padding:20px;
 border-radius:10px;
+padding:15px;
+overflow:hidden;
 }
 
-.chat{
-grid-column:1/4;
-border-top:1px solid #00f7ff;
-padding:10px;
+/* CHAT */
+.chatbot{
+display:flex;
+flex-direction:column;
 }
 
+#chat-box{
+flex:1;
+overflow:auto;
+margin-bottom:10px;
+font-size:13px;
+}
+
+.chat-input{
+display:flex;
+gap:5px;
+}
+
+input{
+flex:1;
+background:#000;
+border:1px solid #00f7ff;
+color:#00f7ff;
+padding:6px;
+}
+
+button{
+background:#00f7ff;
+border:none;
+padding:6px 10px;
+cursor:pointer;
+}
+
+/* LOGS */
 #system-logs{
 height:120px;
 overflow:auto;
@@ -83,11 +116,13 @@ background:#020202;
 padding:8px;
 }
 
+/* MONITOR */
 #system-monitor{
 font-size:13px;
 line-height:1.8;
 }
 
+/* BOOT */
 #boot-screen{
 position:fixed;
 top:0;
@@ -100,7 +135,6 @@ display:flex;
 align-items:center;
 justify-content:center;
 z-index:9999;
-font-size:18px;
 }
 
 .boot-text{
