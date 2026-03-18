@@ -8,7 +8,7 @@ analytics/daily_insights.md
 data/features/*.parquet
 
 # Raw ingestion dataset
-data/raw/events.csv
+#data/raw/events.csv
 
 # Trained models
 models/*.pkl

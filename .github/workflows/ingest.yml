@@ -48,6 +48,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
 
+          git add data/raw/events.csv
           git add data/features/ || true
           git add analytics/ || true
           git add site/data/ || true
