@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>AETHER AI</title>
 
@@ -12,15 +13,52 @@
 
 <body>
 
-<h1>AETHER</h1>
+<!-- MAIN APP -->
+<div class="app">
 
-<button onclick="toggleChat()">Chat</button>
+  <h1>AETHER</h1>
 
-<div id="chat-panel">
-<div id="chat-box"></div>
+  <!-- DASHBOARD TOGGLE -->
+  <div class="toggle-btn" onclick="toggleDashboard()">
+    📊
+  </div>
 
-<input id="input">
-<button onclick="send()">Send</button>
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+
+    <div class="card">
+      <h3>Activity</h3>
+      <div id="activity"></div>
+    </div>
+
+    <div class="card">
+      <h3>Insights</h3>
+      <div id="insights"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- CHAT -->
+<div class="chat-toggle" onclick="toggleChat()">💬</div>
+
+<div class="chat-panel" id="chat-panel">
+
+  <div class="chat-header">
+    AETHER
+    <span onclick="toggleChat()">✖</span>
+  </div>
+
+  <div id="chat-box"></div>
+
+  <div id="thinking">Thinking...</div>
+
+  <div class="chat-input">
+    <input id="input" placeholder="Ask AETHER...">
+    <button onclick="send()">➤</button>
+  </div>
+
 </div>
 
 <script src="app.js"></script>
