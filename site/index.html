@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AETHER 3D</title>
+<title>AETHER AI</title>
 
 <link rel="stylesheet" href="styles.css">
 
@@ -13,29 +13,54 @@
 
 <body>
 
-<!-- 3D CANVAS -->
+<!-- 3D BACKGROUND -->
 <div id="three-container"></div>
 
+<!-- GLOW -->
+<div class="light-orb"></div>
+
+<!-- UI -->
 <div class="ui-overlay">
 
   <div class="core">
     <h1>AETHER</h1>
-    <p id="status">3D Neural System Active</p>
+    <p id="status">Neural System Active</p>
   </div>
 
-  <div class="chat-panel">
-    <div id="chat-box"></div>
+  <div class="panel-row">
 
-    <div class="chat-input">
-      <input id="input" placeholder="Ask AETHER...">
-      <button onclick="send()">Send</button>
-      <button onclick="voiceCommand()">🎤</button>
+    <!-- ACTIVITY -->
+    <div class="panel">
+      <h3>Activity</h3>
+      <div id="activity"></div>
+      <canvas id="activityChart"></canvas>
     </div>
+
+    <!-- CHAT -->
+    <div class="panel chat-panel">
+      <h3>AETHER Chat</h3>
+
+      <div id="chat-box"></div>
+
+      <div class="chat-input">
+        <input id="input" placeholder="Ask AETHER...">
+        <button onclick="send()">Send</button>
+        <button onclick="voiceCommand()">🎤</button>
+      </div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="panel">
+      <h3>Insights</h3>
+      <div id="insights"></div>
+    </div>
+
   </div>
 
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="app.js"></script>
 
 </body>

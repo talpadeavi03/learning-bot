@@ -1,10 +1,21 @@
 let scene, camera, renderer, brain, rings=[];
 let mouseX=0, mouseY=0;
+let activityChart=null;
 
 init();
 animate();
 
+/* INIT */
 function init(){
+
+init3D();
+loadData();
+animateUI();
+
+}
+
+/* 3D SYSTEM */
+function init3D(){
 
 scene=new THREE.Scene();
 
@@ -24,42 +35,24 @@ scene.add(light);
 const geometry=new THREE.SphereGeometry(1.2,64,64);
 const material=new THREE.MeshBasicMaterial({
 wireframe:true,
-color:0x00eaff
+color:0x00eaff,
+transparent:true,
+opacity:0.6
 });
+
 brain=new THREE.Mesh(geometry,material);
 scene.add(brain);
 
-/* MULTIPLE RINGS */
+/* RINGS */
 for(let i=0;i<3;i++){
 const geo=new THREE.TorusGeometry(2+i*0.3,0.03,16,100);
 const mat=new THREE.MeshBasicMaterial({color:0x00ffff});
 const ring=new THREE.Mesh(geo,mat);
-ring.rotation.x=Math.random()*Math.PI;
 scene.add(ring);
 rings.push(ring);
 }
 
-/* NEURAL PARTICLES */
-const particlesGeo=new THREE.BufferGeometry();
-const particlesCount=300;
-
-const posArray=new Float32Array(particlesCount*3);
-
-for(let i=0;i<particlesCount*3;i++){
-posArray[i]=(Math.random()-0.5)*5;
-}
-
-particlesGeo.setAttribute('position',new THREE.BufferAttribute(posArray,3));
-
-const particlesMat=new THREE.PointsMaterial({
-size:0.02,
-color:0x00eaff
-});
-
-const particles=new THREE.Points(particlesGeo,particlesMat);
-scene.add(particles);
-
-/* MOUSE INTERACTION */
+/* MOUSE */
 document.addEventListener("mousemove",(e)=>{
 mouseX=(e.clientX/window.innerWidth-0.5)*2;
 mouseY=(e.clientY/window.innerHeight-0.5)*2;
@@ -72,18 +65,114 @@ function animate(){
 
 requestAnimationFrame(animate);
 
-/* brain follow mouse */
 brain.rotation.y+=0.01 + mouseX*0.02;
 brain.rotation.x+=0.005 + mouseY*0.02;
 
-/* rings rotate */
 rings.forEach((r,i)=>{
 r.rotation.z+=0.01+(i*0.01);
 });
 
-/* floating effect */
 brain.position.y=Math.sin(Date.now()*0.002)*0.1;
 
 renderer.render(scene,camera);
+
+}
+
+/* UI ANIMATION */
+function animateUI(){
+
+const panels=document.querySelectorAll(".panel");
+
+panels.forEach((p,i)=>{
+
+p.style.opacity=0;
+p.style.transform="translateY(40px) scale(0.95)";
+
+setTimeout(()=>{
+p.style.transition="all 0.8s cubic-bezier(0.22,1,0.36,1)";
+p.style.opacity=1;
+p.style.transform="translateY(0) scale(1)";
+},i*150);
+
+});
+
+}
+
+/* DATA */
+async function loadData(){
+
+const dashboard=await fetch("./data/dashboard.json").then(r=>r.json());
+
+const activityDiv=document.getElementById("activity");
+
+dashboard.activity.forEach(a=>{
+activityDiv.innerHTML+=`<p>${a.topic}: ${a.minutes}</p>`;
+});
+
+}
+
+/* CHAT */
+function send(){
+
+const input=document.getElementById("input").value;
+const box=document.getElementById("chat-box");
+
+box.innerHTML+=`<p><b>You:</b> ${input}</p>`;
+
+respond(input);
+
+}
+
+/* RESPONSE */
+function respond(text){
+
+let reply="Analyzing neural data...";
+
+if(text.includes("hi")||text.includes("hello")){
+reply="Hello Avi. System fully operational.";
+}
+
+typing(reply);
+speak(reply);
+
+}
+
+/* typing */
+function typing(text){
+
+const box=document.getElementById("chat-box");
+const p=document.createElement("p");
+box.appendChild(p);
+
+let i=0;
+
+function type(){
+if(i<text.length){
+p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
+i++;
+setTimeout(type,20);
+}
+}
+
+type();
+
+}
+
+/* voice */
+function speak(text){
+const speech=new SpeechSynthesisUtterance(text);
+speechSynthesis.speak(speech);
+}
+
+function voiceCommand(){
+
+const recognition=new webkitSpeechRecognition();
+recognition.start();
+
+recognition.onresult=function(e){
+const text=e.results[0][0].transcript;
+document.getElementById("input").value=text;
+send();
+};
 
 }
