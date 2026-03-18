@@ -1,0 +1,6 @@
+#issue fix for git push
+git add .
+git commit -m "message"
+git pull --rebase origin master
+git push
+
