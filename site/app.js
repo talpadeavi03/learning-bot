@@ -8,10 +8,8 @@ async function loadData() {
     const response = await fetch("./data/aether_response.json").then(r => r.json());
     const dashboard = await fetch("./data/dashboard.json").then(r => r.json());
 
-    // 🔹 Update AETHER message
     document.getElementById("status").innerText = response.message;
 
-    // 🔹 Update insights panel
     document.getElementById("insights").innerHTML = `
       <p><b>Focus:</b> ${state.focus}</p>
       <p><b>Mode:</b> ${state.mode}</p>
@@ -19,7 +17,6 @@ async function loadData() {
       <p><b>Fatigue:</b> ${state.fatigue}</p>
     `;
 
-    // 🔹 Activity stream text
     const activityDiv = document.getElementById("activity");
     activityDiv.innerHTML = "";
 
@@ -29,111 +26,106 @@ async function loadData() {
       activityDiv.appendChild(el);
     });
 
-    // 🔹 Chart Data
     const labels = dashboard.activity.map(a => a.topic);
     const values = dashboard.activity.map(a => a.minutes);
 
     renderChart(labels, values);
-
-    // 🔹 ORB REACTION BASED ON STATE
-    const orb = document.querySelector(".orb");
-
-    if (state.mode === "deep_work") {
-      orb.style.background = "radial-gradient(circle, #00ff88, #003322)";
-      orb.style.boxShadow = "0 0 30px #00ff88";
-    } 
-    else if (state.fatigue > 0.7) {
-      orb.style.background = "radial-gradient(circle, #ff0033, #330000)";
-      orb.style.boxShadow = "0 0 30px #ff0033";
-    } 
-    else {
-      orb.style.background = "radial-gradient(circle, #00f7ff, #001f2f)";
-      orb.style.boxShadow = "0 0 30px #00f7ff";
-    }
+    updateOrbState(state);
 
   } catch (err) {
     console.error("AETHER load error:", err);
-    document.getElementById("status").innerText = "Error loading AI state.";
   }
 }
 
 
+// CHART
 function renderChart(labels, values) {
-
   const ctx = document.getElementById("activityChart");
 
-  if (activityChart) {
-    activityChart.destroy();
-  }
+  if (activityChart) activityChart.destroy();
 
   activityChart = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: labels,
-      datasets: [{
-        label: "Minutes Spent",
-        data: values
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          labels: {
-            color: "#00f7ff"
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: "#00f7ff" }
-        },
-        y: {
-          ticks: { color: "#00f7ff" }
-        }
-      }
+      labels,
+      datasets: [{ label: "Minutes", data: values }]
     }
   });
 }
 
 
-// 🤖 CHAT SYSTEM
-function send() {
+// ORB INTELLIGENCE
+function updateOrbState(state) {
+  const orb = document.querySelector(".orb");
 
-  const inputField = document.getElementById("input");
-  const input = inputField.value.trim();
-  const box = document.getElementById("chat-box");
-
-  if (!input) return;
-
-  box.innerHTML += `<p><b>You:</b> ${input}</p>`;
-  inputField.value = "";
-
-  const thinking = document.createElement("p");
-  thinking.innerHTML = "<b>AETHER:</b> ...";
-  box.appendChild(thinking);
-
-  setTimeout(() => {
-
-    let reply = "Analyzing behavioral data...";
-
-    if (input.toLowerCase().includes("study")) {
-      reply = "Learning efficiency increases during deep work cycles.";
-    } 
-    else if (input.toLowerCase().includes("productivity")) {
-      reply = "Peak productivity window detected between 10AM–2PM.";
-    } 
-    else if (input.toLowerCase().includes("exercise")) {
-      reply = "Exercise correlates with improved cognitive stability.";
-    }
-
-    thinking.innerHTML = `<b>AETHER:</b> ${reply}`;
-
-    box.scrollTop = box.scrollHeight;
-
-  }, 1000);
+  if (state.mode === "deep_work") {
+    orb.style.background = "radial-gradient(circle, #00ff88, #003322)";
+    orb.style.animationDuration = "1.5s";
+  } else if (state.fatigue > 0.7) {
+    orb.style.background = "radial-gradient(circle, #ff0033, #330000)";
+    orb.style.animationDuration = "4s";
+  } else {
+    orb.style.background = "radial-gradient(circle, #00f7ff, #001f2f)";
+    orb.style.animationDuration = "2.5s";
+  }
 }
 
 
-// 🚀 INITIAL LOAD
+// 🔥 NEURAL BACKGROUND
+const canvas = document.getElementById("bg-canvas");
+const ctx = canvas.getContext("2d");
+
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+
+window.addEventListener("resize", resizeCanvas);
+
+// create particles
+for (let i = 0; i < 80; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 1,
+    vy: (Math.random() - 0.5) * 1
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "#00f7ff";
+    ctx.fill();
+  });
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+
+// CHAT
+function send() {
+  const input = document.getElementById("input").value;
+  const box = document.getElementById("chat-box");
+
+  box.innerHTML += `<p><b>You:</b> ${input}</p>`;
+  box.innerHTML += `<p><b>AETHER:</b> Processing...</p>`;
+}
+
+
+// INIT
 loadData();

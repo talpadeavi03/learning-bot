@@ -1,139 +1,61 @@
-// AETHER FRONTEND CONTROLLER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- MUST BE FIRST -->
+  <meta charset="UTF-8" />
 
-let activityChart = null;
+  <!-- Encoding fix -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-async function loadData() {
-  try {
-    const state = await fetch("./data/state.json").then(r => r.json());
-    const response = await fetch("./data/aether_response.json").then(r => r.json());
-    const dashboard = await fetch("./data/dashboard.json").then(r => r.json());
+  <!-- Responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    // 🔹 Update AETHER message
-    document.getElementById("status").innerText = response.message;
+  <title>AETHER AI</title>
 
-    // 🔹 Update insights panel
-    document.getElementById("insights").innerHTML = `
-      <p><b>Focus:</b> ${state.focus}</p>
-      <p><b>Mode:</b> ${state.mode}</p>
-      <p><b>Topic:</b> ${state.dominant_topic}</p>
-      <p><b>Fatigue:</b> ${state.fatigue}</p>
-    `;
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-    // 🔹 Activity stream text
-    const activityDiv = document.getElementById("activity");
-    activityDiv.innerHTML = "";
+<body>
 
-    dashboard.activity.forEach(a => {
-      const el = document.createElement("p");
-      el.innerText = `${a.topic}: ${a.minutes} minutes`;
-      activityDiv.appendChild(el);
-    });
+<!-- 🔥 NEURAL BACKGROUND -->
+<canvas id="bg-canvas"></canvas>
 
-    // 🔹 Chart Data
-    const labels = dashboard.activity.map(a => a.topic);
-    const values = dashboard.activity.map(a => a.minutes);
+<div class="container">
 
-    renderChart(labels, values);
+  <!-- AETHER CORE -->
+  <div class="core">
+    <div class="orb"></div>
+    <h1>AETHER</h1>
+    <p id="status">Initializing system...</p>
+  </div>
 
-    // 🔹 ORB REACTION BASED ON STATE
-    const orb = document.querySelector(".orb");
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <h2>Activity Stream</h2>
+    <div id="activity"></div>
+    <canvas id="activityChart"></canvas>
+  </div>
 
-    if (state.mode === "deep_work") {
-      orb.style.background = "radial-gradient(circle, #00ff88, #003322)";
-      orb.style.boxShadow = "0 0 30px #00ff88";
-    } 
-    else if (state.fatigue > 0.7) {
-      orb.style.background = "radial-gradient(circle, #ff0033, #330000)";
-      orb.style.boxShadow = "0 0 30px #ff0033";
-    } 
-    else {
-      orb.style.background = "radial-gradient(circle, #00f7ff, #001f2f)";
-      orb.style.boxShadow = "0 0 30px #00f7ff";
-    }
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <h2>Insights</h2>
+    <div id="insights"></div>
+  </div>
 
-  } catch (err) {
-    console.error("AETHER load error:", err);
-    document.getElementById("status").innerText = "Error loading AI state.";
-  }
-}
+  <!-- CHAT -->
+  <div class="chat">
+    <input id="input" placeholder="Ask AETHER..." />
+    <button onclick="send()">Send</button>
+    <div id="chat-box"></div>
+  </div>
 
+</div>
 
-function renderChart(labels, values) {
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  const ctx = document.getElementById("activityChart");
+<!-- Your app -->
+<script src="app.js"></script>
 
-  if (activityChart) {
-    activityChart.destroy();
-  }
-
-  activityChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Minutes Spent",
-        data: values
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          labels: {
-            color: "#00f7ff"
-          }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: "#00f7ff" }
-        },
-        y: {
-          ticks: { color: "#00f7ff" }
-        }
-      }
-    }
-  });
-}
-
-
-// 🤖 CHAT SYSTEM
-function send() {
-
-  const inputField = document.getElementById("input");
-  const input = inputField.value.trim();
-  const box = document.getElementById("chat-box");
-
-  if (!input) return;
-
-  box.innerHTML += `<p><b>You:</b> ${input}</p>`;
-  inputField.value = "";
-
-  const thinking = document.createElement("p");
-  thinking.innerHTML = "<b>AETHER:</b> ...";
-  box.appendChild(thinking);
-
-  setTimeout(() => {
-
-    let reply = "Analyzing behavioral data...";
-
-    if (input.toLowerCase().includes("study")) {
-      reply = "Learning efficiency increases during deep work cycles.";
-    } 
-    else if (input.toLowerCase().includes("productivity")) {
-      reply = "Peak productivity window detected between 10AM–2PM.";
-    } 
-    else if (input.toLowerCase().includes("exercise")) {
-      reply = "Exercise correlates with improved cognitive stability.";
-    }
-
-    thinking.innerHTML = `<b>AETHER:</b> ${reply}`;
-
-    box.scrollTop = box.scrollHeight;
-
-  }, 1000);
-}
-
-
-// 🚀 INITIAL LOAD
-loadData();
+</body>
+</html>
