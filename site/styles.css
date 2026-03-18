@@ -19,9 +19,10 @@ z-index:0;
 position:relative;
 z-index:1;
 display:grid;
-grid-template-columns:1fr 2fr 1fr;
-grid-template-rows:auto 1fr auto;
+grid-template-columns:1fr 1fr 1fr;
+grid-template-rows:auto auto 1fr auto;
 height:100vh;
+gap:10px;
 padding:20px;
 }
 
@@ -46,26 +47,45 @@ box-shadow:0 0 40px #00f7ff;
 100%{transform:scale(1)}
 }
 
-.left-panel,.right-panel{
-background:rgba(0,0,0,0.5);
+.avatar-panel{
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+#ai-avatar{
+width:120px;
+height:120px;
+border-radius:50%;
+background:radial-gradient(circle,#00ff88,#002211);
+box-shadow:0 0 50px #00ff88;
+animation:pulse 3s infinite;
+}
+
+.left-panel,.right-panel,.monitor-panel{
+background:rgba(0,0,0,0.6);
 border:1px solid #00f7ff;
 padding:20px;
-margin:10px;
 border-radius:10px;
 }
 
 .chat{
 grid-column:1/4;
-padding:10px;
 border-top:1px solid #00f7ff;
+padding:10px;
 }
 
 #system-logs{
-height:150px;
+height:120px;
 overflow:auto;
-background:#020202;
-padding:10px;
 font-size:12px;
+background:#020202;
+padding:8px;
+}
+
+#system-monitor{
+font-size:13px;
+line-height:1.8;
 }
 
 #boot-screen{
@@ -80,7 +100,7 @@ display:flex;
 align-items:center;
 justify-content:center;
 z-index:9999;
-font-size:20px;
+font-size:18px;
 }
 
 .boot-text{

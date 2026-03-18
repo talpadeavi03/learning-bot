@@ -6,36 +6,52 @@ bootSequence();
 
 function bootSequence(){
 
-const text=`AETHER OS v1.0
+const text=`AETHER OS v2.0
 Initializing neural interface...
-Loading cognitive models...
-Connecting behavior database...
+Loading cognition models...
+Connecting behavioral memory...
 System ready...`;
 
 let i=0;
 
-const bootText=document.getElementById("boot-text");
+const boot=document.getElementById("boot-text");
 
 function type(){
+
 if(i<text.length){
-bootText.innerHTML+=text.charAt(i);
+
+boot.innerHTML+=text.charAt(i);
+
 i++;
+
 setTimeout(type,30);
-}else{
+
+}
+else{
+
 setTimeout(()=>{
 document.getElementById("boot-screen").style.display="none";
 init();
 },1000);
+
 }
+
 }
 
 type();
+
 }
 
 function init(){
+
 loadData();
+
 initBackground();
-log("System initialized");
+
+startMonitor();
+
+log("AETHER system initialized");
+
 }
 
 async function loadData(){
@@ -49,6 +65,7 @@ const dashboard=await fetch("./data/dashboard.json").then(r=>r.json());
 document.getElementById("status").innerText=response.message;
 
 document.getElementById("insights").innerHTML=`
+
 <p>Focus: ${state.focus}</p>
 <p>Mode: ${state.mode}</p>
 <p>Topic: ${state.dominant_topic}</p>
@@ -56,6 +73,7 @@ document.getElementById("insights").innerHTML=`
 `;
 
 const activityDiv=document.getElementById("activity");
+
 activityDiv.innerHTML="";
 
 dashboard.activity.forEach(a=>{
@@ -75,7 +93,7 @@ log("Behavior dataset loaded");
 
 }catch(err){
 
-log("ERROR loading AI state");
+log("Error loading dataset");
 
 }
 
@@ -103,21 +121,19 @@ const orb=document.querySelector(".orb");
 
 if(state.mode==="deep_work"){
 orb.style.background="radial-gradient(circle,#00ff88,#003322)";
-}else if(state.fatigue>0.7){
-orb.style.background="radial-gradient(circle,#ff0033,#330000)";
 }else{
 orb.style.background="radial-gradient(circle,#00f7ff,#001f2f)";
 }
 
 }
 
-function log(message){
+function log(msg){
 
 const logs=document.getElementById("system-logs");
 
 const line=document.createElement("div");
 
-line.innerText="> "+message;
+line.innerText="> "+msg;
 
 logs.prepend(line);
 
@@ -131,7 +147,9 @@ const box=document.getElementById("chat-box");
 
 box.innerHTML+=`<p><b>You:</b> ${input}</p>`;
 
-typingEffect("Analyzing behavioral data...");
+typingEffect("Analyzing behavioral patterns...");
+
+speak("Analyzing behavioral patterns");
 
 }
 
@@ -153,13 +171,43 @@ p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
 
 i++;
 
-setTimeout(type,30);
+setTimeout(type,25);
 
 }
 
 }
 
 type();
+
+}
+
+function speak(text){
+
+const speech=new SpeechSynthesisUtterance(text);
+
+speech.rate=1;
+
+speech.pitch=1;
+
+speech.lang="en-US";
+
+speechSynthesis.speak(speech);
+
+}
+
+function startMonitor(){
+
+setInterval(()=>{
+
+const cpu=(Math.random()*40+20).toFixed(1);
+const mem=(Math.random()*30+40).toFixed(1);
+
+document.getElementById("system-monitor").innerHTML=`CPU Usage: ${cpu}%
+Memory Usage: ${mem}%
+Network: active
+AI Status: operational`;
+
+},2000);
 
 }
 
@@ -174,7 +222,7 @@ canvas.height=window.innerHeight;
 
 let particles=[];
 
-for(let i=0;i<60;i++){
+for(let i=0;i<70;i++){
 
 particles.push({
 x:Math.random()*canvas.width,
