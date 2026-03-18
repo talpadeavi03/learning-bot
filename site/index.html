@@ -8,87 +8,64 @@
 <title>AETHER AI</title>
 
 <link rel="stylesheet" href="styles.css">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
 <body>
 
+<canvas id="bg"></canvas>
+
 <!-- HERO -->
-<section class="hero">
-
-<div class="hero-animation">
-
-<svg viewBox="0 0 200 200" class="orb">
-
-<circle cx="100" cy="100" r="40" class="core"/>
-<circle cx="100" cy="100" r="70" class="ring"/>
-<circle cx="100" cy="100" r="90" class="ring2"/>
-
-</svg>
-
-</div>
+<section class="hero fade" id="hero">
 
 <h1>AETHER</h1>
-
-<p>Personal AI Intelligence System</p>
+<p>Personal AI Intelligence</p>
 
 <button onclick="launchAI()">Launch AI</button>
 
 </section>
 
-
 <!-- CHAT -->
-<section id="chat-section">
+<section id="chat-section" class="fade">
 
 <div class="chat-container">
 
-<h2>Chat with AETHER</h2>
+<h2>AETHER</h2>
 
 <div id="chat-box"></div>
 
+<div class="thinking" id="thinking">AETHER is thinking...</div>
+
 <div class="chat-input">
-
-<input id="input" placeholder="Ask AETHER..." />
+<input id="input" placeholder="Ask AETHER...">
 <button onclick="send()">Send</button>
-
 </div>
 
 </div>
 
 </section>
 
-
 <!-- DASHBOARD -->
-<section id="dashboard">
+<section id="dashboard" class="fade">
 
-<h2>Behavior Dashboard</h2>
+<h2>Dashboard</h2>
 
-<div class="dashboard-grid">
+<div class="grid">
 
 <div class="card">
-
-<h3>Activity Chart</h3>
-
+<h3>Activity</h3>
 <canvas id="activityChart"></canvas>
-
 </div>
 
 <div class="card">
-
-<h3>Activity Stream</h3>
-
+<h3>Stream</h3>
 <div id="activity"></div>
-
 </div>
 
 <div class="card">
-
-<h3>AI Insights</h3>
-
+<h3>Insights</h3>
 <div id="insights"></div>
-
 </div>
 
 </div>
