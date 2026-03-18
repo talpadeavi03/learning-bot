@@ -43,13 +43,16 @@ jobs:
         run: |
           python scripts/ingestion/nlp_parser.py
 
-      - name: Commit dataset
+      - name: Commit pipeline outputs
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
 
-          git add data/raw/events.csv
+          git add data/features/ || true
+          git add analytics/ || true
+          git add site/data/ || true
 
-          git commit -m "update dataset" || echo "no changes"
+          git commit -m "update pipeline outputs" || echo "no changes"
 
+          git pull --rebase origin master
           git push origin master
