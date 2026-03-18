@@ -8,10 +8,13 @@ function init(){
 
 loadData();
 initBackground();
+initNeural();
 startMonitor();
-log("AETHER system initialized");
+log("AETHER initialized");
 
 }
+
+/* LOAD DATA */
 
 async function loadData(){
 
@@ -24,17 +27,14 @@ document.getElementById("status").innerText=response.message;
 document.getElementById("insights").innerHTML=`
 Focus: ${state.focus}<br>
 Mode: ${state.mode}<br>
-Topic: ${state.dominant_topic}<br>
-Fatigue: ${state.fatigue}
+Topic: ${state.dominant_topic}
 `;
 
 const activityDiv=document.getElementById("activity");
 activityDiv.innerHTML="";
 
 dashboard.activity.forEach(a=>{
-const el=document.createElement("p");
-el.innerText=`${a.topic}: ${a.minutes} minutes`;
-activityDiv.appendChild(el);
+activityDiv.innerHTML+=`<p>${a.topic}: ${a.minutes} minutes</p>`;
 });
 
 const labels=dashboard.activity.map(a=>a.topic);
@@ -42,9 +42,9 @@ const values=dashboard.activity.map(a=>a.minutes);
 
 renderChart(labels,values);
 
-log("Behavior dataset loaded");
-
 }
+
+/* CHART */
 
 function renderChart(labels,values){
 
@@ -57,13 +57,15 @@ type:"bar",
 data:{
 labels,
 datasets:[{
-label:"Minutes Spent",
+label:"Minutes",
 data:values
 }]
 }
 });
 
 }
+
+/* CHAT */
 
 function send(){
 
@@ -78,18 +80,19 @@ respond(input);
 
 function respond(text){
 
-let reply="Analyzing behavioral patterns...";
-
-if(text.includes("where")){
-reply="I exist inside your behavioral intelligence system.";
-}
+let reply="Analyzing behavioral patterns.";
 
 if(text.includes("hello")||text.includes("hi")){
-reply="Hello Avi. Your cognitive state looks stable.";
+reply="Hello Avi. Your system looks stable.";
+}
+
+if(text.includes("where")){
+reply="I exist inside your behavioral AI system.";
 }
 
 typing(reply);
 speak(reply);
+memory(text);
 
 }
 
@@ -97,6 +100,7 @@ function typing(text){
 
 const box=document.getElementById("chat-box");
 const p=document.createElement("p");
+
 box.appendChild(p);
 
 let i=0;
@@ -105,13 +109,15 @@ function type(){
 if(i<text.length){
 p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
 i++;
-setTimeout(type,25);
+setTimeout(type,20);
 }
 }
 
 type();
 
 }
+
+/* VOICE OUTPUT */
 
 function speak(text){
 
@@ -124,16 +130,40 @@ speechSynthesis.speak(speech);
 
 }
 
-function log(msg){
+/* VOICE INPUT */
 
-const logs=document.getElementById("system-logs");
+function voiceCommand(){
 
-const line=document.createElement("div");
-line.innerText="> "+msg;
+const recognition=new webkitSpeechRecognition();
+recognition.start();
 
-logs.prepend(line);
+recognition.onresult=function(e){
+
+const text=e.results[0][0].transcript;
+
+document.getElementById("input").value=text;
+
+send();
+
+};
 
 }
+
+/* MEMORY TIMELINE */
+
+function memory(text){
+
+const mem=document.getElementById("memory");
+
+const entry=document.createElement("div");
+
+entry.innerText="Interaction: "+text;
+
+mem.prepend(entry);
+
+}
+
+/* MONITOR */
 
 function startMonitor(){
 
@@ -152,23 +182,33 @@ AI Status: operational
 
 }
 
-/* neural background */
+/* LOGS */
 
-function initBackground(){
+function log(msg){
 
-const canvas=document.getElementById("bg-canvas");
+const logs=document.getElementById("system-logs");
+
+logs.innerHTML=`> ${msg}<br>`+logs.innerHTML;
+
+}
+
+/* NEURAL VISUALIZER */
+
+function initNeural(){
+
+const canvas=document.getElementById("neural-canvas");
 const ctx=canvas.getContext("2d");
 
 canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+canvas.height=200;
 
-let particles=[];
+let nodes=[];
 
-for(let i=0;i<80;i++){
+for(let i=0;i<20;i++){
 
-particles.push({
+nodes.push({
 x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
+y:Math.random()*200,
 vx:(Math.random()-0.5),
 vy:(Math.random()-0.5)
 });
@@ -177,15 +217,15 @@ vy:(Math.random()-0.5)
 
 function draw(){
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.clearRect(0,0,canvas.width,200);
 
-particles.forEach(p=>{
+nodes.forEach(n=>{
 
-p.x+=p.vx;
-p.y+=p.vy;
+n.x+=n.vx;
+n.y+=n.vy;
 
 ctx.beginPath();
-ctx.arc(p.x,p.y,2,0,Math.PI*2);
+ctx.arc(n.x,n.y,3,0,Math.PI*2);
 ctx.fillStyle="#00f7ff";
 ctx.fill();
 

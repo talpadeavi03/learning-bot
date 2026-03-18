@@ -13,6 +13,7 @@
 
 <body>
 
+<!-- Neural Background -->
 <canvas id="bg-canvas"></canvas>
 
 <div class="container">
@@ -21,15 +22,15 @@
   <div class="core">
     <div class="orb"></div>
     <h1>AETHER</h1>
-    <p id="status">Initializing system...</p>
+    <p id="status">AI system active</p>
   </div>
 
-  <!-- AI AVATAR -->
+  <!-- HOLOGRAM AVATAR -->
   <div class="avatar-panel">
     <div id="ai-avatar"></div>
   </div>
 
-  <!-- MAIN ROW -->
+  <!-- MAIN GRID -->
   <div class="main-row">
 
     <!-- ACTIVITY -->
@@ -47,8 +48,9 @@
       <div id="chat-box"></div>
 
       <div class="chat-input">
-        <input id="input" placeholder="Ask AETHER..." />
+        <input id="input" placeholder="Ask AETHER...">
         <button onclick="send()">Send</button>
+        <button onclick="voiceCommand()">🎤</button>
       </div>
 
     </div>
@@ -61,7 +63,19 @@
 
   </div>
 
-  <!-- BOTTOM -->
+  <!-- NEURAL NETWORK VISUALIZER -->
+  <div class="panel neural-panel">
+    <h2>Neural Network Visualizer</h2>
+    <canvas id="neural-canvas"></canvas>
+  </div>
+
+  <!-- MEMORY TIMELINE -->
+  <div class="panel">
+    <h2>AI Memory Timeline</h2>
+    <div id="memory"></div>
+  </div>
+
+  <!-- SYSTEM -->
   <div class="bottom-row">
 
     <div class="panel">

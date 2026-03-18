@@ -6,66 +6,20 @@ font-family:monospace;
 overflow:hidden;
 }
 
-/* neural background */
-#bg-canvas{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:0;
-}
-
 .container{
-position:relative;
-z-index:1;
 display:flex;
 flex-direction:column;
 gap:15px;
 padding:20px;
-height:100vh;
 }
 
-/* CORE */
-.core{
-text-align:center;
+.panel{
 border:1px solid #00f7ff;
-padding:10px;
 border-radius:10px;
+padding:15px;
+background:rgba(0,0,0,0.6);
 }
 
-.orb{
-width:100px;
-height:100px;
-margin:auto;
-border-radius:50%;
-background:radial-gradient(circle,#00f7ff,#001f2f);
-animation:pulse 2s infinite;
-box-shadow:0 0 40px #00f7ff;
-}
-
-@keyframes pulse{
-0%{transform:scale(1)}
-50%{transform:scale(1.1)}
-100%{transform:scale(1)}
-}
-
-/* avatar */
-.avatar-panel{
-display:flex;
-justify-content:center;
-}
-
-#ai-avatar{
-width:120px;
-height:120px;
-border-radius:50%;
-background:radial-gradient(circle,#00ff88,#002211);
-box-shadow:0 0 50px #00ff88;
-animation:pulse 3s infinite;
-}
-
-/* rows */
 .main-row{
 display:grid;
 grid-template-columns:1fr 1fr 1fr;
@@ -78,15 +32,31 @@ grid-template-columns:1fr 1fr;
 gap:15px;
 }
 
-/* panel */
-.panel{
-background:rgba(0,0,0,0.6);
-border:1px solid #00f7ff;
-padding:15px;
-border-radius:10px;
+.orb{
+width:100px;
+height:100px;
+margin:auto;
+border-radius:50%;
+background:radial-gradient(circle,#00f7ff,#001f2f);
+box-shadow:0 0 40px #00f7ff;
+animation:pulse 2s infinite;
 }
 
-/* chat */
+@keyframes pulse{
+0%{transform:scale(1)}
+50%{transform:scale(1.1)}
+100%{transform:scale(1)}
+}
+
+#ai-avatar{
+width:120px;
+height:120px;
+border-radius:50%;
+background:radial-gradient(circle,#00ff88,#002211);
+box-shadow:0 0 60px #00ff88;
+animation:pulse 3s infinite;
+}
+
 .chatbot{
 display:flex;
 flex-direction:column;
@@ -96,8 +66,6 @@ height:300px;
 #chat-box{
 flex:1;
 overflow:auto;
-font-size:13px;
-margin-bottom:10px;
 }
 
 .chat-input{
@@ -105,30 +73,13 @@ display:flex;
 gap:5px;
 }
 
-input{
-flex:1;
-background:#000;
-border:1px solid #00f7ff;
-color:#00f7ff;
-padding:6px;
+#neural-canvas{
+width:100%;
+height:200px;
 }
 
-button{
-background:#00f7ff;
-border:none;
-padding:6px 10px;
-cursor:pointer;
-}
-
-/* logs */
 #system-logs{
 height:120px;
 overflow:auto;
 font-size:12px;
-}
-
-/* monitor */
-#system-monitor{
-font-size:13px;
-line-height:1.8;
 }
