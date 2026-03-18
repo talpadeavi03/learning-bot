@@ -1,5 +1,3 @@
-let chart;
-
 /* launch */
 
 function launchAI(){
@@ -24,66 +22,9 @@ const box=document.getElementById("chat-box");
 
 box.innerHTML+=`<p><b>You:</b> ${input}</p>`;
 
-aiThinking(input);
-
-}
-
-/* thinking */
-
-function aiThinking(text){
-
-const thinking=document.getElementById("thinking");
-
-thinking.style.display="block";
-
 setTimeout(()=>{
-thinking.style.display="none";
-aiResponse(text);
-},900);
-
-}
-
-/* response */
-
-function aiResponse(text){
-
-let reply="Analyzing behavioral data.";
-
-if(text.includes("hello")||text.includes("hi")){
-reply="Hello Avi. System operational.";
-}
-
-typeText(reply);
-
-}
-
-/* typing */
-
-function typeText(text){
-
-const box=document.getElementById("chat-box");
-
-const p=document.createElement("p");
-
-box.appendChild(p);
-
-let i=0;
-
-function type(){
-
-if(i<text.length){
-
-p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
-
-i++;
-
-setTimeout(type,20);
-
-}
-
-}
-
-type();
+box.innerHTML+=`<p><b>AETHER:</b> Processing your request...</p>`;
+},500);
 
 }
 
@@ -91,11 +32,13 @@ type();
 
 async function loadDashboard(){
 
+try{
+
 const data=await fetch("./data/dashboard.json").then(r=>r.json());
 
 const ctx=document.getElementById("activityChart");
 
-chart=new Chart(ctx,{
+new Chart(ctx,{
 type:"bar",
 data:{
 labels:data.activity.map(a=>a.topic),
@@ -103,9 +46,6 @@ datasets:[{
 label:"Minutes",
 data:data.activity.map(a=>a.minutes)
 }]
-},
-options:{
-animation:{duration:1500}
 }
 });
 
@@ -116,11 +56,17 @@ activity.innerHTML+=`<p>${a.topic}: ${a.minutes} minutes</p>`;
 });
 
 document.getElementById("insights").innerHTML=
-`Focus: 0.82<br>Mode: deep_work<br>Topic: kubernetes`;
+"Focus: 0.82<br>Mode: deep_work";
+
+}catch(e){
+
+console.log("Dashboard error:",e);
 
 }
 
-/* particle background */
+}
+
+/* particles */
 
 function initParticles(){
 
@@ -132,7 +78,7 @@ canvas.height=window.innerHeight;
 
 let particles=[];
 
-for(let i=0;i<60;i++){
+for(let i=0;i<50;i++){
 
 particles.push({
 x:Math.random()*canvas.width,
@@ -148,7 +94,6 @@ function draw(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 particles.forEach(p=>{
-
 p.x+=p.vx;
 p.y+=p.vy;
 
@@ -156,7 +101,6 @@ ctx.beginPath();
 ctx.arc(p.x,p.y,2,0,Math.PI*2);
 ctx.fillStyle="#00eaff";
 ctx.fill();
-
 });
 
 requestAnimationFrame(draw);

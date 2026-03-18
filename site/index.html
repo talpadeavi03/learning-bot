@@ -1,23 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>AETHER AI</title>
-
-<link rel="stylesheet" href="styles.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-</head>
-
 <body>
 
 <canvas id="bg"></canvas>
 
+<!-- HERO (VISIBLE BY DEFAULT) -->
 <section class="hero" id="hero">
 
 <h1>AETHER</h1>
@@ -27,8 +12,8 @@
 
 </section>
 
-
-<section id="chat-section">
+<!-- CHAT -->
+<section id="chat-section" style="display:none;">
 
 <div class="chat-wrapper">
 
@@ -49,35 +34,26 @@
 
 </section>
 
-
-<section id="dashboard">
+<!-- DASHBOARD -->
+<section id="dashboard" style="display:none;">
 
 <h2>Behavior Dashboard</h2>
 
 <div class="dashboard-grid">
 
 <div class="card">
-
 <h3>Activity Chart</h3>
-
 <canvas id="activityChart"></canvas>
-
 </div>
 
 <div class="card">
-
 <h3>Activity Stream</h3>
-
 <div id="activity"></div>
-
 </div>
 
 <div class="card">
-
 <h3>AI Insights</h3>
-
 <div id="insights"></div>
-
 </div>
 
 </div>
@@ -87,4 +63,3 @@
 <script src="app.js"></script>
 
 </body>
-</html>
