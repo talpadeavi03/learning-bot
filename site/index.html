@@ -1,137 +1,107 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-<meta charset="UTF-8">
-<title>Learning Dashboard</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-
-body {
-font-family: Arial;
-background:#0f172a;
-color:white;
-margin:40px;
-}
-
-h1{
-margin-bottom:30px;
-}
-
-.container{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-}
-
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-}
-
-canvas{
-background:white;
-border-radius:8px;
-padding:10px;
-}
-
-.heatmap span{
-display:inline-block;
-width:12px;
-height:12px;
-margin:2px;
-background:#22c55e;
-}
-
-</style>
-
+  <title>🧠 Personal AI Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      background: #38bdf8;
+      cursor: pointer;
+    }
+  </style>
 </head>
-
 <body>
 
-<h1>🚀 Personal Learning Dashboard</h1>
-
-<div class="container">
+<h1>🧠 Personal AI Dashboard</h1>
 
 <div class="card">
-<h2>📊 Topic Distribution</h2>
-<canvas id="topicChart"></canvas>
+  <h2>📊 Daily Activity</h2>
+  <canvas id="activityChart"></canvas>
 </div>
 
 <div class="card">
-<h2>📈 Learning Activity</h2>
-<canvas id="activityChart"></canvas>
+  <h2>📊 Topics</h2>
+  <canvas id="topicsChart"></canvas>
 </div>
 
 <div class="card">
-<h2>📅 Learning Heatmap</h2>
-<div id="heatmap" class="heatmap"></div>
-</div>
-
-<div class="card">
-<h2>🧠 Weekly Summary</h2>
-<ul id="summary"></ul>
-</div>
-
+  <h2>🤖 Chat with Your Data</h2>
+  <input id="question" placeholder="Ask about your behavior..." size="50"/>
+  <button onclick="ask()">Ask</button>
+  <pre id="response"></pre>
 </div>
 
 <script>
+let dashboardData = null;
 
 fetch("data/dashboard.json")
-.then(res=>res.json())
-.then(data=>{
+  .then(res => res.json())
+  .then(data => {
+    dashboardData = data;
 
-const topics=data.topics
-const daily=data.daily_activity
-const summary=data.weekly_summary||[]
+    // Activity chart
+    new Chart(document.getElementById("activityChart"), {
+      type: "bar",
+      data: {
+        labels: Object.keys(data.daily_activity),
+        datasets: [{
+          label: "Activity",
+          data: Object.values(data.daily_activity)
+        }]
+      }
+    });
 
-new Chart(document.getElementById("topicChart"),{
-type:"bar",
-data:{
-labels:Object.keys(topics),
-datasets:[{
-label:"Sessions",
-data:Object.values(topics),
-backgroundColor:"#38bdf8"
-}]
+    // Topics chart
+    new Chart(document.getElementById("topicsChart"), {
+      type: "pie",
+      data: {
+        labels: Object.keys(data.topics),
+        datasets: [{
+          data: Object.values(data.topics)
+        }]
+      }
+    });
+  });
+
+function ask() {
+  const q = document.getElementById("question").value.toLowerCase();
+
+  let answer = "I don't know yet.";
+
+  if (q.includes("activity")) {
+    answer = JSON.stringify(dashboardData.daily_activity, null, 2);
+  }
+
+  else if (q.includes("topics")) {
+    answer = JSON.stringify(dashboardData.topics, null, 2);
+  }
+
+  else if (q.includes("most active")) {
+    let maxDay = Object.entries(dashboardData.daily_activity)
+      .sort((a,b)=>b[1]-a[1])[0];
+
+    answer = "Most active day: " + maxDay[0] + " (" + maxDay[1] + " events)";
+  }
+
+  document.getElementById("response").innerText = answer;
 }
-})
-
-new Chart(document.getElementById("activityChart"),{
-type:"line",
-data:{
-labels:Object.keys(daily),
-datasets:[{
-label:"Daily Learning",
-data:Object.values(daily),
-borderColor:"#22c55e",
-fill:false
-}]
-}
-})
-
-const heatmap=document.getElementById("heatmap")
-
-Object.values(daily).forEach(v=>{
-for(let i=0;i<v;i++){
-const box=document.createElement("span")
-heatmap.appendChild(box)
-}
-})
-
-const list=document.getElementById("summary")
-
-summary.forEach(item=>{
-const li=document.createElement("li")
-li.innerText=item
-list.appendChild(li)
-})
-
-})
-
 </script>
 
 </body>
