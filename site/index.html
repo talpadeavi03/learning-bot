@@ -9,58 +9,92 @@
 
 <link rel="stylesheet" href="styles.css">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
-<!-- 3D BACKGROUND -->
-<div id="three-container"></div>
+<!-- HERO -->
+<section class="hero">
 
-<!-- GLOW -->
-<div class="light-orb"></div>
+<div class="hero-animation">
 
-<!-- UI -->
-<div class="ui-overlay">
+<svg viewBox="0 0 200 200" class="orb">
 
-  <div class="core">
-    <h1>AETHER</h1>
-    <p id="status">Neural System Active</p>
-  </div>
+<circle cx="100" cy="100" r="40" class="core"/>
+<circle cx="100" cy="100" r="70" class="ring"/>
+<circle cx="100" cy="100" r="90" class="ring2"/>
 
-  <div class="panel-row">
-
-    <!-- ACTIVITY -->
-    <div class="panel">
-      <h3>Activity</h3>
-      <div id="activity"></div>
-      <canvas id="activityChart"></canvas>
-    </div>
-
-    <!-- CHAT -->
-    <div class="panel chat-panel">
-      <h3>AETHER Chat</h3>
-
-      <div id="chat-box"></div>
-
-      <div class="chat-input">
-        <input id="input" placeholder="Ask AETHER...">
-        <button onclick="send()">Send</button>
-        <button onclick="voiceCommand()">🎤</button>
-      </div>
-    </div>
-
-    <!-- INSIGHTS -->
-    <div class="panel">
-      <h3>Insights</h3>
-      <div id="insights"></div>
-    </div>
-
-  </div>
+</svg>
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<h1>AETHER</h1>
+
+<p>Personal AI Intelligence System</p>
+
+<button onclick="launchAI()">Launch AI</button>
+
+</section>
+
+
+<!-- CHAT -->
+<section id="chat-section">
+
+<div class="chat-container">
+
+<h2>Chat with AETHER</h2>
+
+<div id="chat-box"></div>
+
+<div class="chat-input">
+
+<input id="input" placeholder="Ask AETHER..." />
+<button onclick="send()">Send</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- DASHBOARD -->
+<section id="dashboard">
+
+<h2>Behavior Dashboard</h2>
+
+<div class="dashboard-grid">
+
+<div class="card">
+
+<h3>Activity Chart</h3>
+
+<canvas id="activityChart"></canvas>
+
+</div>
+
+<div class="card">
+
+<h3>Activity Stream</h3>
+
+<div id="activity"></div>
+
+</div>
+
+<div class="card">
+
+<h3>AI Insights</h3>
+
+<div id="insights"></div>
+
+</div>
+
+</div>
+
+</section>
+
 <script src="app.js"></script>
 
 </body>
