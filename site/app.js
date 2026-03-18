@@ -1,128 +1,89 @@
-let scene, camera, renderer, brain, ring;
+let scene, camera, renderer, brain, rings=[];
+let mouseX=0, mouseY=0;
 
-init3D();
+init();
 animate();
 
-function init3D(){
+function init(){
 
-scene = new THREE.Scene();
+scene=new THREE.Scene();
 
-camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-camera.position.z = 5;
+camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.z=4;
 
-renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-
+renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
 document.getElementById("three-container").appendChild(renderer.domElement);
 
 /* LIGHT */
-const light = new THREE.PointLight(0x00f7ff, 1);
-light.position.set(10,10,10);
+const light=new THREE.PointLight(0x00eaff,1);
+light.position.set(5,5,5);
 scene.add(light);
 
-/* NEURAL BRAIN (sphere points) */
-const geometry = new THREE.SphereGeometry(1,32,32);
-const material = new THREE.MeshBasicMaterial({
+/* BRAIN */
+const geometry=new THREE.SphereGeometry(1.2,64,64);
+const material=new THREE.MeshBasicMaterial({
 wireframe:true,
-color:0x00f7ff
+color:0x00eaff
 });
-
-brain = new THREE.Mesh(geometry, material);
+brain=new THREE.Mesh(geometry,material);
 scene.add(brain);
 
-/* DATA RING */
-const ringGeo = new THREE.TorusGeometry(2,0.05,16,100);
-const ringMat = new THREE.MeshBasicMaterial({color:0x00ffcc});
-ring = new THREE.Mesh(ringGeo, ringMat);
-
+/* MULTIPLE RINGS */
+for(let i=0;i<3;i++){
+const geo=new THREE.TorusGeometry(2+i*0.3,0.03,16,100);
+const mat=new THREE.MeshBasicMaterial({color:0x00ffff});
+const ring=new THREE.Mesh(geo,mat);
+ring.rotation.x=Math.random()*Math.PI;
 scene.add(ring);
+rings.push(ring);
+}
+
+/* NEURAL PARTICLES */
+const particlesGeo=new THREE.BufferGeometry();
+const particlesCount=300;
+
+const posArray=new Float32Array(particlesCount*3);
+
+for(let i=0;i<particlesCount*3;i++){
+posArray[i]=(Math.random()-0.5)*5;
+}
+
+particlesGeo.setAttribute('position',new THREE.BufferAttribute(posArray,3));
+
+const particlesMat=new THREE.PointsMaterial({
+size:0.02,
+color:0x00eaff
+});
+
+const particles=new THREE.Points(particlesGeo,particlesMat);
+scene.add(particles);
+
+/* MOUSE INTERACTION */
+document.addEventListener("mousemove",(e)=>{
+mouseX=(e.clientX/window.innerWidth-0.5)*2;
+mouseY=(e.clientY/window.innerHeight-0.5)*2;
+});
 
 }
 
-/* ANIMATION LOOP */
+/* ANIMATION */
 function animate(){
 
 requestAnimationFrame(animate);
 
-brain.rotation.x += 0.01;
-brain.rotation.y += 0.01;
+/* brain follow mouse */
+brain.rotation.y+=0.01 + mouseX*0.02;
+brain.rotation.x+=0.005 + mouseY*0.02;
 
-ring.rotation.z += 0.02;
+/* rings rotate */
+rings.forEach((r,i)=>{
+r.rotation.z+=0.01+(i*0.01);
+});
 
-renderer.render(scene, camera);
+/* floating effect */
+brain.position.y=Math.sin(Date.now()*0.002)*0.1;
 
-}
-
-/* CHAT */
-
-function send(){
-
-const input=document.getElementById("input").value;
-const box=document.getElementById("chat-box");
-
-box.innerHTML+=`<p><b>You:</b> ${input}</p>`;
-
-respond(input);
-
-}
-
-/* AI RESPONSE */
-
-function respond(text){
-
-let reply="Processing neural data...";
-
-if(text.includes("hello")||text.includes("hi")){
-reply="Hello Avi. Neural system is active.";
-}
-
-typing(reply);
-speak(reply);
-
-}
-
-/* typing effect */
-function typing(text){
-
-const box=document.getElementById("chat-box");
-const p=document.createElement("p");
-
-box.appendChild(p);
-
-let i=0;
-
-function type(){
-if(i<text.length){
-p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
-i++;
-setTimeout(type,20);
-}
-}
-
-type();
-
-}
-
-/* voice output */
-function speak(text){
-
-const speech=new SpeechSynthesisUtterance(text);
-speechSynthesis.speak(speech);
-
-}
-
-/* voice input */
-function voiceCommand(){
-
-const recognition=new webkitSpeechRecognition();
-recognition.start();
-
-recognition.onresult=function(e){
-
-const text=e.results[0][0].transcript;
-document.getElementById("input").value=text;
-send();
-
-};
+renderer.render(scene,camera);
 
 }
