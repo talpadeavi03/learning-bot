@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>AETHER AI</title>
+<title>AETHER 3D</title>
 
 <link rel="stylesheet" href="styles.css">
 
@@ -13,86 +13,29 @@
 
 <body>
 
-<!-- Neural Background -->
-<canvas id="bg-canvas"></canvas>
+<!-- 3D CANVAS -->
+<div id="three-container"></div>
 
-<div class="container">
+<div class="ui-overlay">
 
-  <!-- CORE -->
   <div class="core">
-    <div class="orb"></div>
     <h1>AETHER</h1>
-    <p id="status">AI system active</p>
+    <p id="status">3D Neural System Active</p>
   </div>
 
-  <!-- HOLOGRAM AVATAR -->
-  <div class="avatar-panel">
-    <div id="ai-avatar"></div>
-  </div>
+  <div class="chat-panel">
+    <div id="chat-box"></div>
 
-  <!-- MAIN GRID -->
-  <div class="main-row">
-
-    <!-- ACTIVITY -->
-    <div class="panel">
-      <h2>Activity</h2>
-      <div id="activity"></div>
-      <canvas id="activityChart"></canvas>
+    <div class="chat-input">
+      <input id="input" placeholder="Ask AETHER...">
+      <button onclick="send()">Send</button>
+      <button onclick="voiceCommand()">🎤</button>
     </div>
-
-    <!-- CHAT -->
-    <div class="panel chatbot">
-
-      <h2>AETHER Chat</h2>
-
-      <div id="chat-box"></div>
-
-      <div class="chat-input">
-        <input id="input" placeholder="Ask AETHER...">
-        <button onclick="send()">Send</button>
-        <button onclick="voiceCommand()">🎤</button>
-      </div>
-
-    </div>
-
-    <!-- INSIGHTS -->
-    <div class="panel">
-      <h2>Insights</h2>
-      <div id="insights"></div>
-    </div>
-
-  </div>
-
-  <!-- NEURAL NETWORK VISUALIZER -->
-  <div class="panel neural-panel">
-    <h2>Neural Network Visualizer</h2>
-    <canvas id="neural-canvas"></canvas>
-  </div>
-
-  <!-- MEMORY TIMELINE -->
-  <div class="panel">
-    <h2>AI Memory Timeline</h2>
-    <div id="memory"></div>
-  </div>
-
-  <!-- SYSTEM -->
-  <div class="bottom-row">
-
-    <div class="panel">
-      <h2>System Monitor</h2>
-      <div id="system-monitor"></div>
-    </div>
-
-    <div class="panel">
-      <h2>System Logs</h2>
-      <div id="system-logs"></div>
-    </div>
-
   </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="app.js"></script>
 
 </body>

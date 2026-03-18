@@ -1,70 +1,47 @@
 body{
 margin:0;
+overflow:hidden;
 background:#000;
 color:#00f7ff;
 font-family:monospace;
-overflow:hidden;
 }
 
-.container{
-display:flex;
-flex-direction:column;
-gap:15px;
+/* 3D background */
+#three-container{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:0;
+}
+
+/* UI overlay */
+.ui-overlay{
+position:relative;
+z-index:1;
 padding:20px;
 }
 
-.panel{
+/* core text */
+.core{
+text-align:center;
+}
+
+/* chat */
+.chat-panel{
+position:absolute;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:400px;
 border:1px solid #00f7ff;
-border-radius:10px;
-padding:15px;
+padding:10px;
 background:rgba(0,0,0,0.6);
 }
 
-.main-row{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:15px;
-}
-
-.bottom-row{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:15px;
-}
-
-.orb{
-width:100px;
-height:100px;
-margin:auto;
-border-radius:50%;
-background:radial-gradient(circle,#00f7ff,#001f2f);
-box-shadow:0 0 40px #00f7ff;
-animation:pulse 2s infinite;
-}
-
-@keyframes pulse{
-0%{transform:scale(1)}
-50%{transform:scale(1.1)}
-100%{transform:scale(1)}
-}
-
-#ai-avatar{
-width:120px;
-height:120px;
-border-radius:50%;
-background:radial-gradient(circle,#00ff88,#002211);
-box-shadow:0 0 60px #00ff88;
-animation:pulse 3s infinite;
-}
-
-.chatbot{
-display:flex;
-flex-direction:column;
-height:300px;
-}
-
 #chat-box{
-flex:1;
+height:150px;
 overflow:auto;
 }
 
@@ -73,13 +50,9 @@ display:flex;
 gap:5px;
 }
 
-#neural-canvas{
-width:100%;
-height:200px;
-}
-
-#system-logs{
-height:120px;
-overflow:auto;
-font-size:12px;
+input{
+flex:1;
+background:#000;
+border:1px solid #00f7ff;
+color:#00f7ff;
 }
