@@ -13,10 +13,6 @@
 
 <body>
 
-<div id="boot-screen">
-  <div class="boot-text" id="boot-text"></div>
-</div>
-
 <canvas id="bg-canvas"></canvas>
 
 <div class="container">
@@ -25,10 +21,15 @@
   <div class="core">
     <div class="orb"></div>
     <h1>AETHER</h1>
-    <p id="status">Initializing...</p>
+    <p id="status">Initializing system...</p>
   </div>
 
-  <!-- MAIN GRID ROW -->
+  <!-- AI AVATAR -->
+  <div class="avatar-panel">
+    <div id="ai-avatar"></div>
+  </div>
+
+  <!-- MAIN ROW -->
   <div class="main-row">
 
     <!-- ACTIVITY -->
@@ -40,14 +41,16 @@
 
     <!-- CHAT -->
     <div class="panel chatbot">
+
       <h2>AETHER Chat</h2>
 
       <div id="chat-box"></div>
 
       <div class="chat-input">
-        <input id="input" placeholder="Ask AETHER...">
+        <input id="input" placeholder="Ask AETHER..." />
         <button onclick="send()">Send</button>
       </div>
+
     </div>
 
     <!-- INSIGHTS -->
@@ -58,7 +61,7 @@
 
   </div>
 
-  <!-- BOTTOM ROW -->
+  <!-- BOTTOM -->
   <div class="bottom-row">
 
     <div class="panel">
