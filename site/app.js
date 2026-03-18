@@ -1,138 +1,210 @@
-// AETHER FRONTEND CONTROLLER
+let activityChart=null;
 
-let activityChart = null;
+window.onload=function(){
+bootSequence();
+};
 
-async function loadData() {
-  try {
+function bootSequence(){
 
-    const state = await fetch("./data/state.json").then(r => r.json());
-    const response = await fetch("./data/aether_response.json").then(r => r.json());
-    const dashboard = await fetch("./data/dashboard.json").then(r => r.json());
+const text=`AETHER OS v1.0
+Initializing neural interface...
+Loading cognitive models...
+Connecting behavior database...
+System ready...`;
 
-    // Update AETHER status message
-    document.getElementById("status").innerText = response.message;
+let i=0;
 
-    // Update insights panel
-    document.getElementById("insights").innerHTML = `
-      <p><b>Focus:</b> ${state.focus}</p>
-      <p><b>Mode:</b> ${state.mode}</p>
-      <p><b>Topic:</b> ${state.dominant_topic}</p>
-      <p><b>Fatigue:</b> ${state.fatigue}</p>
-    `;
+const bootText=document.getElementById("boot-text");
 
-    // Activity list
-    const activityDiv = document.getElementById("activity");
-    activityDiv.innerHTML = "";
-
-    dashboard.activity.forEach(a => {
-      const el = document.createElement("p");
-      el.innerText = `${a.topic}: ${a.minutes} minutes`;
-      activityDiv.appendChild(el);
-    });
-
-    // Chart data
-    const labels = dashboard.activity.map(a => a.topic);
-    const values = dashboard.activity.map(a => a.minutes);
-
-    renderChart(labels, values);
-
-    // Orb reaction based on AI state
-    const orb = document.querySelector(".orb");
-
-    if (state.mode === "deep_work") {
-      orb.style.background = "radial-gradient(circle, #00ff88, #003322)";
-      orb.style.boxShadow = "0 0 30px #00ff88";
-    } 
-    else if (state.fatigue > 0.7) {
-      orb.style.background = "radial-gradient(circle, #ff0033, #330000)";
-      orb.style.boxShadow = "0 0 30px #ff0033";
-    } 
-    else {
-      orb.style.background = "radial-gradient(circle, #00f7ff, #001f2f)";
-      orb.style.boxShadow = "0 0 30px #00f7ff";
-    }
-
-  } catch (err) {
-
-    console.error("AETHER load error:", err);
-    document.getElementById("status").innerText = "Error loading AI state.";
-
-  }
+function type(){
+if(i<text.length){
+bootText.innerHTML+=text.charAt(i);
+i++;
+setTimeout(type,30);
+}else{
+setTimeout(()=>{
+document.getElementById("boot-screen").style.display="none";
+init();
+},1000);
+}
 }
 
-
-function renderChart(labels, values) {
-
-  const ctx = document.getElementById("activityChart");
-
-  if (activityChart) {
-    activityChart.destroy();
-  }
-
-  activityChart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Minutes Spent",
-        data: values
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          labels: { color: "#00f7ff" }
-        }
-      },
-      scales: {
-        x: { ticks: { color: "#00f7ff" } },
-        y: { ticks: { color: "#00f7ff" } }
-      }
-    }
-  });
-
+type();
 }
 
-
-// CHAT SYSTEM
-function send() {
-
-  const inputField = document.getElementById("input");
-  const input = inputField.value.trim();
-  const box = document.getElementById("chat-box");
-
-  if (!input) return;
-
-  box.innerHTML += `<p><b>You:</b> ${input}</p>`;
-  inputField.value = "";
-
-  const thinking = document.createElement("p");
-  thinking.innerHTML = "<b>AETHER:</b> ...";
-  box.appendChild(thinking);
-
-  setTimeout(() => {
-
-    let reply = "Analyzing behavioral data...";
-
-    if (input.toLowerCase().includes("study")) {
-      reply = "Learning efficiency increases during deep work cycles.";
-    } 
-    else if (input.toLowerCase().includes("productivity")) {
-      reply = "Peak productivity window detected between 10AM-2PM.";
-    } 
-    else if (input.toLowerCase().includes("exercise")) {
-      reply = "Exercise correlates with improved cognitive stability.";
-    }
-
-    thinking.innerHTML = `<b>AETHER:</b> ${reply}`;
-
-    box.scrollTop = box.scrollHeight;
-
-  }, 1000);
-
-}
-
-
-// INITIAL LOAD
+function init(){
 loadData();
+initBackground();
+log("System initialized");
+}
+
+async function loadData(){
+
+try{
+
+const state=await fetch("./data/state.json").then(r=>r.json());
+const response=await fetch("./data/aether_response.json").then(r=>r.json());
+const dashboard=await fetch("./data/dashboard.json").then(r=>r.json());
+
+document.getElementById("status").innerText=response.message;
+
+document.getElementById("insights").innerHTML=`
+<p>Focus: ${state.focus}</p>
+<p>Mode: ${state.mode}</p>
+<p>Topic: ${state.dominant_topic}</p>
+<p>Fatigue: ${state.fatigue}</p>
+`;
+
+const activityDiv=document.getElementById("activity");
+activityDiv.innerHTML="";
+
+dashboard.activity.forEach(a=>{
+const el=document.createElement("p");
+el.innerText=`${a.topic}: ${a.minutes} minutes`;
+activityDiv.appendChild(el);
+});
+
+const labels=dashboard.activity.map(a=>a.topic);
+const values=dashboard.activity.map(a=>a.minutes);
+
+renderChart(labels,values);
+
+updateOrb(state);
+
+log("Behavior dataset loaded");
+
+}catch(err){
+
+log("ERROR loading AI state");
+
+}
+
+}
+
+function renderChart(labels,values){
+
+const ctx=document.getElementById("activityChart");
+
+if(activityChart)activityChart.destroy();
+
+activityChart=new Chart(ctx,{
+type:"bar",
+data:{
+labels,
+datasets:[{label:"Minutes",data:values}]
+}
+});
+
+}
+
+function updateOrb(state){
+
+const orb=document.querySelector(".orb");
+
+if(state.mode==="deep_work"){
+orb.style.background="radial-gradient(circle,#00ff88,#003322)";
+}else if(state.fatigue>0.7){
+orb.style.background="radial-gradient(circle,#ff0033,#330000)";
+}else{
+orb.style.background="radial-gradient(circle,#00f7ff,#001f2f)";
+}
+
+}
+
+function log(message){
+
+const logs=document.getElementById("system-logs");
+
+const line=document.createElement("div");
+
+line.innerText="> "+message;
+
+logs.prepend(line);
+
+}
+
+function send(){
+
+const input=document.getElementById("input").value;
+
+const box=document.getElementById("chat-box");
+
+box.innerHTML+=`<p><b>You:</b> ${input}</p>`;
+
+typingEffect("Analyzing behavioral data...");
+
+}
+
+function typingEffect(text){
+
+const box=document.getElementById("chat-box");
+
+const p=document.createElement("p");
+
+box.appendChild(p);
+
+let i=0;
+
+function type(){
+
+if(i<text.length){
+
+p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
+
+i++;
+
+setTimeout(type,30);
+
+}
+
+}
+
+type();
+
+}
+
+function initBackground(){
+
+const canvas=document.getElementById("bg-canvas");
+
+const ctx=canvas.getContext("2d");
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particles=[];
+
+for(let i=0;i<60;i++){
+
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+vx:(Math.random()-0.5),
+vy:(Math.random()-0.5)
+});
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+particles.forEach(p=>{
+
+p.x+=p.vx;
+p.y+=p.vy;
+
+ctx.beginPath();
+ctx.arc(p.x,p.y,2,0,Math.PI*2);
+ctx.fillStyle="#00f7ff";
+ctx.fill();
+
+});
+
+requestAnimationFrame(draw);
+
+}
+
+draw();
+
+}

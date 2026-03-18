@@ -1,60 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- MUST BE FIRST -->
-  <meta charset="UTF-8" />
 
-  <!-- Encoding fix -->
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Responsive -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AETHER AI</title>
 
-  <title>AETHER AI</title>
+<link rel="stylesheet" href="styles.css">
 
-  <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-<!-- 🔥 NEURAL BACKGROUND -->
+<!-- Boot Screen -->
+<div id="boot-screen">
+  <div class="boot-text" id="boot-text"></div>
+</div>
+
 <canvas id="bg-canvas"></canvas>
 
-<div class="container">
+<div class="container" id="main-ui">
 
-  <!-- AETHER CORE -->
+  <!-- CORE -->
   <div class="core">
     <div class="orb"></div>
     <h1>AETHER</h1>
-    <p id="status">Initializing system...</p>
+    <p id="status">Initializing...</p>
   </div>
 
-  <!-- LEFT PANEL -->
+  <!-- LEFT -->
   <div class="left-panel">
+
     <h2>Activity Stream</h2>
+
     <div id="activity"></div>
+
     <canvas id="activityChart"></canvas>
+
   </div>
 
-  <!-- RIGHT PANEL -->
+  <!-- RIGHT -->
   <div class="right-panel">
+
     <h2>Insights</h2>
+
     <div id="insights"></div>
+
+    <h2>System Logs</h2>
+
+    <div id="system-logs"></div>
+
   </div>
 
   <!-- CHAT -->
   <div class="chat">
-    <input id="input" placeholder="Ask AETHER..." />
+
+    <input id="input" placeholder="Ask AETHER...">
+
     <button onclick="send()">Send</button>
+
     <div id="chat-box"></div>
+
   </div>
 
 </div>
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- Your app -->
 <script src="app.js"></script>
 
 </body>
