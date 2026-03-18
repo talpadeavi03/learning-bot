@@ -1,108 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>🧠 Personal AI Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: white;
-      padding: 20px;
-    }
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    input, button {
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      background: #38bdf8;
-      cursor: pointer;
-    }
-  </style>
+  <!-- ✅ MUST BE FIRST -->
+  <meta charset="UTF-8" />
+
+  <!-- ✅ ADD THIS (prevents weird symbols) -->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+  <!-- ✅ Responsive + cleaner rendering -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AETHER AI</title>
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
 
-<h1>🧠 Personal AI Dashboard</h1>
+<div class="container">
 
-<div class="card">
-  <h2>📊 Daily Activity</h2>
-  <canvas id="activityChart"></canvas>
+  <!-- AETHER CORE -->
+  <div class="core">
+    <div class="orb"></div>
+    <h1>AETHER</h1>
+    <p id="status">Initializing system...</p>
+  </div>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <h2>Activity Stream</h2>
+    <div id="activity"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <h2>Insights</h2>
+    <div id="insights"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat">
+    <input id="input" placeholder="Ask AETHER..." />
+    <button onclick="send()">Send</button>
+    <div id="chat-box"></div>
+  </div>
+
 </div>
 
-<div class="card">
-  <h2>📊 Topics</h2>
-  <canvas id="topicsChart"></canvas>
-</div>
-
-<div class="card">
-  <h2>🤖 Chat with Your Data</h2>
-  <input id="question" placeholder="Ask about your behavior..." size="50"/>
-  <button onclick="ask()">Ask</button>
-  <pre id="response"></pre>
-</div>
-
-<script>
-let dashboardData = null;
-
-fetch("data/dashboard.json")
-  .then(res => res.json())
-  .then(data => {
-    dashboardData = data;
-
-    // Activity chart
-    new Chart(document.getElementById("activityChart"), {
-      type: "bar",
-      data: {
-        labels: Object.keys(data.daily_activity),
-        datasets: [{
-          label: "Activity",
-          data: Object.values(data.daily_activity)
-        }]
-      }
-    });
-
-    // Topics chart
-    new Chart(document.getElementById("topicsChart"), {
-      type: "pie",
-      data: {
-        labels: Object.keys(data.topics),
-        datasets: [{
-          data: Object.values(data.topics)
-        }]
-      }
-    });
-  });
-
-function ask() {
-  const q = document.getElementById("question").value.toLowerCase();
-
-  let answer = "I don't know yet.";
-
-  if (q.includes("activity")) {
-    answer = JSON.stringify(dashboardData.daily_activity, null, 2);
-  }
-
-  else if (q.includes("topics")) {
-    answer = JSON.stringify(dashboardData.topics, null, 2);
-  }
-
-  else if (q.includes("most active")) {
-    let maxDay = Object.entries(dashboardData.daily_activity)
-      .sort((a,b)=>b[1]-a[1])[0];
-
-    answer = "Most active day: " + maxDay[0] + " (" + maxDay[1] + " events)";
-  }
-
-  document.getElementById("response").innerText = answer;
-}
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
