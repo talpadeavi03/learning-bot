@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>AETHER AI</title>
 
@@ -13,36 +12,15 @@
 
 <body>
 
-<canvas id="bg"></canvas>
-
-<!-- HERO -->
-<section class="hero">
 <h1>AETHER</h1>
-<p>Personal AI Assistant</p>
-</section>
 
-<!-- CHAT BUTTON -->
-<div class="chat-toggle" onclick="toggleChat()">
-💬
-</div>
+<button onclick="toggleChat()">Chat</button>
 
-<!-- CHAT PANEL -->
-<div class="chat-panel" id="chat-panel">
-
-<div class="chat-header">
-AETHER
-<span onclick="toggleChat()">✖</span>
-</div>
-
+<div id="chat-panel">
 <div id="chat-box"></div>
 
-<div id="thinking">AETHER is thinking...</div>
-
-<div class="chat-input">
-<input id="input" placeholder="Ask AETHER...">
-<button onclick="send()">➤</button>
-</div>
-
+<input id="input">
+<button onclick="send()">Send</button>
 </div>
 
 <script src="app.js"></script>

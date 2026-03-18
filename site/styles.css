@@ -1,104 +1,20 @@
 body{
-margin:0;
 background:#050b1a;
 color:white;
 font-family:system-ui;
 }
 
-/* hero */
-.hero{
-height:100vh;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-text-align:center;
-}
-
-/* chat button */
-.chat-toggle{
-position:fixed;
-bottom:20px;
-right:20px;
-background:#00eaff;
-width:60px;
-height:60px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:24px;
-cursor:pointer;
-box-shadow:0 0 20px #00eaff;
-}
-
-/* chat panel */
-.chat-panel{
-position:fixed;
-bottom:90px;
-right:20px;
-width:320px;
-height:420px;
+#chat-panel{
+width:300px;
+height:300px;
 background:#0b1328;
-border-radius:12px;
-display:flex;
-flex-direction:column;
-
-transform:translateY(120%);
-opacity:0;
-transition:all 0.3s ease;
-}
-
-/* open state */
-.chat-panel.open{
-transform:translateY(0);
-opacity:1;
-}
-
-/* header */
-.chat-header{
 padding:10px;
-background:#020617;
-display:flex;
-justify-content:space-between;
+margin-top:20px;
 }
 
-/* chat box */
-#chat-box{
-flex:1;
-padding:10px;
-overflow:auto;
-font-size:14px;
-}
-
-/* thinking */
-#thinking{
-display:none;
-font-size:12px;
-opacity:0.7;
-padding-left:10px;
-}
-
-/* input */
-.chat-input{
-display:flex;
-gap:5px;
-padding:10px;
-}
-
-.chat-input input{
-flex:1;
-padding:8px;
-background:#020617;
-border:none;
-color:white;
-border-radius:5px;
-}
-
-.chat-input button{
+button{
 background:#00eaff;
 border:none;
 padding:8px;
 cursor:pointer;
-border-radius:5px;
 }
