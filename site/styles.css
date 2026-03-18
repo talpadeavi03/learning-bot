@@ -1,23 +1,11 @@
 body{
 margin:0;
-font-family:system-ui;
 background:#050b1a;
 color:white;
-}
-
-/* background particles */
-
-#bg{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:-1;
+font-family:system-ui;
 }
 
 /* hero */
-
 .hero{
 height:100vh;
 display:flex;
@@ -27,94 +15,90 @@ justify-content:center;
 text-align:center;
 }
 
-.hero h1{
-font-size:56px;
-letter-spacing:4px;
-}
-
-.hero button{
-margin-top:20px;
-padding:12px 28px;
+/* chat button */
+.chat-toggle{
+position:fixed;
+bottom:20px;
+right:20px;
 background:#00eaff;
-border:none;
-border-radius:30px;
+width:60px;
+height:60px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
 cursor:pointer;
+box-shadow:0 0 20px #00eaff;
 }
 
-/* chat */
-
-#chat-section{
-display:none;
-padding:40px 20px;
-}
-
-.chat-wrapper{
-max-width:600px;
-margin:auto;
+/* chat panel */
+.chat-panel{
+position:fixed;
+bottom:90px;
+right:20px;
+width:320px;
+height:420px;
 background:#0b1328;
-padding:25px;
 border-radius:12px;
+display:flex;
+flex-direction:column;
+
+transform:translateY(120%);
+opacity:0;
+transition:all 0.3s ease;
 }
 
+/* open state */
+.chat-panel.open{
+transform:translateY(0);
+opacity:1;
+}
+
+/* header */
+.chat-header{
+padding:10px;
+background:#020617;
+display:flex;
+justify-content:space-between;
+}
+
+/* chat box */
 #chat-box{
-height:300px;
+flex:1;
+padding:10px;
 overflow:auto;
-margin-bottom:15px;
+font-size:14px;
 }
 
+/* thinking */
 #thinking{
 display:none;
 font-size:12px;
 opacity:0.7;
-margin-bottom:10px;
+padding-left:10px;
 }
 
+/* input */
 .chat-input{
 display:flex;
-gap:10px;
+gap:5px;
+padding:10px;
 }
 
 .chat-input input{
 flex:1;
-padding:10px;
-border-radius:6px;
-border:none;
+padding:8px;
 background:#020617;
+border:none;
 color:white;
+border-radius:5px;
 }
 
-/* dashboard */
-
-#dashboard{
-display:none;
-padding:50px 20px;
-max-width:1100px;
-margin:auto;
-}
-
-.dashboard-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:25px;
-margin-top:30px;
-}
-
-.card{
-background:#0b1328;
-padding:25px;
-border-radius:12px;
-}
-
-/* mobile */
-
-@media(max-width:900px){
-
-.dashboard-grid{
-grid-template-columns:1fr;
-}
-
-.hero h1{
-font-size:36px;
-}
-
+.chat-input button{
+background:#00eaff;
+border:none;
+padding:8px;
+cursor:pointer;
+border-radius:5px;
 }

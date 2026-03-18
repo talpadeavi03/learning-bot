@@ -1,65 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AETHER AI</title>
+
+<link rel="stylesheet" href="styles.css">
+
+</head>
+
 <body>
 
 <canvas id="bg"></canvas>
 
-<!-- HERO (VISIBLE BY DEFAULT) -->
-<section class="hero" id="hero">
-
+<!-- HERO -->
+<section class="hero">
 <h1>AETHER</h1>
-<p>Personal Behavioral Intelligence</p>
-
-<button onclick="launchAI()">Launch AI</button>
-
+<p>Personal AI Assistant</p>
 </section>
 
-<!-- CHAT -->
-<section id="chat-section" style="display:none;">
+<!-- CHAT BUTTON -->
+<div class="chat-toggle" onclick="toggleChat()">
+💬
+</div>
 
-<div class="chat-wrapper">
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chat-panel">
 
-<h2>AETHER</h2>
+<div class="chat-header">
+AETHER
+<span onclick="toggleChat()">✖</span>
+</div>
 
 <div id="chat-box"></div>
 
 <div id="thinking">AETHER is thinking...</div>
 
 <div class="chat-input">
-
-<input id="input" placeholder="Ask AETHER..." />
-<button onclick="send()">Send</button>
-
+<input id="input" placeholder="Ask AETHER...">
+<button onclick="send()">➤</button>
 </div>
 
 </div>
-
-</section>
-
-<!-- DASHBOARD -->
-<section id="dashboard" style="display:none;">
-
-<h2>Behavior Dashboard</h2>
-
-<div class="dashboard-grid">
-
-<div class="card">
-<h3>Activity Chart</h3>
-<canvas id="activityChart"></canvas>
-</div>
-
-<div class="card">
-<h3>Activity Stream</h3>
-<div id="activity"></div>
-</div>
-
-<div class="card">
-<h3>AI Insights</h3>
-<div id="insights"></div>
-</div>
-
-</div>
-
-</section>
 
 <script src="app.js"></script>
 
 </body>
+</html>

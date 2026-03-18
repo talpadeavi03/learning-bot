@@ -1,73 +1,102 @@
-/* launch */
+/* TOGGLE CHAT */
+function toggleChat(){
 
-function launchAI(){
+const panel=document.getElementById("chat-panel");
 
-document.getElementById("hero").style.display="none";
-
-document.getElementById("chat-section").style.display="block";
-document.getElementById("dashboard").style.display="block";
-
-initParticles();
-loadDashboard();
+panel.classList.toggle("open");
 
 }
 
-/* chat */
+/* ENTER KEY SUPPORT */
+document.addEventListener("DOMContentLoaded",()=>{
 
+document.getElementById("input").addEventListener("keydown",(e)=>{
+if(e.key==="Enter"){
+send();
+}
+});
+
+initParticles();
+
+});
+
+/* SEND MESSAGE */
 function send(){
 
-const input=document.getElementById("input").value;
+const input=document.getElementById("input").value.trim();
+
+if(!input) return;
 
 const box=document.getElementById("chat-box");
 
 box.innerHTML+=`<p><b>You:</b> ${input}</p>`;
 
+document.getElementById("input").value="";
+
+aiThinking(input);
+
+}
+
+/* THINKING */
+function aiThinking(text){
+
+const thinking=document.getElementById("thinking");
+
+thinking.style.display="block";
+
 setTimeout(()=>{
-box.innerHTML+=`<p><b>AETHER:</b> Processing your request...</p>`;
-},500);
+thinking.style.display="none";
+aiResponse(text);
+},800);
 
 }
 
-/* dashboard */
+/* RESPONSE */
+function aiResponse(text){
 
-async function loadDashboard(){
+let reply="Analyzing your behavior patterns...";
 
-try{
-
-const data=await fetch("./data/dashboard.json").then(r=>r.json());
-
-const ctx=document.getElementById("activityChart");
-
-new Chart(ctx,{
-type:"bar",
-data:{
-labels:data.activity.map(a=>a.topic),
-datasets:[{
-label:"Minutes",
-data:data.activity.map(a=>a.minutes)
-}]
+if(text.includes("hi")||text.includes("hello")){
+reply="Hello Avi. Everything looks stable.";
 }
-});
 
-const activity=document.getElementById("activity");
+if(text.includes("work")){
+reply="You perform best during deep focus sessions.";
+}
 
-data.activity.forEach(a=>{
-activity.innerHTML+=`<p>${a.topic}: ${a.minutes} minutes</p>`;
-});
-
-document.getElementById("insights").innerHTML=
-"Focus: 0.82<br>Mode: deep_work";
-
-}catch(e){
-
-console.log("Dashboard error:",e);
+typeText(reply);
 
 }
 
+/* TYPING EFFECT */
+function typeText(text){
+
+const box=document.getElementById("chat-box");
+
+const p=document.createElement("p");
+box.appendChild(p);
+
+let i=0;
+
+function type(){
+
+if(i<text.length){
+
+p.innerHTML="<b>AETHER:</b> "+text.substring(0,i);
+
+i++;
+
+setTimeout(type,20);
+
 }
 
-/* particles */
+}
 
+type();
+
+}
+
+/* BACKGROUND PARTICLES */
 function initParticles(){
 
 const canvas=document.getElementById("bg");
@@ -78,7 +107,7 @@ canvas.height=window.innerHeight;
 
 let particles=[];
 
-for(let i=0;i<50;i++){
+for(let i=0;i<40;i++){
 
 particles.push({
 x:Math.random()*canvas.width,
