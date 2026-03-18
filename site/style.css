@@ -1,10 +1,11 @@
 body {
   margin: 0;
-  background: #0a0a0f;
+  background: radial-gradient(circle at center, #0a0a0f, #000000);
   color: #00f7ff;
   font-family: 'Segoe UI', sans-serif;
 }
 
+/* GRID LAYOUT */
 .container {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
@@ -17,31 +18,117 @@ body {
   grid-column: 1 / 4;
   text-align: center;
   padding: 20px;
+  position: relative;
 }
 
+/* 🔥 MAIN ORB */
 .orb {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   margin: auto;
   border-radius: 50%;
   background: radial-gradient(circle, #00f7ff, #001f2f);
-  animation: pulse 2s infinite;
+
+  animation: pulse 2.5s infinite ease-in-out;
+  box-shadow: 0 0 25px #00f7ff;
+
+  position: relative;
 }
 
+/* 🔥 OUTER ENERGY RING */
+.orb::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+
+  border: 2px solid rgba(0, 247, 255, 0.3);
+
+  animation: rotate 6s linear infinite;
+}
+
+/* 🔥 INNER GLOW LAYER */
+.orb::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+
+  background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+
+  animation: glow 3s infinite ease-in-out;
+}
+
+/* BREATHING EFFECT */
 @keyframes pulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 0.7; }
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* ROTATING RING */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* INNER LIGHT SHIFT */
+@keyframes glow {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
 }
 
 /* PANELS */
 .left-panel, .right-panel {
   padding: 20px;
-  border: 1px solid rgba(0,247,255,0.2);
+  margin: 10px;
+  border-radius: 15px;
+
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(0, 247, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
 }
 
+/* CHAT */
 .chat {
   grid-column: 1 / 4;
-  padding: 10px;
+  padding: 15px;
   border-top: 1px solid #00f7ff;
+  display: flex;
+  flex-direction: column;
+}
+
+#chat-box {
+  max-height: 150px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+/* INPUT */
+input {
+  background: #0a0a0f;
+  border: 1px solid #00f7ff;
+  color: #00f7ff;
+  padding: 8px;
+  margin-bottom: 5px;
+}
+
+/* BUTTON */
+button {
+  background: #00f7ff;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #00c2cc;
 }
