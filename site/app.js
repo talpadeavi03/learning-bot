@@ -19,11 +19,11 @@ location.reload()
 }
 
 if(page==="activity"){
-p.innerHTML="<h1 class='text-xl'>Activity Stream</h1>"
+p.innerHTML="<h1 class='text-2xl'>Activity Stream</h1>"
 }
 
 if(page==="analytics"){
-p.innerHTML="<h1 class='text-xl'>Analytics Coming Soon</h1>"
+p.innerHTML="<h1 class='text-2xl'>Analytics Coming Soon</h1>"
 }
 
 }
@@ -46,7 +46,8 @@ data:{
 labels:data.activity.map(a=>a.topic),
 datasets:[{
 label:"Minutes",
-data:data.activity.map(a=>a.minutes)
+data:data.activity.map(a=>a.minutes),
+backgroundColor:"#00ffcc"
 }]
 }
 })
@@ -68,7 +69,7 @@ document.getElementById("chatInput").value=""
 
 try{
 
-const res=await fetch("https://learning-bot.talpadeavi0303.workers.dev/",{
+const res=await fetch("https://aether-api.YOURNAME.workers.dev",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({query:input})
