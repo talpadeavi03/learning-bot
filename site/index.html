@@ -1,85 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>AETHER AI</title>
 
-<link rel="stylesheet" href="styles.css">
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Flowbite -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet"/>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
-<body>
-
-<!-- TOP BAR -->
-<div class="topbar">
-
-<div class="logo">AETHER</div>
-
-<div class="status">
-SYSTEM ONLINE
-</div>
-
-</div>
-
-
-<!-- MAIN LAYOUT -->
-<div class="layout">
+<body class="bg-gray-950 text-green-400">
 
 <!-- SIDEBAR -->
-<div class="sidenav">
+<aside class="fixed top-0 left-0 h-screen w-64 bg-gray-900 border-r border-green-700">
 
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('activity')">Activity</button>
-<button onclick="showPage('analytics')">Analytics</button>
-
+<div class="p-4 text-xl font-bold tracking-widest">
+AETHER
 </div>
 
+<ul class="space-y-2 px-3">
 
-<!-- MAIN AREA -->
-<div class="main">
+<li><button onclick="showPage('dashboard')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Dashboard</button></li>
+<li><button onclick="showPage('activity')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Activity</button></li>
+<li><button onclick="showPage('analytics')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Analytics</button></li>
+
+</ul>
+
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="ml-64 p-6">
 
 <div id="page">
 
-<h2>Welcome to AETHER</h2>
+<h1 class="text-3xl mb-4">AETHER Dashboard</h1>
 
-<p>Behavior Intelligence System</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
+<!-- CARD -->
+<div class="bg-gray-900 p-4 rounded-lg border border-green-700">
+<h2 class="text-lg mb-2">Activity</h2>
+<div id="activity"></div>
+</div>
+
+<!-- CHART -->
+<div class="bg-gray-900 p-4 rounded-lg border border-green-700 md:col-span-2">
+<h2 class="text-lg mb-2">Learning Time</h2>
+<canvas id="activityChart"></canvas>
 </div>
 
 </div>
 
 </div>
 
-
-<!-- CHATBOT -->
-<div class="chat-toggle" onclick="toggleChat()">
-💬
 </div>
 
-<div id="chat-panel">
+<!-- CHAT BUTTON -->
+<button onclick="toggleChat()"
+class="fixed bottom-6 right-6 bg-green-500 text-black px-4 py-3 rounded-full shadow-lg">
+AI
+</button>
 
-<div class="chat-header">
-AETHER
-<span onclick="toggleChat()">✖</span>
+<!-- CHAT PANEL -->
+<div id="chatPanel"
+class="fixed bottom-20 right-6 w-96 h-[420px] bg-gray-900 border border-green-700 rounded-lg flex flex-col hidden">
+
+<div class="flex justify-between p-3 border-b border-green-700">
+<span>AETHER</span>
+<button onclick="toggleChat()">X</button>
 </div>
 
-<div id="chat-box"></div>
+<div id="chatMessages" class="flex-1 overflow-auto p-3 text-sm"></div>
 
-<div id="thinking">thinking...</div>
+<div class="p-3 border-t border-green-700 flex gap-2">
 
-<div class="chat-input">
+<input id="chatInput"
+class="flex-1 bg-gray-950 border border-green-700 rounded p-2 text-green-400"
+placeholder="Ask AETHER...">
 
-<input id="input" placeholder="Ask AETHER">
-
-<button onclick="send()">Send</button>
+<button onclick="sendChat()"
+class="bg-green-500 text-black px-3 rounded">
+Send
+</button>
 
 </div>
 
 </div>
-
 
 <script src="app.js"></script>
 

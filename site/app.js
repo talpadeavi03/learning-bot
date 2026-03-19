@@ -1,37 +1,86 @@
+let chart
+
 function toggleChat(){
-document.getElementById("chat-panel").classList.toggle("open");
+const panel=document.getElementById("chatPanel")
+panel.classList.toggle("hidden")
 }
 
 function showPage(page){
 
-const p=document.getElementById("page");
+const p=document.getElementById("page")
 
 if(page==="dashboard"){
-p.innerHTML="<h2>Dashboard</h2>";
+location.reload()
 }
 
 if(page==="activity"){
-p.innerHTML="<h2>Activity Stream</h2>";
+p.innerHTML="<h1 class='text-2xl'>Activity Stream</h1>"
 }
 
 if(page==="analytics"){
-p.innerHTML="<h2>Analytics</h2>";
+p.innerHTML="<h1 class='text-2xl'>Analytics Coming Soon</h1>"
 }
 
 }
+
+async function loadDashboard(){
+
+const data=await fetch("./data/dashboard.json").then(r=>r.json())
+
+const activity=document.getElementById("activity")
+
+data.activity.forEach(a=>{
+activity.innerHTML+=`<p>${a.topic}: ${a.minutes} minutes</p>`
+})
+
+const ctx=document.getElementById("activityChart")
+
+chart=new Chart(ctx,{
+type:"bar",
+data:{
+labels:data.activity.map(a=>a.topic),
+datasets:[{
+label:"Minutes",
+data:data.activity.map(a=>a.minutes)
+}]
+}
+})
+
+}
+
+loadDashboard()
 
 /* CHAT */
 
-function send(){
+async function sendChat(){
 
-const input=document.getElementById("input").value;
+const input=document.getElementById("chatInput").value
+if(!input) return
 
-if(!input) return;
+const box=document.getElementById("chatMessages")
 
-const box=document.getElementById("chat-box");
+box.innerHTML+=`<div class="mb-2">You: ${input}</div>`
 
-box.innerHTML+=`<p>You: ${input}</p>`;
+document.getElementById("chatInput").value=""
 
-document.getElementById("input").value="";
+try{
+
+const res=await fetch("https://aether-api.YOURNAME.workers.dev",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({query:input})
+})
+
+const data=await res.json()
+
+box.innerHTML+=`<div class="mb-2 text-green-300">AETHER: ${data.reply}</div>`
+
+}catch{
+
+box.innerHTML+=`<div>AETHER: backend unavailable</div>`
+
+}
+
+box.scrollTop=box.scrollHeight
 
 }

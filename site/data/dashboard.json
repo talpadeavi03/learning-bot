@@ -1,7 +1,7 @@
 {
-  "activity": [
-    {"topic": "kubernetes", "minutes": 120},
-    {"topic": "python", "minutes": 60},
-    {"topic": "mlops", "minutes": 45}
-  ]
+ "activity":[
+  {"topic":"kubernetes","minutes":120},
+  {"topic":"python","minutes":60},
+  {"topic":"mlops","minutes":45}
+ ]
 }
