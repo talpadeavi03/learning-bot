@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
@@ -12,16 +13,73 @@
 
 <body>
 
-<h1>AETHER</h1>
+<!-- TOP BAR -->
+<div class="topbar">
 
-<button onclick="toggleChat()">Chat</button>
+<div class="logo">AETHER</div>
+
+<div class="status">
+SYSTEM ONLINE
+</div>
+
+</div>
+
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidenav">
+
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('activity')">Activity</button>
+<button onclick="showPage('analytics')">Analytics</button>
+
+</div>
+
+
+<!-- MAIN AREA -->
+<div class="main">
+
+<div id="page">
+
+<h2>Welcome to AETHER</h2>
+
+<p>Behavior Intelligence System</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- CHATBOT -->
+<div class="chat-toggle" onclick="toggleChat()">
+💬
+</div>
 
 <div id="chat-panel">
+
+<div class="chat-header">
+AETHER
+<span onclick="toggleChat()">✖</span>
+</div>
+
 <div id="chat-box"></div>
 
-<input id="input">
+<div id="thinking">thinking...</div>
+
+<div class="chat-input">
+
+<input id="input" placeholder="Ask AETHER">
+
 <button onclick="send()">Send</button>
+
 </div>
+
+</div>
+
 
 <script src="app.js"></script>
 
