@@ -68,7 +68,7 @@ document.getElementById("chatInput").value=""
 
 try{
 
-const res=await fetch("https://aether-api.YOURNAME.workers.dev",{
+const res=await fetch("https://learning-bot.talpadeavi0303.workers.dev/",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify({query:input})
