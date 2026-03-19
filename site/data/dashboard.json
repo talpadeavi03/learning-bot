@@ -1,7 +1,21 @@
 {
- "activity":[
-  {"topic":"kubernetes","minutes":120},
-  {"topic":"python","minutes":60},
-  {"topic":"mlops","minutes":45}
- ]
+  "metrics": {
+    "focus": 82,
+    "learning": 74,
+    "productivity": 68
+  },
+
+  "activity": [
+    {"topic": "kubernetes", "minutes": 120},
+    {"topic": "python", "minutes": 75},
+    {"topic": "mlops", "minutes": 45},
+    {"topic": "react", "minutes": 30}
+  ],
+
+  "timeline": [
+    {"time": "09:00", "event": "Started Kubernetes learning"},
+    {"time": "11:30", "event": "Practiced Python automation"},
+    {"time": "14:00", "event": "Worked on MLOps pipeline"},
+    {"time": "17:30", "event": "Reviewed system architecture"}
+  ]
 }

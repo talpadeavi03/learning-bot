@@ -1,53 +1,51 @@
 let chart
 
-function toggleSidebar(){
-const sidebar=document.getElementById("sidebar")
-sidebar.classList.toggle("-translate-x-full")
-}
-
 function toggleChat(){
-const panel=document.getElementById("chatPanel")
-panel.classList.toggle("hidden")
-}
-
-function showPage(page){
-
-const p=document.getElementById("page")
-
-if(page==="dashboard"){
-location.reload()
-}
-
-if(page==="activity"){
-p.innerHTML="<h1 class='text-2xl'>Activity Stream</h1>"
-}
-
-if(page==="analytics"){
-p.innerHTML="<h1 class='text-2xl'>Analytics Coming Soon</h1>"
-}
-
+document.getElementById("chatPanel").classList.toggle("hidden")
 }
 
 async function loadDashboard(){
 
 const data=await fetch("./data/dashboard.json").then(r=>r.json())
 
+/* metrics */
+
+document.getElementById("focusBar").style.width=data.metrics.focus+"%"
+document.getElementById("learningBar").style.width=data.metrics.learning+"%"
+document.getElementById("productivityBar").style.width=data.metrics.productivity+"%"
+
+/* activity */
+
 const activity=document.getElementById("activity")
 
 data.activity.forEach(a=>{
-activity.innerHTML+=`<p>${a.topic}: ${a.minutes} minutes</p>`
+activity.innerHTML+=`<p>${a.topic}: ${a.minutes} min</p>`
 })
+
+/* timeline */
+
+const timeline=document.getElementById("timeline")
+
+data.timeline.forEach(t=>{
+timeline.innerHTML+=`<li>${t.time} — ${t.event}</li>`
+})
+
+/* chart */
 
 const ctx=document.getElementById("activityChart")
 
 chart=new Chart(ctx,{
-type:"bar",
+type:"doughnut",
 data:{
 labels:data.activity.map(a=>a.topic),
 datasets:[{
-label:"Minutes",
 data:data.activity.map(a=>a.minutes),
-backgroundColor:"#00ffcc"
+backgroundColor:[
+"#00ffff",
+"#00ffaa",
+"#ffaa00",
+"#ff0077"
+]
 }]
 }
 })
@@ -63,9 +61,11 @@ if(!input) return
 
 const box=document.getElementById("chatMessages")
 
-box.innerHTML+=`<div class="mb-2">You: ${input}</div>`
+box.innerHTML+=`<div>You: ${input}</div>`
 
 document.getElementById("chatInput").value=""
+
+document.getElementById("thinking").classList.remove("hidden")
 
 try{
 
@@ -77,14 +77,37 @@ body:JSON.stringify({query:input})
 
 const data=await res.json()
 
-box.innerHTML+=`<div class="mb-2 text-green-300">AETHER: ${data.reply}</div>`
+document.getElementById("thinking").classList.add("hidden")
+
+typeText(data.reply)
 
 }catch{
+
+document.getElementById("thinking").classList.add("hidden")
 
 box.innerHTML+=`<div>AETHER: backend unavailable</div>`
 
 }
 
-box.scrollTop=box.scrollHeight
+}
+
+function typeText(text){
+
+const box=document.getElementById("chatMessages")
+const el=document.createElement("div")
+
+box.appendChild(el)
+
+let i=0
+
+function type(){
+if(i<text.length){
+el.innerHTML="AETHER: "+text.substring(0,i)
+i++
+setTimeout(type,20)
+}
+}
+
+type()
 
 }

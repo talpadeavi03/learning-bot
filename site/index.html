@@ -7,141 +7,104 @@
 
 <title>AETHER AI</title>
 
-<!-- Tailwind -->
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- Flowbite -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet"/>
-
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- AOS Animations -->
-<link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css"/>
-
-<!-- Particles -->
-<script src="https://cdn.jsdelivr.net/npm/tsparticles@3/tsparticles.bundle.min.js"></script>
+<link rel="stylesheet" href="styles.css">
 
 </head>
 
-<body class="bg-gray-950 text-green-400 min-h-screen">
+<body class="bg-black text-cyan-300">
 
-<!-- PARTICLE BACKGROUND -->
-<div id="particles-bg" class="fixed inset-0 -z-10"></div>
+<header class="flex justify-between p-4 border-b border-cyan-600">
 
-<!-- MOBILE HEADER -->
-<header class="flex items-center justify-between p-4 border-b border-green-700 md:hidden">
+<h1 class="text-xl tracking-widest">AETHER</h1>
 
-<button onclick="toggleSidebar()">☰</button>
-
-<h1 class="font-bold tracking-widest">AETHER</h1>
-
-<button onclick="toggleChat()">AI</button>
+<button onclick="toggleChat()" class="bg-cyan-500 text-black px-3 py-1 rounded">
+AI
+</button>
 
 </header>
 
-<!-- SIDEBAR -->
-<aside id="sidebar"
-class="fixed top-0 left-0 h-screen w-64 bg-gray-900/70 backdrop-blur-md border-r border-green-700 transform -translate-x-full md:translate-x-0 transition-transform z-50">
+<main class="grid grid-cols-1 lg:grid-cols-4 gap-4 p-6">
 
-<div class="p-4 text-xl font-bold tracking-widest">
-AETHER
+<!-- METRICS -->
+<div class="panel">
+
+<h2>System Metrics</h2>
+
+<div class="metric">
+Focus
+<div class="bar"><div id="focusBar"></div></div>
 </div>
 
-<ul class="space-y-2 px-3">
+<div class="metric">
+Learning
+<div class="bar"><div id="learningBar"></div></div>
+</div>
 
-<li><button onclick="showPage('dashboard')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Dashboard</button></li>
-<li><button onclick="showPage('activity')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Activity</button></li>
-<li><button onclick="showPage('analytics')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Analytics</button></li>
+<div class="metric">
+Productivity
+<div class="bar"><div id="productivityBar"></div></div>
+</div>
 
-</ul>
-
-</aside>
-
-<!-- MAIN -->
-<main class="p-4 md:ml-64">
-
-<div id="page">
-
-<h1 class="text-3xl mb-6" data-aos="fade-up">AETHER AI Dashboard</h1>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+</div>
 
 <!-- ACTIVITY -->
-<div data-aos="fade-up"
-class="bg-gray-900/60 backdrop-blur-md border border-green-500/20 p-6 rounded-xl shadow-xl">
+<div class="panel">
 
-<h2 class="text-lg mb-2">Activity</h2>
+<h2>Activity</h2>
 
 <div id="activity"></div>
 
 </div>
 
-<!-- CHART -->
-<div data-aos="zoom-in"
-class="bg-gray-900/60 backdrop-blur-md border border-green-500/20 p-6 rounded-xl shadow-xl sm:col-span-2">
+<!-- TIMELINE -->
+<div class="panel">
 
-<h2 class="text-lg mb-2">Learning Time</h2>
+<h2>Timeline</h2>
+
+<ul id="timeline"></ul>
+
+</div>
+
+<!-- CHART -->
+<div class="panel col-span-2">
+
+<h2>Learning Distribution</h2>
 
 <canvas id="activityChart"></canvas>
 
 </div>
 
-</div>
-
-</div>
-
 </main>
 
-<!-- CHAT BUTTON -->
-<button onclick="toggleChat()"
-class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-400 transition-all duration-300 hover:scale-110 text-black px-4 py-3 rounded-full shadow-lg">
-AI
-</button>
+<!-- CHAT -->
+<div id="chatPanel" class="chat hidden">
 
-<!-- CHAT PANEL -->
-<div id="chatPanel"
-class="fixed bottom-0 right-0 md:bottom-20 md:right-6 w-full md:w-96 h-[60vh] md:h-[420px] bg-gray-900/80 backdrop-blur-md border border-green-500/20 md:rounded-lg flex flex-col hidden">
-
-<div class="flex justify-between p-3 border-b border-green-700">
-<span>AETHER</span>
+<div class="chat-header">
+AETHER
 <button onclick="toggleChat()">X</button>
 </div>
 
-<div id="chatMessages" class="flex-1 overflow-auto p-3 text-sm"></div>
+<div id="chatMessages"></div>
 
-<div class="p-3 border-t border-green-700 flex gap-2">
+<div id="thinking" class="thinking hidden">
+Analyzing behavioral data...
+</div>
 
-<input id="chatInput"
-class="flex-1 bg-gray-950 border border-green-700 rounded p-2 text-green-400"
-placeholder="Ask AETHER...">
+<div class="chat-input">
 
-<button onclick="sendChat()"
-class="bg-green-500 hover:bg-green-400 text-black px-3 rounded">
-Send
-</button>
+<input id="chatInput" placeholder="Ask AETHER...">
+
+<button onclick="sendChat()">Send</button>
 
 </div>
 
 </div>
 
 <script src="app.js"></script>
-
-<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-
-<script>
-AOS.init()
-
-tsParticles.load("particles-bg",{
-background:{color:"#020617"},
-particles:{
-number:{value:60},
-color:{value:"#00ffcc"},
-links:{enable:true,color:"#00ffcc",distance:150},
-move:{enable:true,speed:1}
-}
-})
-</script>
 
 </body>
 </html>
