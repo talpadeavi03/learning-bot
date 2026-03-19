@@ -1,11 +1,32 @@
 let chart
 
+function toggleSidebar(){
+const sidebar=document.getElementById("sidebar")
+sidebar.classList.toggle("-translate-x-full")
+}
+
 function toggleChat(){
 const panel=document.getElementById("chatPanel")
 panel.classList.toggle("hidden")
 }
 
-/* DASHBOARD DATA */
+function showPage(page){
+
+const p=document.getElementById("page")
+
+if(page==="dashboard"){
+location.reload()
+}
+
+if(page==="activity"){
+p.innerHTML="<h1 class='text-2xl'>Activity Stream</h1>"
+}
+
+if(page==="analytics"){
+p.innerHTML="<h1 class='text-2xl'>Analytics Coming Soon</h1>"
+}
+
+}
 
 async function loadDashboard(){
 
@@ -35,8 +56,6 @@ backgroundColor:"#00ffcc"
 
 loadDashboard()
 
-/* CHAT */
-
 async function sendChat(){
 
 const input=document.getElementById("chatInput").value
@@ -44,7 +63,7 @@ if(!input) return
 
 const box=document.getElementById("chatMessages")
 
-box.innerHTML+=`<div>You: ${input}</div>`
+box.innerHTML+=`<div class="mb-2">You: ${input}</div>`
 
 document.getElementById("chatInput").value=""
 
@@ -58,7 +77,7 @@ body:JSON.stringify({query:input})
 
 const data=await res.json()
 
-typeText(data.reply)
+box.innerHTML+=`<div class="mb-2 text-green-300">AETHER: ${data.reply}</div>`
 
 }catch{
 
@@ -69,83 +88,3 @@ box.innerHTML+=`<div>AETHER: backend unavailable</div>`
 box.scrollTop=box.scrollHeight
 
 }
-
-/* TYPING EFFECT */
-
-function typeText(text){
-
-const box=document.getElementById("chatMessages")
-const el=document.createElement("div")
-box.appendChild(el)
-
-let i=0
-
-function type(){
-if(i<text.length){
-el.innerHTML="AETHER: "+text.substring(0,i)
-i++
-setTimeout(type,20)
-}
-}
-
-type()
-
-}
-
-/* VOICE INPUT */
-
-function startVoice(){
-
-const recognition=new webkitSpeechRecognition()
-
-recognition.onresult=function(e){
-
-const text=e.results[0][0].transcript
-
-document.getElementById("chatInput").value=text
-
-sendChat()
-
-}
-
-recognition.start()
-
-}
-
-/* THREE JS NEURAL SPHERE */
-
-const scene=new THREE.Scene()
-
-const camera=new THREE.PerspectiveCamera(75,1,0.1,1000)
-
-const renderer=new THREE.WebGLRenderer()
-
-renderer.setSize(300,300)
-
-document.getElementById("neuralCanvas").appendChild(renderer.domElement)
-
-const geometry=new THREE.SphereGeometry(2,32,32)
-
-const material=new THREE.MeshBasicMaterial({
-wireframe:true,
-color:0x00ffcc
-})
-
-const sphere=new THREE.Mesh(geometry,material)
-
-scene.add(sphere)
-
-camera.position.z=5
-
-function animate(){
-
-requestAnimationFrame(animate)
-
-sphere.rotation.x+=0.003
-sphere.rotation.y+=0.004
-
-renderer.render(scene,camera)
-
-}
-
-animate()
