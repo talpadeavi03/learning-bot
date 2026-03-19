@@ -1,5 +1,10 @@
 let chart
 
+function toggleSidebar(){
+const sidebar=document.getElementById("sidebar")
+sidebar.classList.toggle("-translate-x-full")
+}
+
 function toggleChat(){
 const panel=document.getElementById("chatPanel")
 panel.classList.toggle("hidden")
@@ -14,11 +19,11 @@ location.reload()
 }
 
 if(page==="activity"){
-p.innerHTML="<h1 class='text-2xl'>Activity Stream</h1>"
+p.innerHTML="<h1 class='text-xl'>Activity Stream</h1>"
 }
 
 if(page==="analytics"){
-p.innerHTML="<h1 class='text-2xl'>Analytics Coming Soon</h1>"
+p.innerHTML="<h1 class='text-xl'>Analytics Coming Soon</h1>"
 }
 
 }
@@ -49,8 +54,6 @@ data:data.activity.map(a=>a.minutes)
 }
 
 loadDashboard()
-
-/* CHAT */
 
 async function sendChat(){
 
