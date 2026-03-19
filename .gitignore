@@ -19,3 +19,9 @@ __pycache__/
 
 # Environment
 .env
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
