@@ -55,7 +55,7 @@ Be direct, insightful, and personal. Plain text only, no markdown.`;
             'Authorization': `Bearer ${env.GROQ_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'llama-3.1-70b-versatile',
+            model: 'llama-3.3-70b-versatile',
             max_tokens: 1000,
             messages: [
               { role: 'system', content: systemPrompt },
