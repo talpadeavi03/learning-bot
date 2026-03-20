@@ -14,21 +14,65 @@ export default {
       });
     }
 
-    // ── Health check ──
+    const url = new URL(request.url);
+
+    // ════════════════════════════════
+    // GET — serve frontend or health
+    // ════════════════════════════════
     if (request.method === 'GET') {
-      return json({ status: 'AETHER API ONLINE', version: '2.0' });
+
+      // Health check at /health
+      if (url.pathname === '/health') {
+        return json({ status: 'AETHER API ONLINE', version: '2.0' });
+      }
+
+      // Serve dashboard.json
+      if (url.pathname === '/data/dashboard.json') {
+        const res = await fetch(
+          'https://raw.githubusercontent.com/talpadeavi03/learning-bot/master/site/data/dashboard.json',
+          { cf: { cacheEverything: true, cacheTtl: 60 } }
+        );
+        if (!res.ok) return json({ error: 'dashboard.json not found' }, 404);
+        const data = await res.text();
+        return new Response(data, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'no-cache'
+          }
+        });
+      }
+
+      // Serve index.html for all other GET requests
+      const res = await fetch(
+        'https://raw.githubusercontent.com/talpadeavi03/learning-bot/master/site/index.html',
+        { cf: { cacheEverything: true, cacheTtl: 300 } }
+      );
+
+      if (!res.ok) {
+        return new Response('AETHER frontend not found. Push site/index.html to GitHub.', {
+          status: 404,
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      }
+
+      const html = await res.text();
+      return new Response(html, {
+        headers: {
+          'Content-Type': 'text/html;charset=UTF-8',
+          'Cache-Control': 'no-cache'
+        }
+      });
     }
 
     if (request.method !== 'POST') {
       return new Response('Method not allowed', { status: 405 });
     }
 
-    const url = new URL(request.url);
-
     // ════════════════════════════════
     // ROUTE: POST /chat
     // ════════════════════════════════
-    if (url.pathname === '/chat' || url.pathname === '/') {
+    if (url.pathname === '/chat') {
       try {
         const body = await request.json();
 

@@ -4,12 +4,10 @@ compatibility_date = "2024-01-01"
 
 # ── Non-secret vars (safe to commit) ──
 [vars]
-GITHUB_USERNAME = "YOUR_GITHUB_USERNAME"
-GITHUB_REPO     = "YOUR_REPO_NAME"
+GITHUB_USERNAME = "talpadeavi03"
+GITHUB_REPO     = "learning-bot"
 
 # ── Secrets (set via CLI, NEVER put values here) ──
-# Run these commands once in your terminal:
-#
-# wrangler secret put ANTHROPIC_API_KEY
+# wrangler secret put GROQ_API_KEY
 # wrangler secret put GITHUB_TOKEN
 # wrangler secret put TELEGRAM_BOT_TOKEN
