@@ -32,7 +32,7 @@ body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;
 /* APP */
 #app{position:relative;z-index:2;display:flex;flex-direction:column;min-height:100vh}
 
-/* ── HEADER ── */
+/* HEADER */
 header{display:flex;justify-content:space-between;align-items:center;padding:13px 28px;
   border-bottom:1px solid var(--border);background:rgba(0,6,14,0.95);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
@@ -58,7 +58,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .hbtn{background:transparent;border:1px solid var(--c);color:var(--c);padding:8px 18px;
   font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;
   cursor:pointer;position:relative;overflow:hidden;transition:color .3s;
-  clip-path:polygon(8px 0,100% 0,calc(100%-8px) 100%,0 100%);white-space:nowrap}
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);white-space:nowrap}
 .hbtn::before{content:'';position:absolute;inset:0;background:var(--c);transform:translateX(-110%);transition:transform .3s;z-index:-1}
 .hbtn:hover::before{transform:translateX(0)}
 .hbtn:hover{color:var(--dark)}
@@ -68,19 +68,25 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .ntab.on{background:rgba(0,255,255,.12);color:var(--c);text-shadow:0 0 8px var(--c)}
 .ntab:hover:not(.on){color:var(--text);background:rgba(0,255,255,.06)}
 
-/* ── VIEWS ── */
+/* WORKER STATUS */
+#workerStatus{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
+  letter-spacing:1px;padding:4px 12px;border:1px solid var(--border);font-family:'Orbitron',sans-serif}
+#workerStatus.ok{border-color:rgba(0,255,136,.35);color:var(--g)}
+#workerStatus.err{border-color:rgba(255,51,85,.35);color:var(--r)}
+
+/* VIEWS */
 .view{display:none;animation:fadeIn .35s ease}
 .view.on{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── GRID SYSTEM ── */
+/* GRID */
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;padding:16px 20px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:16px 20px}
 .grid1{display:grid;grid-template-columns:1fr;gap:13px;padding:16px 20px}
 .g-full{grid-column:1/-1}
 .g2{grid-column:span 2}
 
-/* ── PANEL ── */
+/* PANEL */
 .panel{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;
   position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);
@@ -104,7 +110,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .pt span{opacity:.3;font-size:9px}
 .pt::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.18),transparent)}
 
-/* ── WELCOME STRIP ── */
+/* WELCOME */
 .welcome-strip{background:linear-gradient(135deg,rgba(0,255,255,.06) 0%,rgba(255,0,170,.04) 100%);
   border-bottom:1px solid var(--border);padding:16px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .wname{font-family:'Orbitron',sans-serif;font-size:clamp(14px,3vw,20px);font-weight:900;
@@ -115,7 +121,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .wstat-n{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;line-height:1}
 .wstat-l{font-size:11px;font-weight:600;letter-spacing:2px;opacity:.45;margin-top:3px}
 
-/* ── METRICS ── */
+/* METRICS */
 .big-stat{text-align:center;padding:16px 0 18px;border:1px solid var(--border);margin-bottom:18px;background:rgba(0,255,255,.025)}
 .bnum{font-family:'Orbitron',sans-serif;font-size:clamp(36px,5vw,50px);font-weight:900;color:var(--c);
   text-shadow:0 0 24px var(--c),0 0 50px rgba(0,255,255,.2);line-height:1}
@@ -132,7 +138,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .bf-g{background:linear-gradient(90deg,var(--g),rgba(0,180,80,.4));box-shadow:0 0 12px rgba(0,255,136,.5)}
 .bf-o{background:linear-gradient(90deg,var(--o),rgba(180,120,0,.4));box-shadow:0 0 12px rgba(255,170,0,.5)}
 
-/* ── STAT CARDS ── */
+/* STAT CARDS */
 .stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:2px}
 .sc{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.02);
   display:flex;flex-direction:column;gap:4px;transition:border-color .2s,background .2s}
@@ -141,7 +147,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .sc-l{font-size:12px;font-weight:600;letter-spacing:2px;opacity:.45}
 .sc-sub{font-size:11px;font-weight:600;letter-spacing:1px;margin-top:2px}
 
-/* ── ACTIVITY ── */
+/* ACTIVITY */
 .aitem{display:flex;justify-content:space-between;align-items:center;padding:12px 0;
   border-bottom:1px solid rgba(0,255,255,.07);animation:sIn .4s ease forwards;opacity:0}
 .aitem:last-child{border-bottom:none}
@@ -154,7 +160,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .ab-l{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.2)}
 .ab-c{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.2)}
 
-/* ── TIMELINE ── */
+/* TIMELINE */
 .tlist{padding-left:22px;border-left:1px solid var(--border)}
 .titem{display:flex;gap:14px;padding:11px 0;position:relative;animation:fIn .4s ease forwards;opacity:0}
 .titem::before{content:'';position:absolute;left:-25px;top:16px;width:7px;height:7px;
@@ -164,7 +170,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .tevent{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);opacity:.85}
 @keyframes fIn{to{opacity:1}}
 
-/* ── INSIGHT CARDS ── */
+/* INSIGHTS */
 .insights{display:flex;flex-direction:column;gap:10px}
 .insight{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.02);
   display:flex;gap:14px;align-items:flex-start;transition:border-color .2s,background .2s;cursor:default}
@@ -178,7 +184,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .tag-med{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
 .tag-ok{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.25)}
 
-/* ── PIPELINE STATUS ── */
+/* PIPELINE */
 .pipeline{display:flex;flex-direction:column;gap:8px}
 .pipe-item{display:flex;align-items:center;gap:14px;padding:12px 14px;
   border:1px solid var(--border);background:rgba(0,255,255,.02);transition:all .2s}
@@ -186,14 +192,13 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .pipe-icon{font-size:16px;flex-shrink:0}
 .pipe-name{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text)}
 .pipe-sub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
-.pipe-status{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;
-  padding:3px 10px;border-radius:2px}
+.pipe-status{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:2px}
 .ps-ok{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.25)}
 .ps-warn{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
 .ps-off{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1)}
 .ps-run{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.25);animation:blink 1.5s infinite}
 
-/* ── CHART ── */
+/* CHART */
 .chart-wrap{position:relative;max-height:220px}
 .chart-row{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center}
 .clegend{display:flex;flex-direction:column;gap:9px}
@@ -204,18 +209,17 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .lname{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text)}
 .lpct{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700}
 
-/* ── WEEK CHART ── */
+/* WEEK CHART */
 .week-wrap{position:relative;height:180px}
 
-/* ── MEMORY ── */
-.mem-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;
-  border-bottom:1px solid rgba(0,255,255,.07)}
+/* MEMORY */
+.mem-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(0,255,255,.07)}
 .mem-item:last-child{border-bottom:none}
 .mem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
 .mem-txt{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);opacity:.85;flex:1}
 .mem-time{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--c);opacity:.4;white-space:nowrap;margin-top:2px}
 
-/* ── QUICK ACTIONS ── */
+/* QUICK ACTIONS */
 .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .qa{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);
   background:rgba(0,255,255,.02);cursor:pointer;transition:all .2s}
@@ -224,9 +228,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .qa-label{font-size:14px;font-weight:700;letter-spacing:.5px;color:var(--text)}
 .qa-sub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
 
-/* ── GOALS ── */
-.goal-item{display:flex;align-items:center;gap:14px;padding:12px 0;
-  border-bottom:1px solid rgba(0,255,255,.07)}
+/* GOALS */
+.goal-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,255,255,.07)}
 .goal-item:last-child{border-bottom:none}
 .goal-check{width:18px;height:18px;border:1.5px solid var(--border);border-radius:2px;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .2s}
@@ -236,23 +239,22 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .goal-txt.done{text-decoration:line-through;opacity:.4}
 .goal-cat{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:2px 7px;font-weight:700}
 
-/* ── MOOD ── */
+/* MOOD */
 .mood-row{display:flex;gap:10px;justify-content:space-around;margin:10px 0}
 .mood-btn{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
-  padding:12px 16px;border:1px solid var(--border);background:transparent;
-  transition:all .2s;flex:1}
+  padding:12px 16px;border:1px solid var(--border);background:transparent;transition:all .2s;flex:1}
 .mood-btn.sel{border-color:var(--c);background:rgba(0,255,255,.08);box-shadow:0 0 12px rgba(0,255,255,.15)}
 .mood-emoji{font-size:22px}
 .mood-label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text2)}
 
-/* ── SYSTEM INFO ── */
+/* SYSTEM */
 .sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sys-item{padding:14px;border:1px solid var(--border);background:rgba(0,255,255,.02)}
 .sys-key{font-size:11px;font-weight:700;letter-spacing:3px;opacity:.4;margin-bottom:6px}
 .sys-val{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--c)}
 .sys-sub{font-size:11px;opacity:.4;margin-top:3px}
 
-/* ── CHAT ── */
+/* CHAT */
 #chatOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:249;opacity:0;pointer-events:none;transition:opacity .35s}
 #chatOverlay.on{opacity:1;pointer-events:all}
 #chatPanel{position:fixed;bottom:20px;right:20px;width:min(420px,calc(100vw - 20px));
@@ -305,7 +307,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 #sendBtn:hover{background:#fff;box-shadow:0 0 16px rgba(0,255,255,.5)}
 #sendBtn:disabled{opacity:.35;cursor:not-allowed}
 
-/* ── LOADER ── */
+/* LOADER */
 #loader{position:fixed;inset:0;background:var(--dark);z-index:9999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
   transition:opacity .7s}
@@ -319,7 +321,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .ls{font-size:13px;font-weight:600;letter-spacing:4px;opacity:.4}
 .ls2{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--g);opacity:.7;margin-top:4px;min-height:18px;letter-spacing:1px}
 
-/* ── MOBILE ── */
+/* MOBILE */
 @media(max-width:900px){
   .grid3{grid-template-columns:1fr 1fr;padding:12px;gap:10px}
   .g2{grid-column:1/-1}
@@ -356,6 +358,10 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 </head>
 <body>
 
+<!-- ✅ FIX: cursor divs added here -->
+<div id="cur"></div>
+<div id="curd"></div>
+
 <!-- LOADER -->
 <div id="loader">
   <div class="ll">AETHER</div>
@@ -379,6 +385,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
         <button class="ntab" onclick="showView('goals',this)">GOALS</button>
         <button class="ntab" onclick="showView('system',this)">SYSTEM</button>
       </div>
+      <div id="workerStatus" class="err"><span>●</span><span>WORKER</span></div>
       <div class="hpill"><div class="dot g"></div><span>ONLINE</span></div>
       <div id="clk"></div>
       <div id="date"></div>
@@ -397,65 +404,38 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
     </div>
   </div>
 
-  <!-- ═══ OVERVIEW VIEW ═══ -->
+  <!-- OVERVIEW -->
   <div class="view on" id="view-dash">
     <div class="grid3">
-
-      <!-- METRICS -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">System Metrics <span>LIVE</span></div>
-        <div class="big-stat">
-          <div class="bnum" id="bigNum">0</div>
-          <div class="blbl">EFFICIENCY SCORE</div>
-        </div>
-        <div class="mrow">
-          <div class="ml"><span>FOCUS</span><span class="mv c" id="focusVal">0%</span></div>
-          <div class="btrack"><div class="bfill bf-c" id="focusBar"></div></div>
-        </div>
-        <div class="mrow">
-          <div class="ml"><span>LEARNING</span><span class="mv p" id="learningVal">0%</span></div>
-          <div class="btrack"><div class="bfill bf-p" id="learningBar"></div></div>
-        </div>
-        <div class="mrow">
-          <div class="ml"><span>PRODUCTIVITY</span><span class="mv g" id="productivityVal">0%</span></div>
-          <div class="btrack"><div class="bfill bf-g" id="productivityBar"></div></div>
-        </div>
-        <div class="mrow" style="margin-bottom:0">
-          <div class="ml"><span>MOOD</span><span class="mv o" id="moodVal">0%</span></div>
-          <div class="btrack"><div class="bfill bf-o" id="moodBar"></div></div>
-        </div>
+        <div class="big-stat"><div class="bnum" id="bigNum">0</div><div class="blbl">EFFICIENCY SCORE</div></div>
+        <div class="mrow"><div class="ml"><span>FOCUS</span><span class="mv c" id="focusVal">0%</span></div><div class="btrack"><div class="bfill bf-c" id="focusBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>LEARNING</span><span class="mv p" id="learningVal">0%</span></div><div class="btrack"><div class="bfill bf-p" id="learningBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>PRODUCTIVITY</span><span class="mv g" id="productivityVal">0%</span></div><div class="btrack"><div class="bfill bf-g" id="productivityBar"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>MOOD</span><span class="mv o" id="moodVal">0%</span></div><div class="btrack"><div class="bfill bf-o" id="moodBar"></div></div></div>
       </div>
-
-      <!-- ACTIVITY -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Today's Activity <span>LOG</span></div>
         <div id="activity"></div>
       </div>
-
-      <!-- TIMELINE -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Timeline <span>TODAY</span></div>
         <div class="tlist" id="timeline"></div>
       </div>
-
-      <!-- AI INSIGHTS -->
       <div class="panel g2">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">AI Insights <span>AETHER ANALYSIS</span></div>
         <div class="insights" id="insights"></div>
       </div>
-
-      <!-- PIPELINE STATUS -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">System Pipeline <span>STATUS</span></div>
         <div class="pipeline" id="pipeline"></div>
       </div>
-
-      <!-- CHART -->
       <div class="panel g-full">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Learning Distribution <span>CHART</span></div>
@@ -464,22 +444,17 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
           <div class="clegend" id="donutLegend"></div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- ═══ LEARNING VIEW ═══ -->
+  <!-- LEARNING -->
   <div class="view" id="view-learn">
     <div class="grid3">
-
-      <!-- WEEK CHART -->
       <div class="panel g2">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Weekly Study Hours <span>7 DAYS</span></div>
         <div class="week-wrap"><canvas id="weekChart"></canvas></div>
       </div>
-
-      <!-- STAT CARDS -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Weekly Stats</div>
@@ -490,65 +465,43 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
           <div class="sc"><div class="sc-n" style="color:var(--o)">87</div><div class="sc-l">AVG SCORE</div><div class="sc-sub" style="color:var(--g)">↑ +5 pts</div></div>
         </div>
       </div>
-
-      <!-- ML PREDICTION -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">ML Prediction <span>MODEL</span></div>
-        <div style="margin-bottom:14px">
-          <div class="ml" style="font-size:14px"><span>Predicted Productivity</span><span class="mv g">91%</span></div>
-          <div class="btrack"><div class="bfill bf-g" style="width:91%"></div></div>
-        </div>
-        <div style="margin-bottom:14px">
-          <div class="ml" style="font-size:14px"><span>Sleep Impact</span><span class="mv c">+8pts</span></div>
-          <div class="btrack"><div class="bfill bf-c" style="width:75%"></div></div>
-        </div>
-        <div style="margin-bottom:14px">
-          <div class="ml" style="font-size:14px"><span>Exercise Bonus</span><span class="mv p">+5pts</span></div>
-          <div class="btrack"><div class="bfill bf-p" style="width:60%"></div></div>
-        </div>
+        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Predicted Productivity</span><span class="mv g">91%</span></div><div class="btrack"><div class="bfill bf-g" style="width:91%"></div></div></div>
+        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Sleep Impact</span><span class="mv c">+8pts</span></div><div class="btrack"><div class="bfill bf-c" style="width:75%"></div></div></div>
+        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Exercise Bonus</span><span class="mv p">+5pts</span></div><div class="btrack"><div class="bfill bf-p" style="width:60%"></div></div></div>
         <div style="padding:12px;border:1px solid var(--border);background:rgba(0,255,136,.03);margin-top:8px">
           <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--g);opacity:.6;margin-bottom:6px">MODEL OUTPUT</div>
           <div style="font-size:13px;line-height:1.6;opacity:.8">RandomForest model predicts <strong style="color:var(--g)">high productivity day</strong>. Optimal study window: 10:00–13:00.</div>
         </div>
       </div>
-
-      <!-- TOPIC DETAIL -->
       <div class="panel g2">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Topic Breakdown <span>DEEP DIVE</span></div>
         <div id="topicDetail"></div>
       </div>
-
-      <!-- AETHER MEMORY -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">AETHER Memory <span>CONTEXT</span></div>
         <div id="memory"></div>
       </div>
-
     </div>
   </div>
 
-  <!-- ═══ GOALS VIEW ═══ -->
+  <!-- GOALS -->
   <div class="view" id="view-goals">
     <div class="grid2" style="max-width:900px;margin:0 auto">
-
-      <!-- TODAY'S GOALS -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Today's Goals <span>DAILY</span></div>
         <div id="goalsToday"></div>
       </div>
-
-      <!-- WEEKLY GOALS -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Weekly Goals <span>WEEK</span></div>
         <div id="goalsWeek"></div>
       </div>
-
-      <!-- MOOD CHECK -->
       <div class="panel g-full">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">How are you feeling? <span>MOOD CHECK</span></div>
@@ -560,8 +513,6 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
           <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">🔥</div><div class="mood-label">HYPER</div></button>
         </div>
       </div>
-
-      <!-- QUICK ACTIONS -->
       <div class="panel g-full">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Quick Actions <span>AETHER</span></div>
@@ -572,38 +523,31 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
           <div class="qa" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')"><div class="qa-icon">⚡</div><div><div class="qa-label">Motivate Me</div><div class="qa-sub">NEURAL BOOST</div></div></div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- ═══ SYSTEM VIEW ═══ -->
+  <!-- SYSTEM -->
   <div class="view" id="view-system">
     <div class="grid3">
-
-      <!-- ARCHITECTURE -->
       <div class="panel g2">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">System Architecture <span>AETHER OS</span></div>
         <div class="sys-grid">
-          <div class="sys-item"><div class="sys-key">FRONTEND</div><div class="sys-val">Cloudflare Pages</div><div class="sys-sub">index.html — static deploy</div></div>
-          <div class="sys-item"><div class="sys-key">API LAYER</div><div class="sys-val">CF Worker</div><div class="sys-sub">api/worker.js — POST /chat</div></div>
+          <div class="sys-item"><div class="sys-key">FRONTEND</div><div class="sys-val">Cloudflare Pages</div><div class="sys-sub">site/index.html</div></div>
+          <div class="sys-item"><div class="sys-key">API LAYER</div><div class="sys-val">CF Worker</div><div class="sys-sub">aether-api.talpadeavi0303.workers.dev</div></div>
           <div class="sys-item"><div class="sys-key">AI MODEL</div><div class="sys-val">Claude Sonnet</div><div class="sys-sub">via Anthropic API</div></div>
           <div class="sys-item"><div class="sys-key">ML MODEL</div><div class="sys-val">RandomForest</div><div class="sys-sub">productivity_model.pkl</div></div>
           <div class="sys-item"><div class="sys-key">DATA INGESTION</div><div class="sys-val">Telegram Bot</div><div class="sys-sub">→ GitHub Actions pipeline</div></div>
           <div class="sys-item"><div class="sys-key">DATA STORE</div><div class="sys-val">CSV / Parquet</div><div class="sys-sub">data/raw/events.csv</div></div>
-          <div class="sys-item"><div class="sys-key">PIPELINES</div><div class="sys-val">GitHub Actions</div><div class="sys-sub">ingest.yml, ml_pipeline.yml</div></div>
+          <div class="sys-item"><div class="sys-key">PIPELINES</div><div class="sys-val">GitHub Actions</div><div class="sys-sub">ingest.yml, daily.yml</div></div>
           <div class="sys-item"><div class="sys-key">DASHBOARD DATA</div><div class="sys-val">dashboard.json</div><div class="sys-sub">site/data/ — auto-generated</div></div>
         </div>
       </div>
-
-      <!-- PIPELINE STATUS -->
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Live Pipeline <span>STATUS</span></div>
         <div class="pipeline" id="sysPipeline"></div>
       </div>
-
-      <!-- DATA FLOW -->
       <div class="panel g-full">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Data Flow Diagram <span>SYSTEM</span></div>
@@ -626,11 +570,9 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 <pre style="color:var(--g)">predict.py  →  dashboard.json  →  Frontend UI</pre>
         </div>
       </div>
-
     </div>
   </div>
-
-</div><!-- /app -->
+</div>
 
 <!-- CHAT OVERLAY -->
 <div id="chatOverlay" onclick="toggleChat()"></div>
@@ -666,7 +608,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 </div>
 
 <script>
-/* ══ DATA ══ */
+// ══════════════════════════════════════
+// YOUR WORKER URL — already set correctly
+const WORKER_URL = 'https://aether-api.talpadeavi0303.workers.dev';
+// ══════════════════════════════════════
+
 const D = {
   user: { name:"AVI", streak:14, hoursToday:3.2, tasksDone:7 },
   metrics: { focus:82, learning:68, productivity:91, mood:75 },
@@ -693,7 +639,7 @@ const D = {
     { icon:"⚙️", name:"NLP Parser", sub:"nlp_parser.py", status:"IDLE", cls:"ps-off" },
     { icon:"🤖", name:"ML Training", sub:"train_models.py", status:"RUNNING", cls:"ps-run" },
     { icon:"📊", name:"Dashboard Sync", sub:"predict.py → dashboard.json", status:"OK", cls:"ps-ok" },
-    { icon:"🌐", name:"Cloudflare Worker", sub:"api/worker.js", status:"LIVE", cls:"ps-ok" }
+    { icon:"🌐", name:"Cloudflare Worker", sub:"aether-api.talpadeavi0303.workers.dev", status:"LIVE", cls:"ps-ok" }
   ],
   weekData: [1.5, 2.8, 3.1, 2.4, 3.6, 2.9, 3.2],
   memory: [
@@ -711,7 +657,7 @@ const D = {
     ],
     week: [
       { text:"Study 12+ hours total this week", done:false, cat:"LEARNING" },
-      { text:"Complete AETHER worker.js backend", done:false, cat:"CODING" },
+      { text:"Complete AETHER worker.js backend", done:true, cat:"CODING" },
       { text:"Train ML model on new dataset", done:true, cat:"ML" },
       { text:"Maintain daily Telegram logging streak", done:false, cat:"SYSTEM" }
     ]
@@ -720,13 +666,48 @@ const D = {
 const COLS=["#00ffff","#ff00aa","#00ff88","#ffaa00"];
 
 /* ══ CURSOR ══ */
-const C=document.getElementById('cur'),CD=document.getElementById('curd');
-document.addEventListener('mousemove',e=>{
-  C.style.left=e.clientX+'px';C.style.top=e.clientY+'px';
-  CD.style.left=e.clientX+'px';CD.style.top=e.clientY+'px';
+const C = document.getElementById('cur');
+const CD = document.getElementById('curd');
+document.addEventListener('mousemove', e => {
+  C.style.left = e.clientX + 'px';
+  C.style.top = e.clientY + 'px';
+  CD.style.left = e.clientX + 'px';
+  CD.style.top = e.clientY + 'px';
 });
-document.addEventListener('mousedown',()=>C.style.transform='translate(-50%,-50%) scale(.7)');
-document.addEventListener('mouseup',()=>C.style.transform='translate(-50%,-50%) scale(1)');
+document.addEventListener('mousedown', () => C.style.transform = 'translate(-50%,-50%) scale(.7)');
+document.addEventListener('mouseup', () => C.style.transform = 'translate(-50%,-50%) scale(1)');
+
+/* ══ WORKER HEALTH CHECK ══ */
+async function checkWorker() {
+  const badge = document.getElementById('workerStatus');
+  try {
+    const r = await fetch(WORKER_URL, { method: 'GET' });
+    if (r.ok) {
+      badge.className = 'ok';
+      badge.innerHTML = '<span>●</span><span>WORKER OK</span>';
+    } else {
+      throw new Error('not ok');
+    }
+  } catch {
+    badge.className = 'err';
+    badge.innerHTML = '<span>●</span><span>WORKER ERR</span>';
+  }
+}
+
+/* ══ LOAD dashboard.json ══ */
+async function loadData() {
+  try {
+    const res = await fetch('./data/dashboard.json?t=' + Date.now());
+    if (!res.ok) throw new Error('not found');
+    const json = await res.json();
+    if (json.metrics)  D.metrics  = { ...D.metrics,  ...json.metrics };
+    if (json.activity?.length) D.activity = json.activity;
+    if (json.timeline?.length) D.timeline = json.timeline;
+    console.log('[AETHER] Live dashboard.json loaded ✓');
+  } catch {
+    console.log('[AETHER] Using static fallback data');
+  }
+}
 
 /* ══ CLOCK ══ */
 function tick(){
@@ -762,9 +743,9 @@ function draw(){
   });
   if(!mob()){
     for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
-      const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
-      if(d<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-        ctx.strokeStyle=`rgba(0,255,255,${(1-d/100)*.1})`;ctx.lineWidth=.5;ctx.stroke()}
+      const dist=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
+      if(dist<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(0,255,255,${(1-dist/100)*.1})`;ctx.lineWidth=.5;ctx.stroke()}
     }
   }
   requestAnimationFrame(draw);
@@ -778,33 +759,38 @@ const bInt=setInterval(()=>{
   if(bIdx<bootMsgs.length)bootLog.textContent=bootMsgs[bIdx++];
   else clearInterval(bInt);
 },400);
-setTimeout(()=>{document.getElementById('loader').classList.add('gone');initDash();},2400);
+
+setTimeout(async ()=>{
+  document.getElementById('loader').classList.add('gone');
+  await loadData();
+  await checkWorker();
+  initDash();
+}, 2400);
 
 /* ══ INIT ══ */
 function initDash(){
-  // Welcome counters
   setTimeout(()=>{
-    animN('wScore',0,87,1200);animN('wStreak',0,D.user.streak,800);
-    animN('wHours',0,D.user.hoursToday,1000,'');animN('wTasks',0,D.user.tasksDone,700);
+    animN('wScore',0,87,1200);
+    animN('wStreak',0,D.user.streak,800);
+    animN('wHours',0,D.user.hoursToday,1000,'');
+    animN('wTasks',0,D.user.tasksDone,700);
   },100);
   setTimeout(()=>{
-    setBar('focusBar','focusVal',D.metrics.focus,'c');
-    setBar('learningBar','learningVal',D.metrics.learning,'p');
-    setBar('productivityBar','productivityVal',D.metrics.productivity,'g');
-    setBar('moodBar','moodVal',D.metrics.mood,'o');
-    animN('bigNum',0,97,1600);
+    setBar('focusBar','focusVal',D.metrics.focus);
+    setBar('learningBar','learningVal',D.metrics.learning);
+    setBar('productivityBar','productivityVal',D.metrics.productivity);
+    setBar('moodBar','moodVal',D.metrics.mood);
+    animN('bigNum',0,Math.round((D.metrics.focus+D.metrics.learning+D.metrics.productivity)/3),1600);
   },300);
 
-  // Activity
   const act=document.getElementById('activity');
   D.activity.forEach((a,i)=>{
     const el=document.createElement('div');el.className='aitem';
     el.style.animationDelay=(i*.1+.3)+'s';
-    el.innerHTML=`<div><div class="atop">${a.topic}</div><div class="asub">${a.cat}</div></div><div style="display:flex;align-items:center"><span class="amins">${a.minutes}m</span></div>`;
+    el.innerHTML=`<div><div class="atop">${a.topic}</div><div class="asub">${a.cat||''}</div></div><div style="display:flex;align-items:center"><span class="amins">${a.minutes}m</span></div>`;
     act.appendChild(el);
   });
 
-  // Timeline
   const tl=document.getElementById('timeline');
   D.timeline.forEach((t,i)=>{
     const el=document.createElement('div');el.className='titem';
@@ -813,7 +799,6 @@ function initDash(){
     tl.appendChild(el);
   });
 
-  // Insights
   const ins=document.getElementById('insights');
   D.insights.forEach((n,i)=>{
     const el=document.createElement('div');el.className='insight';
@@ -822,10 +807,9 @@ function initDash(){
     ins.appendChild(el);
   });
 
-  // Pipeline (overview)
-  renderPipeline('pipeline');renderPipeline('sysPipeline');
+  renderPipeline('pipeline');
+  renderPipeline('sysPipeline');
 
-  // Donut chart
   const tot=D.activity.reduce((s,a)=>s+a.minutes,0);
   new Chart(document.getElementById('donutChart'),{
     type:'doughnut',
@@ -844,7 +828,6 @@ function initDash(){
     dl.appendChild(d);
   });
 
-  // Week chart
   new Chart(document.getElementById('weekChart'),{
     type:'bar',
     data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{
@@ -855,41 +838,39 @@ function initDash(){
       plugins:{legend:{display:false},tooltip:{bodyFont:{family:'Rajdhani',size:14},
         titleFont:{family:'Orbitron',size:10},backgroundColor:'rgba(0,8,18,.95)',
         borderColor:'rgba(0,255,255,.25)',borderWidth:1,padding:12}},
-      scales:{x:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10},letterSpacing:'2px'}},
+      scales:{x:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10}}},
         y:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10}}}}}
   });
 
-  // Topic detail
   const td=document.getElementById('topicDetail');
   D.activity.forEach((a,i)=>{
     const pct=Math.round(a.minutes/tot*100);
     td.innerHTML+=`<div class="mrow"><div class="ml" style="font-size:14px"><span>${a.topic}</span><span class="mv" style="color:${COLS[i]}">${a.minutes}m · ${pct}%</span></div><div class="btrack"><div class="bfill" style="width:${pct}%;background:linear-gradient(90deg,${COLS[i]},${COLS[i]}66);box-shadow:0 0 10px ${COLS[i]}88;transition:width 1.8s cubic-bezier(.4,0,.2,1)"></div></div></div>`;
   });
 
-  // Memory
   const mem=document.getElementById('memory');
   D.memory.forEach((m,i)=>{
-    const el=document.createElement('div');el.className='mem-item';el.style.animationDelay=(i*.1)+'s';
+    const el=document.createElement('div');el.className='mem-item';
+    el.style.animationDelay=(i*.1)+'s';
     el.innerHTML=`<div class="mem-dot" style="background:${m.col};box-shadow:0 0 6px ${m.col}"></div><div class="mem-txt">${m.text}</div><div class="mem-time">${m.time}</div>`;
     mem.appendChild(el);
   });
 
-  // Goals
-  renderGoals('goalsToday',D.goals.today);renderGoals('goalsWeek',D.goals.week);
+  renderGoals('goalsToday',D.goals.today);
+  renderGoals('goalsWeek',D.goals.week);
 }
 
 function renderPipeline(id){
   const el=document.getElementById(id);if(!el)return;el.innerHTML='';
-  D.pipeline.forEach((p,i)=>{
+  D.pipeline.forEach(p=>{
     const d=document.createElement('div');d.className='pipe-item';
     d.innerHTML=`<div class="pipe-icon">${p.icon}</div><div><div class="pipe-name">${p.name}</div><div class="pipe-sub">${p.sub}</div></div><div class="pipe-status ${p.cls}">${p.status}</div>`;
     el.appendChild(d);
   });
 }
-
 function renderGoals(id,goals){
   const el=document.getElementById(id);
-  goals.forEach((g,i)=>{
+  goals.forEach(g=>{
     const d=document.createElement('div');d.className='goal-item';
     d.innerHTML=`<div class="goal-check ${g.done?'done':''}" onclick="toggleGoal(this)"></div>
       <div class="goal-txt ${g.done?'done':''}">${g.text}</div>
@@ -905,7 +886,6 @@ function setMood(el){
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
 }
-
 function setBar(bId,vId,val){
   document.getElementById(bId).style.width=val+'%';
   animN(vId,0,val,1600,'%');
@@ -916,8 +896,6 @@ function animN(id,from,to,dur,sfx=''){
     el.textContent=Math.round(from+(to-from)*e)+sfx;if(t<1)requestAnimationFrame(step)}
   requestAnimationFrame(step);
 }
-
-/* ══ NAVIGATION ══ */
 function showView(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
@@ -925,7 +903,7 @@ function showView(id,btn){
   btn.classList.add('on');
 }
 
-/* ══ CHAT ══ */
+/* ══ CHAT — calls Worker ══ */
 let chatOpen=false;
 function toggleChat(){
   chatOpen=!chatOpen;
@@ -945,31 +923,29 @@ async function sendChat(){
   document.getElementById('thinking').classList.remove('hidden');
   document.getElementById('sendBtn').disabled=true;
 
-  const sys=`You are AETHER, a personal AI operating system assistant embedded in ${D.user.name}'s life dashboard.
-You have full context of the user's life:
-- Current metrics: Focus ${D.metrics.focus}%, Learning ${D.metrics.learning}%, Productivity ${D.metrics.productivity}%, Mood ${D.metrics.mood}%
-- Today's study: ${D.activity.map(a=>a.topic+'('+a.minutes+'min)').join(', ')}
-- Study streak: ${D.user.streak} days, hours today: ${D.user.hoursToday}h
-- Pipeline: Telegram bot ingestion → GitHub Actions → ML model → dashboard.json → this UI
-- ML model: RandomForest predicting productivity from sleep, exercise, study data
-- Goals today: ${D.goals.today.map(g=>(g.done?'✓':'○')+' '+g.text).join('; ')}
-Be direct, insightful, and personal. Respond in plain text, no markdown. Keep it concise but impactful.`;
-
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:hist})
+    // ✅ calls your Cloudflare Worker — API key stays safe on server
+    const r = await fetch(WORKER_URL + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        history:  hist,
+        metrics:  D.metrics,
+        activity: D.activity,
+        goals:    D.goals.today
+      })
     });
-    const data=await r.json();
-    const reply=data.content?.[0]?.text||'Neural pathway disrupted.';
-    hist.push({role:'assistant',content:reply});
+    const data = await r.json();
+    const reply = data.reply || data.error || 'Neural pathway disrupted.';
+    hist.push({role:'assistant', content:reply});
     document.getElementById('thinking').classList.add('hidden');
     document.getElementById('sendBtn').disabled=false;
     typeMsg(reply);
-  }catch{
+  } catch(err) {
     document.getElementById('thinking').classList.add('hidden');
     document.getElementById('sendBtn').disabled=false;
-    addMsg('ai','Connection lost. Check your Cloudflare Worker endpoint.');
+    addMsg('ai','Worker connection failed. Check console.');
+    console.error('[AETHER]', err);
   }
 }
 function addMsg(role,text){
