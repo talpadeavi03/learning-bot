@@ -1,0 +1,63 @@
+.
+├── analytics
+│   ├── daily_insights.md
+│   ├── dashboard.md
+│   ├── heatmap.md
+│   └── weekly-summary.md
+├── api
+│   └── worker.js
+├── commands
+├── data
+│   ├── features
+│   │   ├── behavior_features.parquet
+│   │   ├── daily_behavior.parquet
+│   │   └── daily_state_vector.parquet
+│   ├── insights
+│   ├── processed
+│   └── raw
+│       └── events.csv
+├── experiments
+│   └── mlruns
+├── models
+│   ├── productivity_model.pkl
+│   └── saved_models
+│       └── productivity_model.pkl
+├── pipeline.log
+├── readme.md
+├── requirements-analytics.txt
+├── requirements-ingest.txt
+├── scripts
+│   ├── analytics
+│   │   ├── analytics.py
+│   │   ├── dashboard.py
+│   │   ├── dashboard_data.py
+│   │   ├── heatmap.py
+│   │   ├── insight_generator.py
+│   │   └── weekly_summary.py
+│   ├── features
+│   │   ├── daily_aggregator.py
+│   │   ├── feature_extractor.py
+│   │   └── state_vector_builder.py
+│   ├── ingestion
+│   │   ├── nlp_parser.py
+│   │   ├── nlp_parser_ml.py
+│   │   └── tracker.py
+│   ├── ml
+│   │   ├── ai_summary.py
+│   │   ├── generate_synthetic_data.py
+│   │   ├── predict.py
+│   │   └── train_models.py
+│   └── pipeline
+│       └── run_pipeline.py
+├── site
+│   ├── data
+│   │   ├── aether_response.json
+│   │   ├── dashboard.json
+│   │   └── state.json
+│   └── index.html
+├── state
+│   └── last_update.txt
+├── tree.txt
+└── wrangler.toml
+
+21 directories, 40 files
