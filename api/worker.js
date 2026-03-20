@@ -27,13 +27,11 @@ export default {
 
     // ════════════════════════════════
     // ROUTE: POST /chat
-    // Called by your frontend chat
     // ════════════════════════════════
     if (url.pathname === '/chat' || url.pathname === '/') {
       try {
         const body = await request.json();
 
-        // Safely read fields with fallbacks
         const history  = body.history  || [{ role: 'user', content: body.message || 'Hello' }];
         const metrics  = body.metrics  || {};
         const activity = body.activity || [];
@@ -49,29 +47,31 @@ You have full context of Avi's daily life and data:
 - Goals today: ${goals.map(g => (g.done ? '✓' : '○') + ' ' + g.text).join(' | ') || 'none set'}
 Be direct, insightful, and personal. Plain text only, no markdown.`;
 
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        // ✅ GROQ API — free, fast, no billing
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': env.ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01'
+            'Authorization': `Bearer ${env.GROQ_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'llama-3.1-70b-versatile',
             max_tokens: 1000,
-            system: systemPrompt,
-            messages: history
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...history
+            ]
           })
         });
 
         if (!response.ok) {
           const err = await response.text();
-          console.error('Anthropic API error:', err);
+          console.error('Groq API error:', err);
           return json({ error: 'AI API error', detail: err }, 502);
         }
 
         const data = await response.json();
-        const reply = data.content?.[0]?.text || 'Neural pathway disrupted.';
+        const reply = data.choices?.[0]?.message?.content || 'Neural pathway disrupted.';
 
         return json({ reply });
 
@@ -83,7 +83,6 @@ Be direct, insightful, and personal. Plain text only, no markdown.`;
 
     // ════════════════════════════════
     // ROUTE: POST /telegram
-    // Called by Telegram webhook
     // ════════════════════════════════
     if (url.pathname === '/telegram') {
       try {
@@ -93,7 +92,6 @@ Be direct, insightful, and personal. Plain text only, no markdown.`;
 
         if (!message) return new Response('ok');
 
-        // Trigger GitHub Actions pipeline with the message
         const ghResponse = await fetch(
           `https://api.github.com/repos/${env.GITHUB_USERNAME}/${env.GITHUB_REPO}/dispatches`,
           {
@@ -112,7 +110,6 @@ Be direct, insightful, and personal. Plain text only, no markdown.`;
 
         const ghOk = ghResponse.ok;
 
-        // Send confirmation back to Telegram user
         await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
