@@ -8,7 +8,7 @@ binding = "ASSETS"
 
 [[kv_namespaces]]
 binding = "AETHER_KV"
-id = "REPLACE_WITH_YOUR_KV_ID"
+id = "4154fa683ced47c9871d0b43dfbd7a54"
 
 [ai]
 binding = "AI"
