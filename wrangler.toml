@@ -5,3 +5,7 @@ compatibility_date = "2025-03-20"
 [assets]
 directory = "./site"
 binding = "ASSETS"
+
+[[kv_namespaces]]
+binding = "AETHER_KV"
+id = "4154fa683ced47c9871d0b43dfbd7a54"

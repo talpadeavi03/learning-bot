@@ -16,6 +16,9 @@
 │   ├── processed
 │   └── raw
 │       └── events.csv
+├── docs
+│   ├── PROJECT_MAP.md
+│   └── secrets.md
 ├── experiments
 │   └── mlruns
 ├── models
@@ -60,4 +63,4 @@
 ├── tree.txt
 └── wrangler.toml
 
-21 directories, 40 files
+22 directories, 42 files
