@@ -635,10 +635,18 @@ Return ONLY the JSON object, no other text.`;
       max_tokens: 400,
     });
 
-    const raw    = result?.response || '{}';
-    // Extract JSON from response (model may wrap it in text)
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(raw.trim());
+    const raw = result?.response || '{}';
+    // Extract JSON — model often wraps it in markdown or text
+    let parsed = null;
+    const jsonMatch = raw.match(/\{[\s\S]*?\}/);
+    if (jsonMatch) {
+      try { parsed = JSON.parse(jsonMatch[0]); } catch {}
+    }
+    // Validate parsed has required fields, else use fallback
+    if (!parsed || typeof parsed.energy_signal !== 'number') {
+      console.warn('[AETHER] Llama JSON invalid, using rule-based fallback');
+      return fallbackNLP(text);
+    }
     return parsed;
 
   } catch (e) {
@@ -692,8 +700,8 @@ async function openaiVisionExtract(imageUrl, caption, env) {
   if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
 
   const prompt = caption
-    ? `Image caption: "${caption}". Extract all text, topics, tasks, and key information visible in this image.`
-    : 'Extract all text, topics, tasks, and key information visible in this image. Include any handwritten notes, diagrams labels or text you can see. Be thorough.';
+    ? `Image caption: "${caption}". Describe what you see in this image in English. Extract any visible text, topics, tasks or key information.`
+    : 'Describe what you see in this image in English only. List any visible text, objects, activities, or key information. If you cannot read text clearly, describe the visual content instead. Never invent text that is not visible.';
 
   const result = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', {
     image:    imgArray,
@@ -719,12 +727,19 @@ async function whisperTranscribe(audioUrl, env) {
   // Cloudflare Workers AI — free Whisper, no OpenAI billing
   if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
 
+  // CF Whisper has a ~25MB file size limit and ~30s timeout
+  if (audioBuffer.byteLength > 25 * 1024 * 1024) {
+    throw new Error('Audio file too large (max 25MB). Keep voice notes under 5 minutes.');
+  }
+
   const result = await env.AI.run('@cf/openai/whisper', {
     audio: [...new Uint8Array(audioBuffer)],
   });
 
-  if (!result?.text) throw new Error('Whisper returned empty transcript');
-  return result.text;
+  // CF Whisper returns { text, word_count, segments }
+  const transcript = result?.text || result?.transcription || '';
+  if (!transcript.trim()) throw new Error('Could not transcribe — try speaking more clearly or send as text.');
+  return transcript.trim();
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -767,30 +782,51 @@ function buildTelegramReply(parsed, inputType, rawText) {
     video_note: '🎥',
     image:      '🖼',
     document:   '📄',
+    goal:       '🎯',
+    mood:       '😊',
+    checkin:    '✅',
   };
 
   const icon      = icons[inputType] || '📨';
-  const energy    = Math.round((parsed.energy_signal    || 0.5) * 100);
-  const stress    = Math.round((parsed.stress_signal    || 0.1) * 100);
-  const focus     = Math.round((parsed.focus_signal     || 0.5) * 100);
+  const energy    = Math.round((parsed.energy_signal || 0.5) * 100);
+  const stress    = Math.round((parsed.stress_signal || 0.2) * 100);
+  const focus     = Math.round((parsed.focus_signal  || 0.5) * 100);
   const sentiment = parsed.sentiment || 'neutral';
+  const topic     = parsed.topic || 'general';
+  const summary   = parsed.summary || rawText.slice(0, 80);
 
-  let flowLabel = '—';
-  if (energy > 75 && stress < 25)      flowLabel = '🟢 FLOW ZONE';
-  else if (energy > 55 && stress < 45) flowLabel = '🟡 PRE-FLOW';
-  else if (stress > 60)                flowLabel = '🔴 HIGH STRESS';
-  else if (energy < 30)                flowLabel = '⚫ LOW ENERGY';
+  // Flow state label
+  let flowLabel;
+  if      (energy > 80 && stress < 20) flowLabel = '🟢 FLOW ZONE';
+  else if (energy > 60 && stress < 40) flowLabel = '🟡 PRE-FLOW';
+  else if (stress > 65)                flowLabel = '🔴 HIGH STRESS';
+  else if (energy < 25)                flowLabel = '⚫ LOW ENERGY';
   else                                 flowLabel = '⚪ NOMINAL';
 
-  return `${icon} *AETHER logged*\n\n` +
-    `📊 *Analysis*\n` +
-    `Topic: ${parsed.topic || 'general'}\n` +
-    `Mood: ${sentiment} · ${parsed.dominant_emotion || 'neutral'}\n\n` +
-    `⚡ Energy: ${energy}%\n` +
-    `😤 Stress: ${stress}%\n` +
-    `🎯 Focus: ${focus}%\n\n` +
-    `${flowLabel}\n\n` +
-    `_${parsed.summary || rawText.slice(0, 60)}_`;
+  // Emoji for sentiment
+  const moodEmoji = sentiment === 'positive' ? '😊' : sentiment === 'negative' ? '😔' : '😐';
+
+  // Image gets a simpler reply showing what was seen
+  if (inputType === 'image') {
+    return `🖼 *Image logged*\n\n` +
+      `Seen: ${summary}\n` +
+      `Topic: ${topic}\n\n` +
+      `⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%  ${flowLabel}`;
+  }
+
+  // Voice gets transcript confirmation
+  if (inputType === 'voice' || inputType === 'video_note') {
+    return `🎙 *Voice logged*\n\n` +
+      `"_${summary}_"\n\n` +
+      `Topic: ${topic}  ${moodEmoji} ${sentiment}\n` +
+      `⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%\n${flowLabel}`;
+  }
+
+  // Standard text reply
+  return `${icon} *Logged* · ${topic}\n` +
+    `${moodEmoji} ${sentiment}  ⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%\n` +
+    `${flowLabel}\n` +
+    `_${summary.slice(0, 100)}_`;
 }
 
 // ═════════════════════════════════════════════════════════════════
