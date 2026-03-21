@@ -227,7 +227,8 @@ Keep logging daily!`, env);
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 
-const OPENAI_CHAT_MODEL = 'gpt-4o-mini'; // cheap + fast. change to 'gpt-4o' for smarter responses
+// All AI now runs on Cloudflare Workers AI (free)
+// CF models used: llama-3-8b-instruct (chat+NLP), llava-1.5-7b (vision), whisper (voice)
 const MAX_EVENTS       = 500;   // max rows kept in KV events log
 const MAX_HISTORY      = 20;    // max chat turns kept per session
 
@@ -573,18 +574,18 @@ async function handleHealth(request, env) {
   const eventCount = await getEventCount(env);
 
   // Overall ready = core 4 are present (OpenAI is optional)
-  const coreReady = kvOk && openaiOk && telegramOk && chatIdOk;
+  const coreReady = kvOk && !!env.AI && telegramOk && chatIdOk;
 
   return jsonResp({
     status:     coreReady ? 'AETHER ONLINE ✅' : 'AETHER PARTIAL ⚠️',
     version:    '2.0',
     timestamp:  new Date().toISOString(),
     services: {
-      kv:               kvOk        ? 'OK' : '❌ MISSING — create KV namespace + add to wrangler.toml',
-      openai:           openaiOk   ? 'OK' : '❌ MISSING — add OPENAI_API_KEY secret',
-      telegram_token:   telegramOk  ? 'OK' : '❌ MISSING — add TELEGRAM_BOT_TOKEN secret',
-      telegram_chat_id: chatIdOk    ? 'OK' : '❌ MISSING — add TELEGRAM_CHAT_ID secret',
-      whisper_voice:    env.AI       ? 'OK' : '❌ MISSING — add [ai] binding to wrangler.toml',
+      kv:               kvOk       ? 'OK' : '❌ MISSING — create KV namespace + add to wrangler.toml',
+      cf_ai:            env.AI     ? 'OK' : '❌ MISSING — add [ai] to wrangler.toml (chat, NLP, vision, voice)',
+      telegram_token:   telegramOk ? 'OK' : '❌ MISSING — add TELEGRAM_BOT_TOKEN secret',
+      telegram_chat_id: chatIdOk   ? 'OK' : '❌ MISSING — add TELEGRAM_CHAT_ID secret',
+      openai:           openaiOk   ? 'OK' : '⚪ OPTIONAL — not required, CF AI handles everything',
     },
     data: {
       total_events: eventCount,
@@ -626,27 +627,22 @@ Base stress_signal on anxiety/overwhelm words (calm=0.1, stressed=0.8).
 Return ONLY the JSON object, no other text.`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({
-        model:      OPENAI_CHAT_MODEL,
-        max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+    // Use Cloudflare Workers AI — free, no OpenAI quota needed
+    if (!env.AI) throw new Error('No AI binding');
+
+    const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 400,
     });
 
-    const data   = await response.json();
-    const raw    = data?.choices?.[0]?.message?.content || '{}';
-    const parsed = JSON.parse(raw.trim());
+    const raw    = result?.response || '{}';
+    // Extract JSON from response (model may wrap it in text)
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(raw.trim());
     return parsed;
 
   } catch (e) {
     console.warn('[AETHER] NLP parse failed, using fallback:', e.message);
-    // Fallback: basic rule-based extraction
     return fallbackNLP(text);
   }
 }
@@ -685,32 +681,28 @@ function fallbackNLP(text) {
 // ═════════════════════════════════════════════════════════════════
 
 async function openaiVisionExtract(imageUrl, caption, env) {
+  // Download image from Telegram
+  const imgResp = await fetch(imageUrl);
+  if (!imgResp.ok) throw new Error('Could not download image');
+
+  const imgBuffer = await imgResp.arrayBuffer();
+  const imgArray  = [...new Uint8Array(imgBuffer)];
+
+  // Use Cloudflare Workers AI — free vision model
+  if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
+
   const prompt = caption
     ? `Image caption: "${caption}". Extract all text, topics, tasks, and key information visible in this image.`
-    : 'Extract all text, topics, tasks, and key information visible in this image. Include any handwritten notes, diagrams, or text you can see.';
+    : 'Extract all text, topics, tasks, and key information visible in this image. Include any handwritten notes, diagrams labels or text you can see. Be thorough.';
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type':  'application/json',
-    },
-    body: JSON.stringify({
-      model:      'gpt-4o',
-      max_tokens: 500,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image_url', image_url: { url: imageUrl } },
-          { type: 'text',      text: prompt },
-        ],
-      }],
-    }),
+  const result = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', {
+    image:    imgArray,
+    prompt:   prompt,
+    max_tokens: 512,
   });
 
-  const data = await response.json();
-  if (data.error) throw new Error(data.error.message);
-  return data?.choices?.[0]?.message?.content || '';
+  if (!result?.description) throw new Error('Vision model returned empty result');
+  return result.description;
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -849,22 +841,15 @@ async function callOpenAI(systemPrompt, history, env) {
     ...history,
   ];
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type':  'application/json',
-    },
-    body: JSON.stringify({
-      model:      OPENAI_CHAT_MODEL,
-      max_tokens: 400,
-      messages,
-    }),
+  // Use Cloudflare Workers AI — free Llama 3
+  if (!env.AI) throw new Error('AI binding missing');
+
+  const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+    messages,
+    max_tokens: 400,
   });
 
-  const data = await response.json();
-  if (data.error) throw new Error(data.error.message || 'OpenAI API error');
-  return data?.choices?.[0]?.message?.content || 'No response from AI.';
+  return result?.response || 'No response from AI.';
 }
 
 // ═════════════════════════════════════════════════════════════════
