@@ -1,37 +1,50 @@
-name: ML Pipeline
+name: AETHER ML Pipeline
 
 on:
-  workflow_run:
-    workflows: ["Telegram Ingestion"]
-    types:
-      - completed
-
-  workflow_dispatch:
+  schedule:
+    - cron: '30 19 * * *'   # 1am IST daily (7:30pm UTC)
+  workflow_dispatch:          # manual trigger from GitHub Actions tab
 
 jobs:
-
-  pipeline:
-
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-
+  ml_pipeline:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          pip install -r requirements-ingest.txt
-          pip install -r requirements-analytics.txt
-          pip install scikit-learn joblib
+          pip install pandas scikit-learn numpy requests joblib
 
-      - name: Run ML pipeline
+      - name: Pull events from worker
+        env:
+          WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
+        run: python scripts/pipeline/pull_events.py
+
+      - name: Train model
+        run: python scripts/ml/train_models.py
+
+      - name: Generate predictions
+        run: python scripts/ml/predict.py
+
+      - name: Push dashboard to KV
+        env:
+          WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
+        run: python scripts/pipeline/push_dashboard.py
+
+      - name: Commit data files
         run: |
-          python scripts/pipeline/run_pipeline.py
+          git config --local user.email "aether-bot@noreply.com"
+          git config --local user.name "AETHER Bot"
+          git add data/ models/training_stats.json site/data/dashboard.json || true
+          git diff --staged --quiet || git commit -m "chore: nightly ML pipeline [skip ci]"
+          git push || true

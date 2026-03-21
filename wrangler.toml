@@ -12,3 +12,7 @@ id = "4154fa683ced47c9871d0b43dfbd7a54"
 
 [ai]
 binding = "AI"
+
+# Cron triggers — morning briefing 8:30am IST, evening summary 8:30pm IST
+[triggers]
+crons = ["30 3 * * *", "30 15 * * *"]

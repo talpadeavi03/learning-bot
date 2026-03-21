@@ -189,6 +189,32 @@ Keep logging daily!`, env);
       return true;
     }
 
+    case '/briefing':
+    case '/morning': {
+      await sendMorningBriefing(env);
+      return true;
+    }
+
+    case '/summary':
+    case '/evening': {
+      await sendEveningSummary(env);
+      return true;
+    }
+
+    case '/streak': {
+      const events = await getRecentEvents(100, env);
+      const streak = await calculateStreak(events);
+      const total  = events.length;
+      await sendTelegram(chatId,
+        `🔥 *Streak: ${streak} day${streak !== 1 ? 's' : ''}*
+
+` +
+        `Total events logged: ${total}
+` +
+        `Keep logging daily to maintain your streak!`, env);
+      return true;
+    }
+
     default:
       return false; // not a recognized command, treat as regular text
   }
@@ -261,6 +287,16 @@ function textResp(text, status = 200) {
 // ─────────────────────────────────────────────────────────────────
 
 export default {
+
+  // ── Cron jobs — runs on schedule set in wrangler.toml ──────────
+  async scheduled(event, env, ctx) {
+    const hour = new Date().getUTCHours();
+    // Adjust for IST (UTC+5:30) — 8am IST = 2:30 UTC, 9pm IST = 15:30 UTC
+    // We use UTC 3 for morning (8:30am IST) and UTC 15 for evening (8:30pm IST)
+    if (hour === 3)  ctx.waitUntil(sendMorningBriefing(env));
+    if (hour === 15) ctx.waitUntil(sendEveningSummary(env));
+  },
+
   async fetch(request, env) {
 
     // Handle CORS preflight
@@ -277,6 +313,7 @@ export default {
       if (url.pathname === '/log-state' && request.method === 'POST') return handleLogState(request, env);
       if (url.pathname === '/dashboard' && request.method === 'GET')  return handleDashboard(request, env);
       if (url.pathname === '/events'    && request.method === 'GET')  return handleEvents(request, env);
+      if (url.pathname === '/update-dashboard' && request.method === 'POST') return handleUpdateDashboard(request, env);
       if (url.pathname === '/health'    && request.method === 'GET')  return handleHealth(request, env);
 
       // ── Legacy: keep old /api route working ──────────────────
@@ -533,18 +570,187 @@ async function handleLogState(request, env) {
 
 async function handleDashboard(request, env) {
   try {
-    const raw = await env.AETHER_KV.get('dashboard:latest');
-    if (raw) {
-      return new Response(raw, {
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
-      });
+    // Always recompute from real events for freshness
+    const events     = await getRecentEvents(200, env);
+    const latestState = await getLatestState(env);
+    const today      = new Date().toISOString().split('T')[0];
+    const todayEv    = events.filter(e => e.timestamp?.startsWith(today));
+    const todayGoal  = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
+
+    // Streak
+    const streak = await calculateStreak(events);
+
+    // Today metrics
+    const avgEnergy = todayEv.length > 0
+      ? Math.round(todayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / todayEv.length * 100)
+      : latestState ? Math.round((latestState.energy || 0.5) * 100) : 0;
+
+    const avgStress = todayEv.length > 0
+      ? Math.round(todayEv.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / todayEv.length * 100)
+      : latestState ? Math.round((latestState.stress || 0.2) * 100) : 0;
+
+    const avgFocus = todayEv.length > 0
+      ? Math.round(todayEv.reduce((s, e) => s + (e.focus_signal || 0.5), 0) / todayEv.length * 100)
+      : 0;
+
+    const studySessions = todayEv.filter(e => e.is_study_session).length;
+    const hoursToday    = Math.round(studySessions * 0.5 * 10) / 10;
+
+    // Flow probability
+    let flowProb = 0;
+    if (latestState?.flow_prob) flowProb = Math.round(latestState.flow_prob * 100);
+    else if (avgEnergy > 75 && avgStress < 25) flowProb = 85;
+    else if (avgEnergy > 55 && avgStress < 45) flowProb = 55;
+    else flowProb = 20;
+
+    // Topics breakdown from today's events
+    const topicCounts = {};
+    todayEv.forEach(e => {
+      if (e.topic && e.topic !== 'general') {
+        topicCounts[e.topic] = (topicCounts[e.topic] || 0) + 1;
+      }
+    });
+    const activity = Object.entries(topicCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([topic, count]) => ({
+        topic,
+        minutes: count * 25, // rough estimate
+        cat: 'LOGGED',
+      }));
+
+    // Timeline from today's events
+    const timeline = todayEv.slice(0, 8).map(e => ({
+      time: new Date(e.timestamp).toLocaleTimeString('en-IN', {
+        hour: '2-digit', minute: '2-digit', hour12: false,
+        timeZone: 'Asia/Kolkata'
+      }),
+      event: `${e.input_type}: ${e.summary || e.topic || 'logged'}`,
+    }));
+
+    // 7-day energy trend
+    const weekData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const ds = d.toISOString().split('T')[0];
+      const dayEv = events.filter(e => e.timestamp?.startsWith(ds));
+      const dayEnergy = dayEv.length > 0
+        ? dayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / dayEv.length
+        : 0;
+      weekData.push(Math.round(dayEnergy * 10) / 10);
     }
+
+    // Insights generated from patterns
+    const insights = generateInsights(events, todayEv, avgEnergy, avgStress, streak);
+
+    // Today's goal as a goal item
+    const goals = {
+      today: todayGoal ? [{ text: todayGoal, done: false, cat: 'TODAY' }] : [],
+      week:  [],
+    };
+
+    const dash = {
+      metrics: {
+        focus:        avgFocus || avgEnergy,
+        learning:     Math.round(avgEnergy * 0.9),
+        productivity: flowProb,
+        mood:         Math.round((1 - avgStress / 100) * 100),
+        streak,
+        hours_today:  hoursToday,
+        tasks_done:   todayEv.filter(e => e.is_goal_mention).length,
+        total_events: events.length,
+        last_updated: new Date().toISOString(),
+      },
+      state:    latestState,
+      activity: activity.length > 0 ? activity : defaultDashboard().activity,
+      timeline: timeline.length > 0 ? timeline : defaultDashboard().timeline,
+      weekData,
+      insights,
+      goals,
+      streak,
+    };
+
+    return new Response(JSON.stringify(dash, null, 2), {
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    });
+
   } catch (e) {
-    console.warn('[AETHER] KV dashboard read failed:', e.message);
+    console.warn('[AETHER] Dashboard compute failed:', e.message);
+    return jsonResp(defaultDashboard());
+  }
+}
+
+// Generate insights from event patterns
+function generateInsights(events, todayEv, avgEnergy, avgStress, streak) {
+  const insights = [];
+
+  // Peak energy insight
+  const hourEnergy = {};
+  events.forEach(e => {
+    const h = new Date(e.timestamp).getUTCHours();
+    if (!hourEnergy[h]) hourEnergy[h] = [];
+    hourEnergy[h].push(e.energy_signal || 0.5);
+  });
+  const peakHour = Object.entries(hourEnergy)
+    .map(([h, vals]) => ({ h: parseInt(h), avg: vals.reduce((s,v)=>s+v,0)/vals.length }))
+    .sort((a,b) => b.avg - a.avg)[0];
+
+  if (peakHour) {
+    const istHour = (peakHour.h + 5) % 24;
+    const ampm = istHour >= 12 ? 'pm' : 'am';
+    const h12 = istHour % 12 || 12;
+    insights.push({
+      icon: '⚡',
+      title: 'Peak Performance Window',
+      body: `Your energy peaks around ${h12}${ampm} IST based on ${events.length} logged events. Schedule your hardest tasks then.`,
+      tag: 'PATTERN',
+      tagClass: 'tag-ok',
+    });
   }
 
-  // No data yet — return empty defaults
-  return jsonResp(defaultDashboard());
+  // Stress insight
+  if (avgStress > 60) {
+    insights.push({
+      icon: '⚠️',
+      title: 'High Stress Detected',
+      body: 'Your stress signals are elevated today. Break tasks into smaller steps and take short breaks.',
+      tag: 'WARNING',
+      tagClass: 'tag-med',
+    });
+  } else if (avgEnergy > 70) {
+    insights.push({
+      icon: '🔥',
+      title: 'High Energy Day',
+      body: `Energy at ${avgEnergy}% — good conditions for deep work. Protect this window.`,
+      tag: 'POSITIVE',
+      tagClass: 'tag-ok',
+    });
+  }
+
+  // Streak insight
+  if (streak >= 3) {
+    insights.push({
+      icon: '🔥',
+      title: `${streak}-Day Streak`,
+      body: `You have logged data for ${streak} consecutive days. AETHER is building your behavioral model.`,
+      tag: streak >= 7 ? 'HIGH PRIORITY' : 'POSITIVE',
+      tagClass: streak >= 7 ? 'tag-hi' : 'tag-ok',
+    });
+  }
+
+  // Today's activity insight
+  if (todayEv.length === 0) {
+    insights.push({
+      icon: '💡',
+      title: 'No Data Today Yet',
+      body: 'Send a message to your Telegram bot to start logging today activity.',
+      tag: 'ACTION',
+      tagClass: 'tag-med',
+    });
+  }
+
+  return insights.slice(0, 3);
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -563,6 +769,16 @@ async function handleEvents(request, env) {
 // ═════════════════════════════════════════════════════════════════
 // 6. HEALTH CHECK
 // ═════════════════════════════════════════════════════════════════
+
+async function handleUpdateDashboard(request, env) {
+  try {
+    const dash = await request.json();
+    await env.AETHER_KV.put('dashboard:latest', JSON.stringify(dash));
+    return jsonResp({ ok: true, message: 'Dashboard updated from ML pipeline' });
+  } catch (e) {
+    return jsonResp({ error: e.message }, 500);
+  }
+}
 
 async function handleHealth(request, env) {
   const kvOk        = !!env.AETHER_KV;
@@ -886,6 +1102,157 @@ async function callOpenAI(systemPrompt, history, env) {
   });
 
   return result?.response || 'No response from AI.';
+}
+
+
+// ═════════════════════════════════════════════════════════════════
+// MORNING BRIEFING — runs at 8:30am IST via cron
+// ═════════════════════════════════════════════════════════════════
+
+async function sendMorningBriefing(env) {
+  const chatId = env.TELEGRAM_CHAT_ID;
+  if (!chatId) return;
+
+  const today      = new Date().toISOString().split('T')[0];
+  const events     = await getRecentEvents(50, env);
+  const todayGoal  = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
+  const latestState = await getLatestState(env);
+
+  // Calculate yesterday stats
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const ydStr = yesterday.toISOString().split('T')[0];
+  const ydEvents = events.filter(e => e.timestamp?.startsWith(ydStr));
+  const avgEnergy = ydEvents.length > 0
+    ? Math.round(ydEvents.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / ydEvents.length * 100)
+    : null;
+
+  // Streak calculation
+  const streak = await calculateStreak(events);
+
+  // Day of week motivation
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const dayName = days[new Date().getDay()];
+
+  let msg = `🌅 *Good morning, Avi!*
+
+`;
+  msg += `📅 ${dayName} · ${today}
+`;
+  msg += `🔥 Streak: ${streak} day${streak !== 1 ? 's' : ''}
+
+`;
+
+  if (avgEnergy !== null) {
+    msg += `Yesterday: ⚡ ${avgEnergy}% energy · ${ydEvents.length} events logged
+
+`;
+  }
+
+  if (todayGoal) {
+    msg += `🎯 *Today's goal:* ${todayGoal}
+
+`;
+  } else {
+    msg += `💡 Set your goal: /goal [what you want to achieve today]
+
+`;
+  }
+
+  // Motivational nudge based on streak
+  if (streak === 0)      msg += `_Start your streak today — just send one message._`;
+  else if (streak < 3)   msg += `_${streak} days in. Keep the momentum going._`;
+  else if (streak < 7)   msg += `_${streak} days strong. You're building a habit._`;
+  else if (streak < 30)  msg += `_${streak} day streak. AETHER is learning your patterns._`;
+  else                   msg += `_${streak} days. The model knows you well now._`;
+
+  await sendTelegram(chatId, msg, env);
+}
+
+// ═════════════════════════════════════════════════════════════════
+// EVENING SUMMARY — runs at 8:30pm IST via cron
+// ═════════════════════════════════════════════════════════════════
+
+async function sendEveningSummary(env) {
+  const chatId = env.TELEGRAM_CHAT_ID;
+  if (!chatId) return;
+
+  const today   = new Date().toISOString().split('T')[0];
+  const events  = await getRecentEvents(100, env);
+  const todayEv = events.filter(e => e.timestamp?.startsWith(today));
+  const goal    = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
+  const state   = await getLatestState(env);
+
+  if (todayEv.length === 0) {
+    await sendTelegram(chatId,
+      `🌙 *Evening check-in*
+
+No activity logged today, Avi.
+
+Tomorrow: start with one message to AETHER when you wake up.
+
+_Consistency beats intensity._`, env);
+    return;
+  }
+
+  const avgEnergy = Math.round(todayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / todayEv.length * 100);
+  const avgStress = Math.round(todayEv.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / todayEv.length * 100);
+  const topics    = [...new Set(todayEv.map(e => e.topic).filter(Boolean))].slice(0, 4);
+  const studyMins = todayEv.filter(e => e.is_study_session).length * 30; // rough estimate
+  const streak    = await calculateStreak(events);
+
+  // Flow assessment
+  let flowSummary;
+  if      (avgEnergy > 75 && avgStress < 25) flowSummary = '🟢 Strong flow day';
+  else if (avgEnergy > 55 && avgStress < 45) flowSummary = '🟡 Decent focus day';
+  else if (avgStress > 65)                   flowSummary = '🔴 High stress day — rest tonight';
+  else if (avgEnergy < 30)                   flowSummary = '⚫ Low energy day — sleep early';
+  else                                        flowSummary = '⚪ Normal day';
+
+  let msg = `🌙 *AETHER Daily Summary*
+
+`;
+  msg += `📊 ${todayEv.length} events logged
+`;
+  msg += `⚡ Avg energy: ${avgEnergy}%
+`;
+  msg += `😤 Avg stress: ${avgStress}%
+`;
+  msg += `${flowSummary}
+
+`;
+
+  if (topics.length > 0) msg += `🧠 Topics: ${topics.join(', ')}
+`;
+  if (goal)              msg += `🎯 Goal was: ${goal}
+`;
+  msg += `🔥 Streak: ${streak} days
+
+`;
+
+  // Tomorrow nudge
+  const hour = new Date().getHours();
+  if (avgEnergy < 40 || avgStress > 60) {
+    msg += `_Rest well tonight. Recovery is productive._`;
+  } else {
+    msg += `_Good work today. Log your state tomorrow morning to keep AETHER learning._`;
+  }
+
+  await sendTelegram(chatId, msg, env);
+}
+
+// ─── Streak calculator ────────────────────────────────────────────
+async function calculateStreak(events) {
+  const days = new Set(events.map(e => e.timestamp?.split('T')[0]).filter(Boolean));
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    if (days.has(ds)) streak++;
+    else if (i > 0) break; // gap found
+  }
+  return streak;
 }
 
 // ═════════════════════════════════════════════════════════════════
