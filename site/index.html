@@ -674,7 +674,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 <script>
 // ══════════════════════════════════════
 // YOUR WORKER URL — already set correctly
-const WORKER_URL = 'https://aether-api.talpadeavi0303.workers.dev';
+const WORKER_URL = 'https://learning-bot.talpadeavi0303.workers.dev';
 // ══════════════════════════════════════
 
 const D = {
@@ -747,31 +747,61 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&chatOpen) closeCh
 async function checkWorker() {
   const badge = document.getElementById('workerStatus');
   try {
-    const r = await fetch(WORKER_URL, { method: 'GET' });
-    if (r.ok) {
-      badge.className = 'ok';
-      badge.innerHTML = '<span>●</span><span>WORKER OK</span>';
-    } else {
-      throw new Error('not ok');
-    }
+    const r = await fetch(WORKER_URL + '/health');
+    const data = await r.json();
+    const allOk = data.services && Object.values(data.services).every(v => v === 'OK');
+    badge.className = allOk ? 'ok' : 'err';
+    badge.innerHTML = allOk
+      ? '<span>●</span><span>AETHER LIVE</span>'
+      : '<span>●</span><span>PARTIAL</span>';
   } catch {
     badge.className = 'err';
     badge.innerHTML = '<span>●</span><span>WORKER ERR</span>';
   }
 }
 
-/* ══ LOAD dashboard.json ══ */
+/* ══ LOAD dashboard from live worker ══ */
 async function loadData() {
   try {
-    const res = await fetch('./data/dashboard.json?t=' + Date.now());
-    if (!res.ok) throw new Error('not found');
+    // Pull live data from Cloudflare KV via worker
+    const res = await fetch(WORKER_URL + '/dashboard?t=' + Date.now());
+    if (!res.ok) throw new Error('worker not ok');
     const json = await res.json();
+
+    // Merge live metrics into D
     if (json.metrics)  D.metrics  = { ...D.metrics,  ...json.metrics };
     if (json.activity?.length) D.activity = json.activity;
     if (json.timeline?.length) D.timeline = json.timeline;
-    console.log('[AETHER] Live dashboard.json loaded ✓');
-  } catch {
-    console.log('[AETHER] Using static fallback data');
+    if (json.goals?.today?.length) D.goals.today = json.goals.today;
+    if (json.goals?.week?.length)  D.goals.week  = json.goals.week;
+    if (json.insights?.length) D.insights = json.insights;
+
+    // Show live state badge if today's check-in exists
+    if (json.state) {
+      const s = json.state;
+      const strip = document.getElementById('workerStatus');
+      if (strip) {
+        strip.className = 'ok';
+        strip.innerHTML = '<span>●</span><span>' + (s.state_label || 'LIVE') + '</span>';
+      }
+    }
+
+    // Update welcome strip stats from live events
+    if (json.metrics.streak)       animN('wStreak', 0, json.metrics.streak, 800);
+    if (json.metrics.hours_today)  animN('wHours',  0, json.metrics.hours_today, 800);
+    if (json.metrics.tasks_done)   animN('wTasks',  0, json.metrics.tasks_done, 800);
+
+    console.log('[AETHER] Live data loaded from worker ✓');
+  } catch(e) {
+    console.log('[AETHER] Worker data unavailable, using fallback:', e.message);
+    // Fallback: try local dashboard.json
+    try {
+      const res2 = await fetch('./data/dashboard.json?t=' + Date.now());
+      if (res2.ok) {
+        const json2 = await res2.json();
+        if (json2.metrics) D.metrics = { ...D.metrics, ...json2.metrics };
+      }
+    } catch {}
   }
 }
 
