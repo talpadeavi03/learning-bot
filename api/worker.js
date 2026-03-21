@@ -32,7 +32,6 @@
 // ─────────────────────────────────────────────────────────────────
 
 const OPENAI_CHAT_MODEL = 'gpt-4o-mini'; // cheap + fast. change to 'gpt-4o' for smarter responses
-const WHISPER_MODEL    = 'whisper-1';
 const MAX_EVENTS       = 500;   // max rows kept in KV events log
 const MAX_HISTORY      = 20;    // max chat turns kept per session
 
@@ -139,9 +138,9 @@ async function handleWebhook(request, env) {
 
   // ── VOICE NOTE (hold mic button) ─────────────────────────────
   else if (msg.voice) {
-    if (!env.OPENAI_API_KEY) {
-      await sendTelegram(chatId, '🎙 Voice noted! Add OPENAI_API_KEY to enable transcription.\nFor now, send as text.', env);
-      return textResp('No OpenAI key', 200);
+    if (!env.AI) {
+      await sendTelegram(chatId, '🎙 Voice noted! AI binding not configured yet.\nAdd [ai] to wrangler.toml', env);
+      return textResp('No AI binding', 200);
     }
     await sendTelegram(chatId, '🎙 Transcribing...', env);
     try {
@@ -157,9 +156,9 @@ async function handleWebhook(request, env) {
 
   // ── VIDEO NOTE (circle video) ─────────────────────────────────
   else if (msg.video_note) {
-    if (!env.OPENAI_API_KEY) {
-      await sendTelegram(chatId, '🎥 Video noted! Add OPENAI_API_KEY to enable transcription.\nFor now, send as text.', env);
-      return textResp('No OpenAI key', 200);
+    if (!env.AI) {
+      await sendTelegram(chatId, '🎥 Video noted! AI binding not configured yet.\nAdd [ai] to wrangler.toml', env);
+      return textResp('No AI binding', 200);
     }
     await sendTelegram(chatId, '🎥 Processing video...', env);
     try {
@@ -368,7 +367,7 @@ async function handleHealth(request, env) {
   const openaiOk = !!env.OPENAI_API_KEY;
   const telegramOk  = !!env.TELEGRAM_BOT_TOKEN;
   const chatIdOk    = !!env.TELEGRAM_CHAT_ID;
-  const whisperOk   = !!env.OPENAI_API_KEY;
+  const whisperOk   = !!env.AI;
 
   const eventCount = await getEventCount(env);
 
@@ -384,7 +383,7 @@ async function handleHealth(request, env) {
       openai:           openaiOk   ? 'OK' : '❌ MISSING — add OPENAI_API_KEY secret',
       telegram_token:   telegramOk  ? 'OK' : '❌ MISSING — add TELEGRAM_BOT_TOKEN secret',
       telegram_chat_id: chatIdOk    ? 'OK' : '❌ MISSING — add TELEGRAM_CHAT_ID secret',
-      whisper_voice:    whisperOk   ? 'OK' : '⚪ OPTIONAL — add OPENAI_API_KEY to enable voice notes',
+      whisper_voice:    env.AI       ? 'OK' : '❌ MISSING — add [ai] binding to wrangler.toml',
     },
     data: {
       total_events: eventCount,
@@ -523,22 +522,16 @@ async function whisperTranscribe(audioUrl, env) {
   if (!audioResponse.ok) throw new Error('Could not download audio file');
 
   const audioBuffer = await audioResponse.arrayBuffer();
-  const audioBlob   = new Blob([audioBuffer], { type: 'audio/ogg' });
 
-  const form = new FormData();
-  form.append('file',     audioBlob, 'audio.ogg');
-  form.append('model',    WHISPER_MODEL);
-  form.append('language', 'en'); // change to 'hi' for Hindi, or remove for auto-detect
+  // Cloudflare Workers AI — free Whisper, no OpenAI billing
+  if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
 
-  const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-    method:  'POST',
-    headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}` },
-    body:    form,
+  const result = await env.AI.run('@cf/openai/whisper', {
+    audio: [...new Uint8Array(audioBuffer)],
   });
 
-  const data = await response.json();
-  if (data.error) throw new Error(data.error.message);
-  return data.text || '';
+  if (!result?.text) throw new Error('Whisper returned empty transcript');
+  return result.text;
 }
 
 // ═════════════════════════════════════════════════════════════════
