@@ -1090,10 +1090,17 @@ function typeMsg(text){
 // ── PWA Service Worker Registration ──────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
+    // Only register SW when on Pages domain (not workers.dev)
+    const isPagesDomain = location.hostname.includes('pages.dev') || 
+                          location.hostname === 'localhost' ||
+                          !location.hostname.includes('workers.dev');
+    if (!isPagesDomain) {
+      console.log('[AETHER] Skipping SW on workers.dev domain');
+      return;
+    }
     navigator.serviceWorker.register('/sw.js')
       .then(reg => {
         console.log('[AETHER] Service worker registered ✓', reg.scope);
-        // Check for updates every 60s
         setInterval(() => reg.update(), 60000);
       })
       .catch(err => console.warn('[AETHER] SW registration failed:', err));
