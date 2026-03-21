@@ -1,3 +1,199 @@
+// ═════════════════════════════════════════════════════════════════
+// BOT COMMANDS
+// /stats  — weekly summary
+// /flow   — current flow state
+// /goal   — set today's goal
+// /mood   — quick mood log
+// /help   — list commands
+// ═════════════════════════════════════════════════════════════════
+
+async function handleCommand(text, chatId, env) {
+  const parts   = text.trim().split(' ');
+  const command = parts[0].toLowerCase();
+  const args    = parts.slice(1).join(' ');
+
+  switch (command) {
+    case '/help':
+    case '/start': {
+      await sendTelegram(chatId, 
+        `🤖 *AETHER OS — Commands*
+
+` +
+        `/stats — weekly performance summary
+` +
+        `/flow  — are you in flow right now?
+` +
+        `/goal  — set today's main goal
+` +
+        `/mood  — quick mood check-in
+` +
+        `/week  — 7-day activity overview
+
+` +
+        `Or just send any message, voice note, or photo and AETHER will log it.`, env);
+      return true;
+    }
+
+    case '/stats': {
+      const events = await getRecentEvents(50, env);
+      if (events.length === 0) {
+        await sendTelegram(chatId, '📊 No data yet. Send some messages first!', env);
+        return true;
+      }
+      const avgEnergy = events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length;
+      const avgStress = events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length;
+      const studySessions = events.filter(e => e.is_study_session).length;
+      const topics = [...new Set(events.map(e => e.topic).filter(Boolean))].slice(0, 5);
+      const checkins = events.filter(e => e.input_type === 'checkin').length;
+      await sendTelegram(chatId,
+        `📊 *AETHER Weekly Stats*
+
+` +
+        `Events logged: ${events.length}
+` +
+        `Study sessions: ${studySessions}
+` +
+        `Check-ins: ${checkins}
+
+` +
+        `⚡ Avg energy: ${Math.round(avgEnergy * 100)}%
+` +
+        `😤 Avg stress: ${Math.round(avgStress * 100)}%
+
+` +
+        `🧠 Topics: ${topics.join(', ') || 'none yet'}
+
+` +
+        `Keep logging — model trains after 30 days!`, env);
+      return true;
+    }
+
+    case '/flow': {
+      const state = await getLatestState(env);
+      const events = await getRecentEvents(5, env);
+      const recentEnergy = events.length > 0
+        ? events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length
+        : 0.5;
+      const recentStress = events.length > 0
+        ? events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length
+        : 0.2;
+
+      let flowStatus, advice;
+      if (state) {
+        flowStatus = state.flow_class || 'UNKNOWN';
+        if (flowStatus === 'FLOW') advice = 'You are in flow. Protect this time — no distractions.';
+        else if (flowStatus === 'PRE_FLOW') advice = 'Almost there. One focused task to enter flow.';
+        else if (flowStatus === 'ANXIETY') advice = 'Challenge too high. Break the task into smaller pieces.';
+        else if (flowStatus === 'RECOVERY') advice = 'Rest mode. Light tasks only.';
+        else advice = 'Log your state with the check-in to get a flow reading.';
+      } else if (recentEnergy > 0.7 && recentStress < 0.3) {
+        flowStatus = 'FLOW';
+        advice = 'Recent messages suggest flow. Stay focused!';
+      } else {
+        flowStatus = 'NOMINAL';
+        advice = 'Open the AETHER dashboard and log your state for a precise reading.';
+      }
+
+      await sendTelegram(chatId,
+        `🎯 *Flow State*
+
+` +
+        `Status: *${flowStatus}*
+` +
+        `Energy: ${Math.round(recentEnergy * 100)}%
+` +
+        `Stress: ${Math.round(recentStress * 100)}%
+
+` +
+        `${advice}`, env);
+      return true;
+    }
+
+    case '/goal': {
+      if (!args) {
+        await sendTelegram(chatId, '🎯 What is your main goal today? Usage: /goal [your goal]', env);
+        return true;
+      }
+      const today = new Date().toISOString().split('T')[0];
+      await env.AETHER_KV.put(`goal:${today}`, args);
+      await saveEvent({
+        timestamp:       new Date().toISOString(),
+        input_type:      'goal',
+        raw_text:        args,
+        topic:           'goal setting',
+        sentiment:       'positive',
+        energy_signal:   0.7,
+        stress_signal:   0.1,
+        is_goal_mention: true,
+        summary:         args,
+      }, env);
+      await sendTelegram(chatId, `✅ Goal set: *${args}*
+
+AETHER will track this today.`, env);
+      return true;
+    }
+
+    case '/mood': {
+      const moodMap = {
+        '1': { label: 'Very low',  energy: 0.1, stress: 0.6 },
+        '2': { label: 'Low',       energy: 0.3, stress: 0.4 },
+        '3': { label: 'Neutral',   energy: 0.5, stress: 0.3 },
+        '4': { label: 'Good',      energy: 0.7, stress: 0.2 },
+        '5': { label: 'Excellent', energy: 0.9, stress: 0.1 },
+      };
+      if (!args || !moodMap[args]) {
+        await sendTelegram(chatId, '😊 Rate your mood: /mood 1-5 (1=very low, 3=neutral, 5=excellent)', env);
+        return true;
+      }
+      const mood = moodMap[args];
+      await saveEvent({
+        timestamp:     new Date().toISOString(),
+        input_type:    'mood',
+        raw_text:      `mood: ${mood.label}`,
+        topic:         'mood check-in',
+        energy_signal: mood.energy,
+        stress_signal: mood.stress,
+        sentiment:     args >= '4' ? 'positive' : args === '3' ? 'neutral' : 'negative',
+        summary:       `Mood rated ${args}/5: ${mood.label}`,
+      }, env);
+      await sendTelegram(chatId, `${args >= '4' ? '😊' : args === '3' ? '😐' : '😔'} Mood logged: *${mood.label}* (${args}/5)
+
+Energy: ${Math.round(mood.energy*100)}%`, env);
+      return true;
+    }
+
+    case '/week': {
+      const events = await getRecentEvents(100, env);
+      const days = {};
+      events.forEach(e => {
+        const day = e.timestamp?.split('T')[0];
+        if (day) {
+          if (!days[day]) days[day] = { count: 0, energy: [] };
+          days[day].count++;
+          days[day].energy.push(e.energy_signal || 0.5);
+        }
+      });
+      const dayLines = Object.entries(days).slice(0, 7).map(([day, d]) => {
+        const avg = d.energy.reduce((s,v) => s+v, 0) / d.energy.length;
+        const bar = '█'.repeat(Math.round(avg * 5)) + '░'.repeat(5 - Math.round(avg * 5));
+        return `${day}: ${bar} ${d.count} events`;
+      }).join('\n');
+      await sendTelegram(chatId,
+        `📅 *7-Day Activity*
+
+\`\`\`
+${dayLines || 'No data yet'}
+\`\`\`
+
+Keep logging daily!`, env);
+      return true;
+    }
+
+    default:
+      return false; // not a recognized command, treat as regular text
+  }
+}
+
 /**
  * ╔══════════════════════════════════════════════════════════════╗
  * ║            AETHER OS — Cloudflare Worker v2.0               ║
@@ -132,6 +328,11 @@ async function handleWebhook(request, env) {
 
   // ── TEXT ─────────────────────────────────────────────────────
   if (msg.text) {
+    // Handle bot commands first
+    if (msg.text.startsWith('/')) {
+      const handled = await handleCommand(msg.text, chatId, env);
+      if (handled) return textResp('OK', 200);
+    }
     rawText   = msg.text;
     inputType = 'text';
   }
