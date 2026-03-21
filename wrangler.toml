@@ -1,5 +1,7 @@
-name = "aether-api"
+name = "learning-bot"
 main = "api/worker.js"
 compatibility_date = "2025-03-20"
 
-pages_build_output_dir = "./site"
+[assets]
+directory = "./site"
+binding = "ASSETS"
