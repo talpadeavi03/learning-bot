@@ -1271,21 +1271,47 @@ async function saveEvent(event, env) {
     return;
   }
   try {
-    // Get existing events
     const raw    = await env.AETHER_KV.get('events:list');
     const events = raw ? JSON.parse(raw) : [];
 
-    // Prepend new event (newest first)
     events.unshift(event);
-
-    // Cap at MAX_EVENTS
     if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
 
     await env.AETHER_KV.put('events:list', JSON.stringify(events));
     await env.AETHER_KV.put('events:count', String(events.length));
+
+    // Auto-trigger ML pipeline every 5 real events (not commands/checkins)
+    const realTypes = ['text', 'voice', 'image', 'document', 'video_note'];
+    if (realTypes.includes(event.input_type)) {
+      const realCount = events.filter(e => realTypes.includes(e.input_type)).length;
+      if (realCount >= 10 && realCount % 5 === 0 && env.GITHUB_TOKEN) {
+        triggerMLPipeline(env).catch(e =>
+          console.warn('[AETHER] ML trigger failed:', e.message)
+        );
+      }
+    }
   } catch (e) {
     console.error('[AETHER] saveEvent failed:', e.message);
   }
+}
+
+// Trigger GitHub Actions ML pipeline via API
+async function triggerMLPipeline(env) {
+  if (!env.GITHUB_TOKEN) return;
+  console.log('[AETHER] Triggering ML pipeline...');
+  const resp = await fetch(
+    'https://api.github.com/repos/talpadeavi03/learning-bot/actions/workflows/ml_pipeline.yml/dispatches',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
+        'Accept':        'application/vnd.github.v3+json',
+        'Content-Type':  'application/json',
+      },
+      body: JSON.stringify({ ref: 'master' }),
+    }
+  );
+  console.log('[AETHER] ML pipeline triggered:', resp.status);
 }
 
 async function getRecentEvents(limit, env) {
