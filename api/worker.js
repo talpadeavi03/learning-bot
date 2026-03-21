@@ -16,8 +16,8 @@
  * ║                                                              ║
  * ║  TELEGRAM_BOT_TOKEN   from @BotFather on Telegram           ║
  * ║  TELEGRAM_CHAT_ID     your personal numeric chat ID         ║
- * ║  ANTHROPIC_API_KEY    from console.anthropic.com            ║
- * ║  OPENAI_API_KEY       from platform.openai.com (Whisper)    ║
+ * ║  OPENAI_API_KEY       from platform.openai.com            ║
+ * ║                       used for chat, NLP, vision & voice   ║
  * ║                                                              ║
  * ║  KV NAMESPACE — create in Cloudflare dashboard              ║
  * ║  Add binding named AETHER_KV in wrangler.toml:              ║
@@ -31,7 +31,7 @@
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 
-const ANTHROPIC_MODEL  = 'claude-sonnet-4-6';
+const OPENAI_CHAT_MODEL = 'gpt-4o-mini'; // cheap + fast. change to 'gpt-4o' for smarter responses
 const WHISPER_MODEL    = 'whisper-1';
 const MAX_EVENTS       = 500;   // max rows kept in KV events log
 const MAX_HISTORY      = 20;    // max chat turns kept per session
@@ -103,7 +103,7 @@ export default {
 //    Receives all message types from Telegram bot
 //    Text → direct NLP
 //    Voice / Video note → Whisper → NLP
-//    Photo → Claude Vision → NLP
+//    Photo → GPT-4o Vision → NLP
 //    All paths converge into processText() → saveEvent()
 // ═════════════════════════════════════════════════════════════════
 
@@ -139,28 +139,36 @@ async function handleWebhook(request, env) {
 
   // ── VOICE NOTE (hold mic button) ─────────────────────────────
   else if (msg.voice) {
-    await sendTelegram(chatId, '🎙 Processing voice note...', env);
+    if (!env.OPENAI_API_KEY) {
+      await sendTelegram(chatId, '🎙 Voice noted! Add OPENAI_API_KEY to enable transcription.\nFor now, send as text.', env);
+      return textResp('No OpenAI key', 200);
+    }
+    await sendTelegram(chatId, '🎙 Transcribing...', env);
     try {
       const fileUrl = await getTelegramFileUrl(msg.voice.file_id, env);
       rawText       = await whisperTranscribe(fileUrl, env);
       inputType     = 'voice';
       extra.duration_seconds = msg.voice.duration;
     } catch (e) {
-      await sendTelegram(chatId, '⚠️ Could not transcribe voice note: ' + e.message, env);
+      await sendTelegram(chatId, '⚠️ Could not transcribe: ' + e.message, env);
       return textResp('Voice error', 200);
     }
   }
 
   // ── VIDEO NOTE (circle video) ─────────────────────────────────
   else if (msg.video_note) {
-    await sendTelegram(chatId, '🎥 Processing video note...', env);
+    if (!env.OPENAI_API_KEY) {
+      await sendTelegram(chatId, '🎥 Video noted! Add OPENAI_API_KEY to enable transcription.\nFor now, send as text.', env);
+      return textResp('No OpenAI key', 200);
+    }
+    await sendTelegram(chatId, '🎥 Processing video...', env);
     try {
       const fileUrl = await getTelegramFileUrl(msg.video_note.file_id, env);
       rawText       = await whisperTranscribe(fileUrl, env);
       inputType     = 'video_note';
       extra.duration_seconds = msg.video_note.duration;
     } catch (e) {
-      await sendTelegram(chatId, '⚠️ Could not process video note: ' + e.message, env);
+      await sendTelegram(chatId, '⚠️ Could not process video: ' + e.message, env);
       return textResp('Video error', 200);
     }
   }
@@ -172,7 +180,7 @@ async function handleWebhook(request, env) {
       // Telegram sends multiple sizes — take the largest (last)
       const bestPhoto = msg.photo[msg.photo.length - 1];
       const fileUrl   = await getTelegramFileUrl(bestPhoto.file_id, env);
-      rawText         = await claudeVisionExtract(fileUrl, msg.caption || '', env);
+      rawText         = await openaiVisionExtract(fileUrl, msg.caption || '', env);
       inputType       = 'image';
     } catch (e) {
       await sendTelegram(chatId, '⚠️ Could not read image: ' + e.message, env);
@@ -259,9 +267,9 @@ async function handleChat(request, env) {
 
   let reply;
   try {
-    reply = await callClaude(systemPrompt, trimmedHistory, env);
+    reply = await callOpenAI(systemPrompt, trimmedHistory, env);
   } catch (e) {
-    console.error('[AETHER] Claude error:', e);
+    console.error('[AETHER] OpenAI error:', e);
     return jsonResp({ error: 'AI unavailable: ' + e.message }, 500);
   }
 
@@ -356,22 +364,27 @@ async function handleEvents(request, env) {
 // ═════════════════════════════════════════════════════════════════
 
 async function handleHealth(request, env) {
-  const kvOk = env.AETHER_KV ? true : false;
-  const anthropicOk = !!env.ANTHROPIC_API_KEY;
+  const kvOk        = !!env.AETHER_KV;
+  const openaiOk = !!env.OPENAI_API_KEY;
   const telegramOk  = !!env.TELEGRAM_BOT_TOKEN;
+  const chatIdOk    = !!env.TELEGRAM_CHAT_ID;
   const whisperOk   = !!env.OPENAI_API_KEY;
 
   const eventCount = await getEventCount(env);
 
+  // Overall ready = core 4 are present (OpenAI is optional)
+  const coreReady = kvOk && openaiOk && telegramOk && chatIdOk;
+
   return jsonResp({
-    status:     'AETHER ONLINE',
+    status:     coreReady ? 'AETHER ONLINE ✅' : 'AETHER PARTIAL ⚠️',
     version:    '2.0',
     timestamp:  new Date().toISOString(),
     services: {
-      kv:        kvOk        ? 'OK' : 'MISSING — add KV binding in wrangler.toml',
-      anthropic: anthropicOk ? 'OK' : 'MISSING — add ANTHROPIC_API_KEY secret',
-      telegram:  telegramOk  ? 'OK' : 'MISSING — add TELEGRAM_BOT_TOKEN secret',
-      whisper:   whisperOk   ? 'OK' : 'MISSING — add OPENAI_API_KEY secret (for voice)',
+      kv:               kvOk        ? 'OK' : '❌ MISSING — create KV namespace + add to wrangler.toml',
+      openai:           openaiOk   ? 'OK' : '❌ MISSING — add OPENAI_API_KEY secret',
+      telegram_token:   telegramOk  ? 'OK' : '❌ MISSING — add TELEGRAM_BOT_TOKEN secret',
+      telegram_chat_id: chatIdOk    ? 'OK' : '❌ MISSING — add TELEGRAM_CHAT_ID secret',
+      whisper_voice:    whisperOk   ? 'OK' : '⚪ OPTIONAL — add OPENAI_API_KEY to enable voice notes',
     },
     data: {
       total_events: eventCount,
@@ -382,7 +395,7 @@ async function handleHealth(request, env) {
 // ═════════════════════════════════════════════════════════════════
 // NLP PARSER
 // Extracts structured features from any raw text
-// Uses Claude to understand content deeply
+// Uses GPT-4o-mini to understand content deeply
 // ═════════════════════════════════════════════════════════════════
 
 async function nlpParse(text, inputType, env) {
@@ -413,22 +426,21 @@ Base stress_signal on anxiety/overwhelm words (calm=0.1, stressed=0.8).
 Return ONLY the JSON object, no other text.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'x-api-key':         env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type':      'application/json',
+        'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+        'Content-Type':  'application/json',
       },
       body: JSON.stringify({
-        model:      ANTHROPIC_MODEL,
+        model:      OPENAI_CHAT_MODEL,
         max_tokens: 400,
         messages: [{ role: 'user', content: prompt }],
       }),
     });
 
     const data   = await response.json();
-    const raw    = data?.content?.[0]?.text || '{}';
+    const raw    = data?.choices?.[0]?.message?.content || '{}';
     const parsed = JSON.parse(raw.trim());
     return parsed;
 
@@ -472,32 +484,25 @@ function fallbackNLP(text) {
 // Extracts text and topics from photos
 // ═════════════════════════════════════════════════════════════════
 
-async function claudeVisionExtract(imageUrl, caption, env) {
+async function openaiVisionExtract(imageUrl, caption, env) {
   const prompt = caption
     ? `Image caption: "${caption}". Extract all text, topics, tasks, and key information visible in this image.`
     : 'Extract all text, topics, tasks, and key information visible in this image. Include any handwritten notes, diagrams, or text you can see.';
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'x-api-key':         env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'content-type':      'application/json',
+      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      'Content-Type':  'application/json',
     },
     body: JSON.stringify({
-      model:      ANTHROPIC_MODEL,
+      model:      'gpt-4o',
       max_tokens: 500,
       messages: [{
         role: 'user',
         content: [
-          {
-            type:   'image',
-            source: { type: 'url', url: imageUrl },
-          },
-          {
-            type: 'text',
-            text: prompt,
-          },
+          { type: 'image_url', image_url: { url: imageUrl } },
+          { type: 'text',      text: prompt },
         ],
       }],
     }),
@@ -505,7 +510,7 @@ async function claudeVisionExtract(imageUrl, caption, env) {
 
   const data = await response.json();
   if (data.error) throw new Error(data.error.message);
-  return data?.content?.[0]?.text || '';
+  return data?.choices?.[0]?.message?.content || '';
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -643,25 +648,29 @@ Rules:
 - Always end with one concrete action if the question is about productivity.`;
 }
 
-async function callClaude(systemPrompt, history, env) {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+async function callOpenAI(systemPrompt, history, env) {
+  // Convert history to OpenAI format (prepend system message)
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...history,
+  ];
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'x-api-key':         env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'content-type':      'application/json',
+      'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+      'Content-Type':  'application/json',
     },
     body: JSON.stringify({
-      model:      ANTHROPIC_MODEL,
+      model:      OPENAI_CHAT_MODEL,
       max_tokens: 400,
-      system:     systemPrompt,
-      messages:   history,
+      messages,
     }),
   });
 
   const data = await response.json();
-  if (data.error) throw new Error(data.error.message || 'Claude API error');
-  return data?.content?.[0]?.text || 'No response from AI.';
+  if (data.error) throw new Error(data.error.message || 'OpenAI API error');
+  return data?.choices?.[0]?.message?.content || 'No response from AI.';
 }
 
 // ═════════════════════════════════════════════════════════════════
