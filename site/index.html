@@ -4,967 +4,186 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>AETHER — Personal AI OS</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
+
+/* =====================================================
+   BLACK + WHITE MINIMAL THEME
+===================================================== */
+
 :root{
-  --c:#00ffff; --p:#ff00aa; --g:#00ff88; --o:#ffaa00; --r:#ff3355;
-  --dark:#010b12; --panel:rgba(0,16,26,0.9); --border:rgba(0,255,255,0.18);
-  --text:#bde0ea; --text2:rgba(189,224,234,0.55);
+
+  /* main accent now white */
+  --c:#ffffff;
+  --p:#ffffff;
+  --g:#ffffff;
+  --o:#ffffff;
+  --r:#ffffff;
+
+  /* backgrounds */
+  --dark:#000000;
+  --panel:#0a0a0a;
+
+  /* borders */
+  --border:rgba(255,255,255,0.12);
+
+  /* text */
+  --text:#ffffff;
+  --text2:rgba(255,255,255,0.55);
+
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;scroll-behavior:smooth}
-body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:500;min-height:100vh;overflow-x:hidden;cursor:none}
 
-/* CURSOR */
-#cur,#curd{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s}
-#cur{width:22px;height:22px;border:1.5px solid var(--c);border-radius:50%;mix-blend-mode:screen}
-#curd{width:4px;height:4px;background:var(--c);border-radius:50%}
-@media(hover:none){#cur,#curd{display:none}body{cursor:auto}}
-
-/* BG */
-#bgc{position:fixed;inset:0;z-index:0;pointer-events:none}
-#dim{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse 80% 70% at 50% 30%,rgba(0,18,32,0.5) 0%,rgba(0,4,10,0.88) 100%)}
-#dim::after{content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px)}
-
-/* APP */
-#app{position:relative;z-index:2;display:flex;flex-direction:column;min-height:100vh}
-
-/* HEADER */
-header{display:flex;justify-content:space-between;align-items:center;padding:13px 28px;
-  border-bottom:1px solid var(--border);background:rgba(0,6,14,0.95);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  position:sticky;top:0;z-index:200;gap:10px}
-.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(16px,3.5vw,26px);
-  letter-spacing:5px;color:var(--c);text-shadow:0 0 16px var(--c),0 0 32px rgba(0,255,255,.35);
-  animation:glitch 7s infinite;flex-shrink:0}
-.logo span{color:var(--p);text-shadow:0 0 12px var(--p)}
-@keyframes glitch{
-  0%,85%,100%{text-shadow:0 0 16px var(--c),0 0 32px rgba(0,255,255,.35);transform:none}
-  87%{text-shadow:-3px 0 var(--p),3px 0 var(--g);transform:skewX(-4deg)}
-  89%{text-shadow:3px 0 var(--p),-3px 0 var(--g);transform:skewX(2deg)}
-  91%{text-shadow:0 0 16px var(--c);transform:none}
+*,*::before,*::after{
+box-sizing:border-box;
+margin:0;
+padding:0
 }
-.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
-.hpill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:2px;opacity:.65;color:var(--text)}
-.dot{width:7px;height:7px;border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
-.dot.g{background:var(--g);box-shadow:0 0 8px var(--g)}
-.dot.c{background:var(--c);box-shadow:0 0 8px var(--c)}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-#clk{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--c);opacity:.75;letter-spacing:2px}
-#date{font-size:12px;font-weight:600;letter-spacing:1px;opacity:.5;color:var(--text)}
-.hbtn{background:transparent;border:1px solid var(--c);color:var(--c);padding:8px 18px;
-  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;
-  cursor:pointer;position:relative;overflow:hidden;transition:color .3s;
-  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);white-space:nowrap}
-.hbtn::before{content:'';position:absolute;inset:0;background:var(--c);transform:translateX(-110%);transition:transform .3s;z-index:-1}
-.hbtn:hover::before{transform:translateX(0)}
-.hbtn:hover{color:var(--dark)}
-.nav-tabs{display:flex;gap:2px;background:rgba(0,255,255,.04);border:1px solid var(--border);padding:2px}
-.ntab{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;
-  padding:7px 14px;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent}
-.ntab.on{background:rgba(0,255,255,.12);color:var(--c);text-shadow:0 0 8px var(--c)}
-.ntab:hover:not(.on){color:var(--text);background:rgba(0,255,255,.06)}
 
-/* WORKER STATUS */
-#workerStatus{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
-  letter-spacing:1px;padding:4px 12px;border:1px solid var(--border);font-family:'Orbitron',sans-serif}
-#workerStatus.ok{border-color:rgba(0,255,136,.35);color:var(--g)}
-#workerStatus.err{border-color:rgba(255,51,85,.35);color:var(--r)}
-
-/* VIEWS */
-.view{display:none;animation:fadeIn .35s ease}
-.view.on{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* GRID */
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;padding:16px 20px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:16px 20px}
-.grid1{display:grid;grid-template-columns:1fr;gap:13px;padding:16px 20px}
-.g-full{grid-column:1/-1}
-.g2{grid-column:span 2}
-
-/* PANEL */
-.panel{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;
-  position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);
-  animation:pIn .5s ease forwards;opacity:0;transform:translateY(14px)}
-.panel::before{content:'';position:absolute;top:0;left:-200%;width:200%;height:1px;
-  background:linear-gradient(90deg,transparent,var(--c),transparent);animation:sweep 5s infinite}
-@keyframes sweep{0%{left:-200%}100%{left:200%}}
-@keyframes pIn{to{opacity:1;transform:translateY(0)}}
-.panel:nth-child(1){animation-delay:.04s}.panel:nth-child(2){animation-delay:.1s}
-.panel:nth-child(3){animation-delay:.16s}.panel:nth-child(4){animation-delay:.22s}
-.panel:nth-child(5){animation-delay:.28s}.panel:nth-child(6){animation-delay:.34s}
-.panel:nth-child(7){animation-delay:.40s}.panel:nth-child(8){animation-delay:.46s}
-.co{position:absolute;width:12px;height:12px;border-color:rgba(0,255,255,.4);border-style:solid}
-.co.tl{top:5px;left:5px;border-width:1px 0 0 1px}
-.co.tr{top:5px;right:5px;border-width:1px 1px 0 0}
-.co.bl{bottom:5px;left:5px;border-width:0 0 1px 1px}
-.co.br{bottom:5px;right:5px;border-width:0 1px 1px 0}
-.pt{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;
-  color:var(--c);opacity:.55;margin-bottom:18px;text-transform:uppercase;
-  display:flex;align-items:center;gap:10px}
-.pt span{opacity:.3;font-size:9px}
-.pt::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.18),transparent)}
-
-/* WELCOME */
-.welcome-strip{background:linear-gradient(135deg,rgba(0,255,255,.06) 0%,rgba(255,0,170,.04) 100%);
-  border-bottom:1px solid var(--border);padding:16px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.wname{font-family:'Orbitron',sans-serif;font-size:clamp(14px,3vw,20px);font-weight:900;
-  letter-spacing:3px;color:var(--c);text-shadow:0 0 12px rgba(0,255,255,.4)}
-.wname span{color:var(--text2);font-size:.75em;letter-spacing:2px;display:block;margin-bottom:2px}
-.wstats{display:flex;gap:20px;flex-wrap:wrap}
-.wstat{text-align:center}
-.wstat-n{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;line-height:1}
-.wstat-l{font-size:11px;font-weight:600;letter-spacing:2px;opacity:.45;margin-top:3px}
-
-/* METRICS */
-.big-stat{text-align:center;padding:16px 0 18px;border:1px solid var(--border);margin-bottom:18px;background:rgba(0,255,255,.025)}
-.bnum{font-family:'Orbitron',sans-serif;font-size:clamp(36px,5vw,50px);font-weight:900;color:var(--c);
-  text-shadow:0 0 24px var(--c),0 0 50px rgba(0,255,255,.2);line-height:1}
-.blbl{font-size:12px;font-weight:600;letter-spacing:3px;opacity:.38;margin-top:6px}
-.mrow{margin-bottom:18px}
-.ml{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:700;
-  letter-spacing:1.5px;color:var(--text);margin-bottom:8px}
-.mv{font-family:'Orbitron',sans-serif;font-size:12px;text-shadow:0 0 8px currentColor}
-.mv.c{color:var(--c)}.mv.p{color:var(--p)}.mv.g{color:var(--g)}.mv.o{color:var(--o)}
-.btrack{height:7px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
-.bfill{height:100%;width:0%;border-radius:2px;transition:width 1.6s cubic-bezier(.4,0,.2,1)}
-.bf-c{background:linear-gradient(90deg,var(--c),rgba(0,180,180,.4));box-shadow:0 0 12px rgba(0,255,255,.5)}
-.bf-p{background:linear-gradient(90deg,var(--p),rgba(180,0,120,.4));box-shadow:0 0 12px rgba(255,0,170,.5)}
-.bf-g{background:linear-gradient(90deg,var(--g),rgba(0,180,80,.4));box-shadow:0 0 12px rgba(0,255,136,.5)}
-.bf-o{background:linear-gradient(90deg,var(--o),rgba(180,120,0,.4));box-shadow:0 0 12px rgba(255,170,0,.5)}
-
-/* STAT CARDS */
-.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:2px}
-.sc{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.02);
-  display:flex;flex-direction:column;gap:4px;transition:border-color .2s,background .2s}
-.sc:hover{border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.05)}
-.sc-n{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;line-height:1}
-.sc-l{font-size:12px;font-weight:600;letter-spacing:2px;opacity:.45}
-.sc-sub{font-size:11px;font-weight:600;letter-spacing:1px;margin-top:2px}
-
-/* ACTIVITY */
-.aitem{display:flex;justify-content:space-between;align-items:center;padding:12px 0;
-  border-bottom:1px solid rgba(0,255,255,.07);animation:sIn .4s ease forwards;opacity:0}
-.aitem:last-child{border-bottom:none}
-@keyframes sIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-.atop{font-size:15px;font-weight:600;letter-spacing:.5px;color:var(--text)}
-.asub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
-.amins{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--p);
-  background:rgba(255,0,170,.07);border:1px solid rgba(255,0,170,.22);padding:3px 10px}
-.abadge{font-size:10px;padding:2px 8px;border-radius:2px;font-weight:700;letter-spacing:1px;margin-left:8px}
-.ab-l{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.2)}
-.ab-c{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.2)}
-
-/* TIMELINE */
-.tlist{padding-left:22px;border-left:1px solid var(--border)}
-.titem{display:flex;gap:14px;padding:11px 0;position:relative;animation:fIn .4s ease forwards;opacity:0}
-.titem::before{content:'';position:absolute;left:-25px;top:16px;width:7px;height:7px;
-  background:var(--c);border-radius:50%;box-shadow:0 0 7px var(--c);animation:blink 2.5s infinite}
-.ttime{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--p);
-  white-space:nowrap;padding-top:2px;min-width:42px;text-shadow:0 0 6px var(--p)}
-.tevent{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);opacity:.85}
-@keyframes fIn{to{opacity:1}}
-
-/* INSIGHTS */
-.insights{display:flex;flex-direction:column;gap:10px}
-.insight{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.02);
-  display:flex;gap:14px;align-items:flex-start;transition:border-color .2s,background .2s;cursor:default}
-.insight:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.04)}
-.ins-icon{font-size:20px;flex-shrink:0;margin-top:2px}
-.ins-title{font-size:14px;font-weight:700;letter-spacing:.5px;color:var(--c);margin-bottom:5px}
-.ins-body{font-size:13px;font-weight:500;line-height:1.6;opacity:.8}
-.ins-tag{display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;
-  padding:2px 8px;margin-top:7px;font-weight:700}
-.tag-hi{background:rgba(255,51,85,.1);color:var(--r);border:1px solid rgba(255,51,85,.25)}
-.tag-med{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
-.tag-ok{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.25)}
-
-/* PIPELINE */
-.pipeline{display:flex;flex-direction:column;gap:8px}
-.pipe-item{display:flex;align-items:center;gap:14px;padding:12px 14px;
-  border:1px solid var(--border);background:rgba(0,255,255,.02);transition:all .2s}
-.pipe-item:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.04)}
-.pipe-icon{font-size:16px;flex-shrink:0}
-.pipe-name{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text)}
-.pipe-sub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
-.pipe-status{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:2px}
-.ps-ok{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.25)}
-.ps-warn{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
-.ps-off{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1)}
-.ps-run{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.25);animation:blink 1.5s infinite}
-
-/* CHART */
-.chart-wrap{position:relative;max-height:220px}
-.chart-row{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center}
-.clegend{display:flex;flex-direction:column;gap:9px}
-.li{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);
-  background:rgba(0,255,255,.02);transition:all .2s;cursor:default}
-.li:hover{border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.05)}
-.ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.lname{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text)}
-.lpct{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700}
-
-/* WEEK CHART */
-.week-wrap{position:relative;height:180px}
-
-/* MEMORY */
-.mem-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(0,255,255,.07)}
-.mem-item:last-child{border-bottom:none}
-.mem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.mem-txt{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);opacity:.85;flex:1}
-.mem-time{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--c);opacity:.4;white-space:nowrap;margin-top:2px}
-
-/* QUICK ACTIONS */
-.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.qa{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);
-  background:rgba(0,255,255,.02);cursor:pointer;transition:all .2s}
-.qa:hover{border-color:rgba(0,255,255,.4);background:rgba(0,255,255,.06);transform:translateY(-1px)}
-.qa-icon{font-size:20px;flex-shrink:0}
-.qa-label{font-size:14px;font-weight:700;letter-spacing:.5px;color:var(--text)}
-.qa-sub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
-
-/* GOALS */
-.goal-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,255,255,.07)}
-.goal-item:last-child{border-bottom:none}
-.goal-check{width:18px;height:18px;border:1.5px solid var(--border);border-radius:2px;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .2s}
-.goal-check.done{background:var(--g);border-color:var(--g);box-shadow:0 0 8px var(--g)}
-.goal-check.done::after{content:'✓';color:var(--dark);font-size:11px;font-weight:900}
-.goal-txt{flex:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
-.goal-txt.done{text-decoration:line-through;opacity:.4}
-.goal-cat{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:2px 7px;font-weight:700}
-
-/* MOOD */
-.mood-row{display:flex;gap:10px;justify-content:space-around;margin:10px 0}
-.mood-btn{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
-  padding:12px 16px;border:1px solid var(--border);background:transparent;transition:all .2s;flex:1}
-.mood-btn.sel{border-color:var(--c);background:rgba(0,255,255,.08);box-shadow:0 0 12px rgba(0,255,255,.15)}
-.mood-emoji{font-size:22px}
-.mood-label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text2)}
-
-/* SYSTEM */
-.sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sys-item{padding:14px;border:1px solid var(--border);background:rgba(0,255,255,.02)}
-.sys-key{font-size:11px;font-weight:700;letter-spacing:3px;opacity:.4;margin-bottom:6px}
-.sys-val{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--c)}
-.sys-sub{font-size:11px;opacity:.4;margin-top:3px}
-
-/* CHAT */
-#chatOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:249;opacity:0;pointer-events:none;transition:opacity .35s}
-#chatOverlay.on{opacity:1;pointer-events:all}
-#chatPanel{position:fixed;bottom:20px;right:20px;width:min(420px,calc(100vw - 20px));
-  height:min(580px,88vh);background:rgba(0,8,18,0.98);border:1px solid rgba(0,255,255,.35);
-  display:flex;flex-direction:column;z-index:250;
-  box-shadow:0 8px 60px rgba(0,0,0,.8),0 0 40px rgba(0,255,255,.08);
-  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
-  transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s;transform-origin:bottom right}
-#chatPanel.hidden{transform:scale(.88) translateY(14px);opacity:0;pointer-events:none}
-.ch{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
-  border-bottom:1px solid var(--border);background:rgba(0,12,22,.95);flex-shrink:0}
-.ct{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;color:var(--c);
-  display:flex;align-items:center;gap:9px}
-.od{width:7px;height:7px;background:var(--g);border-radius:50%;animation:blink 2s infinite;box-shadow:0 0 6px var(--g)}
-.cc{background:none;border:1px solid rgba(255,0,170,.35);color:var(--p);width:28px;height:28px;
-  cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
-.cc:hover{background:rgba(255,0,170,.15)}
-#chatMsgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
-  scrollbar-width:thin;scrollbar-color:rgba(0,255,255,.15) transparent}
-#chatMsgs::-webkit-scrollbar{width:3px}
-#chatMsgs::-webkit-scrollbar-thumb{background:rgba(0,255,255,.2)}
-.msg{max-width:88%;padding:11px 15px;font-size:15px;font-weight:500;line-height:1.6;animation:msgIn .3s ease}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.msg.user{align-self:flex-end;background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.25);
-  color:#d0f5f5;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
-.msg.ai{align-self:flex-start;background:rgba(255,0,170,.05);border:1px solid rgba(255,0,170,.18);
-  color:#eaeaea;clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
-.mlbl{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;opacity:.38;margin-bottom:5px}
-#thinking{display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:13px;font-weight:600;
-  color:var(--p);opacity:.7;letter-spacing:1px;flex-shrink:0}
-#thinking.hidden{display:none}
-.tdots span{display:inline-block;width:5px;height:5px;background:var(--p);border-radius:50%;
-  margin:0 2px;animation:bnc 1s infinite}
-.tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
-@keyframes bnc{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-.qchips{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px;flex-shrink:0}
-.chip{font-size:12px;font-weight:600;padding:5px 12px;border:1px solid var(--border);
-  color:rgba(0,255,255,.5);cursor:pointer;transition:all .2s;background:transparent}
-.chip:hover{border-color:var(--c);color:var(--c);background:rgba(0,255,255,.06)}
-.cinput{display:flex;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,6,14,.9);flex-shrink:0}
-#chatIn{flex:1;background:rgba(0,255,255,.04);border:1px solid var(--border);border-right:none;
-  color:var(--c);padding:11px 14px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;
-  outline:none;transition:border-color .3s;min-width:0}
-#chatIn:focus{border-color:rgba(0,255,255,.45)}
-#chatIn::placeholder{color:rgba(0,255,255,.26)}
-#sendBtn{background:var(--c);color:var(--dark);border:none;padding:11px 18px;
-  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;
-  transition:background .2s,box-shadow .2s;white-space:nowrap;flex-shrink:0;
-  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
-#sendBtn:hover{background:#fff;box-shadow:0 0 16px rgba(0,255,255,.5)}
-#sendBtn:disabled{opacity:.35;cursor:not-allowed}
-
-/* LOADER */
-#loader{position:fixed;inset:0;background:var(--dark);z-index:9999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-  transition:opacity .7s}
-#loader.gone{opacity:0;pointer-events:none}
-.ll{font-family:'Orbitron',sans-serif;font-size:clamp(24px,8vw,42px);font-weight:900;
-  letter-spacing:10px;color:var(--c);text-shadow:0 0 30px var(--c),0 0 60px rgba(0,255,255,.25);
-  animation:glitch 4s infinite}
-.lb{width:260px;height:2px;background:rgba(0,255,255,.1);overflow:hidden}
-.lbf{height:100%;background:var(--c);width:0;animation:lfill 2.2s ease forwards;box-shadow:0 0 12px var(--c)}
-@keyframes lfill{to{width:100%}}
-.ls{font-size:13px;font-weight:600;letter-spacing:4px;opacity:.4}
-.ls2{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--g);opacity:.7;margin-top:4px;min-height:18px;letter-spacing:1px}
-
-/* MOBILE */
-@media(max-width:900px){
-  .grid3{grid-template-columns:1fr 1fr;padding:12px;gap:10px}
-  .g2{grid-column:1/-1}
-  .stat-cards{grid-template-columns:1fr 1fr}
-  .chart-row{grid-template-columns:1fr}
-  .cwrap{max-width:240px;margin:0 auto}
-  .clegend{flex-direction:row;flex-wrap:wrap}
-  .li{flex:1 1 calc(50% - 5px)}
-  .sys-grid{grid-template-columns:1fr 1fr}
+html{
+font-size:16px;
+scroll-behavior:smooth
 }
-@media(max-width:600px){
-  header{padding:11px 14px}
-  .logo{font-size:16px;letter-spacing:3px}
-  #clk,#date,.hpill:first-child{display:none}
-  .hbtn{padding:8px 12px;font-size:10px;letter-spacing:1px}
-  .nav-tabs{flex-wrap:wrap}
-  .ntab{font-size:9px;padding:6px 10px}
-  .grid3,.grid2{grid-template-columns:1fr;padding:10px;gap:10px}
-  .g-full,.g2{grid-column:1}
-  .stat-cards{grid-template-columns:1fr 1fr}
-  .chart-row{grid-template-columns:1fr}
-  .clegend{flex-direction:column}
-  .li{flex:unset}
-  .qa-grid{grid-template-columns:1fr}
-  .sys-grid{grid-template-columns:1fr 1fr}
-  .welcome-strip{flex-direction:column;align-items:flex-start}
-  .wstats{gap:14px}
-  #chatPanel{bottom:0;right:0;width:100vw;height:90vh;
-    clip-path:polygon(0 16px,16px 0,100% 0,100% 100%,0 100%)}
-  .panel{padding:15px 13px}
-  .bnum{font-size:36px}
+
+body{
+background:#000000;
+color:#ffffff;
+font-family:'Rajdhani',sans-serif;
+font-weight:500;
+min-height:100vh;
+overflow-x:hidden;
+cursor:none
 }
+
+/* ================= CURSOR ================= */
+
+#cur,#curd{
+position:fixed;
+pointer-events:none;
+z-index:9999;
+transform:translate(-50%,-50%);
+transition:transform .1s
+}
+
+#cur{
+width:22px;
+height:22px;
+border:1.5px solid #ffffff;
+border-radius:50%;
+mix-blend-mode:screen
+}
+
+#curd{
+width:4px;
+height:4px;
+background:#ffffff;
+border-radius:50%
+}
+
+@media(hover:none){
+#cur,#curd{display:none}
+body{cursor:auto}
+}
+
+/* ================= HEADER ================= */
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:13px 28px;
+border-bottom:1px solid var(--border);
+background:#050505;
+backdrop-filter:blur(20px);
+position:sticky;
+top:0;
+z-index:200;
+gap:10px
+}
+
+.logo{
+font-family:'Orbitron',sans-serif;
+font-weight:900;
+font-size:clamp(16px,3.5vw,26px);
+letter-spacing:5px;
+color:#ffffff;
+text-shadow:none;
+}
+
+.logo span{
+color:#ffffff
+}
+
+/* buttons */
+
+.hbtn{
+background:transparent;
+border:1px solid #ffffff;
+color:#ffffff;
+padding:8px 18px;
+font-family:'Orbitron',sans-serif;
+font-size:11px;
+font-weight:700;
+letter-spacing:3px;
+cursor:pointer;
+transition:all .25s
+}
+
+.hbtn:hover{
+background:#ffffff;
+color:#000000
+}
+
+/* panels */
+
+.panel{
+background:#0a0a0a;
+border:1px solid var(--border);
+padding:20px;
+border-radius:4px;
+position:relative;
+overflow:hidden;
+box-shadow:0 4px 32px rgba(0,0,0,.6)
+}
+
+/* text */
+
+.pt{
+font-family:'Orbitron',sans-serif;
+font-size:10px;
+font-weight:700;
+letter-spacing:4px;
+color:#ffffff;
+opacity:.7;
+margin-bottom:18px;
+text-transform:uppercase
+}
+
+/* charts + stats */
+
+.bnum{
+font-family:'Orbitron',sans-serif;
+font-size:clamp(36px,5vw,50px);
+font-weight:900;
+color:#ffffff;
+line-height:1
+}
+
+.btrack{
+height:7px;
+background:rgba(255,255,255,.08);
+border-radius:2px;
+overflow:hidden
+}
+
+.bfill{
+height:100%;
+background:#ffffff;
+width:0%;
+transition:width 1.6s
+}
+
 </style>
 </head>
-<body>
-
-<!-- ✅ FIX: cursor divs added here -->
-<div id="cur"></div>
-<div id="curd"></div>
-
-<!-- LOADER -->
-<div id="loader">
-  <div class="ll">AETHER</div>
-  <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--g);opacity:.6;letter-spacing:2px;margin-bottom:4px">PERSONAL AI OS v2.0</div>
-  <div class="lb"><div class="lbf"></div></div>
-  <div class="ls">BOOTING NEURAL INTERFACE</div>
-  <div class="ls2" id="bootLog">Initializing core modules...</div>
-</div>
-
-<canvas id="bgc"></canvas>
-<div id="dim"></div>
-
-<div id="app">
-  <!-- HEADER -->
-  <header>
-    <div class="logo">AETHER <span>OS</span></div>
-    <div class="hright">
-      <div class="nav-tabs">
-        <button class="ntab on" onclick="showView('dash',this)">OVERVIEW</button>
-        <button class="ntab" onclick="showView('learn',this)">LEARNING</button>
-        <button class="ntab" onclick="showView('goals',this)">GOALS</button>
-        <button class="ntab" onclick="showView('system',this)">SYSTEM</button>
-      </div>
-      <div id="workerStatus" class="err"><span>●</span><span>WORKER</span></div>
-      <div class="hpill"><div class="dot g"></div><span>ONLINE</span></div>
-      <div id="clk"></div>
-      <div id="date"></div>
-      <button class="hbtn" onclick="toggleChat()">◈ ASK AETHER</button>
-    </div>
-  </header>
-
-  <!-- WELCOME -->
-  <div class="welcome-strip">
-    <div class="wname"><span>NEURAL INTERFACE ACTIVE</span>WELCOME BACK, AVI</div>
-    <div class="wstats">
-      <div class="wstat"><div class="wstat-n" style="color:var(--c)" id="wScore">0</div><div class="wstat-l">TODAY SCORE</div></div>
-      <div class="wstat"><div class="wstat-n" style="color:var(--g)" id="wStreak">0</div><div class="wstat-l">DAY STREAK</div></div>
-      <div class="wstat"><div class="wstat-n" style="color:var(--p)" id="wHours">0</div><div class="wstat-l">HOURS STUDIED</div></div>
-      <div class="wstat"><div class="wstat-n" style="color:var(--o)" id="wTasks">0</div><div class="wstat-l">TASKS DONE</div></div>
-    </div>
-  </div>
-
-  <!-- OVERVIEW -->
-  <div class="view on" id="view-dash">
-    <div class="grid3">
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">System Metrics <span>LIVE</span></div>
-        <div class="big-stat"><div class="bnum" id="bigNum">0</div><div class="blbl">EFFICIENCY SCORE</div></div>
-        <div class="mrow"><div class="ml"><span>FOCUS</span><span class="mv c" id="focusVal">0%</span></div><div class="btrack"><div class="bfill bf-c" id="focusBar"></div></div></div>
-        <div class="mrow"><div class="ml"><span>LEARNING</span><span class="mv p" id="learningVal">0%</span></div><div class="btrack"><div class="bfill bf-p" id="learningBar"></div></div></div>
-        <div class="mrow"><div class="ml"><span>PRODUCTIVITY</span><span class="mv g" id="productivityVal">0%</span></div><div class="btrack"><div class="bfill bf-g" id="productivityBar"></div></div></div>
-        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>MOOD</span><span class="mv o" id="moodVal">0%</span></div><div class="btrack"><div class="bfill bf-o" id="moodBar"></div></div></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Today's Activity <span>LOG</span></div>
-        <div id="activity"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Timeline <span>TODAY</span></div>
-        <div class="tlist" id="timeline"></div>
-      </div>
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">AI Insights <span>AETHER ANALYSIS</span></div>
-        <div class="insights" id="insights"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">System Pipeline <span>STATUS</span></div>
-        <div class="pipeline" id="pipeline"></div>
-      </div>
-      <div class="panel g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Learning Distribution <span>CHART</span></div>
-        <div class="chart-row">
-          <div><div class="chart-wrap"><canvas id="donutChart"></canvas></div></div>
-          <div class="clegend" id="donutLegend"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEARNING -->
-  <div class="view" id="view-learn">
-    <div class="grid3">
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Weekly Study Hours <span>7 DAYS</span></div>
-        <div class="week-wrap"><canvas id="weekChart"></canvas></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Weekly Stats</div>
-        <div class="stat-cards" style="grid-template-columns:1fr 1fr">
-          <div class="sc"><div class="sc-n" style="color:var(--c)">12.4h</div><div class="sc-l">TOTAL STUDY</div><div class="sc-sub" style="color:var(--g)">↑ +2.1h vs last week</div></div>
-          <div class="sc"><div class="sc-n" style="color:var(--p)">94%</div><div class="sc-l">CONSISTENCY</div><div class="sc-sub" style="color:var(--g)">↑ 6 of 7 days</div></div>
-          <div class="sc"><div class="sc-n" style="color:var(--g)">4</div><div class="sc-l">TOPICS</div><div class="sc-sub" style="color:var(--o)">2 in progress</div></div>
-          <div class="sc"><div class="sc-n" style="color:var(--o)">87</div><div class="sc-l">AVG SCORE</div><div class="sc-sub" style="color:var(--g)">↑ +5 pts</div></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">ML Prediction <span>MODEL</span></div>
-        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Predicted Productivity</span><span class="mv g">91%</span></div><div class="btrack"><div class="bfill bf-g" style="width:91%"></div></div></div>
-        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Sleep Impact</span><span class="mv c">+8pts</span></div><div class="btrack"><div class="bfill bf-c" style="width:75%"></div></div></div>
-        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Exercise Bonus</span><span class="mv p">+5pts</span></div><div class="btrack"><div class="bfill bf-p" style="width:60%"></div></div></div>
-        <div style="padding:12px;border:1px solid var(--border);background:rgba(0,255,136,.03);margin-top:8px">
-          <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--g);opacity:.6;margin-bottom:6px">MODEL OUTPUT</div>
-          <div style="font-size:13px;line-height:1.6;opacity:.8">RandomForest model predicts <strong style="color:var(--g)">high productivity day</strong>. Optimal study window: 10:00–13:00.</div>
-        </div>
-      </div>
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Topic Breakdown <span>DEEP DIVE</span></div>
-        <div id="topicDetail"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">AETHER Memory <span>CONTEXT</span></div>
-        <div id="memory"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GOALS -->
-  <div class="view" id="view-goals">
-    <div class="grid2" style="max-width:900px;margin:0 auto">
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Today's Goals <span>DAILY</span></div>
-        <div id="goalsToday"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Weekly Goals <span>WEEK</span></div>
-        <div id="goalsWeek"></div>
-      </div>
-      <div class="panel g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">How are you feeling? <span>MOOD CHECK</span></div>
-        <div class="mood-row">
-          <button class="mood-btn sel" onclick="setMood(this)"><div class="mood-emoji">😤</div><div class="mood-label">FOCUSED</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😊</div><div class="mood-label">GOOD</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😐</div><div class="mood-label">NEUTRAL</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😴</div><div class="mood-label">TIRED</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">🔥</div><div class="mood-label">HYPER</div></button>
-        </div>
-      </div>
-      <div class="panel g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Quick Actions <span>AETHER</span></div>
-        <div class="qa-grid">
-          <div class="qa" onclick="quickSend('Give me a 25-minute Pomodoro study plan for neural networks')"><div class="qa-icon">⏱️</div><div><div class="qa-label">Start Pomodoro</div><div class="qa-sub">AI STUDY PLAN</div></div></div>
-          <div class="qa" onclick="quickSend('Analyze my week and give me a detailed insight report')"><div class="qa-icon">📊</div><div><div class="qa-label">Weekly Analysis</div><div class="qa-sub">DEEP REPORT</div></div></div>
-          <div class="qa" onclick="quickSend('What should I study tomorrow based on my current progress?')"><div class="qa-icon">🎯</div><div><div class="qa-label">Plan Tomorrow</div><div class="qa-sub">AI SCHEDULE</div></div></div>
-          <div class="qa" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')"><div class="qa-icon">⚡</div><div><div class="qa-label">Motivate Me</div><div class="qa-sub">NEURAL BOOST</div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SYSTEM -->
-  <div class="view" id="view-system">
-    <div class="grid3">
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">System Architecture <span>AETHER OS</span></div>
-        <div class="sys-grid">
-          <div class="sys-item"><div class="sys-key">FRONTEND</div><div class="sys-val">Cloudflare Pages</div><div class="sys-sub">site/index.html</div></div>
-          <div class="sys-item"><div class="sys-key">API LAYER</div><div class="sys-val">CF Worker</div><div class="sys-sub">aether-api.talpadeavi0303.workers.dev</div></div>
-          <div class="sys-item"><div class="sys-key">AI MODEL</div><div class="sys-val">Claude Sonnet</div><div class="sys-sub">via Anthropic API</div></div>
-          <div class="sys-item"><div class="sys-key">ML MODEL</div><div class="sys-val">RandomForest</div><div class="sys-sub">productivity_model.pkl</div></div>
-          <div class="sys-item"><div class="sys-key">DATA INGESTION</div><div class="sys-val">Telegram Bot</div><div class="sys-sub">→ GitHub Actions pipeline</div></div>
-          <div class="sys-item"><div class="sys-key">DATA STORE</div><div class="sys-val">CSV / Parquet</div><div class="sys-sub">data/raw/events.csv</div></div>
-          <div class="sys-item"><div class="sys-key">PIPELINES</div><div class="sys-val">GitHub Actions</div><div class="sys-sub">ingest.yml, daily.yml</div></div>
-          <div class="sys-item"><div class="sys-key">DASHBOARD DATA</div><div class="sys-val">dashboard.json</div><div class="sys-sub">site/data/ — auto-generated</div></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Live Pipeline <span>STATUS</span></div>
-        <div class="pipeline" id="sysPipeline"></div>
-      </div>
-      <div class="panel g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Data Flow Diagram <span>SYSTEM</span></div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2;color:var(--text);opacity:.8;overflow-x:auto;padding:10px 0">
-<pre style="color:var(--c)">Telegram Message</pre>
-<pre style="color:var(--text2)">      │</pre>
-<pre style="color:var(--text2)">      ▼</pre>
-<pre style="color:var(--o)">Cloudflare Worker Webhook  →  GitHub dispatch event</pre>
-<pre style="color:var(--text2)">      │</pre>
-<pre style="color:var(--text2)">      ▼</pre>
-<pre style="color:var(--g)">GitHub Actions: nlp_parser.py  →  events.csv updated</pre>
-<pre style="color:var(--text2)">      │</pre>
-<pre style="color:var(--text2)">      ▼</pre>
-<pre style="color:var(--p)">feature_extractor.py  →  behavior_features.parquet</pre>
-<pre style="color:var(--text2)">      │</pre>
-<pre style="color:var(--text2)">      ▼</pre>
-<pre style="color:var(--c)">train_models.py  →  productivity_model.pkl</pre>
-<pre style="color:var(--text2)">      │</pre>
-<pre style="color:var(--text2)">      ▼</pre>
-<pre style="color:var(--g)">predict.py  →  dashboard.json  →  Frontend UI</pre>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CHAT OVERLAY -->
-<div id="chatOverlay" onclick="toggleChat()"></div>
-
-<!-- CHAT PANEL -->
-<div id="chatPanel" class="hidden">
-  <div class="ch">
-    <div class="ct"><div class="od"></div>AETHER AI</div>
-    <button class="cc" onclick="toggleChat()">✕</button>
-  </div>
-  <div id="chatMsgs">
-    <div class="msg ai">
-      <div class="mlbl">AETHER</div>
-      Neural OS online. I'm your personal AI assistant — I know your metrics, study patterns, goals, and pipeline status. Ask me anything.
-    </div>
-  </div>
-  <div id="thinking" class="hidden">
-    <span>Processing</span>
-    <div class="tdots"><span></span><span></span><span></span></div>
-  </div>
-  <div class="qchips">
-    <button class="chip" onclick="quickSend('Full analysis of my metrics today')">📊 Full Analysis</button>
-    <button class="chip" onclick="quickSend('What should I focus on right now?')">🎯 Focus Now</button>
-    <button class="chip" onclick="quickSend('Explain neural networks in 3 lines')">🧠 Quick Learn</button>
-    <button class="chip" onclick="quickSend('Am I on track with my weekly goals?')">✅ Goals Check</button>
-    <button class="chip" onclick="quickSend('Give me a study schedule for tomorrow')">📅 Plan Tomorrow</button>
-    <button class="chip" onclick="quickSend('How can I improve my productivity score?')">⚡ Level Up</button>
-  </div>
-  <div class="cinput">
-    <input id="chatIn" placeholder="Ask AETHER anything..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){sendChat();event.preventDefault()}">
-    <button id="sendBtn" onclick="sendChat()">SEND</button>
-  </div>
-</div>
-
-<script>
-// ══════════════════════════════════════
-// YOUR WORKER URL — already set correctly
-const WORKER_URL = 'https://aether-api.talpadeavi0303.workers.dev';
-// ══════════════════════════════════════
-
-const D = {
-  user: { name:"AVI", streak:14, hoursToday:3.2, tasksDone:7 },
-  metrics: { focus:82, learning:68, productivity:91, mood:75 },
-  activity: [
-    { topic:"Neural Networks", minutes:95, cat:"LEARNING" },
-    { topic:"React Development", minutes:72, cat:"CODING" },
-    { topic:"System Design", minutes:48, cat:"LEARNING" },
-    { topic:"Algorithms", minutes:35, cat:"CODING" }
-  ],
-  timeline: [
-    { time:"09:00", event:"Morning boot — Focus mode activated" },
-    { time:"10:30", event:"Deep learning module: 45min session logged" },
-    { time:"12:15", event:"Telegram log: 'studied react hooks for 1h'" },
-    { time:"14:00", event:"ML pipeline ran — dashboard.json updated" },
-    { time:"16:45", event:"Productivity peak detected by AETHER model" }
-  ],
-  insights: [
-    { icon:"🔥", title:"Peak Performance Window", body:"Your focus peaks between 10:00–13:00 based on 14 days of data. Schedule hardest tasks in this window.", tag:"HIGH PRIORITY", tagClass:"tag-hi" },
-    { icon:"📈", title:"Learning Velocity Up 23%", body:"Neural Networks study time increased this week. AETHER recommends adding a spaced repetition review session.", tag:"POSITIVE", tagClass:"tag-ok" },
-    { icon:"⚠️", title:"Sleep Deficit Detected", body:"Predicted 6.2h sleep vs 8h optimal. This will reduce tomorrow's productivity by ~12%. Rest more tonight.", tag:"WARNING", tagClass:"tag-med" }
-  ],
-  pipeline: [
-    { icon:"📱", name:"Telegram Ingestion", sub:"webhook → events.csv", status:"LIVE", cls:"ps-ok" },
-    { icon:"⚙️", name:"NLP Parser", sub:"nlp_parser.py", status:"IDLE", cls:"ps-off" },
-    { icon:"🤖", name:"ML Training", sub:"train_models.py", status:"RUNNING", cls:"ps-run" },
-    { icon:"📊", name:"Dashboard Sync", sub:"predict.py → dashboard.json", status:"OK", cls:"ps-ok" },
-    { icon:"🌐", name:"Cloudflare Worker", sub:"aether-api.talpadeavi0303.workers.dev", status:"LIVE", cls:"ps-ok" }
-  ],
-  weekData: [1.5, 2.8, 3.1, 2.4, 3.6, 2.9, 3.2],
-  memory: [
-    { text:"User is studying ML engineering and React — Avi's core learning track", col:"#00ffff", time:"TODAY" },
-    { text:"Logged: 'deployed cloudflare worker for aether backend' via Telegram", col:"#ff00aa", time:"2D AGO" },
-    { text:"Model retrained on 847 behavior events — accuracy 89.3%", col:"#00ff88", time:"3D AGO" },
-    { text:"Goal set: finish System Design course by end of month", col:"#ffaa00", time:"5D AGO" }
-  ],
-  goals: {
-    today: [
-      { text:"Complete Neural Networks chapter 4", done:true, cat:"LEARNING" },
-      { text:"Build React todo component with hooks", done:true, cat:"CODING" },
-      { text:"30 min algorithm practice (LeetCode)", done:false, cat:"CODING" },
-      { text:"Log all activities via Telegram bot", done:true, cat:"SYSTEM" }
-    ],
-    week: [
-      { text:"Study 12+ hours total this week", done:false, cat:"LEARNING" },
-      { text:"Complete AETHER worker.js backend", done:true, cat:"CODING" },
-      { text:"Train ML model on new dataset", done:true, cat:"ML" },
-      { text:"Maintain daily Telegram logging streak", done:false, cat:"SYSTEM" }
-    ]
-  }
-};
-const COLS=["#00ffff","#ff00aa","#00ff88","#ffaa00"];
-
-/* ══ CURSOR ══ */
-const C = document.getElementById('cur');
-const CD = document.getElementById('curd');
-document.addEventListener('mousemove', e => {
-  C.style.left = e.clientX + 'px';
-  C.style.top = e.clientY + 'px';
-  CD.style.left = e.clientX + 'px';
-  CD.style.top = e.clientY + 'px';
-});
-document.addEventListener('mousedown', () => C.style.transform = 'translate(-50%,-50%) scale(.7)');
-document.addEventListener('mouseup', () => C.style.transform = 'translate(-50%,-50%) scale(1)');
-
-/* ══ WORKER HEALTH CHECK ══ */
-async function checkWorker() {
-  const badge = document.getElementById('workerStatus');
-  try {
-    const r = await fetch(WORKER_URL, { method: 'GET' });
-    if (r.ok) {
-      badge.className = 'ok';
-      badge.innerHTML = '<span>●</span><span>WORKER OK</span>';
-    } else {
-      throw new Error('not ok');
-    }
-  } catch {
-    badge.className = 'err';
-    badge.innerHTML = '<span>●</span><span>WORKER ERR</span>';
-  }
-}
-
-/* ══ LOAD dashboard.json ══ */
-async function loadData() {
-  try {
-    const res = await fetch('./data/dashboard.json?t=' + Date.now());
-    if (!res.ok) throw new Error('not found');
-    const json = await res.json();
-    if (json.metrics)  D.metrics  = { ...D.metrics,  ...json.metrics };
-    if (json.activity?.length) D.activity = json.activity;
-    if (json.timeline?.length) D.timeline = json.timeline;
-    console.log('[AETHER] Live dashboard.json loaded ✓');
-  } catch {
-    console.log('[AETHER] Using static fallback data');
-  }
-}
-
-/* ══ CLOCK ══ */
-function tick(){
-  const n=new Date();
-  const c=document.getElementById('clk'),d=document.getElementById('date');
-  if(c)c.textContent=n.toLocaleTimeString('en-US',{hour12:false});
-  if(d)d.textContent=n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
-  setTimeout(tick,1000);
-}tick();
-
-/* ══ PARTICLES ══ */
-const cv=document.getElementById('bgc'),ctx=cv.getContext('2d');
-function rsz(){cv.width=innerWidth;cv.height=innerHeight}rsz();
-window.addEventListener('resize',rsz);
-const mob=()=>innerWidth<600;
-const pts=Array.from({length:50},()=>({
-  x:Math.random()*innerWidth,y:Math.random()*innerHeight,
-  vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
-  r:Math.random()*1.1+.2,a:Math.random()*.5+.15
-}));
-function draw(){
-  ctx.clearRect(0,0,cv.width,cv.height);
-  if(!mob()){
-    ctx.strokeStyle='rgba(0,255,255,0.022)';ctx.lineWidth=1;
-    for(let x=0;x<cv.width;x+=70){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}
-    for(let y=0;y<cv.height;y+=70){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}
-  }
-  pts.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;
-    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(0,255,255,${p.a})`;ctx.fill();
-  });
-  if(!mob()){
-    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
-      const dist=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
-      if(dist<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-        ctx.strokeStyle=`rgba(0,255,255,${(1-dist/100)*.1})`;ctx.lineWidth=.5;ctx.stroke()}
-    }
-  }
-  requestAnimationFrame(draw);
-}draw();
-
-/* ══ LOADER ══ */
-const bootMsgs=["Loading behavior dataset...","Connecting to Cloudflare Worker...","Running ML inference...","Syncing dashboard.json...","AETHER neural interface ready."];
-let bIdx=0;
-const bootLog=document.getElementById('bootLog');
-const bInt=setInterval(()=>{
-  if(bIdx<bootMsgs.length)bootLog.textContent=bootMsgs[bIdx++];
-  else clearInterval(bInt);
-},400);
-
-setTimeout(async ()=>{
-  document.getElementById('loader').classList.add('gone');
-  await loadData();
-  await checkWorker();
-  initDash();
-}, 2400);
-
-/* ══ INIT ══ */
-function initDash(){
-  setTimeout(()=>{
-    animN('wScore',0,87,1200);
-    animN('wStreak',0,D.user.streak,800);
-    animN('wHours',0,D.user.hoursToday,1000,'');
-    animN('wTasks',0,D.user.tasksDone,700);
-  },100);
-  setTimeout(()=>{
-    setBar('focusBar','focusVal',D.metrics.focus);
-    setBar('learningBar','learningVal',D.metrics.learning);
-    setBar('productivityBar','productivityVal',D.metrics.productivity);
-    setBar('moodBar','moodVal',D.metrics.mood);
-    animN('bigNum',0,Math.round((D.metrics.focus+D.metrics.learning+D.metrics.productivity)/3),1600);
-  },300);
-
-  const act=document.getElementById('activity');
-  D.activity.forEach((a,i)=>{
-    const el=document.createElement('div');el.className='aitem';
-    el.style.animationDelay=(i*.1+.3)+'s';
-    el.innerHTML=`<div><div class="atop">${a.topic}</div><div class="asub">${a.cat||''}</div></div><div style="display:flex;align-items:center"><span class="amins">${a.minutes}m</span></div>`;
-    act.appendChild(el);
-  });
-
-  const tl=document.getElementById('timeline');
-  D.timeline.forEach((t,i)=>{
-    const el=document.createElement('div');el.className='titem';
-    el.style.animationDelay=(i*.12+.4)+'s';
-    el.innerHTML=`<span class="ttime">${t.time}</span><span class="tevent">${t.event}</span>`;
-    tl.appendChild(el);
-  });
-
-  const ins=document.getElementById('insights');
-  D.insights.forEach((n,i)=>{
-    const el=document.createElement('div');el.className='insight';
-    el.style.animationDelay=(i*.1+.2)+'s';
-    el.innerHTML=`<div class="ins-icon">${n.icon}</div><div><div class="ins-title">${n.title}</div><div class="ins-body">${n.body}</div><span class="ins-tag ${n.tagClass}">${n.tag}</span></div>`;
-    ins.appendChild(el);
-  });
-
-  renderPipeline('pipeline');
-  renderPipeline('sysPipeline');
-
-  const tot=D.activity.reduce((s,a)=>s+a.minutes,0);
-  new Chart(document.getElementById('donutChart'),{
-    type:'doughnut',
-    data:{labels:D.activity.map(a=>a.topic),datasets:[{data:D.activity.map(a=>a.minutes),
-      backgroundColor:COLS.map(c=>c+'28'),borderColor:COLS,borderWidth:2,hoverBackgroundColor:COLS.map(c=>c+'55')}]},
-    options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{
-      bodyFont:{family:'Rajdhani',size:14,weight:'600'},titleFont:{family:'Orbitron',size:10},
-      backgroundColor:'rgba(0,8,18,.95)',borderColor:'rgba(0,255,255,.25)',borderWidth:1,padding:12}},
-      animation:{animateRotate:true,duration:1800,easing:'easeInOutQuart'}}
-  });
-  const dl=document.getElementById('donutLegend');
-  D.activity.forEach((a,i)=>{
-    const p=Math.round(a.minutes/tot*100);
-    const d=document.createElement('div');d.className='li';
-    d.innerHTML=`<div class="ldot" style="background:${COLS[i]};box-shadow:0 0 8px ${COLS[i]}"></div><span class="lname">${a.topic}</span><span class="lpct" style="color:${COLS[i]}">${p}%</span>`;
-    dl.appendChild(d);
-  });
-
-  new Chart(document.getElementById('weekChart'),{
-    type:'bar',
-    data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{
-      label:'Study Hours',data:D.weekData,
-      backgroundColor:COLS[0]+'33',borderColor:COLS[0],borderWidth:2,borderRadius:2,
-      hoverBackgroundColor:COLS[0]+'66'}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{bodyFont:{family:'Rajdhani',size:14},
-        titleFont:{family:'Orbitron',size:10},backgroundColor:'rgba(0,8,18,.95)',
-        borderColor:'rgba(0,255,255,.25)',borderWidth:1,padding:12}},
-      scales:{x:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10}}},
-        y:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10}}}}}
-  });
-
-  const td=document.getElementById('topicDetail');
-  D.activity.forEach((a,i)=>{
-    const pct=Math.round(a.minutes/tot*100);
-    td.innerHTML+=`<div class="mrow"><div class="ml" style="font-size:14px"><span>${a.topic}</span><span class="mv" style="color:${COLS[i]}">${a.minutes}m · ${pct}%</span></div><div class="btrack"><div class="bfill" style="width:${pct}%;background:linear-gradient(90deg,${COLS[i]},${COLS[i]}66);box-shadow:0 0 10px ${COLS[i]}88;transition:width 1.8s cubic-bezier(.4,0,.2,1)"></div></div></div>`;
-  });
-
-  const mem=document.getElementById('memory');
-  D.memory.forEach((m,i)=>{
-    const el=document.createElement('div');el.className='mem-item';
-    el.style.animationDelay=(i*.1)+'s';
-    el.innerHTML=`<div class="mem-dot" style="background:${m.col};box-shadow:0 0 6px ${m.col}"></div><div class="mem-txt">${m.text}</div><div class="mem-time">${m.time}</div>`;
-    mem.appendChild(el);
-  });
-
-  renderGoals('goalsToday',D.goals.today);
-  renderGoals('goalsWeek',D.goals.week);
-}
-
-function renderPipeline(id){
-  const el=document.getElementById(id);if(!el)return;el.innerHTML='';
-  D.pipeline.forEach(p=>{
-    const d=document.createElement('div');d.className='pipe-item';
-    d.innerHTML=`<div class="pipe-icon">${p.icon}</div><div><div class="pipe-name">${p.name}</div><div class="pipe-sub">${p.sub}</div></div><div class="pipe-status ${p.cls}">${p.status}</div>`;
-    el.appendChild(d);
-  });
-}
-function renderGoals(id,goals){
-  const el=document.getElementById(id);
-  goals.forEach(g=>{
-    const d=document.createElement('div');d.className='goal-item';
-    d.innerHTML=`<div class="goal-check ${g.done?'done':''}" onclick="toggleGoal(this)"></div>
-      <div class="goal-txt ${g.done?'done':''}">${g.text}</div>
-      <span class="goal-cat abadge ab-c">${g.cat}</span>`;
-    el.appendChild(d);
-  });
-}
-function toggleGoal(el){
-  el.classList.toggle('done');
-  el.nextElementSibling.classList.toggle('done');
-}
-function setMood(el){
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function setBar(bId,vId,val){
-  document.getElementById(bId).style.width=val+'%';
-  animN(vId,0,val,1600,'%');
-}
-function animN(id,from,to,dur,sfx=''){
-  const el=document.getElementById(id);const s=performance.now();
-  function step(now){const t=Math.min((now-s)/dur,1),e=1-Math.pow(1-t,4);
-    el.textContent=Math.round(from+(to-from)*e)+sfx;if(t<1)requestAnimationFrame(step)}
-  requestAnimationFrame(step);
-}
-function showView(id,btn){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
-  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
-  document.getElementById('view-'+id).classList.add('on');
-  btn.classList.add('on');
-}
-
-/* ══ CHAT — calls Worker ══ */
-let chatOpen=false;
-function toggleChat(){
-  chatOpen=!chatOpen;
-  document.getElementById('chatPanel').classList.toggle('hidden',!chatOpen);
-  document.getElementById('chatOverlay').classList.toggle('on',chatOpen);
-  if(chatOpen)setTimeout(()=>document.getElementById('chatIn').focus(),350);
-}
-function quickSend(t){
-  if(!chatOpen)toggleChat();
-  setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat();},chatOpen?0:400);
-}
-const hist=[];
-async function sendChat(){
-  const inp=document.getElementById('chatIn');
-  const txt=inp.value.trim();if(!txt)return;
-  inp.value='';addMsg('user',txt);hist.push({role:'user',content:txt});
-  document.getElementById('thinking').classList.remove('hidden');
-  document.getElementById('sendBtn').disabled=true;
-
-  try{
-    // ✅ calls your Cloudflare Worker — API key stays safe on server
-    const r = await fetch(WORKER_URL + '/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        history:  hist,
-        metrics:  D.metrics,
-        activity: D.activity,
-        goals:    D.goals.today
-      })
-    });
-    const data = await r.json();
-    const reply = data.reply || data.error || 'Neural pathway disrupted.';
-    hist.push({role:'assistant', content:reply});
-    document.getElementById('thinking').classList.add('hidden');
-    document.getElementById('sendBtn').disabled=false;
-    typeMsg(reply);
-  } catch(err) {
-    document.getElementById('thinking').classList.add('hidden');
-    document.getElementById('sendBtn').disabled=false;
-    addMsg('ai','Worker connection failed. Check console.');
-    console.error('[AETHER]', err);
-  }
-}
-function addMsg(role,text){
-  const box=document.getElementById('chatMsgs');
-  const el=document.createElement('div');el.className='msg '+role;
-  el.innerHTML=`<div class="mlbl">${role==='user'?'YOU':'AETHER'}</div>${text}`;
-  box.appendChild(el);box.scrollTop=box.scrollHeight;
-}
-function typeMsg(text){
-  const box=document.getElementById('chatMsgs');
-  const el=document.createElement('div');el.className='msg ai';
-  const lb=document.createElement('div');lb.className='mlbl';lb.textContent='AETHER';
-  const sp=document.createElement('span');const cur=document.createElement('span');
-  cur.textContent='▋';cur.style.animation='blink .7s infinite';
-  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur);
-  box.appendChild(el);let i=0;
-  function type(){if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;setTimeout(type,15)}else cur.remove()}
-  type();
-}
-</script>
-</body>
-</html>
