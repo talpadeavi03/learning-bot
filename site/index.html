@@ -42,7 +42,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   animation:glitch 7s infinite;flex-shrink:0}
 .logo span{color:var(--p);text-shadow:0 0 12px var(--p)}
 @keyframes glitch{
-  0%,85%,100%{text-shadow:0 0 16px var(--c),0 0 32px rgba(0,255,255,.35);transform:none} 
+  0%,85%,100%{text-shadow:0 0 16px var(--c),0 0 32px rgba(0,255,255,.35);transform:none}
   87%{text-shadow:-3px 0 var(--p),3px 0 var(--g);transform:skewX(-4deg)}
   89%{text-shadow:3px 0 var(--p),-3px 0 var(--g);transform:skewX(2deg)}
   91%{text-shadow:0 0 16px var(--c);transform:none}
@@ -254,58 +254,100 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 .sys-val{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--c)}
 .sys-sub{font-size:11px;opacity:.4;margin-top:3px}
 
-/* CHAT */
-#chatOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:249;opacity:0;pointer-events:none;transition:opacity .35s}
-#chatOverlay.on{opacity:1;pointer-events:all}
-#chatPanel{position:fixed;bottom:20px;right:20px;width:min(420px,calc(100vw - 20px));
-  height:min(580px,88vh);background:rgba(0,8,18,0.98);border:1px solid rgba(0,255,255,.35);
-  display:flex;flex-direction:column;z-index:250;
-  box-shadow:0 8px 60px rgba(0,0,0,.8),0 0 40px rgba(0,255,255,.08);
-  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
-  transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s;transform-origin:bottom right}
-#chatPanel.hidden{transform:scale(.88) translateY(14px);opacity:0;pointer-events:none}
-.ch{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
-  border-bottom:1px solid var(--border);background:rgba(0,12,22,.95);flex-shrink:0}
-.ct{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;color:var(--c);
-  display:flex;align-items:center;gap:9px}
-.od{width:7px;height:7px;background:var(--g);border-radius:50%;animation:blink 2s infinite;box-shadow:0 0 6px var(--g)}
-.cc{background:none;border:1px solid rgba(255,0,170,.35);color:var(--p);width:28px;height:28px;
-  cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
-.cc:hover{background:rgba(255,0,170,.15)}
-#chatMsgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
-  scrollbar-width:thin;scrollbar-color:rgba(0,255,255,.15) transparent}
+/* ── FULL-SCREEN CHAT PAGE ── */
+/* Slide wrapper: sits to the right of viewport, slides left over the main app */
+#chatPage{
+  position:fixed;inset:0;z-index:300;
+  display:flex;flex-direction:column;
+  background:var(--dark);
+  transform:translateX(100%);
+  transition:transform .55s cubic-bezier(.77,0,.18,1);
+  will-change:transform;
+}
+#chatPage.open{ transform:translateX(0); }
+
+/* Push main app to the left when chat opens */
+#app{
+  transition:transform .55s cubic-bezier(.77,0,.18,1);
+  will-change:transform;
+}
+#app.shifted{ transform:translateX(-6%); }
+
+/* Scanline overlay on chat page */
+#chatPage::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
+}
+
+/* Header bar */
+.ch{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 28px;border-bottom:1px solid var(--border);
+  background:rgba(0,6,14,.98);flex-shrink:0;position:relative;z-index:1;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.ct{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:5px;color:var(--c);
+  display:flex;align-items:center;gap:12px;text-shadow:0 0 14px var(--c)}
+.od{width:8px;height:8px;background:var(--g);border-radius:50%;animation:blink 2s infinite;box-shadow:0 0 8px var(--g)}
+.cc{background:none;border:1px solid rgba(255,0,170,.35);color:var(--p);
+  padding:8px 20px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:3px;display:flex;align-items:center;gap:8px;transition:all .2s;
+  clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.cc:hover{background:rgba(255,0,170,.12);border-color:rgba(255,0,170,.6)}
+/* Messages area — takes all available vertical space */
+#chatMsgs{
+  flex:1;overflow-y:auto;padding:24px clamp(16px,4vw,80px);
+  display:flex;flex-direction:column;gap:16px;
+  scrollbar-width:thin;scrollbar-color:rgba(0,255,255,.15) transparent;
+  position:relative;z-index:1;
+}
 #chatMsgs::-webkit-scrollbar{width:3px}
 #chatMsgs::-webkit-scrollbar-thumb{background:rgba(0,255,255,.2)}
-.msg{max-width:88%;padding:11px 15px;font-size:15px;font-weight:500;line-height:1.6;animation:msgIn .3s ease}
-@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg{max-width:min(700px,82%);padding:14px 18px;font-size:15px;font-weight:500;line-height:1.65;animation:msgIn .35s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .msg.user{align-self:flex-end;background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.25);
-  color:#d0f5f5;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+  color:#d0f5f5;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
 .msg.ai{align-self:flex-start;background:rgba(255,0,170,.05);border:1px solid rgba(255,0,170,.18);
-  color:#eaeaea;clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
-.mlbl{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;opacity:.38;margin-bottom:5px}
-#thinking{display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:13px;font-weight:600;
-  color:var(--p);opacity:.7;letter-spacing:1px;flex-shrink:0}
+  color:#eaeaea;clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px)}
+.mlbl{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;opacity:.38;margin-bottom:6px}
+#thinking{display:flex;align-items:center;gap:10px;padding:8px clamp(16px,4vw,80px);font-size:13px;font-weight:600;
+  color:var(--p);opacity:.7;letter-spacing:1px;flex-shrink:0;position:relative;z-index:1}
 #thinking.hidden{display:none}
 .tdots span{display:inline-block;width:5px;height:5px;background:var(--p);border-radius:50%;
   margin:0 2px;animation:bnc 1s infinite}
 .tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
-@keyframes bnc{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-.qchips{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 10px;flex-shrink:0}
-.chip{font-size:12px;font-weight:600;padding:5px 12px;border:1px solid var(--border);
-  color:rgba(0,255,255,.5);cursor:pointer;transition:all .2s;background:transparent}
-.chip:hover{border-color:var(--c);color:var(--c);background:rgba(0,255,255,.06)}
-.cinput{display:flex;padding:12px 14px;border-top:1px solid var(--border);background:rgba(0,6,14,.9);flex-shrink:0}
-#chatIn{flex:1;background:rgba(0,255,255,.04);border:1px solid var(--border);border-right:none;
-  color:var(--c);padding:11px 14px;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:500;
-  outline:none;transition:border-color .3s;min-width:0}
-#chatIn:focus{border-color:rgba(0,255,255,.45)}
-#chatIn::placeholder{color:rgba(0,255,255,.26)}
-#sendBtn{background:var(--c);color:var(--dark);border:none;padding:11px 18px;
-  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;cursor:pointer;
+@keyframes bnc{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
+/* Quick chips */
+.qchips{
+  display:flex;flex-wrap:wrap;gap:8px;
+  padding:12px clamp(16px,4vw,80px);
+  flex-shrink:0;position:relative;z-index:1;
+  border-top:1px solid rgba(0,255,255,.06);
+}
+.chip{font-size:12px;font-weight:600;padding:6px 14px;border:1px solid var(--border);
+  color:rgba(0,255,255,.5);cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px}
+.chip:hover{border-color:var(--c);color:var(--c);background:rgba(0,255,255,.06);transform:translateY(-1px)}
+/* Input bar */
+.cinput{
+  display:flex;padding:16px clamp(16px,4vw,80px);
+  border-top:1px solid var(--border);background:rgba(0,4,12,.96);
+  flex-shrink:0;gap:0;position:relative;z-index:1;
+}
+#chatIn{
+  flex:1;background:rgba(0,255,255,.04);border:1px solid var(--border);border-right:none;
+  color:var(--c);padding:14px 18px;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:500;
+  outline:none;transition:border-color .3s;min-width:0;
+}
+#chatIn:focus{border-color:rgba(0,255,255,.45);background:rgba(0,255,255,.06)}
+#chatIn::placeholder{color:rgba(0,255,255,.22)}
+#sendBtn{
+  background:var(--c);color:var(--dark);border:none;padding:14px 28px;
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;cursor:pointer;
   transition:background .2s,box-shadow .2s;white-space:nowrap;flex-shrink:0;
-  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
-#sendBtn:hover{background:#fff;box-shadow:0 0 16px rgba(0,255,255,.5)}
-#sendBtn:disabled{opacity:.35;cursor:not-allowed}
+  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px);
+}
+#sendBtn:hover{background:#fff;box-shadow:0 0 20px rgba(0,255,255,.55)}
+#sendBtn:disabled{opacity:.3;cursor:not-allowed}
 
 /* LOADER */
 #loader{position:fixed;inset:0;background:var(--dark);z-index:9999;
@@ -349,10 +391,14 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   .sys-grid{grid-template-columns:1fr 1fr}
   .welcome-strip{flex-direction:column;align-items:flex-start}
   .wstats{gap:14px}
-  #chatPanel{bottom:0;right:0;width:100vw;height:90vh;
-    clip-path:polygon(0 16px,16px 0,100% 0,100% 100%,0 100%)}
   .panel{padding:15px 13px}
   .bnum{font-size:36px}
+  /* Chat page mobile: full cover, no padding tricks */
+  #chatMsgs{padding:16px}
+  .cinput{padding:12px 16px}
+  .qchips{padding:10px 16px}
+  .ch{padding:14px 16px}
+  .cc{padding:7px 14px;font-size:9px;letter-spacing:2px}
 }
 </style>
 </head>
@@ -389,7 +435,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
       <div class="hpill"><div class="dot g"></div><span>ONLINE</span></div>
       <div id="clk"></div>
       <div id="date"></div>
-      <button class="hbtn" onclick="toggleChat()">◈ ASK AETHER</button>
+      <button class="hbtn" onclick="openChat()">◈ ASK AETHER</button>
     </div>
   </header>
 
@@ -574,25 +620,41 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   </div>
 </div>
 
-<!-- CHAT OVERLAY -->
-<div id="chatOverlay" onclick="toggleChat()"></div>
+<!-- ── FULL-SCREEN AETHER CHAT PAGE ── -->
+<div id="chatPage">
+  <!-- Animated background canvas (shared) -->
+  <div id="chatBg" style="position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 70% 60% at 30% 50%,rgba(0,255,255,.03) 0%,transparent 70%),
+               radial-gradient(ellipse 50% 80% at 80% 20%,rgba(255,0,170,.03) 0%,transparent 70%)"></div>
 
-<!-- CHAT PANEL -->
-<div id="chatPanel" class="hidden">
+  <!-- Header -->
   <div class="ch">
-    <div class="ct"><div class="od"></div>AETHER AI</div>
-    <button class="cc" onclick="toggleChat()">✕</button>
+    <div class="ct">
+      <div class="od"></div>
+      AETHER
+      <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">NEURAL INTERFACE</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text2);opacity:.5">FULL CONTEXT MODE</div>
+      <button class="cc" onclick="closeChat()">← BACK TO OS</button>
+    </div>
   </div>
+
+  <!-- Messages -->
   <div id="chatMsgs">
     <div class="msg ai">
       <div class="mlbl">AETHER</div>
-      Neural OS online. I'm your personal AI assistant — I know your metrics, study patterns, goals, and pipeline status. Ask me anything.
+      Neural OS online. Full-screen interface active — I have complete context of your metrics, learning patterns, goals and pipeline. What can I help you with?
     </div>
   </div>
+
+  <!-- Thinking indicator -->
   <div id="thinking" class="hidden">
     <span>Processing</span>
     <div class="tdots"><span></span><span></span><span></span></div>
   </div>
+
+  <!-- Quick chips -->
   <div class="qchips">
     <button class="chip" onclick="quickSend('Full analysis of my metrics today')">📊 Full Analysis</button>
     <button class="chip" onclick="quickSend('What should I focus on right now?')">🎯 Focus Now</button>
@@ -601,9 +663,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
     <button class="chip" onclick="quickSend('Give me a study schedule for tomorrow')">📅 Plan Tomorrow</button>
     <button class="chip" onclick="quickSend('How can I improve my productivity score?')">⚡ Level Up</button>
   </div>
+
+  <!-- Input -->
   <div class="cinput">
     <input id="chatIn" placeholder="Ask AETHER anything..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){sendChat();event.preventDefault()}">
-    <button id="sendBtn" onclick="sendChat()">SEND</button>
+    <button id="sendBtn" onclick="sendChat()">SEND ◈</button>
   </div>
 </div>
 
@@ -676,6 +740,8 @@ document.addEventListener('mousemove', e => {
 });
 document.addEventListener('mousedown', () => C.style.transform = 'translate(-50%,-50%) scale(.7)');
 document.addEventListener('mouseup', () => C.style.transform = 'translate(-50%,-50%) scale(1)');
+// ESC key closes chat
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&chatOpen) closeChat(); });
 
 /* ══ WORKER HEALTH CHECK ══ */
 async function checkWorker() {
@@ -903,17 +969,33 @@ function showView(id,btn){
   btn.classList.add('on');
 }
 
-/* ══ CHAT — calls Worker ══ */
+/* ══ CHAT — full-screen slide page ══ */
 let chatOpen=false;
-function toggleChat(){
-  chatOpen=!chatOpen;
-  document.getElementById('chatPanel').classList.toggle('hidden',!chatOpen);
-  document.getElementById('chatOverlay').classList.toggle('on',chatOpen);
-  if(chatOpen)setTimeout(()=>document.getElementById('chatIn').focus(),350);
+
+function openChat(){
+  if(chatOpen)return;
+  chatOpen=true;
+  document.getElementById('chatPage').classList.add('open');
+  document.getElementById('app').classList.add('shifted');
+  // Focus input after transition
+  setTimeout(()=>document.getElementById('chatIn').focus(),560);
 }
+
+function closeChat(){
+  if(!chatOpen)return;
+  chatOpen=false;
+  document.getElementById('chatPage').classList.remove('open');
+  document.getElementById('app').classList.remove('shifted');
+}
+
+// Keep legacy toggleChat for any other callers
+function toggleChat(){
+  chatOpen ? closeChat() : openChat();
+}
+
 function quickSend(t){
-  if(!chatOpen)toggleChat();
-  setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat();},chatOpen?0:400);
+  openChat();
+  setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat();},chatOpen?0:600);
 }
 const hist=[];
 async function sendChat(){
