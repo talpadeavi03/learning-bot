@@ -37,7 +37,7 @@ def auto_label(row):
     return 'NOMINAL'
 
 def train():
-    csv_path = 'data/raw/events.csv'
+    csv_path = 'data/processed/events_clean.csv' if os.path.exists('data/processed/events_clean.csv') else 'data/raw/events.csv'
     if not os.path.exists(csv_path):
         print("[AETHER] No events.csv — run pull_events.py first")
         return False
