@@ -82,7 +82,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 #workerStatus.err{border-color:rgba(255,51,85,.35);color:var(--r)}
 
 /* VIEWS */
-.view{display:none;animation:fadeIn .35s ease}
+.view{display:none;animation:fadeIn .35s ease}#view-docs,#view-docs *{animation-play-state:paused!important}#view-docs{animation:none!important;opacity:1!important}#view-docs .panel-static{opacity:1!important;transform:none!important}
 .view.on{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
@@ -98,6 +98,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);
   animation:pIn .5s ease forwards;opacity:0;transform:translateY(14px)}
+.panel-static{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);opacity:1;transform:none;animation:none}
 .panel::before{content:'';position:absolute;top:0;left:-200%;width:200%;height:1px;
   background:linear-gradient(90deg,transparent,var(--c),transparent);animation:sweep 5s infinite}
 @keyframes sweep{0%{left:-200%}100%{left:200%}}
@@ -437,6 +438,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
         <button class="ntab" onclick="showView('learn',this)">LEARNING</button>
         <button class="ntab" onclick="showView('goals',this)">GOALS</button>
         <button class="ntab" onclick="showView('system',this)">SYSTEM</button>
+        <button class="ntab" onclick="showView('docs',this)">DOCS</button>
       </div>
       <div id="workerStatus" class="err"><span>●</span><span>WORKER</span></div>
       <div class="hpill"><div class="dot g"></div><span>ONLINE</span></div>
@@ -627,6 +629,140 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   </div>
 </div>
 
+
+<!-- ── DOCS VIEW ── -->
+<div class="view" id="view-docs" style="animation:none!important;opacity:1!important;transform:none!important">
+<div class="grid1" style="opacity:1">
+
+  <div class="panel-static g-full">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">AETHER OS Documentation <span>v2.0</span></div>
+    <div class="stat-cards">
+      <div class="sc"><div class="sc-n" style="color:var(--g)">9</div><div class="sc-l">API ROUTES</div></div>
+      <div class="sc"><div class="sc-n" style="color:var(--c)">12</div><div class="sc-l">BOT COMMANDS</div></div>
+      <div class="sc"><div class="sc-n" style="color:var(--p)">0</div><div class="sc-l">MONTHLY COST</div></div>
+      <div class="sc"><div class="sc-n" style="color:var(--o)">65%</div><div class="sc-l">COMPLETE</div></div>
+    </div>
+  </div>
+
+  <div class="panel-static g-full">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">What is AETHER OS</div>
+    <p style="font-size:14px;line-height:1.9;margin-bottom:10px"><span style="color:var(--c);font-weight:700">AETHER</span> is your Personal AI Operating System. Tracks behavior, cognitive state, productivity and learning. Uses machine learning to understand your patterns and help you perform better every day.</p>
+    <p style="font-size:14px;line-height:1.9;margin-bottom:10px">Every message, voice note, image and code push gets analyzed by free Cloudflare AI, stored as structured data, and trains a model that learns specifically about you.</p>
+    <p style="font-size:14px;line-height:1.9;color:var(--g);font-weight:600">The more you log, the smarter it gets. Over 90 days AETHER knows your peaks, crashes, and best work conditions better than you do.</p>
+  </div>
+
+  <div class="panel-static g-full">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">How Data Flows</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2.5">
+      <div><span style="color:var(--c)">YOU</span> send message / voice / image / check-in / git push</div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--g)">Cloudflare Worker</span> /webhook receives + routes it</div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--o)">Llama 3</span> extracts 22 NLP features (energy, stress, topic, emotion)</div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--o)">Worker</span> adds 11 auto-features (hour_sin, word_count, complexity)</div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--g)">Cloudflare KV</span> stores structured event JSON</div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--p)">Every 5 events</span> triggers GitHub Actions ML pipeline</div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--o)">pull &#8594; clean &#8594; train &#8594; predict &#8594; push dashboard</span></div>
+      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
+      <div><span style="color:var(--g)">Dashboard</span> shows real ML predictions + <span style="color:var(--p)">Telegram</span> sends briefings</div>
+    </div>
+  </div>
+
+  <div class="panel-static g-full">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">Repo Structure</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:12px;line-height:2.3">
+      <div><span style="color:var(--c)">api/worker.js</span><span style="color:var(--text2)"> &#8212; THE BRAIN. 1673 lines. All routes, NLP, cron, commands.</span></div>
+      <div><span style="color:var(--c)">wrangler.toml</span><span style="color:var(--text2)"> &#8212; CF config. KV + AI + 4 cron schedules.</span></div>
+      <div><span style="color:var(--c)">site/index.html</span><span style="color:var(--text2)"> &#8212; This dashboard.</span></div>
+      <div><span style="color:var(--c)">site/manifest.json + sw.js</span><span style="color:var(--text2)"> &#8212; PWA installable + offline.</span></div>
+      <div><span style="color:var(--c)">site/checkin.html</span><span style="color:var(--text2)"> &#8212; One-tap state check-in.</span></div>
+      <div style="margin-top:6px"><span style="color:var(--g)">scripts/pipeline/pull_events.py</span><span style="color:var(--text2)"> &#8212; KV events &#8594; events.csv</span></div>
+      <div><span style="color:var(--g)">scripts/pipeline/data_cleaner.py</span><span style="color:var(--text2)"> &#8212; Remove gibberish + dupes</span></div>
+      <div><span style="color:var(--g)">scripts/pipeline/push_dashboard.py</span><span style="color:var(--text2)"> &#8212; ML predictions &#8594; KV</span></div>
+      <div><span style="color:var(--g)">scripts/pipeline/run_pipeline.py</span><span style="color:var(--text2)"> &#8212; Master runner</span></div>
+      <div style="margin-top:6px"><span style="color:var(--p)">scripts/ml/train_models.py</span><span style="color:var(--text2)"> &#8212; RandomForest + GBM</span></div>
+      <div><span style="color:var(--p)">scripts/ml/predict.py</span><span style="color:var(--text2)"> &#8212; Flow class + peak hour + dashboard.json</span></div>
+      <div style="margin-top:6px"><span style="color:var(--o)">.github/workflows/deploy.yml</span><span style="color:var(--text2)"> &#8212; Auto-deploy on push</span></div>
+      <div><span style="color:var(--o)">.github/workflows/ml_pipeline.yml</span><span style="color:var(--text2)"> &#8212; Nightly ML at 1am IST</span></div>
+      <div><span style="color:var(--o)">.github/workflows/github_activity.yml</span><span style="color:var(--text2)"> &#8212; Auto-logs every commit</span></div>
+    </div>
+  </div>
+
+  <div class="panel-static">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">API Routes</div>
+    <div class="insights">
+      <div class="insight"><div class="ins-icon">&#128994;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /webhook</div><div class="ins-body">Telegram all types. NLP parsed and saved to KV.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /chat</div><div class="ins-body">AI assistant. Llama 3 reply with your live data as context.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /log-state</div><div class="ins-body">One-tap check-in saves state vector to KV.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">GET /dashboard</div><div class="ins-body">Live metrics computed from your events.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">GET /events</div><div class="ins-body">Raw event log for ML pipeline.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128993;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /trigger</div><div class="ins-body">Automations: nudge, notion, spotify, webhook.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128993;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /log-github</div><div class="ins-body">Auto-logs every git push as coding event.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128308;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /reset-data</div><div class="ins-body">Clears all events. Needs confirm body.</div></div></div>
+      <div class="insight"><div class="ins-icon">&#128994;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">GET /health</div><div class="ins-body">Status check — all services OK or MISSING.</div></div></div>
+    </div>
+  </div>
+
+  <div class="panel-static">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">Bot Commands</div>
+    <div class="pipeline">
+      <div class="pipe-item"><div class="pipe-icon">&#128202;</div><div><div class="pipe-name">/stats</div><div class="pipe-sub">Weekly performance summary</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#127919;</div><div><div class="pipe-name">/flow</div><div class="pipe-sub">Current flow state</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">/goal TEXT</div><div class="pipe-sub">Set today goal</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#128578;</div><div><div class="pipe-name">/mood 1-5</div><div class="pipe-sub">Quick mood log</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#128197;</div><div><div class="pipe-name">/week</div><div class="pipe-sub">7-day activity overview</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#128293;</div><div><div class="pipe-name">/streak</div><div class="pipe-sub">Current logging streak</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#127749;</div><div><div class="pipe-name">/morning</div><div class="pipe-sub">Morning briefing (auto 8:30am IST)</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#127762;</div><div><div class="pipe-name">/evening</div><div class="pipe-sub">Evening summary (auto 8:30pm IST)</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9889;</div><div><div class="pipe-name">/automate</div><div class="pipe-sub">Trigger notion, spotify, nudge, webhook</div></div><div class="pipe-status ps-ok">LIVE</div></div>
+    </div>
+  </div>
+
+  <div class="panel-static g-full">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">Status Tracker</div>
+    <div class="pipeline">
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">Worker v2 all routes live</div><div class="pipe-sub">1673 lines deployed</div></div><div class="pipe-status ps-ok">DONE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">ML pipeline 5 scripts</div><div class="pipe-sub">pull, clean, train, predict, push</div></div><div class="pipe-status ps-ok">DONE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">Dashboard live data + PWA</div><div class="pipe-sub">Real KV metrics, installs on phone</div></div><div class="pipe-status ps-ok">DONE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">12 bot commands + 4 daily briefings</div><div class="pipe-sub">All active and automated</div></div><div class="pipe-status ps-ok">DONE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">GitHub auto-logging + data cleaner</div><div class="pipe-sub">Passive data + clean training set</div></div><div class="pipe-status ps-ok">DONE</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9203;</div><div><div class="pipe-name">Feed 10+ clean events</div><div class="pipe-sub">Fresh start done, start logging today</div></div><div class="pipe-status ps-warn">NOW</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#9203;</div><div><div class="pipe-name">Add GITHUB_TOKEN to Cloudflare</div><div class="pipe-sub">Enables auto ML trigger every 5 events</div></div><div class="pipe-status ps-warn">NOW</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#10060;</div><div><div class="pipe-name">/exercise /sleep /food /spend</div><div class="pipe-sub">Health and money tracking</div></div><div class="pipe-status ps-off">NEXT</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#10060;</div><div><div class="pipe-name">CF Vectorize semantic memory</div><div class="pipe-sub">Search past events by meaning</div></div><div class="pipe-status ps-off">NEXT</div></div>
+      <div class="pipe-item"><div class="pipe-icon">&#10060;</div><div><div class="pipe-name">Native APK + Calendar</div><div class="pipe-sub">Capacitor build + Calendar OAuth</div></div><div class="pipe-status ps-off">FUTURE</div></div>
+    </div>
+  </div>
+
+  <div class="panel-static g-full">
+    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+    <div class="pt">Next Steps</div>
+    <div class="tlist">
+      <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent"><strong>Send 10+ clean messages to bot</strong> &#8212; mix high energy, low energy, study sessions, goals. Most important thing right now.</div></div>
+      <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent"><strong>Add GITHUB_TOKEN to Cloudflare</strong> &#8212; Cloudflare &#8594; learning-bot &#8594; Settings &#8594; Variables.</div></div>
+      <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent"><strong>Run ML pipeline manually</strong> &#8212; GitHub &#8594; Actions &#8594; AETHER ML Pipeline &#8594; Run workflow.</div></div>
+      <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent"><strong>Add health commands</strong> &#8212; /exercise /sleep /food /spend /job for life data.</div></div>
+      <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent"><strong>CF Vectorize</strong> &#8212; semantic memory so you can search past events.</div></div>
+      <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent"><strong>Dev environment</strong> &#8212; dev branch + separate KV + separate bot for testing.</div></div>
+      <div class="titem"><div class="ttime" style="color:var(--text2)">MONTH 2</div><div class="tevent"><strong>Native APK</strong> &#8212; Capacitor wraps PWA in 3 commands. Real app with push notifications.</div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
 <!-- ── FULL-SCREEN AETHER CHAT PAGE ── -->
 <div id="chatPage">
   <!-- Animated background canvas (shared) -->
@@ -642,7 +778,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
       <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">NEURAL INTERFACE</span>
     </div>
     <div style="display:flex;align-items:center;gap:16px">
-      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text2);opacity:.5">FULL CONTEXT MODE</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text2);opacity:.8">FULL CONTEXT MODE</div>
       <button class="cc" onclick="closeChat()">← BACK TO OS</button>
     </div>
   </div>
@@ -1156,18 +1292,21 @@ function typeMsg(text) {
   }
   type();
 }
+
+
+
+
 </script>
 
 <script>
 // ── PWA Service Worker Registration ──────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Only register SW when on Pages domain (not workers.dev)
-    const isPagesDomain = location.hostname.includes('pages.dev') || 
-                          location.hostname === 'localhost' ||
-                          !location.hostname.includes('workers.dev');
-    if (!isPagesDomain) {
-      console.log('[AETHER] Skipping SW on workers.dev domain');
+    // Only register SW on actual deployed domain
+    const hostname = location.hostname;
+    const isDeployed = hostname.includes('pages.dev') || hostname.includes('workers.dev');
+    if (!isDeployed) {
+      console.log('[AETHER] Skipping SW on preview domain');
       return;
     }
     navigator.serviceWorker.register('/sw.js')

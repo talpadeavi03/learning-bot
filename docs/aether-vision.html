@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AETHER OS — Full Vision v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c:#00ffff;--p:#ff00aa;--g:#00ff88;--o:#ffaa00;--r:#ff3355;
+  --dark:#010b12;--panel:rgba(0,16,26,0.94);--border:rgba(0,255,255,0.11);
+  --text:#bde0ea;--text2:rgba(189,224,234,0.42);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:500;padding:0;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(0,255,255,0.018) 1px,transparent 1px),
+                  linear-gradient(90deg,rgba(0,255,255,0.018) 1px,transparent 1px);
+  background-size:44px 44px;pointer-events:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(1,11,18,0.97);
+  border-bottom:1px solid var(--border);backdrop-filter:blur(20px);
+  display:flex;align-items:center;gap:0;padding:0 20px;height:48px;overflow-x:auto}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;
+  letter-spacing:4px;color:var(--c);margin-right:24px;white-space:nowrap}
+.nav-logo span{color:var(--p)}
+.ntab{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;
+  padding:0 16px;height:48px;display:flex;align-items:center;cursor:pointer;
+  color:var(--text2);border:none;background:transparent;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .2s}
+.ntab:hover{color:var(--text);background:rgba(0,255,255,.04)}
+.ntab.on{color:var(--c);border-bottom-color:var(--c)}
+
+/* VIEWS */
+.view{display:none;min-height:100vh;padding:68px 20px 60px;max-width:1100px;margin:0 auto}
+.view.on{display:block;animation:fIn .3s ease}
+@keyframes fIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{text-align:center;padding:40px 0 48px}
+.hero-title{font-family:'Orbitron',sans-serif;font-size:clamp(28px,6vw,52px);font-weight:900;
+  letter-spacing:8px;color:var(--c);text-shadow:0 0 40px rgba(0,255,255,.3);margin-bottom:8px}
+.hero-title span{color:var(--p)}
+.hero-sub{font-size:13px;letter-spacing:4px;opacity:.35;font-family:'Share Tech Mono',monospace;margin-bottom:32px}
+.hero-stats{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
+.hs{text-align:center}
+.hs-n{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;line-height:1}
+.hs-l{font-size:10px;letter-spacing:2px;opacity:.35;margin-top:4px}
+
+/* SECTION */
+.sec{margin-bottom:40px}
+.sh{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:5px;
+  color:var(--c);opacity:.5;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.sh::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.2),transparent)}
+
+/* ARCH DIAGRAM */
+.arch{display:flex;flex-direction:column;gap:12px}
+.arch-row{display:grid;gap:8px}
+.arch-row.c2{grid-template-columns:1fr 1fr}
+.arch-row.c3{grid-template-columns:1fr 1fr 1fr}
+.arch-row.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.arch-row.c5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
+.arch-row.c6{grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr}
+
+.anode{border:1px solid var(--border);background:var(--panel);padding:12px 14px;
+  position:relative;transition:all .2s;cursor:default;overflow:hidden}
+.anode:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.anode.done{border-color:rgba(0,255,136,.22)}
+.anode.done:hover{border-color:rgba(0,255,136,.45)}
+.anode.partial{border-color:rgba(255,170,0,.2)}
+.anode.partial:hover{border-color:rgba(255,170,0,.45)}
+.anode.todo{border-color:rgba(255,51,85,.12);opacity:.65}
+.anode.todo:hover{border-color:rgba(255,51,85,.35);opacity:1}
+.anode.free{border-color:rgba(0,255,255,.2)}
+.anode.free:hover{border-color:rgba(0,255,255,.45)}
+.anode::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.anode.done::before{background:linear-gradient(90deg,var(--g),transparent)}
+.anode.partial::before{background:linear-gradient(90deg,var(--o),transparent)}
+.anode.todo::before{background:linear-gradient(90deg,var(--r),transparent)}
+.anode.free::before{background:linear-gradient(90deg,var(--c),transparent)}
+
+.an-icon{font-size:22px;margin-bottom:6px;display:block}
+.an-title{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:2px;color:var(--text);margin-bottom:4px}
+.an-sub{font-size:11px;font-weight:500;opacity:.45;line-height:1.5}
+.an-badge{position:absolute;top:8px;right:8px;font-family:'Orbitron',sans-serif;
+  font-size:7px;font-weight:700;letter-spacing:1px;padding:2px 6px}
+.b-done{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.3)}
+.b-part{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
+.b-todo{background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)}
+.b-next{background:rgba(0,255,255,.08);color:var(--c);border:1px solid rgba(0,255,255,.2)}
+.b-free{background:rgba(0,255,136,.05);color:var(--g);border:1px solid rgba(0,255,136,.15)}
+
+.arrow-row{text-align:center;padding:4px 0;opacity:.2;font-family:'Share Tech Mono',monospace;
+  font-size:13px;letter-spacing:8px;color:var(--c)}
+
+/* DATASET GRID */
+.ds-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ds-card{border:1px solid var(--border);background:var(--panel);padding:16px;transition:all .2s}
+.ds-card:hover{border-color:rgba(0,255,255,.25);transform:translateY(-1px)}
+.ds-icon{font-size:24px;margin-bottom:8px}
+.ds-title{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;
+  color:var(--text);margin-bottom:6px}
+.ds-items{display:flex;flex-direction:column;gap:3px}
+.ds-item{font-size:12px;font-weight:500;opacity:.5;display:flex;align-items:center;gap:6px}
+.ds-item::before{content:'·';color:var(--c);opacity:.5}
+.ds-item.auto::before{content:'⚡';font-size:9px}
+.ds-item.done::before{content:'✓';color:var(--g)}
+.ds-tag{font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;
+  padding:2px 6px;margin-top:8px;display:inline-block;font-weight:700}
+
+/* SECURITY */
+.sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sec-card{border:1px solid var(--border);background:var(--panel);padding:16px}
+.sc-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sc-icon{font-size:20px}
+.sc-title{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text)}
+.sc-items{display:flex;flex-direction:column;gap:5px}
+.sc-item{font-size:12px;font-weight:500;opacity:.5;display:flex;align-items:center;gap:8px}
+.sc-item.done{opacity:.8}
+.sc-item.done::before{content:'✓';color:var(--g);font-size:10px}
+.sc-item.todo::before{content:'○';color:var(--r);font-size:10px;opacity:.5}
+
+/* ROADMAP TIMELINE */
+.road{display:flex;flex-direction:column;gap:0}
+.ritem{display:grid;grid-template-columns:140px 1fr;gap:20px;padding:20px 0;border-bottom:1px solid var(--border)}
+.ritem:last-child{border-bottom:none}
+.ri-left{text-align:right}
+.ri-week{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--c);margin-bottom:4px}
+.ri-status{font-size:10px;font-weight:700;letter-spacing:2px}
+.ri-items{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.ri-item{font-size:12px;font-weight:600;opacity:.55;display:flex;align-items:center;gap:6px;padding:3px 0}
+.ri-item.done{opacity:.9;color:var(--g)}
+.ri-item.done::before{content:'✓';font-size:10px}
+.ri-item.active::before{content:'▶';font-size:9px;color:var(--c)}
+.ri-item.todo::before{content:'○';font-size:10px;opacity:.3}
+
+/* CONNECTION MAP */
+.conn{display:grid;grid-template-columns:1fr 2fr 1fr;gap:16px;align-items:start}
+.conn-col{display:flex;flex-direction:column;gap:8px}
+.conn-node{border:1px solid var(--border);background:var(--panel);padding:12px;
+  font-size:12px;font-weight:600;text-align:center;position:relative}
+.conn-arrow{display:flex;align-items:center;justify-content:center;opacity:.25;
+  font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--c);padding:4px 0}
+.conn-center{border:1px solid rgba(0,255,255,.35);background:rgba(0,255,255,.05);
+  padding:20px;text-align:center}
+.conn-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:3px;color:var(--c);margin-bottom:10px}
+.conn-routes{display:flex;flex-direction:column;gap:4px}
+.conn-route{font-family:'Share Tech Mono',monospace;font-size:11px;opacity:.5;padding:3px 0;
+  border-bottom:1px solid rgba(0,255,255,.05)}
+.conn-route span{color:var(--g);margin-right:8px}
+
+/* COST TABLE */
+.cost-table{width:100%;border-collapse:collapse}
+.cost-table th{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;
+  color:var(--c);opacity:.5;padding:10px 16px;text-align:left;border-bottom:1px solid var(--border)}
+.cost-table td{padding:12px 16px;font-size:13px;font-weight:500;border-bottom:1px solid rgba(0,255,255,.05)}
+.cost-table tr:hover td{background:rgba(0,255,255,.03)}
+.cost-free{color:var(--g);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700}
+.cost-paid{color:var(--r);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700}
+
+/* PROD/DEV */
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.env-card{border:1px solid var(--border);background:var(--panel);padding:20px}
+.env-title{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:4px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+
+@media(max-width:700px){
+  .arch-row.c4,.arch-row.c5,.arch-row.c6{grid-template-columns:1fr 1fr}
+  .arch-row.c3{grid-template-columns:1fr 1fr}
+  .ds-grid{grid-template-columns:1fr 1fr}
+  .sec-grid{grid-template-columns:1fr}
+  .ri-items{grid-template-columns:1fr}
+  .conn{grid-template-columns:1fr}
+  .env-grid{grid-template-columns:1fr}
+  .hero-stats{gap:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">AETHER <span>OS</span></div>
+  <button class="ntab on"   onclick="show('arch',this)">ARCHITECTURE</button>
+  <button class="ntab"      onclick="show('data',this)">DATASETS</button>
+  <button class="ntab"      onclick="show('conn',this)">CONNECTIONS</button>
+  <button class="ntab"      onclick="show('sec',this)">SECURITY</button>
+  <button class="ntab"      onclick="show('cost',this)">COST</button>
+  <button class="ntab"      onclick="show('env',this)">PROD/DEV</button>
+  <button class="ntab"      onclick="show('road',this)">ROADMAP</button>
+</nav>
+
+<!-- ═══ ARCHITECTURE ═══ -->
+<div class="view on" id="view-arch">
+  <div class="hero">
+    <div class="hero-title">AETHER <span>OS</span></div>
+    <div class="hero-sub">PERSONAL AI OPERATING SYSTEM · FULL ARCHITECTURE · V2.0 → V5.0</div>
+    <div class="hero-stats">
+      <div class="hs"><div class="hs-n" style="color:var(--g)">9</div><div class="hs-l">ROUTES LIVE</div></div>
+      <div class="hs"><div class="hs-n" style="color:var(--c)">12</div><div class="hs-l">BOT COMMANDS</div></div>
+      <div class="hs"><div class="hs-n" style="color:var(--p)">3</div><div class="hs-l">FREE AI MODELS</div></div>
+      <div class="hs"><div class="hs-n" style="color:var(--o)">5</div><div class="hs-l">ML SCRIPTS</div></div>
+      <div class="hs"><div class="hs-n" style="color:var(--g)">£0</div><div class="hs-l">MONTHLY COST</div></div>
+      <div class="hs"><div class="hs-n" style="color:var(--c)">65%</div><div class="hs-l">COMPLETE</div></div>
+    </div>
+  </div>
+
+  <div class="arch">
+    <!-- INPUT -->
+    <div class="sec"><div class="sh">01 · INPUT LAYER — how data enters AETHER</div></div>
+    <div class="arch-row c6">
+      <div class="anode done"><span class="an-icon">💬</span><div class="an-title">TEXT</div><div class="an-sub">Telegram diary, commands</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode done"><span class="an-icon">🎙</span><div class="an-title">VOICE</div><div class="an-sub">Hold mic, speak naturally</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode done"><span class="an-icon">🖼</span><div class="an-title">IMAGE</div><div class="an-sub">Photos, notes, whiteboards</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode done"><span class="an-icon">📊</span><div class="an-title">CHECK-IN</div><div class="an-sub">One-tap 6-state widget</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode done"><span class="an-icon">⚙️</span><div class="an-title">GITHUB</div><div class="an-sub">Auto-logs every push</div><span class="an-badge b-done">AUTO</span></div>
+      <div class="anode todo"><span class="an-icon">📅</span><div class="an-title">CALENDAR</div><div class="an-sub">Google Cal API events</div><span class="an-badge b-next">NEXT</span></div>
+    </div>
+    <div class="arch-row c6">
+      <div class="anode todo"><span class="an-icon">🏃</span><div class="an-title">HEALTH</div><div class="an-sub">Apple Health/Garmin HRV</div><span class="an-badge b-todo">TODO</span></div>
+      <div class="anode todo"><span class="an-icon">💰</span><div class="an-title">FINANCE</div><div class="an-sub">Bank/UPI transaction feed</div><span class="an-badge b-todo">TODO</span></div>
+      <div class="anode todo"><span class="an-icon">🍎</span><div class="an-title">FOOD</div><div class="an-sub">Meal log via bot photo</div><span class="an-badge b-todo">TODO</span></div>
+      <div class="anode todo"><span class="an-icon">📍</span><div class="an-title">LOCATION</div><div class="an-sub">Daily movement pattern</div><span class="an-badge b-todo">TODO</span></div>
+      <div class="anode todo"><span class="an-icon">📺</span><div class="an-title">SCREEN TIME</div><div class="an-sub">Android usage API</div><span class="an-badge b-todo">TODO</span></div>
+      <div class="anode todo"><span class="an-icon">😴</span><div class="an-title">SLEEP</div><div class="an-sub">Phone sensors/wearable</div><span class="an-badge b-todo">TODO</span></div>
+    </div>
+
+    <div class="arrow-row">↓ ↓ ↓ ↓ ↓ ↓</div>
+
+    <!-- CORE -->
+    <div class="sec"><div class="sh">02 · CLOUDFLARE WORKER — the brain</div></div>
+    <div class="arch-row c4">
+      <div class="anode free"><span class="an-icon">🔀</span><div class="an-title">ROUTER</div><div class="an-sub">9 routes · all input types handled</div><span class="an-badge b-done">9 ROUTES</span></div>
+      <div class="anode free"><span class="an-icon">🧠</span><div class="an-title">NLP ENGINE</div><div class="an-sub">Llama 3 extracts 22 features per event</div><span class="an-badge b-free">FREE</span></div>
+      <div class="anode free"><span class="an-icon">⏰</span><div class="an-title">CRON ENGINE</div><div class="an-sub">8:30am · 12:30pm · 8:30pm · Sunday</div><span class="an-badge b-done">4 CRONS</span></div>
+      <div class="anode free"><span class="an-icon">⚡</span><div class="an-title">AUTOMATION</div><div class="an-sub">Notion · Spotify · Webhooks · Nudges</div><span class="an-badge b-done">LIVE</span></div>
+    </div>
+
+    <div class="arrow-row">↓ ↓ ↓</div>
+
+    <!-- AI + STORAGE -->
+    <div class="sec"><div class="sh">03 · AI + STORAGE LAYER — all free</div></div>
+    <div class="arch-row c4">
+      <div class="anode free"><span class="an-icon">🦙</span><div class="an-title">LLAMA 3 8B</div><div class="an-sub">NLP parsing + AI chat. Free on CF.</div><span class="an-badge b-free">FREE</span></div>
+      <div class="anode free"><span class="an-icon">🎤</span><div class="an-title">CF WHISPER</div><div class="an-sub">Voice→text transcription. Free.</div><span class="an-badge b-free">FREE</span></div>
+      <div class="anode free"><span class="an-icon">👁</span><div class="an-title">LLAVA VISION</div><div class="an-sub">Image reading. Free on CF.</div><span class="an-badge b-free">FREE</span></div>
+      <div class="anode done"><span class="an-icon">🗄</span><div class="an-title">CF KV STORE</div><div class="an-sub">Events · state · dashboard · goals</div><span class="an-badge b-done">LIVE</span></div>
+    </div>
+    <div class="arch-row c4">
+      <div class="anode todo"><span class="an-icon">🔍</span><div class="an-title">CF VECTORIZE</div><div class="an-sub">Semantic memory search. Free 5M vectors.</div><span class="an-badge b-next">NEXT</span></div>
+      <div class="anode todo"><span class="an-icon">🗃</span><div class="an-title">CF D1 SQL</div><div class="an-sub">Complex queries, joins, analytics.</div><span class="an-badge b-next">NEXT</span></div>
+      <div class="anode todo"><span class="an-icon">📊</span><div class="an-title">CF ANALYTICS</div><div class="an-sub">Real-time dashboard metrics.</div><span class="an-badge b-todo">FUTURE</span></div>
+      <div class="anode todo"><span class="an-icon">🔔</span><div class="an-title">CF QUEUES</div><div class="an-sub">Async event processing pipeline.</div><span class="an-badge b-todo">FUTURE</span></div>
+    </div>
+
+    <div class="arrow-row">↓ ↓</div>
+
+    <!-- ML PIPELINE -->
+    <div class="sec"><div class="sh">04 · ML PIPELINE — GitHub Actions nightly</div></div>
+    <div class="arch-row c5">
+      <div class="anode done"><span class="an-icon">📥</span><div class="an-title">PULL EVENTS</div><div class="an-sub">KV → events.csv</div><span class="an-badge b-done">BUILT</span></div>
+      <div class="anode done"><span class="an-icon">🧹</span><div class="an-title">DATA CLEANER</div><div class="an-sub">Remove gibberish, dupes</div><span class="an-badge b-done">BUILT</span></div>
+      <div class="anode done"><span class="an-icon">🏋</span><div class="an-title">TRAIN MODEL</div><div class="an-sub">RF + GBM flow classifier</div><span class="an-badge b-done">BUILT</span></div>
+      <div class="anode done"><span class="an-icon">🔮</span><div class="an-title">PREDICT</div><div class="an-sub">Flow · peak hour · energy</div><span class="an-badge b-done">BUILT</span></div>
+      <div class="anode done"><span class="an-icon">📤</span><div class="an-title">PUSH DASH</div><div class="an-sub">→ KV → live UI</div><span class="an-badge b-done">BUILT</span></div>
+    </div>
+
+    <div class="arrow-row">↓ ↓</div>
+
+    <!-- OUTPUT -->
+    <div class="sec"><div class="sh">05 · OUTPUT LAYER — where you see AETHER</div></div>
+    <div class="arch-row c4">
+      <div class="anode done"><span class="an-icon">📱</span><div class="an-title">DASHBOARD PWA</div><div class="an-sub">Installable · offline · live ML data</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode done"><span class="an-icon">🤖</span><div class="an-title">TELEGRAM BOT</div><div class="an-sub">12 commands · 4 daily briefings</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode done"><span class="an-icon">💬</span><div class="an-title">AI CHAT</div><div class="an-sub">3-sentence replies · history persists</div><span class="an-badge b-done">LIVE</span></div>
+      <div class="anode todo"><span class="an-icon">📲</span><div class="an-title">NATIVE APK</div><div class="an-sub">Capacitor wraps PWA → real APK</div><span class="an-badge b-next">NEXT</span></div>
+    </div>
+    <div class="arch-row c4">
+      <div class="anode todo"><span class="an-icon">📓</span><div class="an-title">NOTION JOURNAL</div><div class="an-sub">Auto daily log to Notion DB</div><span class="an-badge b-next">NEXT</span></div>
+      <div class="anode todo"><span class="an-icon">📅</span><div class="an-title">CALENDAR BLOCKS</div><div class="an-sub">Auto-block deep work time</div><span class="an-badge b-todo">FUTURE</span></div>
+      <div class="anode todo"><span class="an-icon">🎵</span><div class="an-title">SPOTIFY FLOW</div><div class="an-sub">Auto-play focus playlist</div><span class="an-badge b-todo">FUTURE</span></div>
+      <div class="anode todo"><span class="an-icon">🗣</span><div class="an-title">VOICE UI</div><div class="an-sub">Hands-free AETHER interface</div><span class="an-badge b-todo">FUTURE</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DATASETS ═══ -->
+<div class="view" id="view-data">
+  <div class="sec"><div class="sh">ALL DATASETS — passive auto collection + manual</div></div>
+
+  <div class="ds-grid">
+    <div class="ds-card">
+      <div class="ds-icon">🧠</div>
+      <div class="ds-title">COGNITIVE STATE</div>
+      <div class="ds-items">
+        <div class="ds-item done">energy_signal (0-1)</div>
+        <div class="ds-item done">stress_signal (0-1)</div>
+        <div class="ds-item done">focus_signal (0-1)</div>
+        <div class="ds-item done">motivation_signal (0-1)</div>
+        <div class="ds-item done">dominant_emotion</div>
+        <div class="ds-item done">flow_class (ML predicted)</div>
+        <div class="ds-item">challenge_skill_ratio</div>
+        <div class="ds-item">cognitive_load_score</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">6/8 LIVE</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">⏰</div>
+      <div class="ds-title">TIME & RHYTHM</div>
+      <div class="ds-items">
+        <div class="ds-item auto done">hour_sin / hour_cos (auto)</div>
+        <div class="ds-item auto done">day_of_week (auto)</div>
+        <div class="ds-item auto done">is_weekend (auto)</div>
+        <div class="ds-item done">streak_days</div>
+        <div class="ds-item">peak_hour_personal (ML)</div>
+        <div class="ds-item">ultradian_cycle_position</div>
+        <div class="ds-item">days_since_rest_day</div>
+        <div class="ds-item">session_start_vs_peak</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">4/8 LIVE</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">💪</div>
+      <div class="ds-title">HEALTH & BODY</div>
+      <div class="ds-items">
+        <div class="ds-item">football session logged</div>
+        <div class="ds-item">exercise_minutes</div>
+        <div class="ds-item">sleep_hours (bot ask)</div>
+        <div class="ds-item">sleep_quality (1-5)</div>
+        <div class="ds-item">weight_kg (weekly)</div>
+        <div class="ds-item">food_log (photo → vision)</div>
+        <div class="ds-item">water_glasses</div>
+        <div class="ds-item">HRV (wearable future)</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">0/8 — BUILD NEXT</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">💰</div>
+      <div class="ds-title">MONEY & FINANCE</div>
+      <div class="ds-items">
+        <div class="ds-item">daily_spend (bot log)</div>
+        <div class="ds-item">income_today</div>
+        <div class="ds-item">savings_rate</div>
+        <div class="ds-item">expense_category</div>
+        <div class="ds-item">job_applications_sent</div>
+        <div class="ds-item">interview_scheduled</div>
+        <div class="ds-item">project_revenue</div>
+        <div class="ds-item">monthly_goal_progress</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">0/8 — BUILD NEXT</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">📚</div>
+      <div class="ds-title">LEARNING & SKILLS</div>
+      <div class="ds-items">
+        <div class="ds-item done">topic (NLP extracted)</div>
+        <div class="ds-item done">is_study_session</div>
+        <div class="ds-item done">estimated_minutes</div>
+        <div class="ds-item">topic_momentum (rolling)</div>
+        <div class="ds-item">spaced_repetition_due</div>
+        <div class="ds-item">skill_level_estimate</div>
+        <div class="ds-item">courses_in_progress</div>
+        <div class="ds-item">books_reading</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">3/8 LIVE</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">⚙️</div>
+      <div class="ds-title">PRODUCTIVITY</div>
+      <div class="ds-items">
+        <div class="ds-item auto done">github_commits (auto)</div>
+        <div class="ds-item auto done">lines_written (auto)</div>
+        <div class="ds-item done">goals_set today</div>
+        <div class="ds-item done">goals_completed</div>
+        <div class="ds-item">todo_items_done</div>
+        <div class="ds-item">deep_work_minutes</div>
+        <div class="ds-item">distraction_count</div>
+        <div class="ds-item">pomodoro_sessions</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">4/8 LIVE</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">🌍</div>
+      <div class="ds-title">LIFE & SOCIAL</div>
+      <div class="ds-items">
+        <div class="ds-item">social_hours today</div>
+        <div class="ds-item">alone_hours today</div>
+        <div class="ds-item">friends_met</div>
+        <div class="ds-item">mood_after_social</div>
+        <div class="ds-item">travel_logged</div>
+        <div class="ds-item">new_experience_flag</div>
+        <div class="ds-item">gratitude_log</div>
+        <div class="ds-item">journal_sentiment_trend</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">0/8 — SIMPLE BOT CMDS</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">📝</div>
+      <div class="ds-title">MESSAGE BEHAVIOR</div>
+      <div class="ds-items">
+        <div class="ds-item auto done">word_count (auto)</div>
+        <div class="ds-item auto done">complexity (auto)</div>
+        <div class="ds-item auto done">question_ratio (auto)</div>
+        <div class="ds-item auto done">exclamation_count (auto)</div>
+        <div class="ds-item auto done">message_length (auto)</div>
+        <div class="ds-item auto">burst_density (rolling)</div>
+        <div class="ds-item auto">inter_message_gap</div>
+        <div class="ds-item auto">topic_switch_count</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">5/8 AUTO ⚡</span>
+    </div>
+
+    <div class="ds-card">
+      <div class="ds-icon">🏆</div>
+      <div class="ds-title">GOALS & CAREER</div>
+      <div class="ds-items">
+        <div class="ds-item done">daily_goal (bot /goal)</div>
+        <div class="ds-item">weekly_goals</div>
+        <div class="ds-item">job_applications</div>
+        <div class="ds-item">interview_prep_hours</div>
+        <div class="ds-item">projects_shipped</div>
+        <div class="ds-item">github_streak</div>
+        <div class="ds-item">skills_practiced</div>
+        <div class="ds-item">monthly_target_progress</div>
+      </div>
+      <span class="ds-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">1/8 — ADD BOT CMDS</span>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:32px"><div class="sh">ZERO EFFORT DATA — auto-collected with no input from you</div></div>
+  <div class="arch-row c4">
+    <div class="anode free"><span class="an-icon">⚡</span><div class="an-title">GIT PUSHES</div><div class="an-sub">Every commit auto-logged. Energy scored from commit type. Files and lines counted.</div><span class="an-badge b-done">LIVE</span></div>
+    <div class="anode free"><span class="an-icon">⚡</span><div class="an-title">MESSAGE TIMING</div><div class="an-sub">When you send reveals energy rhythm. Hour patterns, burst density, gaps — all auto-extracted.</div><span class="an-badge b-done">LIVE</span></div>
+    <div class="anode todo"><span class="an-icon">⚡</span><div class="an-title">ANDROID AUTOMATION</div><div class="an-sub">Tasker/MacroDroid sends silent webhook when you open study apps, start exercise, or plug in to charge at night.</div><span class="an-badge b-next">NEXT</span></div>
+    <div class="anode todo"><span class="an-icon">⚡</span><div class="an-title">LINUX AUTOMATION</div><div class="an-sub">Cron script logs active window title every 5 mins. Study app open = study event. Terminal open = coding event.</div><span class="an-badge b-next">NEXT</span></div>
+  </div>
+</div>
+
+<!-- ═══ CONNECTIONS ═══ -->
+<div class="view" id="view-conn">
+  <div class="sec"><div class="sh">SYSTEM CONNECTION MAP — how everything talks</div></div>
+  <div class="conn">
+    <div class="conn-col">
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;opacity:.4;margin-bottom:8px;text-align:center">INPUTS</div>
+      <div class="conn-node" style="border-color:rgba(0,255,136,.25)">📱 Telegram Bot<div style="font-size:10px;opacity:.4;margin-top:3px">@your_bot</div></div>
+      <div class="conn-arrow">→</div>
+      <div class="conn-node" style="border-color:rgba(0,255,136,.25)">🌐 Pages PWA<div style="font-size:10px;opacity:.4;margin-top:3px">learning-bot.pages.dev</div></div>
+      <div class="conn-arrow">→</div>
+      <div class="conn-node" style="border-color:rgba(0,255,136,.25)">⚙️ GitHub Actions<div style="font-size:10px;opacity:.4;margin-top:3px">auto on push</div></div>
+      <div class="conn-arrow">→</div>
+      <div class="conn-node" style="border-color:rgba(255,170,0,.25)">🤖 ML Pipeline<div style="font-size:10px;opacity:.4;margin-top:3px">nightly 1am IST</div></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:0;align-items:center">
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;opacity:.4;margin-bottom:8px">CLOUDFLARE WORKER</div>
+      <div class="conn-center" style="width:100%">
+        <div class="conn-title">LEARNING-BOT WORKER</div>
+        <div style="font-size:10px;opacity:.35;font-family:'Share Tech Mono',monospace;margin-bottom:12px">learning-bot.talpadeavi0303.workers.dev</div>
+        <div class="conn-routes">
+          <div class="conn-route"><span>POST</span>/webhook · Telegram all types</div>
+          <div class="conn-route"><span>POST</span>/chat · AI assistant</div>
+          <div class="conn-route"><span>POST</span>/log-state · check-in widget</div>
+          <div class="conn-route"><span>GET </span>/dashboard · live metrics</div>
+          <div class="conn-route"><span>GET </span>/events · ML data pull</div>
+          <div class="conn-route"><span>POST</span>/trigger · automations</div>
+          <div class="conn-route"><span>POST</span>/log-github · git activity</div>
+          <div class="conn-route"><span>POST</span>/update-dashboard · ML push</div>
+          <div class="conn-route"><span>POST</span>/reset-data · fresh start</div>
+          <div class="conn-route"><span>GET </span>/health · status check</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="conn-col">
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;opacity:.4;margin-bottom:8px;text-align:center">SERVICES</div>
+      <div class="conn-node" style="border-color:rgba(0,255,255,.2)">🦙 CF Llama 3<div style="font-size:10px;opacity:.4;margin-top:3px">NLP + Chat · Free</div></div>
+      <div class="conn-arrow">↔</div>
+      <div class="conn-node" style="border-color:rgba(0,255,255,.2)">🎤 CF Whisper<div style="font-size:10px;opacity:.4;margin-top:3px">Voice → Text · Free</div></div>
+      <div class="conn-arrow">↔</div>
+      <div class="conn-node" style="border-color:rgba(0,255,255,.2)">👁 CF LLaVA<div style="font-size:10px;opacity:.4;margin-top:3px">Vision · Free</div></div>
+      <div class="conn-arrow">↔</div>
+      <div class="conn-node" style="border-color:rgba(0,255,255,.2)">🗄 CF KV Store<div style="font-size:10px;opacity:.4;margin-top:3px">All data · Free 1GB</div></div>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:32px"><div class="sh">KEY CONFIGURATION VALUES</div></div>
+  <div class="arch-row c2">
+    <div class="anode done">
+      <div class="an-title">CLOUDFLARE WORKER SECRETS</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;line-height:2;opacity:.6;margin-top:8px">
+        TELEGRAM_BOT_TOKEN &nbsp;→ from @BotFather<br>
+        TELEGRAM_CHAT_ID &nbsp;&nbsp;→ your numeric ID<br>
+        OPENAI_API_KEY &nbsp;&nbsp;&nbsp;&nbsp;→ optional (fallback)<br>
+        GITHUB_TOKEN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ workflow scope<br>
+        NOTION_TOKEN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ when you add Notion<br>
+        SPOTIFY_FLOW_PLAYLIST → playlist URL
+      </div>
+    </div>
+    <div class="anode done">
+      <div class="an-title">WRANGLER.TOML BINDINGS</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;line-height:2;opacity:.6;margin-top:8px">
+        name = "learning-bot"<br>
+        [ai] binding = "AI"<br>
+        [[kv_namespaces]] → AETHER_KV<br>
+        [triggers] crons = [...3 times...]<br>
+        [assets] directory = "./site"
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SECURITY ═══ -->
+<div class="view" id="view-sec">
+  <div class="sec"><div class="sh">SECURITY ARCHITECTURE</div></div>
+  <div class="sec-grid">
+    <div class="sec-card">
+      <div class="sc-head"><div class="sc-icon">🔑</div><div class="sc-title">SECRETS MANAGEMENT</div></div>
+      <div class="sc-items">
+        <div class="sc-item done">All API keys in GitHub Secrets — never in code</div>
+        <div class="sc-item done">Cloudflare Worker env variables encrypted</div>
+        <div class="sc-item done">No secrets in wrangler.toml or repo</div>
+        <div class="sc-item todo">Rotate tokens every 90 days</div>
+        <div class="sc-item todo">Separate tokens for prod vs dev</div>
+        <div class="sc-item todo">GitHub Actions OIDC instead of static tokens</div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <div class="sc-head"><div class="sc-icon">🛡</div><div class="sc-title">TELEGRAM SECURITY</div></div>
+      <div class="sc-items">
+        <div class="sc-item done">TELEGRAM_CHAT_ID check — rejects all other senders</div>
+        <div class="sc-item done">Returns 200 OK to unknown senders (no retry storm)</div>
+        <div class="sc-item todo">Webhook secret token verification header</div>
+        <div class="sc-item todo">Rate limiting — max 30 msgs/min per chat</div>
+        <div class="sc-item todo">Input sanitisation before KV storage</div>
+        <div class="sc-item todo">Max raw_text length enforced (already 500 chars)</div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <div class="sc-head"><div class="sc-icon">🌐</div><div class="sc-title">API SECURITY</div></div>
+      <div class="sc-items">
+        <div class="sc-item done">CORS headers on all routes</div>
+        <div class="sc-item done">/reset-data requires confirmation body</div>
+        <div class="sc-item todo">Add API key header to /reset-data and /trigger</div>
+        <div class="sc-item todo">CF Access rules — block /admin routes from public</div>
+        <div class="sc-item todo">Request size limits on POST bodies</div>
+        <div class="sc-item todo">Cloudflare WAF rules for bot protection</div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <div class="sc-head"><div class="sc-icon">🔒</div><div class="sc-title">DATA PRIVACY</div></div>
+      <div class="sc-items">
+        <div class="sc-item done">raw_text truncated to 500 chars in KV</div>
+        <div class="sc-item done">Events capped at 500 — no unbounded growth</div>
+        <div class="sc-item todo">Encrypt sensitive KV values at rest</div>
+        <div class="sc-item todo">Auto-purge events older than 1 year</div>
+        <div class="sc-item todo">Export/delete endpoint for data portability</div>
+        <div class="sc-item todo">Local ML training option (no cloud data)</div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <div class="sc-head"><div class="sc-icon">🔐</div><div class="sc-title">AUTHENTICATION (add next)</div></div>
+      <div class="sc-items">
+        <div class="sc-item todo">CF Access — protect dashboard with Google OAuth</div>
+        <div class="sc-item todo">JWT tokens for /chat and /trigger endpoints</div>
+        <div class="sc-item todo">Dashboard login page before showing data</div>
+        <div class="sc-item todo">Session management with CF KV TTL tokens</div>
+        <div class="sc-item todo">2FA via Telegram OTP before sensitive actions</div>
+        <div class="sc-item todo">Audit log — who called what endpoint when</div>
+      </div>
+    </div>
+    <div class="sec-card">
+      <div class="sc-head"><div class="sc-icon">🚨</div><div class="sc-title">PROD/DEV SEPARATION</div></div>
+      <div class="sc-items">
+        <div class="sc-item todo">learning-bot (prod) + learning-bot-dev (dev) workers</div>
+        <div class="sc-item todo">master branch → prod, dev branch → staging</div>
+        <div class="sc-item todo">Separate KV namespaces prod/dev</div>
+        <div class="sc-item todo">Separate Telegram bots for prod/dev testing</div>
+        <div class="sc-item todo">Feature flags in KV for gradual rollout</div>
+        <div class="sc-item todo">Wrangler environments in wrangler.toml</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COST ═══ -->
+<div class="view" id="view-cost">
+  <div class="sec"><div class="sh">FULL COST BREAKDOWN — target: £0/month forever</div></div>
+  <table class="cost-table">
+    <thead>
+      <tr><th>SERVICE</th><th>WHAT IT DOES</th><th>FREE TIER</th><th>COST</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Cloudflare Workers</td><td>Main backend — all API routes</td><td>100k req/day</td><td class="cost-free">FREE</td></tr>
+      <tr><td>Cloudflare KV</td><td>All data storage — events, state, dashboard</td><td>100k reads, 1k writes/day</td><td class="cost-free">FREE</td></tr>
+      <tr><td>CF Workers AI — Llama 3</td><td>NLP parsing + AI chat</td><td>10k neurons/day</td><td class="cost-free">FREE</td></tr>
+      <tr><td>CF Workers AI — Whisper</td><td>Voice transcription</td><td>Included in Workers AI</td><td class="cost-free">FREE</td></tr>
+      <tr><td>CF Workers AI — LLaVA</td><td>Image/vision extraction</td><td>Included in Workers AI</td><td class="cost-free">FREE</td></tr>
+      <tr><td>Cloudflare Pages</td><td>Dashboard hosting + PWA</td><td>Unlimited sites</td><td class="cost-free">FREE</td></tr>
+      <tr><td>GitHub Actions</td><td>ML pipeline + auto-deploy</td><td>2000 min/month</td><td class="cost-free">FREE</td></tr>
+      <tr><td>Telegram Bot API</td><td>All bot functionality</td><td>Unlimited</td><td class="cost-free">FREE</td></tr>
+      <tr><td>CF Vectorize (next)</td><td>Semantic memory search</td><td>5M vectors, 30M queries</td><td class="cost-free">FREE</td></tr>
+      <tr><td>CF D1 SQL (next)</td><td>Complex analytics queries</td><td>5GB storage, 5M reads</td><td class="cost-free">FREE</td></tr>
+      <tr><td>CF Queues (future)</td><td>Async event processing</td><td>1M messages/month</td><td class="cost-free">FREE</td></tr>
+      <tr><td>Notion API (future)</td><td>Auto-journal entries</td><td>Unlimited via API</td><td class="cost-free">FREE</td></tr>
+      <tr><td>Google Calendar API</td><td>Deep work blocks</td><td>Unlimited</td><td class="cost-free">FREE</td></tr>
+      <tr><td>OpenAI Whisper (optional)</td><td>Fallback voice if CF fails</td><td>None — pay per use</td><td class="cost-paid">$0.006/min</td></tr>
+      <tr><td><strong>TOTAL</strong></td><td></td><td></td><td class="cost-free" style="font-size:16px">£0 / MONTH</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ PROD/DEV ═══ -->
+<div class="view" id="view-env">
+  <div class="sec"><div class="sh">PROD / DEV ENVIRONMENT SETUP</div></div>
+  <div class="env-grid">
+    <div class="env-card">
+      <div class="env-title" style="color:var(--g)">🟢 PRODUCTION</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">REPO</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">talpadeavi03/learning-bot · master branch</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">WORKER</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">learning-bot.talpadeavi0303.workers.dev</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">DASHBOARD</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">learning-bot.pages.dev</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">KV NAMESPACE</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">AETHER_KV (prod) · id: 4154fa68...</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">TELEGRAM BOT</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">Your main bot · real data</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">DEPLOY TRIGGER</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">git push master → auto-deploy</div></div>
+      </div>
+    </div>
+    <div class="env-card">
+      <div class="env-title" style="color:var(--o)">🟡 DEVELOPMENT (set up next)</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">REPO BRANCH</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">talpadeavi03/learning-bot · dev branch</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">WORKER</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">learning-bot-dev.talpadeavi0303.workers.dev</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">DASHBOARD</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">learning-bot-dev.pages.dev</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">KV NAMESPACE</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">AETHER_KV_DEV · separate namespace</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">TELEGRAM BOT</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">Create @aether_dev_bot via @BotFather</div></div>
+        <div><div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;opacity:.4;margin-bottom:4px">DEPLOY TRIGGER</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:12px;opacity:.7">git push dev → auto-deploy to staging</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:24px"><div class="sh">WRANGLER.TOML — PROD/DEV CONFIG</div></div>
+  <div class="anode free" style="padding:20px">
+    <pre style="font-family:'Share Tech Mono',monospace;font-size:12px;line-height:2;opacity:.7;overflow-x:auto">
+name = "learning-bot"
+main = "api/worker.js"
+compatibility_date = "2025-03-20"
+
+[assets]
+directory = "./site"
+binding = "ASSETS"
+
+[ai]
+binding = "AI"
+
+[[kv_namespaces]]
+binding = "AETHER_KV"
+id = "4154fa683ced47c9871d0b43dfbd7a54"
+
+[triggers]
+crons = ["30 3 * * *", "30 7 * * *", "30 15 * * *", "30 15 * * 0"]
+
+# DEV ENVIRONMENT — wrangler deploy --env dev
+[env.dev]
+name = "learning-bot-dev"
+
+[env.dev.ai]
+binding = "AI"
+
+[[env.dev.kv_namespaces]]
+binding = "AETHER_KV"
+id = "YOUR_DEV_KV_ID_HERE"
+
+[env.dev.triggers]
+crons = []   # no crons in dev
+    </pre>
+  </div>
+</div>
+
+<!-- ═══ ROADMAP ═══ -->
+<div class="view" id="view-road">
+  <div class="sec"><div class="sh">BUILD ROADMAP — ordered by impact</div></div>
+  <div class="road">
+    <div class="ritem">
+      <div class="ri-left">
+        <div class="ri-week">NOW</div>
+        <div class="ri-status" style="color:var(--g)">LIVE ✓</div>
+      </div>
+      <div class="ri-items">
+        <div class="ri-item done">Worker v2 — all routes</div>
+        <div class="ri-item done">CF Workers AI — free</div>
+        <div class="ri-item done">KV storage live</div>
+        <div class="ri-item done">ML pipeline 5 scripts</div>
+        <div class="ri-item done">Dashboard live data</div>
+        <div class="ri-item done">PWA installable</div>
+        <div class="ri-item done">12 bot commands</div>
+        <div class="ri-item done">4 daily crons</div>
+        <div class="ri-item done">GitHub auto-logging</div>
+        <div class="ri-item done">Data cleaner</div>
+        <div class="ri-item done">Chat history localStorage</div>
+        <div class="ri-item done">Back button fixed</div>
+      </div>
+    </div>
+    <div class="ritem">
+      <div class="ri-left">
+        <div class="ri-week">WEEK 1</div>
+        <div class="ri-status" style="color:var(--c)">BUILDING</div>
+      </div>
+      <div class="ri-items">
+        <div class="ri-item active">Feed 30 clean events</div>
+        <div class="ri-item active">First ML model train</div>
+        <div class="ri-item active">GITHUB_TOKEN in CF</div>
+        <div class="ri-item todo">Health dataset commands</div>
+        <div class="ri-item todo">/exercise /sleep /food cmds</div>
+        <div class="ri-item todo">Money tracking /spend cmd</div>
+        <div class="ri-item todo">Job tracking /job cmd</div>
+        <div class="ri-item todo">Daily aggregator script</div>
+        <div class="ri-item todo">Dev environment setup</div>
+        <div class="ri-item todo">Add auth to /reset-data</div>
+      </div>
+    </div>
+    <div class="ritem">
+      <div class="ri-left">
+        <div class="ri-week">WEEK 2</div>
+        <div class="ri-status" style="color:var(--o)">PLANNED</div>
+      </div>
+      <div class="ri-items">
+        <div class="ri-item todo">CF Vectorize semantic memory</div>
+        <div class="ri-item todo">Weekly auto-report Sunday</div>
+        <div class="ri-item todo">Flow predictor V2</div>
+        <div class="ri-item todo">Spaced repetition engine</div>
+        <div class="ri-item todo">Android Tasker automation</div>
+        <div class="ri-item todo">Linux window tracker</div>
+        <div class="ri-item todo">Better dashboard charts</div>
+        <div class="ri-item todo">Calendar/todo widget</div>
+        <div class="ri-item todo">Notion auto-journal</div>
+        <div class="ri-item todo">Webhook signature verify</div>
+      </div>
+    </div>
+    <div class="ritem">
+      <div class="ri-left">
+        <div class="ri-week">MONTH 2</div>
+        <div class="ri-status" style="color:var(--text2)">PLANNED</div>
+      </div>
+      <div class="ri-items">
+        <div class="ri-item todo">CF D1 SQL migration</div>
+        <div class="ri-item todo">Native Android APK</div>
+        <div class="ri-item todo">Google Calendar blocks</div>
+        <div class="ri-item todo">Burnout predictor model</div>
+        <div class="ri-item todo">Multiple ML models</div>
+        <div class="ri-item todo">Food/nutrition tracking</div>
+        <div class="ri-item todo">Finance dashboard</div>
+        <div class="ri-item todo">Cloudflare Access auth</div>
+        <div class="ri-item todo">Voice interface</div>
+        <div class="ri-item todo">Life inventory system</div>
+      </div>
+    </div>
+    <div class="ritem">
+      <div class="ri-left">
+        <div class="ri-week">MONTH 3+</div>
+        <div class="ri-status" style="color:rgba(255,255,255,.2)">VISION</div>
+      </div>
+      <div class="ri-items">
+        <div class="ri-item todo">Full Jarvis OS</div>
+        <div class="ri-item todo">HRV wearable integration</div>
+        <div class="ri-item todo">Autonomous agent mode</div>
+        <div class="ri-item todo">Multi-model ensemble</div>
+        <div class="ri-item todo">AR overlay interface</div>
+        <div class="ri-item todo">Life pattern model</div>
+        <div class="ri-item todo">Years of data — true self-model</div>
+        <div class="ri-item todo">AETHER knows you better than you do</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(b => b.classList.remove('on'));
+  document.getElementById('view-' + id).classList.add('on');
+  btn.classList.add('on');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
