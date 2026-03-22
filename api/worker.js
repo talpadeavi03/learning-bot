@@ -201,6 +201,53 @@ Keep logging daily!`, env);
       return true;
     }
 
+    case '/automate': {
+      if (!args) {
+        await sendTelegram(chatId,
+          `⚡ *AETHER Automations*\n\n` +
+          `/automate notion    — log today to Notion\n` +
+          `/automate spotify   — open flow playlist\n` +
+          `/automate nudge     — send me a smart nudge\n` +
+          `/automate checkin   — send check-in reminder\n` +
+          `/automate webhook [url] — call custom URL`, env);
+        return true;
+      }
+      const subAction = args.split(' ')[0];
+      const actionMap = {
+        'notion':   'notion_log',
+        'spotify':  'spotify_flow',
+        'nudge':    'smart_nudge',
+        'checkin':  'checkin_reminder',
+      };
+      if (subAction === 'webhook') {
+        const webhookUrl = args.split(' ')[1];
+        if (!webhookUrl) {
+          await sendTelegram(chatId, '⚠️ Usage: /automate webhook https://yoururl.com', env);
+          return true;
+        }
+        const r = await handleTrigger(
+          new Request('https://x/trigger', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'webhook', data: { url: webhookUrl } }),
+          }), env
+        );
+        await sendTelegram(chatId, '✅ Webhook triggered!', env);
+        return true;
+      }
+      const mappedAction = actionMap[subAction];
+      if (!mappedAction) {
+        await sendTelegram(chatId, `⚠️ Unknown automation: ${subAction}. Try /automate for list.`, env);
+        return true;
+      }
+      await handleTrigger(
+        new Request('https://x/trigger', {
+          method: 'POST',
+          body: JSON.stringify({ action: mappedAction }),
+        }), env
+      );
+      return true;
+    }
+
     case '/streak': {
       const events = await getRecentEvents(100, env);
       const streak = await calculateStreak(events);
@@ -295,6 +342,8 @@ export default {
     // We use UTC 3 for morning (8:30am IST) and UTC 15 for evening (8:30pm IST)
     if (hour === 3)  ctx.waitUntil(sendMorningBriefing(env));
     if (hour === 15) ctx.waitUntil(sendEveningSummary(env));
+    // Midday nudge at 12:30pm IST (7:00 UTC) if no data logged yet today
+    if (hour === 7)  ctx.waitUntil(middayNudge(env));
   },
 
   async fetch(request, env) {
@@ -314,6 +363,8 @@ export default {
       if (url.pathname === '/dashboard' && request.method === 'GET')  return handleDashboard(request, env);
       if (url.pathname === '/events'    && request.method === 'GET')  return handleEvents(request, env);
       if (url.pathname === '/update-dashboard' && request.method === 'POST') return handleUpdateDashboard(request, env);
+      if (url.pathname === '/log-github'       && request.method === 'POST') return handleGitHubLog(request, env);
+      if (url.pathname === '/trigger'          && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health'    && request.method === 'GET')  return handleHealth(request, env);
 
       // ── Legacy: keep old /api route working ──────────────────
@@ -795,6 +846,188 @@ async function handleEvents(request, env) {
 // 6. HEALTH CHECK
 // ═════════════════════════════════════════════════════════════════
 
+
+// ═════════════════════════════════════════════════════════════════
+// AUTOMATION ENGINE
+// POST /trigger — AETHER triggers external actions
+// Called by: cron, ML pipeline, flow detection, bot commands
+//
+// Supported actions:
+//   spotify_flow    — start focus playlist
+//   notion_log      — append to Notion journal
+//   webhook         — call any custom URL
+//   telegram_nudge  — send smart nudge to self
+// ═════════════════════════════════════════════════════════════════
+
+async function handleTrigger(request, env) {
+  try {
+    const body   = await request.json();
+    const action = body.action;
+    const data   = body.data || {};
+
+    console.log('[AETHER] Trigger:', action);
+
+    switch (action) {
+
+      // ── Smart nudge based on time + state ──────────────────────
+      case 'smart_nudge': {
+        const state  = await getLatestState(env);
+        const events = await getRecentEvents(5, env);
+        const avgE   = events.reduce((s,e) => s+(e.energy_signal||0.5),0) / Math.max(events.length,1);
+
+        let msg;
+        if (!state && events.length === 0) {
+          msg = '👋 AETHER here. No data logged today yet. What are you working on?';
+        } else if (avgE > 0.75) {
+          msg = `⚡ You're in high energy mode. What's the hardest thing on your list right now?`;
+        } else if (avgE < 0.35) {
+          msg = `😴 Low energy detected. Small task or rest? Reply to log your state.`;
+        } else {
+          msg = `🎯 Mid-day check: still on track with your goal? Reply to update AETHER.`;
+        }
+        await sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
+        return jsonResp({ ok: true, action, sent: msg });
+      }
+
+      // ── Notion journal entry ────────────────────────────────────
+      case 'notion_log': {
+        if (!env.NOTION_TOKEN || !env.NOTION_DATABASE_ID) {
+          return jsonResp({ ok: false, error: 'NOTION_TOKEN and NOTION_DATABASE_ID not set' });
+        }
+        const events = await getRecentEvents(20, env);
+        const today  = new Date().toISOString().split('T')[0];
+        const todayEv = events.filter(e => e.timestamp?.startsWith(today));
+        const avgE   = todayEv.length > 0
+          ? Math.round(todayEv.reduce((s,e)=>s+(e.energy_signal||0.5),0)/todayEv.length*100)
+          : 0;
+        const topics = [...new Set(todayEv.map(e=>e.topic).filter(Boolean))].slice(0,5).join(', ');
+
+        const resp = await fetch('https://api.notion.com/v1/pages', {
+          method: 'POST',
+          headers: {
+            'Authorization':  `Bearer ${env.NOTION_TOKEN}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type':   'application/json',
+          },
+          body: JSON.stringify({
+            parent: { database_id: env.NOTION_DATABASE_ID },
+            properties: {
+              'Name':   { title:  [{ text: { content: `AETHER Log — ${today}` } }] },
+              'Date':   { date:   { start: today } },
+              'Energy': { number: avgE },
+              'Events': { number: todayEv.length },
+              'Topics': { rich_text: [{ text: { content: topics } }] },
+            },
+          }),
+        });
+        const notionData = await resp.json();
+        return jsonResp({ ok: resp.ok, notion_id: notionData.id });
+      }
+
+      // ── Custom webhook — call any URL ───────────────────────────
+      case 'webhook': {
+        if (!data.url) return jsonResp({ error: 'data.url required' }, 400);
+        const state  = await getLatestState(env);
+        const events = await getRecentEvents(5, env);
+        const payload = {
+          timestamp:   new Date().toISOString(),
+          state:       state,
+          recent_events: events.slice(0,3),
+          ...data.extra,
+        };
+        const resp = await fetch(data.url, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
+        });
+        return jsonResp({ ok: resp.ok, status: resp.status });
+      }
+
+      // ── Spotify — open focus playlist ───────────────────────────
+      case 'spotify_flow': {
+        // Spotify requires OAuth — send deep link via Telegram instead
+        const playlistUrl = env.SPOTIFY_FLOW_PLAYLIST || 'https://open.spotify.com/playlist/37i9dQZF1DX8Uebhn9wzrS';
+        await sendTelegram(env.TELEGRAM_CHAT_ID,
+          `🎵 *Flow playlist*
+You entered flow state — time to focus.
+${playlistUrl}`, env);
+        return jsonResp({ ok: true, action, playlist: playlistUrl });
+      }
+
+      // ── Check-in reminder ───────────────────────────────────────
+      case 'checkin_reminder': {
+        const url = 'https://learning-bot.pages.dev/checkin.html';
+        await sendTelegram(env.TELEGRAM_CHAT_ID,
+          `📊 *Quick check-in*
+How are you right now?
+${url}`, env);
+        return jsonResp({ ok: true });
+      }
+
+      default:
+        return jsonResp({ error: `Unknown action: ${action}` }, 400);
+    }
+
+  } catch (e) {
+    console.error('[AETHER] Trigger error:', e.message);
+    return jsonResp({ error: e.message }, 500);
+  }
+}
+
+async function handleGitHubLog(request, env) {
+  try {
+    const body = await request.json();
+
+    // Build enriched event from GitHub data
+    const now   = new Date().toISOString();
+    const event = {
+      timestamp:        now,
+      input_type:       'github',
+      raw_text:         `git push: ${body.commit_message}`,
+      topic:            body.topic || 'Coding',
+      topics:           ['coding', 'github', body.repo?.split('/')[1] || 'project'],
+      sentiment:        'positive',
+      energy_signal:    parseFloat(body.energy_signal) || 0.7,
+      stress_signal:    0.15,
+      focus_signal:     0.8,  // coding = high focus
+      motivation_signal: 0.75,
+      dominant_emotion: 'neutral',
+      is_study_session: true,
+      is_goal_mention:  body.commit_message?.toLowerCase().includes('feat') || false,
+      is_complaint:     false,
+      estimated_minutes: Math.min(120, (body.files_changed || 1) * 15),
+      summary:          `GitHub push: ${body.commit_message?.slice(0, 80)}`,
+      // GitHub specific
+      github_repo:      body.repo,
+      github_branch:    body.branch,
+      files_changed:    body.files_changed || 0,
+      lines_added:      body.additions || 0,
+      lines_deleted:    body.deletions || 0,
+      // Time features
+      hour_utc:         new Date().getUTCHours(),
+      hour_sin:         Math.sin(2 * Math.PI * new Date().getUTCHours() / 24),
+      hour_cos:         Math.cos(2 * Math.PI * new Date().getUTCHours() / 24),
+      day_of_week:      new Date().getUTCDay(),
+      is_weekend:       [0, 6].includes(new Date().getUTCDay()),
+    };
+
+    await saveEvent(event, env);
+
+    // Send Telegram notification for big commits
+    if ((body.files_changed || 0) >= 5 && env.TELEGRAM_CHAT_ID) {
+      const msg = `⚡ *Code logged*
+${body.commit_message?.slice(0,60)}
+${body.files_changed} files · +${body.additions || 0} −${body.deletions || 0}`;
+      await sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
+    }
+
+    console.log('[AETHER] GitHub push logged:', body.commit_message?.slice(0, 50));
+    return jsonResp({ ok: true, message: 'GitHub activity logged to AETHER' });
+  } catch (e) {
+    return jsonResp({ error: e.message }, 500);
+  }
+}
+
 async function handleUpdateDashboard(request, env) {
   try {
     const dash = await request.json();
@@ -1253,6 +1486,26 @@ _Consistency beats intensity._`, env);
   }
 
   await sendTelegram(chatId, msg, env);
+}
+
+
+// ─── Midday nudge — checks if user logged anything today ──────────
+async function middayNudge(env) {
+  const chatId = env.TELEGRAM_CHAT_ID;
+  if (!chatId) return;
+  const today   = new Date().toISOString().split('T')[0];
+  const events  = await getRecentEvents(20, env);
+  const todayEv = events.filter(e => e.timestamp?.startsWith(today)
+                                  && e.input_type !== 'checkin');
+  if (todayEv.length === 0) {
+    await sendTelegram(chatId,
+      `🌞 *Midday check*
+
+No activity logged yet today.
+What are you working on?
+
+Just reply or use /goal to set your focus.`, env);
+  }
 }
 
 // ─── Streak calculator ────────────────────────────────────────────
