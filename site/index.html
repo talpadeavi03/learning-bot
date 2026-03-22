@@ -10,7 +10,6 @@
 <meta name="theme-color" content="#00ffff">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
-<link rel="icon" type="image/png" href="/icons/icon-192.png">
 <title>AETHER — Personal AI OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1008,81 +1007,141 @@ function showView(id,btn){
 }
 
 /* ══ CHAT — full-screen slide page ══ */
-let chatOpen=false;
+let chatOpen = false;
 
-function openChat(){
-  if(chatOpen)return;
-  chatOpen=true;
+// Restore chat history from sessionStorage so it survives close/reopen
+const hist = JSON.parse(sessionStorage.getItem('aether_chat_hist') || '[]');
+
+function saveHist() {
+  // Keep last 20 turns to avoid sessionStorage bloat
+  const trimmed = hist.slice(-20);
+  sessionStorage.setItem('aether_chat_hist', JSON.stringify(trimmed));
+}
+
+function openChat() {
+  if (chatOpen) return;
+  chatOpen = true;
   document.getElementById('chatPage').classList.add('open');
   document.getElementById('app').classList.add('shifted');
-  // Focus input after transition
-  setTimeout(()=>document.getElementById('chatIn').focus(),560);
+
+  // Push history state so Android back button closes chat not app
+  history.pushState({ chat: true }, '', '#chat');
+
+  // Restore previous messages if any
+  restoreChatHistory();
+
+  setTimeout(() => document.getElementById('chatIn').focus(), 560);
 }
 
-function closeChat(){
-  if(!chatOpen)return;
-  chatOpen=false;
+function closeChat() {
+  if (!chatOpen) return;
+  chatOpen = false;
   document.getElementById('chatPage').classList.remove('open');
   document.getElementById('app').classList.remove('shifted');
+  // Go back in history if we pushed a state
+  if (location.hash === '#chat') history.back();
 }
 
-// Keep legacy toggleChat for any other callers
-function toggleChat(){
-  chatOpen ? closeChat() : openChat();
-}
+// Handle Android/browser back button
+window.addEventListener('popstate', e => {
+  if (chatOpen) {
+    chatOpen = false;
+    document.getElementById('chatPage').classList.remove('open');
+    document.getElementById('app').classList.remove('shifted');
+  }
+});
 
-function quickSend(t){
+function toggleChat() { chatOpen ? closeChat() : openChat(); }
+
+function quickSend(t) {
   openChat();
-  setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat();},chatOpen?0:600);
+  setTimeout(() => { document.getElementById('chatIn').value = t; sendChat(); }, chatOpen ? 0 : 600);
 }
-const hist=[];
-async function sendChat(){
-  const inp=document.getElementById('chatIn');
-  const txt=inp.value.trim();if(!txt)return;
-  inp.value='';addMsg('user',txt);hist.push({role:'user',content:txt});
-  document.getElementById('thinking').classList.remove('hidden');
-  document.getElementById('sendBtn').disabled=true;
 
-  try{
-    // ✅ calls your Cloudflare Worker — API key stays safe on server
+// Restore chat messages from history into the DOM
+function restoreChatHistory() {
+  const box = document.getElementById('chatMsgs');
+  // Only restore if box just has the initial AETHER message
+  if (box.children.length > 1) return;
+  // Replay stored history into DOM (skip first welcome msg)
+  hist.forEach(m => {
+    if (m.role === 'user') addMsg('user', m.content);
+    else if (m.role === 'assistant') addMsg('ai', m.content);
+  });
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chatIn');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  addMsg('user', txt);
+  hist.push({ role: 'user', content: txt });
+  saveHist();
+
+  document.getElementById('thinking').classList.remove('hidden');
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
     const r = await fetch(WORKER_URL + '/chat', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        history:  hist,
+        history:  hist.slice(-10), // send last 10 turns only
         metrics:  D.metrics,
         activity: D.activity,
         goals:    D.goals.today
       })
     });
-    const data = await r.json();
+    const data  = await r.json();
     const reply = data.reply || data.error || 'Neural pathway disrupted.';
-    hist.push({role:'assistant', content:reply});
+    hist.push({ role: 'assistant', content: reply });
+    saveHist();
     document.getElementById('thinking').classList.add('hidden');
-    document.getElementById('sendBtn').disabled=false;
+    document.getElementById('sendBtn').disabled = false;
     typeMsg(reply);
-  } catch(err) {
+  } catch (err) {
     document.getElementById('thinking').classList.add('hidden');
-    document.getElementById('sendBtn').disabled=false;
-    addMsg('ai','Worker connection failed. Check console.');
+    document.getElementById('sendBtn').disabled = false;
+    addMsg('ai', 'Connection failed. Check worker status.');
     console.error('[AETHER]', err);
   }
 }
-function addMsg(role,text){
-  const box=document.getElementById('chatMsgs');
-  const el=document.createElement('div');el.className='msg '+role;
-  el.innerHTML=`<div class="mlbl">${role==='user'?'YOU':'AETHER'}</div>${text}`;
-  box.appendChild(el);box.scrollTop=box.scrollHeight;
+
+function addMsg(role, text) {
+  const box = document.getElementById('chatMsgs');
+  const el  = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.innerHTML = `<div class="mlbl">${role === 'user' ? 'YOU' : 'AETHER'}</div>${text}`;
+  box.appendChild(el);
+  box.scrollTop = box.scrollHeight;
 }
-function typeMsg(text){
-  const box=document.getElementById('chatMsgs');
-  const el=document.createElement('div');el.className='msg ai';
-  const lb=document.createElement('div');lb.className='mlbl';lb.textContent='AETHER';
-  const sp=document.createElement('span');const cur=document.createElement('span');
-  cur.textContent='▋';cur.style.animation='blink .7s infinite';
-  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur);
-  box.appendChild(el);let i=0;
-  function type(){if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;setTimeout(type,15)}else cur.remove()}
+
+function typeMsg(text) {
+  const box = document.getElementById('chatMsgs');
+  const el  = document.createElement('div');
+  el.className = 'msg ai';
+  const lb  = document.createElement('div');
+  lb.className = 'mlbl';
+  lb.textContent = 'AETHER';
+  const sp  = document.createElement('span');
+  const cur = document.createElement('span');
+  cur.textContent = '▋';
+  cur.style.animation = 'blink .7s infinite';
+  el.appendChild(lb);
+  el.appendChild(sp);
+  el.appendChild(cur);
+  box.appendChild(el);
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      sp.textContent += text[i++];
+      box.scrollTop = box.scrollHeight;
+      setTimeout(type, 12);
+    } else {
+      cur.remove();
+    }
+  }
   type();
 }
 </script>
