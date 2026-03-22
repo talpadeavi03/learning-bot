@@ -1010,17 +1010,17 @@ function showView(id,btn){
 let chatOpen = false;
 
 // Restore chat history from sessionStorage so it survives close/reopen
-const hist = JSON.parse(sessionStorage.getItem('aether_chat_hist') || '[]');
+const hist = JSON.parse(localStorage.getItem('aether_chat_hist') || '[]');
 
 function saveHist() {
   // Keep last 30 messages to avoid sessionStorage bloat
   const trimmed = hist.slice(-30);
   try {
-    sessionStorage.setItem('aether_chat_hist', JSON.stringify(trimmed));
+    localStorage.setItem('aether_chat_hist', JSON.stringify(trimmed));
   } catch(e) {
     // sessionStorage full — clear and retry
-    sessionStorage.clear();
-    sessionStorage.setItem('aether_chat_hist', JSON.stringify(trimmed.slice(-10)));
+    localStorage.removeItem('aether_chat_hist');
+    localStorage.setItem('aether_chat_hist', JSON.stringify(trimmed.slice(-10)));
   }
 }
 
