@@ -459,11 +459,36 @@ async function handleWebhook(request, env) {
   // ── NLP Parse ────────────────────────────────────────────────
   const parsed = await nlpParse(rawText, inputType, env);
 
-  // ── Save event to KV ─────────────────────────────────────────
+  // ── Enrich + Save event to KV ────────────────────────────────
+  const hour      = new Date(timestamp).getUTCHours();
+  const dayOfWeek = new Date(timestamp).getUTCDay(); // 0=Sun, 6=Sat
+  const wordCount = rawText.trim().split(/\s+/).length;
+
+  // Message complexity — longer = deeper thinking
+  const complexity = Math.min(1, wordCount / 50);
+
+  // Question ratio — questions = exploration mode
+  const questionCount = (rawText.match(/\?/g) || []).length;
+  const questionRatio = Math.min(1, questionCount / Math.max(1, wordCount / 10));
+
+  // Exclamation = high energy signal
+  const exclamations = (rawText.match(/!/g) || []).length;
+
   const event = {
     timestamp,
-    input_type: inputType,
-    raw_text:   rawText.slice(0, 1000), // trim to avoid KV bloat
+    input_type:      inputType,
+    raw_text:        rawText.slice(0, 500),
+    // Computed behavioral features
+    hour_utc:        hour,
+    hour_sin:        Math.sin(2 * Math.PI * hour / 24),
+    hour_cos:        Math.cos(2 * Math.PI * hour / 24),
+    day_of_week:     dayOfWeek,
+    is_weekend:      dayOfWeek === 0 || dayOfWeek === 6,
+    word_count:      wordCount,
+    complexity:      Math.round(complexity * 100) / 100,
+    question_ratio:  Math.round(questionRatio * 100) / 100,
+    exclamation_count: exclamations,
+    message_length:  rawText.length,
     ...parsed,
     ...extra,
   };
@@ -816,31 +841,20 @@ async function handleHealth(request, env) {
 // ═════════════════════════════════════════════════════════════════
 
 async function nlpParse(text, inputType, env) {
-  const prompt = `You are AETHER's data parser. Analyze this input and extract structured data.
+  const prompt = `You are a behavioral data parser. Extract signals from this message.
 
-Input type: ${inputType}
-Text: "${text}"
+Input: "${text}"
 
-Return ONLY valid JSON with exactly these fields:
-{
-  "topic": "main subject in 2-3 words",
-  "topics": ["list", "of", "topics"],
-  "sentiment": "positive|neutral|negative",
-  "energy_signal": 0.0-1.0,
-  "stress_signal": 0.0-1.0,
-  "focus_signal": 0.0-1.0,
-  "motivation_signal": 0.0-1.0,
-  "dominant_emotion": "joy|sadness|anger|fear|surprise|neutral",
-  "is_study_session": true/false,
-  "is_goal_mention": true/false,
-  "is_complaint": true/false,
-  "estimated_minutes": number or null,
-  "summary": "one sentence summary"
-}
+Rules for scoring (be DECISIVE, never default to 0.5):
+- energy_signal: words like "focused/great/productive/excited" = 0.8-0.95. "tired/slow/drained" = 0.1-0.3. "okay/fine" = 0.5-0.6. Action words = 0.7+
+- stress_signal: "overwhelmed/stuck/confused/deadline" = 0.7-0.9. "calm/relaxed/easy" = 0.05-0.2. Neutral = 0.15-0.3
+- focus_signal: studying/building/coding = 0.7-0.9. Multitasking/distracted = 0.2-0.4. General chat = 0.4-0.6
+- motivation_signal: goals/targets/progress = 0.8-0.95. Complaints/giving up = 0.1-0.3
+- is_study_session: true if learning, coding, reading, practicing, building
+- is_goal_mention: true if mentions goal, target, plan, finish, complete, achieve
 
-Base energy_signal on language energy (excited=0.9, tired=0.2, neutral=0.5).
-Base stress_signal on anxiety/overwhelm words (calm=0.1, stressed=0.8).
-Return ONLY the JSON object, no other text.`;
+Return ONLY this JSON, no other text:
+{"topic":"2-3 word subject","topics":["topic1","topic2"],"sentiment":"positive|neutral|negative","energy_signal":0.0,"stress_signal":0.0,"focus_signal":0.0,"motivation_signal":0.0,"dominant_emotion":"joy|sadness|anger|fear|surprise|neutral","is_study_session":false,"is_goal_mention":false,"is_complaint":false,"estimated_minutes":null,"summary":"one sentence"}`;
 
   try {
     // Use Cloudflare Workers AI — free, no OpenAI quota needed
