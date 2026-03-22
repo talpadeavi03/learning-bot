@@ -2,8 +2,8 @@ name: AETHER ML Pipeline
 
 on:
   schedule:
-    - cron: '30 19 * * *'   # 1am IST daily (7:30pm UTC)
-  workflow_dispatch:          # manual trigger from GitHub Actions tab
+    - cron: '30 19 * * *'   # 1am IST daily
+  workflow_dispatch:
 
 jobs:
   ml_pipeline:
@@ -20,15 +20,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          pip install pandas scikit-learn numpy requests joblib
+        run: pip install -r requirements-ml.txt
 
       - name: Pull events from worker
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
         run: python scripts/pipeline/pull_events.py
+
+      - name: Clean data
+        run: python scripts/pipeline/data_cleaner.py
 
       - name: Train model
         run: python scripts/ml/train_models.py
