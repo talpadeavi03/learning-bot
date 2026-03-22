@@ -1013,9 +1013,15 @@ let chatOpen = false;
 const hist = JSON.parse(sessionStorage.getItem('aether_chat_hist') || '[]');
 
 function saveHist() {
-  // Keep last 20 turns to avoid sessionStorage bloat
-  const trimmed = hist.slice(-20);
-  sessionStorage.setItem('aether_chat_hist', JSON.stringify(trimmed));
+  // Keep last 30 messages to avoid sessionStorage bloat
+  const trimmed = hist.slice(-30);
+  try {
+    sessionStorage.setItem('aether_chat_hist', JSON.stringify(trimmed));
+  } catch(e) {
+    // sessionStorage full — clear and retry
+    sessionStorage.clear();
+    sessionStorage.setItem('aether_chat_hist', JSON.stringify(trimmed.slice(-10)));
+  }
 }
 
 function openChat() {
@@ -1061,13 +1067,19 @@ function quickSend(t) {
 // Restore chat messages from history into the DOM
 function restoreChatHistory() {
   const box = document.getElementById('chatMsgs');
-  // Only restore if box just has the initial AETHER message
-  if (box.children.length > 1) return;
-  // Replay stored history into DOM (skip first welcome msg)
+  if (hist.length === 0) return;
+
+  // Clear everything except the first welcome message
+  while (box.children.length > 1) box.removeChild(box.lastChild);
+
+  // Replay stored history
   hist.forEach(m => {
     if (m.role === 'user') addMsg('user', m.content);
     else if (m.role === 'assistant') addMsg('ai', m.content);
   });
+
+  // Scroll to bottom
+  box.scrollTop = box.scrollHeight;
 }
 
 async function sendChat() {
