@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AETHER — Progress & Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--c:#00ffff;--p:#ff00aa;--g:#00ff88;--o:#ffaa00;--r:#ff3355;--dark:#010b12;--panel:rgba(0,16,26,0.92);--border:rgba(0,255,255,0.12);--text:#bde0ea;--text2:rgba(189,224,234,0.45)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:500;min-height:100vh;padding:20px 16px 60px;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,255,255,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,255,0.018) 1px,transparent 1px);background-size:44px 44px;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto}
+
+/* Header */
+.hd{text-align:center;padding:24px 0 36px}
+.hd-logo{font-family:'Orbitron',sans-serif;font-size:clamp(22px,5vw,38px);font-weight:900;letter-spacing:8px;color:var(--c);text-shadow:0 0 40px rgba(0,255,255,.3);margin-bottom:6px}
+.hd-logo span{color:var(--p)}
+.hd-sub{font-size:12px;letter-spacing:4px;opacity:.35;font-family:'Share Tech Mono',monospace}
+
+/* Progress bar */
+.prog-wrap{margin-bottom:36px}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.prog-label{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:4px;color:var(--c);opacity:.6}
+.prog-pct{font-family:'Orbitron',sans-serif;font-size:32px;font-weight:900;color:var(--c);text-shadow:0 0 20px var(--c)}
+.prog-track{height:8px;background:rgba(0,255,255,.08);border-radius:4px;overflow:hidden;position:relative}
+.prog-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--g),var(--c),var(--p));position:relative;transition:width 2s cubic-bezier(.4,0,.2,1)}
+.prog-fill::after{content:'';position:absolute;right:0;top:-4px;width:16px;height:16px;border-radius:50%;background:var(--c);box-shadow:0 0 12px var(--c)}
+
+/* Stats row */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:32px}
+.stat{border:1px solid var(--border);background:var(--panel);padding:14px 10px;text-align:center}
+.stat-n{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;line-height:1}
+.stat-l{font-size:10px;font-weight:600;letter-spacing:2px;opacity:.35;margin-top:4px}
+
+/* Section */
+.sec{margin-bottom:36px}
+.sec-hd{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:5px;color:var(--c);opacity:.5;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.sec-hd::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.2),transparent)}
+
+/* Change cards */
+.changes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.change{border:1px solid var(--border);background:var(--panel);padding:16px;position:relative;overflow:hidden;transition:all .2s}
+.change:hover{border-color:rgba(0,255,255,.28);background:rgba(0,255,255,.04);transform:translateY(-1px)}
+.change::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.change.cat-infra::before{background:var(--g)}
+.change.cat-ai::before{background:var(--c)}
+.change.cat-data::before{background:var(--o)}
+.change.cat-ux::before{background:var(--p)}
+.change.cat-auto::before{background:var(--r)}
+.ch-num{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;opacity:.25;margin-bottom:6px}
+.ch-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text);margin-bottom:6px}
+.ch-body{font-size:13px;font-weight:500;opacity:.55;line-height:1.6}
+.ch-tag{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:2px 8px;margin-top:10px;display:inline-block;font-weight:700}
+
+/* Next steps */
+.next-list{display:flex;flex-direction:column;gap:10px}
+.next-item{border:1px solid var(--border);background:var(--panel);padding:16px 20px;display:flex;align-items:flex-start;gap:16px;transition:all .2s}
+.next-item:hover{border-color:rgba(0,255,255,.25);background:rgba(0,255,255,.03)}
+.next-item.priority-now{border-color:rgba(255,51,85,.3)}
+.next-item.priority-week{border-color:rgba(255,170,0,.2)}
+.next-item.priority-month{border-color:rgba(0,255,136,.15)}
+.ni-num{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;opacity:.15;flex-shrink:0;line-height:1;margin-top:2px}
+.ni-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--text);margin-bottom:5px}
+.ni-body{font-size:13px;font-weight:500;opacity:.55;line-height:1.6}
+.ni-meta{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.ni-tag{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:2px 8px;font-weight:700}
+.tag-now{background:rgba(255,51,85,.1);color:var(--r);border:1px solid rgba(255,51,85,.3)}
+.tag-week{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
+.tag-month{background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)}
+.tag-free{background:rgba(0,255,255,.08);color:var(--c);border:1px solid rgba(0,255,255,.2)}
+.tag-hard{background:rgba(255,0,170,.08);color:var(--p);border:1px solid rgba(255,0,170,.2)}
+
+/* Tabs */
+.tabs{display:flex;gap:3px;margin-bottom:24px}
+.tab{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:3px;padding:8px 16px;cursor:pointer;color:var(--text2);background:var(--panel);border:1px solid var(--border);transition:all .2s}
+.tab.on{color:var(--c);border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.07)}
+.tab:hover:not(.on){color:var(--text);border-color:rgba(0,255,255,.2)}
+.view{display:none}.view.on{display:block;animation:fIn .3s ease}
+@keyframes fIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Version timeline */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tblock{display:flex;gap:20px;padding:20px 0;border-bottom:1px solid var(--border)}
+.tblock:last-child{border-bottom:none}
+.tb-left{width:120px;flex-shrink:0}
+.tb-ver{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;color:var(--c);margin-bottom:4px}
+.tb-status{font-size:10px;letter-spacing:2px;font-weight:700}
+.tb-items{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tb-item{font-size:12px;font-weight:600;opacity:.6;padding:4px 0;display:flex;align-items:center;gap:8px}
+.tb-item::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.tb-item.done::before{background:var(--g)}
+.tb-item.partial::before{background:var(--o)}
+.tb-item.todo::before{background:rgba(255,255,255,.2)}
+
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .changes{grid-template-columns:1fr}
+  .tb-items{grid-template-columns:1fr}
+  .tabs{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hd">
+  <div class="hd-logo">AETHER <span>OS</span></div>
+  <div class="hd-sub">PROGRESS TRACKER · CHANGES · NEXT STEPS</div>
+</div>
+
+<!-- Overall progress -->
+<div class="prog-wrap">
+  <div class="prog-top">
+    <div class="prog-label">OVERALL COMPLETION</div>
+    <div class="prog-pct" id="pct">0%</div>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-n" style="color:var(--g)">47</div><div class="stat-l">CHANGES MADE</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--c)">14</div><div class="stat-l">FILES BUILT</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--p)">8</div><div class="stat-l">ROUTES</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--o)">3</div><div class="stat-l">CF AI MODELS</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--g)">10</div><div class="stat-l">BOT COMMANDS</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--r)">3</div><div class="stat-l">CRON JOBS</div></div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab on" onclick="show('changes',this)">WHAT WE BUILT</button>
+  <button class="tab" onclick="show('next',this)">WHAT'S NEXT</button>
+  <button class="tab" onclick="show('version',this)">VERSION HISTORY</button>
+</div>
+
+<!-- CHANGES -->
+<div class="view on" id="view-changes">
+  <div class="sec">
+    <div class="sec-hd">INFRASTRUCTURE & DEPLOYMENT</div>
+    <div class="changes">
+      <div class="change cat-infra">
+        <div class="ch-num">01</div>
+        <div class="ch-title">CLOUDFLARE WORKER V2</div>
+        <div class="ch-body">Replaced 6-line skeleton worker with 1300+ line production worker. Handles 8 API routes, NLP parsing, cron jobs, bot commands, automation engine, GitHub logging.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">INFRA</span></div>
+      </div>
+      <div class="change cat-infra">
+        <div class="ch-num">02</div>
+        <div class="ch-title">CLOUDFLARE KV STORAGE</div>
+        <div class="ch-body">Added KV namespace binding. All events, states, dashboard data now stored persistently in Cloudflare KV. events:list, state:date, dashboard:latest, goal:date keys.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">STORAGE</span></div>
+      </div>
+      <div class="change cat-infra">
+        <div class="ch-num">03</div>
+        <div class="ch-title">WRANGLER.TOML UPGRADED</div>
+        <div class="ch-body">Added KV namespace binding, CF Workers AI binding, and 3 cron triggers (8:30am, 12:30pm, 8:30pm IST). All in one clean toml file.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">CONFIG</span></div>
+      </div>
+      <div class="change cat-infra">
+        <div class="ch-num">04</div>
+        <div class="ch-title">3 GITHUB ACTIONS WORKFLOWS</div>
+        <div class="ch-body">deploy.yml (auto-deploy on push), ml_pipeline.yml (nightly ML at 1am IST with data cleaning), github_activity.yml (auto-logs every commit to AETHER).</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,136,.08);color:var(--g);border:1px solid rgba(0,255,136,.2)">CI/CD</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">AI LAYER — 100% FREE</div>
+    <div class="changes">
+      <div class="change cat-ai">
+        <div class="ch-num">05</div>
+        <div class="ch-title">CLOUDFLARE WORKERS AI NLP</div>
+        <div class="ch-body">Replaced OpenAI GPT-4o (paid) with CF Llama 3 8B (free). Extracts 11 structured fields from every message: topic, sentiment, energy, stress, focus, motivation, emotion, study flag, goal flag, complaint flag, summary.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,255,.08);color:var(--c);border:1px solid rgba(0,255,255,.2)">FREE AI</span></div>
+      </div>
+      <div class="change cat-ai">
+        <div class="ch-num">06</div>
+        <div class="ch-title">CLOUDFLARE WHISPER (VOICE)</div>
+        <div class="ch-body">Replaced OpenAI Whisper ($0.006/min) with CF @cf/openai/whisper (free). Voice notes transcribed on Cloudflare infrastructure. No quota, no billing.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,255,.08);color:var(--c);border:1px solid rgba(0,255,255,.2)">FREE AI</span></div>
+      </div>
+      <div class="change cat-ai">
+        <div class="ch-num">07</div>
+        <div class="ch-title">CLOUDFLARE LLAVA VISION</div>
+        <div class="ch-body">Replaced OpenAI GPT-4o Vision (paid) with CF LLaVA 1.5 7B (free). Photos of notes, whiteboards, book pages extracted in English. Prompt hardened to prevent hallucination.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,255,.08);color:var(--c);border:1px solid rgba(0,255,255,.2)">FREE AI</span></div>
+      </div>
+      <div class="change cat-ai">
+        <div class="ch-num">08</div>
+        <div class="ch-title">AI CHAT — 3 SENTENCE LIMIT</div>
+        <div class="ch-body">System prompt rewritten to enforce max 3 sentences, no preamble, lead with the answer, use real data numbers, one concrete action at end. Llama 3 powers the chat with full dashboard context.</div>
+        <div><span class="ch-tag" style="background:rgba(0,255,255,.08);color:var(--c);border:1px solid rgba(0,255,255,.2)">UX FIX</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">DATA PIPELINE & ML</div>
+    <div class="changes">
+      <div class="change cat-data">
+        <div class="ch-num">09</div>
+        <div class="ch-title">ML PIPELINE — 4 SCRIPTS</div>
+        <div class="ch-body">pull_events.py → data_cleaner.py → train_models.py → predict.py → push_dashboard.py. Full pipeline runs nightly via GitHub Actions. RandomForest + GBM trains on your behavioral events.</div>
+        <div><span class="ch-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">ML</span></div>
+      </div>
+      <div class="change cat-data">
+        <div class="ch-num">10</div>
+        <div class="ch-title">DATA CLEANER SCRIPT</div>
+        <div class="ch-body">Removes gibberish (Arabic noise, Russian Whisper errors), duplicates, events with word_count under 3, and text events where all NLP signals defaulted to 0.5 (failed parse). Clean data trains better models.</div>
+        <div><span class="ch-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">DATA</span></div>
+      </div>
+      <div class="change cat-data">
+        <div class="ch-num">11</div>
+        <div class="ch-title">EVENT ENRICHMENT (11 AUTO FEATURES)</div>
+        <div class="ch-body">Every event automatically gets: hour_utc, hour_sin, hour_cos, day_of_week, is_weekend, word_count, complexity, question_ratio, exclamation_count, message_length. Zero extra effort from you.</div>
+        <div><span class="ch-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">DATA</span></div>
+      </div>
+      <div class="change cat-data">
+        <div class="ch-num">12</div>
+        <div class="ch-title">GITHUB AUTO-LOGGING</div>
+        <div class="ch-body">github_activity.yml logs every push as a coding event. Scores energy from commit message (feat=0.8, fix=0.7, chore=0.5), counts files changed, lines added. Your coding builds the dataset passively.</div>
+        <div><span class="ch-tag" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)">PASSIVE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">UX & DASHBOARD</div>
+    <div class="changes">
+      <div class="change cat-ux">
+        <div class="ch-num">13</div>
+        <div class="ch-title">DASHBOARD — LIVE REAL DATA</div>
+        <div class="ch-body">Dashboard no longer shows dummy numbers. Fetches from worker /dashboard which computes real metrics from KV events: actual energy, stress, focus, topics, timeline, streak, 7-day chart, insights.</div>
+        <div><span class="ch-tag" style="background:rgba(255,0,170,.08);color:var(--p);border:1px solid rgba(255,0,170,.2)">UX</span></div>
+      </div>
+      <div class="change cat-ux">
+        <div class="ch-num">14</div>
+        <div class="ch-title">PWA — INSTALLABLE APP</div>
+        <div class="ch-body">manifest.json + sw.js + icons added. AETHER installs on Android/iOS home screen as a real app. Offline caching, background sync, push notification support. No Play Store needed.</div>
+        <div><span class="ch-tag" style="background:rgba(255,0,170,.08);color:var(--p);border:1px solid rgba(255,0,170,.2)">MOBILE</span></div>
+      </div>
+      <div class="change cat-ux">
+        <div class="ch-num">15</div>
+        <div class="ch-title">CHAT HISTORY PERSISTS</div>
+        <div class="ch-body">Switched from sessionStorage (clears on close) to localStorage (persists forever). Chat history survives app close, tab close, phone restart. Last 30 messages stored and restored on reopen.</div>
+        <div><span class="ch-tag" style="background:rgba(255,0,170,.08);color:var(--p);border:1px solid rgba(255,0,170,.2)">UX FIX</span></div>
+      </div>
+      <div class="change cat-ux">
+        <div class="ch-num">16</div>
+        <div class="ch-title">BACK BUTTON FIXED</div>
+        <div class="ch-body">Android back button now closes chat and returns to dashboard instead of closing the app. Uses history.pushState on chat open and popstate listener on back press.</div>
+        <div><span class="ch-tag" style="background:rgba(255,0,170,.08);color:var(--p);border:1px solid rgba(255,0,170,.2)">UX FIX</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd">BOT COMMANDS & AUTOMATIONS</div>
+    <div class="changes">
+      <div class="change cat-auto">
+        <div class="ch-num">17</div>
+        <div class="ch-title">10 BOT COMMANDS</div>
+        <div class="ch-body">/help /stats /flow /goal /mood /week /streak /morning /evening /automate. Commands no longer log as events. Each returns structured, useful data. /flow shows real-time flow state from latest events.</div>
+        <div><span class="ch-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">BOT</span></div>
+      </div>
+      <div class="change cat-auto">
+        <div class="ch-num">18</div>
+        <div class="ch-title">3 DAILY CRON BRIEFINGS</div>
+        <div class="ch-body">8:30am: morning briefing with streak, goal, yesterday stats. 12:30pm: midday nudge if no data logged. 8:30pm: evening summary with energy, topics, flow assessment, tomorrow nudge. Fully automatic.</div>
+        <div><span class="ch-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">AUTO</span></div>
+      </div>
+      <div class="change cat-auto">
+        <div class="ch-num">19</div>
+        <div class="ch-title">AUTOMATION ENGINE</div>
+        <div class="ch-body">/trigger endpoint handles: smart_nudge, notion_log, spotify_flow, webhook (any URL), checkin_reminder. AETHER can now push to external services on command or automatically when flow detected.</div>
+        <div><span class="ch-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">AUTO</span></div>
+      </div>
+      <div class="change cat-auto">
+        <div class="ch-num">20</div>
+        <div class="ch-title">AUTO ML TRIGGER</div>
+        <div class="ch-body">Worker counts real events after each save. Every 5th real event automatically triggers the GitHub Actions ML pipeline via API dispatch. Model retrains without any manual action.</div>
+        <div><span class="ch-tag" style="background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)">AUTO</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEXT STEPS -->
+<div class="view" id="view-next">
+  <div class="sec">
+    <div class="sec-hd">DO RIGHT NOW — CRITICAL</div>
+    <div class="next-list">
+      <div class="next-item priority-now">
+        <div class="ni-num" style="color:var(--r)">1</div>
+        <div>
+          <div class="ni-title">SEND 20 CLEAN MESSAGES TO BOT</div>
+          <div class="ni-body">Your dataset has 10 events, several are garbage. Send 20 varied natural messages over the next 2 days — mix of tired/energetic/stressed/focused. This is the single most important thing. Without clean data the ML model cannot train meaningfully.</div>
+          <div class="ni-meta"><span class="ni-tag tag-now">DO TODAY</span><span class="ni-tag tag-free">FREE</span></div>
+        </div>
+      </div>
+      <div class="next-item priority-now">
+      
