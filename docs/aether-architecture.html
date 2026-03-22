@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AETHER OS — Full Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --c:#00ffff;--p:#ff00aa;--g:#00ff88;--o:#ffaa00;--r:#ff3355;
+  --dark:#010b12;--panel:rgba(0,16,26,0.92);--border:rgba(0,255,255,0.13);
+  --text:#bde0ea;--text2:rgba(189,224,234,0.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:500;min-height:100vh;padding:20px;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(0,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,255,0.02) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none}
+
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto}
+
+/* Header */
+.hd{text-align:center;padding:20px 0 30px}
+.hd-title{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;letter-spacing:6px;
+  color:var(--c);text-shadow:0 0 30px var(--c);margin-bottom:8px}
+.hd-sub{font-size:13px;letter-spacing:3px;opacity:.4}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.tab{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;
+  padding:8px 18px;cursor:pointer;color:var(--text2);background:transparent;
+  border:1px solid transparent;transition:all .2s}
+.tab.on{color:var(--c);border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.06)}
+.tab:hover:not(.on){color:var(--text);border-color:var(--border)}
+
+/* Views */
+.view{display:none}.view.on{display:block}
+
+/* Section */
+.sec{margin-bottom:32px}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:4px;
+  color:var(--c);opacity:.6;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.2),transparent)}
+
+/* Folder tree */
+.tree{font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2;
+  background:rgba(0,255,255,.03);border:1px solid var(--border);padding:20px 24px;
+  border-radius:4px;overflow-x:auto}
+.tree .folder{color:var(--c)}
+.tree .file{color:var(--text);opacity:.75}
+.tree .file.done{color:var(--g)}
+.tree .file.partial{color:var(--o)}
+.tree .file.missing{color:var(--r);opacity:.6}
+.tree .comment{color:var(--text2);font-size:11px}
+
+/* Architecture rows */
+.arch-row{display:grid;gap:10px;margin-bottom:10px}
+.arch-row.cols-2{grid-template-columns:1fr 1fr}
+.arch-row.cols-3{grid-template-columns:1fr 1fr 1fr}
+.arch-row.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.arch-row.cols-5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
+
+/* Node card */
+.node{border:1px solid var(--border);padding:14px 16px;background:var(--panel);
+  position:relative;transition:all .2s;cursor:default}
+.node:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.05);transform:translateY(-1px)}
+.node.done{border-color:rgba(0,255,136,.25)}
+.node.partial{border-color:rgba(255,170,0,.25)}
+.node.missing{border-color:rgba(255,51,85,.15);opacity:.7}
+.node.highlight{border-color:rgba(0,255,255,.5);background:rgba(0,255,255,.07)}
+
+.node-icon{font-size:18px;margin-bottom:6px;display:block}
+.node-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;
+  color:var(--text);margin-bottom:4px}
+.node-sub{font-size:12px;font-weight:500;opacity:.45;line-height:1.4}
+.node-badge{position:absolute;top:8px;right:8px;font-family:'Orbitron',sans-serif;
+  font-size:8px;font-weight:700;letter-spacing:1px;padding:2px 6px}
+.badge-done{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.3)}
+.badge-partial{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.3)}
+.badge-todo{background:rgba(255,51,85,.08);color:var(--r);border:1px solid rgba(255,51,85,.2)}
+.badge-next{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.3)}
+
+/* Arrow connector */
+.arrow-down{text-align:center;color:var(--c);opacity:.3;font-size:18px;margin:4px 0;
+  font-family:'Share Tech Mono',monospace;letter-spacing:2px}
+
+/* Flow diagram */
+.flow{display:flex;align-items:center;gap:0;overflow-x:auto;padding:16px 0;margin-bottom:16px}
+.flow-node{flex-shrink:0;border:1px solid var(--border);background:var(--panel);
+  padding:10px 16px;text-align:center;min-width:110px}
+.flow-node.done{border-color:rgba(0,255,136,.3)}
+.flow-node.active{border-color:var(--c);background:rgba(0,255,255,.07);
+  box-shadow:0 0 16px rgba(0,255,255,.1)}
+.flow-node.todo{border-color:rgba(255,51,85,.2);opacity:.5}
+.fn-label{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text)}
+.fn-sub{font-size:11px;opacity:.4;margin-top:2px}
+.flow-arrow{color:var(--c);opacity:.25;padding:0 8px;font-size:18px;flex-shrink:0}
+
+/* Improvement cards */
+.imp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.imp{border:1px solid var(--border);background:var(--panel);padding:16px;position:relative}
+.imp.priority-1{border-color:rgba(255,51,85,.3)}
+.imp.priority-2{border-color:rgba(255,170,0,.2)}
+.imp.priority-3{border-color:rgba(0,255,136,.15)}
+.imp-num{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;
+  color:var(--c);opacity:.12;position:absolute;top:10px;right:14px}
+.imp-title{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:2px;color:var(--text);margin-bottom:6px}
+.imp-body{font-size:13px;font-weight:500;opacity:.6;line-height:1.6;margin-bottom:10px}
+.imp-tag{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;
+  padding:2px 8px;font-weight:700}
+
+/* Stats row */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px}
+.stat{border:1px solid var(--border);background:var(--panel);padding:16px;text-align:center}
+.stat-n{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;line-height:1}
+.stat-l{font-size:11px;font-weight:600;letter-spacing:2px;opacity:.35;margin-top:4px}
+
+/* File status legend */
+.legend{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:1px;opacity:.6}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+
+@media(max-width:700px){
+  .arch-row.cols-3,.arch-row.cols-4,.arch-row.cols-5{grid-template-columns:1fr 1fr}
+  .arch-row.cols-2{grid-template-columns:1fr}
+  .imp-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hd">
+  <div class="hd-title">AETHER OS</div>
+  <div class="hd-sub">FULL ARCHITECTURE · CURRENT STATE · IMPROVEMENT ROADMAP</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="show('overview',this)">OVERVIEW</button>
+  <button class="tab" onclick="show('structure',this)">REPO STRUCTURE</button>
+  <button class="tab" onclick="show('pipeline',this)">DATA PIPELINE</button>
+  <button class="tab" onclick="show('improve',this)">IMPROVEMENTS</button>
+  <button class="tab" onclick="show('roadmap',this)">ROADMAP</button>
+</div>
+
+<!-- OVERVIEW -->
+<div class="view on" id="view-overview">
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n" style="color:var(--g)">12</div><div class="stat-l">FILES BUILT</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--c)">6</div><div class="stat-l">API ROUTES</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--o)">4</div><div class="stat-l">INPUT TYPES</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--p)">3</div><div class="stat-l">CF AI MODELS</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--g)">65%</div><div class="stat-l">COMPLETE</div></div>
+  </div>
+
+  <!-- Input layer -->
+  <div class="sec">
+    <div class="sec-title">01 · INPUT LAYER</div>
+    <div class="arch-row cols-5">
+      <div class="node done">
+        <span class="node-icon">💬</span>
+        <div class="node-title">TEXT</div>
+        <div class="node-sub">Telegram diary entries, commands, goals</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🎙</span>
+        <div class="node-title">VOICE</div>
+        <div class="node-sub">CF Whisper free transcription</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🖼</span>
+        <div class="node-title">IMAGE</div>
+        <div class="node-sub">CF LLaVA vision extraction</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">📊</span>
+        <div class="node-title">CHECK-IN</div>
+        <div class="node-sub">One-tap state widget, 6 states</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">⚙️</span>
+        <div class="node-title">GITHUB</div>
+        <div class="node-sub">Auto-logs every code push</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓ ↓ ↓ ↓ ↓</div>
+
+  <!-- Core worker -->
+  <div class="sec">
+    <div class="sec-title">02 · CLOUDFLARE WORKER — learning-bot</div>
+    <div class="arch-row cols-4">
+      <div class="node done highlight">
+        <span class="node-icon">🔀</span>
+        <div class="node-title">ROUTER</div>
+        <div class="node-sub">/webhook /chat /log-state /dashboard /events /health /trigger /log-github</div>
+        <span class="node-badge badge-done">8 ROUTES</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🧠</span>
+        <div class="node-title">NLP ENGINE</div>
+        <div class="node-sub">Llama 3 8B extracts topic, energy, stress, focus, emotion</div>
+        <span class="node-badge badge-done">FREE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">⏰</span>
+        <div class="node-title">CRON JOBS</div>
+        <div class="node-sub">8:30am briefing · 12:30pm nudge · 8:30pm summary</div>
+        <span class="node-badge badge-done">3 CRONS</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">⚡</span>
+        <div class="node-title">AUTOMATION</div>
+        <div class="node-sub">Notion · Spotify · Webhooks · Smart nudges</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓ ↓ ↓</div>
+
+  <!-- AI + Storage -->
+  <div class="sec">
+    <div class="sec-title">03 · AI LAYER + STORAGE</div>
+    <div class="arch-row cols-4">
+      <div class="node done">
+        <span class="node-icon">🤖</span>
+        <div class="node-title">CF WORKERS AI</div>
+        <div class="node-sub">Llama 3 (NLP+chat) · Whisper (voice) · LLaVA (vision) — all free</div>
+        <span class="node-badge badge-done">FREE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🗄</span>
+        <div class="node-title">CF KV STORE</div>
+        <div class="node-sub">events:list · state:date · dashboard:latest · goal:date</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node missing">
+        <span class="node-icon">🔍</span>
+        <div class="node-title">CF VECTORIZE</div>
+        <div class="node-sub">Semantic memory — search past events by meaning</div>
+        <span class="node-badge badge-todo">TODO</span>
+      </div>
+      <div class="node missing">
+        <span class="node-icon">🗃</span>
+        <div class="node-title">CF D1 SQL</div>
+        <div class="node-sub">Structured queries, complex analytics, joins</div>
+        <span class="node-badge badge-todo">TODO</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓ ↓</div>
+
+  <!-- ML Pipeline -->
+  <div class="sec">
+    <div class="sec-title">04 · ML PIPELINE — GitHub Actions nightly</div>
+    <div class="arch-row cols-4">
+      <div class="node done">
+        <span class="node-icon">📥</span>
+        <div class="node-title">PULL EVENTS</div>
+        <div class="node-sub">pull_events.py fetches KV → events.csv</div>
+        <span class="node-badge badge-done">BUILT</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🏋</span>
+        <div class="node-title">TRAIN MODEL</div>
+        <div class="node-sub">RandomForest + GBM on behavioral features</div>
+        <span class="node-badge badge-done">BUILT</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🔮</span>
+        <div class="node-title">PREDICT</div>
+        <div class="node-sub">Flow class · peak hour · energy forecast</div>
+        <span class="node-badge badge-done">BUILT</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">📤</span>
+        <div class="node-title">PUSH DASHBOARD</div>
+        <div class="node-sub">dashboard.json → KV → UI</div>
+        <span class="node-badge badge-done">BUILT</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-down">↓ ↓</div>
+
+  <!-- Output -->
+  <div class="sec">
+    <div class="sec-title">05 · OUTPUT LAYER</div>
+    <div class="arch-row cols-4">
+      <div class="node done">
+        <span class="node-icon">📱</span>
+        <div class="node-title">DASHBOARD PWA</div>
+        <div class="node-sub">learning-bot.pages.dev · installable · offline · real data</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">🤖</span>
+        <div class="node-title">TELEGRAM BOT</div>
+        <div class="node-sub">/help /stats /flow /goal /mood /week /streak /morning /evening /automate</div>
+        <span class="node-badge badge-done">10 CMDS</span>
+      </div>
+      <div class="node done">
+        <span class="node-icon">💬</span>
+        <div class="node-title">AI CHAT</div>
+        <div class="node-sub">3-sentence replies · history persists · Llama 3</div>
+        <span class="node-badge badge-done">LIVE</span>
+      </div>
+      <div class="node missing">
+        <span class="node-icon">📲</span>
+        <div class="node-title">NATIVE APK</div>
+        <div class="node-sub">Capacitor wraps PWA → real Android APK</div>
+        <span class="node-badge badge-todo">TODO</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- REPO STRUCTURE -->
+<div class="view" id="view-structure">
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--g)"></div>Built and working</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--o)"></div>Built, needs improvement</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--r)"></div>Missing — needs to be added</div>
+  </div>
+
+  <div class="tree">
+<span class="folder">learning-bot/</span>
+│
+├── <span class="folder">api/</span>
+│   └── <span class="file done">worker.js</span>                    <span class="comment">✅ 1200+ lines · all routes · NLP · cron · automations</span>
+│
+├── <span class="folder">site/</span>
+│   ├── <span class="file done">index.html</span>                   <span class="comment">✅ dashboard PWA · live data · chat · check-in</span>
+│   ├── <span class="file done">manifest.json</span>                <span class="comment">✅ PWA installable</span>
+│   ├── <span class="file done">sw.js</span>                        <span class="comment">✅ offline caching · background sync</span>
+│   ├── <span class="file done">checkin.html</span>                 <span class="comment">✅ one-tap state widget</span>
+│   ├── <span class="file missing">icons/icon-192.png</span>           <span class="comment">⚠ add to site/icons/</span>
+│   ├── <span class="file missing">icons/icon-512.png</span>           <span class="comment">⚠ add to site/icons/</span>
+│   └── <span class="folder">data/</span>
+│       └── <span class="file partial">dashboard.json</span>           <span class="comment">🟡 auto-generated by ML pipeline</span>
+│
+├── <span class="folder">scripts/</span>
+│   ├── <span class="folder">pipeline/</span>
+│   │   ├── <span class="file done">pull_events.py</span>           <span class="comment">✅ KV → events.csv</span>
+│   │   ├── <span class="file done">push_dashboard.py</span>        <span class="comment">✅ dashboard.json → KV</span>
+│   │   └── <span class="file done">run_pipeline.py</span>          <span class="comment">✅ master runner</span>
+│   ├── <span class="folder">ml/</span>
+│   │   ├── <span class="file done">train_models.py</span>          <span class="comment">✅ RF + GBM flow classifier</span>
+│   │   └── <span class="file done">predict.py</span>               <span class="comment">✅ flow · peak hour · dashboard</span>
+│   ├── <span class="folder">features/</span>
+│   │   ├── <span class="file partial">feature_extractor.py</span>     <span class="comment">🟡 needs richer features</span>
+│   │   ├── <span class="file missing">daily_aggregator.py</span>      <span class="comment">❌ missing — daily rollup</span>
+│   │   └── <span class="file missing">state_vector_builder.py</span>  <span class="comment">❌ missing — 32-dim state</span>
+│   ├── <span class="folder">analytics/</span>
+│   │   ├── <span class="file missing">weekly_summary.py</span>        <span class="comment">❌ missing — auto weekly report</span>
+│   │   └── <span class="file missing">insight_generator.py</span>     <span class="comment">❌ missing — pattern insights</span>
+│   └── <span class="folder">ingestion/</span>
+│       ├── <span class="file partial">nlp_parser.py</span>            <span class="comment">🟡 exists but outdated vs worker</span>
+│       └── <span class="file missing">data_cleaner.py</span>          <span class="comment">❌ missing — remove bad events</span>
+│
+├── <span class="folder">data/</span>
+│   ├── <span class="folder">raw/</span>
+│   │   └── <span class="file partial">events.csv</span>               <span class="comment">🟡 10 events · some bad quality</span>
+│   ├── <span class="folder">features/</span>
+│   │   └── <span class="file missing">behavior_features.parquet</span> <span class="comment">❌ not yet generated</span>
+│   ├── <span class="folder">processed/</span>                       <span class="comment">❌ empty — needs cleaned data</span>
+│   └── <span class="folder">insights/</span>                        <span class="comment">❌ empty — needs generated</span>
+│
+├── <span class="folder">models/</span>
+│   ├── <span class="file partial">productivity_model.pkl</span>       <span class="comment">🟡 not trained yet — need 30+ events</span>
+│   └── <span class="file missing">training_stats.json</span>          <span class="comment">❌ generated after first train</span>
+│
+├── <span class="folder">.github/workflows/</span>
+│   ├── <span class="file done">deploy.yml</span>                   <span class="comment">✅ auto-deploy on push</span>
+│   ├── <span class="file done">ml_pipeline.yml</span>              <span class="comment">✅ nightly ML at 1am IST</span>
+│   └── <span class="file done">github_activity.yml</span>          <span class="comment">✅ auto-logs every push</span>
+│
+├── <span class="folder">docs/</span>
+│   ├── <span class="file done">PROJECT_MAP.md</span>               <span class="comment">✅ exists</span>
+│   └── <span class="file missing">ARCHITECTURE.md</span>              <span class="comment">❌ update with new structure</span>
+│
+├── <span class="file done">wrangler.toml</span>                    <span class="comment">✅ KV + AI bindings + crons</span>
+├── <span class="file partial">requirements.txt</span>                 <span class="comment">🟡 spl
