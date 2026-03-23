@@ -11,6 +11,8 @@ sys.path.append(
 )
 
 from scripts.analytics.vector_query import search
+from scripts.ai.intent_classifier import classify
+from scripts.analytics.temporal_engine import yesterday_summary
 
 PATTERNS = "site/data/patterns.json"
 INSIGHTS = "site/data/insights.json"
@@ -112,6 +114,17 @@ def answer_question(question):
     answer = []
 
     # -------------------------
+    # Intent classification
+    # -------------------------
+
+    intent = classify(question)
+
+    # Temporal questions handled separately
+    if intent == "temporal":
+        answer.append(yesterday_summary())
+        return "\n".join(answer)
+
+    # -------------------------
     # Vector memory search
     # -------------------------
 
@@ -210,7 +223,6 @@ def answer_question(question):
         answer.append(f"\nRecommendation: {rec}")
 
     if not answer:
-
         answer.append("No data yet. Keep logging events.")
 
     return "\n".join(answer)
