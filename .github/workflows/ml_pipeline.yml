@@ -2,7 +2,7 @@ name: AETHER ML Pipeline
 
 on:
   schedule:
-    - cron: '30 19 * * *'
+    - cron: '30 19 * * *'   # 1am IST daily
   workflow_dispatch:
 
 jobs:
@@ -15,15 +15,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+        run: |
+          python3 --version
 
       - name: Install dependencies
-        run: |
-          pip install pandas scikit-learn numpy requests joblib pyarrow
+        run: pip install -r requirements-ml.txt
 
-      - name: Pull events
+      - name: Pull events from worker
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
         run: python scripts/pipeline/pull_events.py
@@ -34,18 +32,18 @@ jobs:
       - name: Train model
         run: python scripts/ml/train_models.py
 
-      - name: Predict
+      - name: Generate predictions
         run: python scripts/ml/predict.py
 
-      - name: Push dashboard
+      - name: Push dashboard to KV
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
         run: python scripts/pipeline/push_dashboard.py
 
-      - name: Commit results
+      - name: Commit data files
         run: |
           git config --local user.email "aether-bot@noreply.com"
           git config --local user.name "AETHER Bot"
-          git add data/ models/ || true
-          git diff --staged --quiet || git commit -m "chore: nightly ML [skip ci]"
+          git add data/ models/ site/data/ || true
+          git diff --staged --quiet || git commit -m "chore: nightly ML pipeline [skip ci]"
           git push || true
