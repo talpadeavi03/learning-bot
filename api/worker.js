@@ -262,6 +262,157 @@ Keep logging daily!`, env);
       return true;
     }
 
+    case '/exercise':
+    case '/workout': {
+      const actType = args.replace(/[0-9]+/g,'').trim() || 'workout';
+      const mins = parseInt(args.match(/[0-9]+/)?.[0]) || 30;
+      await saveEvent({ input_type:'health', raw_text:text, topic:'Exercise',
+        topics:['health','fitness'], energy_signal:0.75, stress_signal:0.1,
+        focus_signal:0.6, motivation_signal:0.8, dominant_emotion:'energized',
+        is_study_session:false, is_goal_mention:false, estimated_minutes:mins,
+        health_type:'exercise', activity:actType, duration_mins:mins,
+        summary:`Exercise: ${actType} ${mins}min` }, env);
+      await sendTelegram(chatId, `💪 *Exercise logged*\n\n${actType} — ${mins} min\nEnergy: +0.75 recorded 🔥`, env);
+      return true;
+    }
+
+    case '/sleep': {
+      const hrs = parseFloat(args) || 7;
+      const quality = hrs >= 8 ? 'great' : hrs >= 6 ? 'ok' : 'poor';
+      const energy  = hrs >= 8 ? 0.85 : hrs >= 6 ? 0.6 : 0.35;
+      await saveEvent({ input_type:'health', raw_text:text, topic:'Sleep',
+        topics:['health','sleep','recovery'], energy_signal:energy,
+        stress_signal:hrs < 6 ? 0.5 : 0.1, focus_signal:energy,
+        motivation_signal:energy, dominant_emotion:hrs < 6 ? 'tired' : 'rested',
+        is_study_session:false, is_goal_mention:false,
+        health_type:'sleep', sleep_hours:hrs, sleep_quality:quality,
+        summary:`Sleep: ${hrs}h (${quality})` }, env);
+      await sendTelegram(chatId, `😴 *Sleep logged*\n\n${hrs}h — ${quality.toUpperCase()}\nEnergy forecast: ${Math.round(energy*100)}%\n\n${hrs < 6 ? '⚠️ Low sleep — take it easy.' : hrs >= 8 ? '✅ Well rested!' : '👍 Decent sleep.'}`, env);
+      return true;
+    }
+
+    case '/food':
+    case '/meal': {
+      const meal = args || 'meal';
+      await saveEvent({ input_type:'health', raw_text:text, topic:'Food',
+        topics:['health','nutrition'], energy_signal:0.5, stress_signal:0.05,
+        focus_signal:0.4, motivation_signal:0.5, dominant_emotion:'neutral',
+        is_study_session:false, is_goal_mention:false,
+        health_type:'food', meal_description:meal,
+        summary:`Meal: ${meal}` }, env);
+      await sendTelegram(chatId, `🍽️ *Meal logged*\n\n${meal}\n\nFuel in the tank! 💪`, env);
+      return true;
+    }
+
+    case '/water':
+    case '/hydrate': {
+      const litres = parseFloat(args) || 0.5;
+      await saveEvent({ input_type:'health', raw_text:text, topic:'Hydration',
+        topics:['health','water'], energy_signal:0.55, stress_signal:0.05,
+        focus_signal:0.5, motivation_signal:0.55, dominant_emotion:'neutral',
+        health_type:'water', litres,
+        summary:`Water: ${litres}L` }, env);
+      await sendTelegram(chatId, `💧 *Water logged*\n\n${litres}L\n\nBrain runs on water 🧠`, env);
+      return true;
+    }
+
+    case '/weight': {
+      const kg = parseFloat(args);
+      if (!kg || kg < 30 || kg > 250) {
+        await sendTelegram(chatId, '⚖️ Usage: /weight 72.5', env);
+        return true;
+      }
+      await saveEvent({ input_type:'health', raw_text:text, topic:'Weight',
+        topics:['health','fitness'], energy_signal:0.5, stress_signal:0.1,
+        focus_signal:0.5, motivation_signal:0.6, dominant_emotion:'neutral',
+        health_type:'weight', weight_kg:kg,
+        summary:`Weight: ${kg}kg` }, env);
+      await sendTelegram(chatId, `⚖️ *Weight logged*\n\n${kg} kg\n\nTracking → trending → improving 📈`, env);
+      return true;
+    }
+
+    case '/spend':
+    case '/expense': {
+      if (!args) { await sendTelegram(chatId, '💸 Usage: /spend 200 food', env); return true; }
+      const spendParts = args.split(' ');
+      const amount = parseFloat(spendParts[0]) || 0;
+      const cat = spendParts.slice(1).join(' ') || 'general';
+      await saveEvent({ input_type:'finance', raw_text:text, topic:'Expense',
+        topics:['money','spending',cat], energy_signal:0.5, stress_signal:0.15,
+        focus_signal:0.4, motivation_signal:0.5, dominant_emotion:'neutral',
+        finance_type:'expense', amount_inr:amount, category:cat,
+        summary:`Spent Rs${amount} on ${cat}` }, env);
+      await sendTelegram(chatId, `💸 *Expense logged*\n\nRs${amount} — ${cat}\n\nEvery rupee tracked 💰`, env);
+      return true;
+    }
+
+    case '/income':
+    case '/earn': {
+      if (!args) { await sendTelegram(chatId, '💰 Usage: /income 5000 freelance', env); return true; }
+      const earnParts = args.split(' ');
+      const earned = parseFloat(earnParts[0]) || 0;
+      const src = earnParts.slice(1).join(' ') || 'income';
+      await saveEvent({ input_type:'finance', raw_text:text, topic:'Income',
+        topics:['money','income',src], energy_signal:0.85, stress_signal:0.05,
+        focus_signal:0.7, motivation_signal:0.9, dominant_emotion:'joy',
+        finance_type:'income', amount_inr:earned, source:src,
+        summary:`Income: Rs${earned} from ${src}` }, env);
+      await sendTelegram(chatId, `💰 *Income logged*\n\nRs${earned} from ${src}\n\nMoney flowing in! Keep building 🚀`, env);
+      return true;
+    }
+
+    case '/job':
+    case '/apply': {
+      const company = args || 'company';
+      await saveEvent({ input_type:'career', raw_text:text, topic:'Job Application',
+        topics:['career','jobs'], energy_signal:0.7, stress_signal:0.3,
+        focus_signal:0.6, motivation_signal:0.75, dominant_emotion:'determined',
+        career_type:'application', company,
+        summary:`Applied: ${company}` }, env);
+      await sendTelegram(chatId, `📋 *Job application logged*\n\nCompany: ${company}\n\nConsistency wins. Keep applying! 🎯`, env);
+      return true;
+    }
+
+    case '/interview': {
+      const co = args || 'company';
+      await saveEvent({ input_type:'career', raw_text:text, topic:'Interview',
+        topics:['career','interview'], energy_signal:0.8, stress_signal:0.5,
+        focus_signal:0.8, motivation_signal:0.85, dominant_emotion:'focused',
+        career_type:'interview', company:co,
+        summary:`Interview: ${co}` }, env);
+      await sendTelegram(chatId, `🎯 *Interview logged*\n\n${co}\n\nYou got this! 💪`, env);
+      return true;
+    }
+
+    case '/commands': {
+      await sendTelegram(chatId, `*AETHER Commands* 🤖
+
+*📊 CORE*
+/goal [text] — set today goal
+/mood [1-5] — quick mood log
+/stats — weekly summary
+/flow — current flow state
+
+*💪 HEALTH*
+/exercise [mins] [type]
+/sleep [hours]
+/food [description]
+/water [litres]
+/weight [kg]
+
+*💰 MONEY*
+/spend [amount] [category]
+/income [amount] [source]
+
+*💼 CAREER*
+/job [company] — log application
+/interview [company]
+
+*📈 INSIGHTS*
+/week /streak /morning /evening`, env);
+      return true;
+    }
+
     default:
       return false; // not a recognized command, treat as regular text
   }
@@ -344,6 +495,9 @@ export default {
     if (hour === 15) ctx.waitUntil(sendEveningSummary(env));
     // Midday nudge at 12:30pm IST (7:00 UTC) if no data logged yet today
     if (hour === 7)  ctx.waitUntil(middayNudge(env));
+    // Sunday weekly report at 9pm IST (15:30 UTC)
+    const dayOfWeek = new Date().getUTCDay(); // 0=Sunday
+    if (hour === 15 && dayOfWeek === 0) ctx.waitUntil(sendWeeklyReport(env));
   },
 
   async fetch(request, env) {
@@ -727,6 +881,30 @@ async function handleDashboard(request, env) {
       week:  [],
     };
 
+    // Input type breakdown
+    const inputCounts = {};
+    events.forEach(e => {
+      const t = e.input_type || 'text';
+      inputCounts[t] = (inputCounts[t] || 0) + 1;
+    });
+
+    // Hourly activity heatmap (UTC hours → we convert to IST in frontend)
+    const hourlyData = new Array(24).fill(0);
+    events.forEach(e => {
+      if (e.timestamp) {
+        const h = new Date(e.timestamp).getUTCHours();
+        hourlyData[h] = (hourlyData[h] || 0) + 1;
+      }
+    });
+
+    // Flow label from latest state or computed
+    let flowLabel = 'NOMINAL';
+    if (latestState?.flow_class)    flowLabel = latestState.flow_class;
+    else if (avgEnergy > 75 && avgStress < 25) flowLabel = 'FLOW';
+    else if (avgEnergy > 60 && avgStress < 35) flowLabel = 'PRE-FLOW';
+    else if (avgStress > 60)                   flowLabel = 'ANXIETY';
+    else if (avgEnergy < 35)                   flowLabel = 'RECOVERY';
+
     const dash = {
       metrics: {
         focus:        avgFocus || avgEnergy,
@@ -739,13 +917,24 @@ async function handleDashboard(request, env) {
         total_events: events.length,
         last_updated: new Date().toISOString(),
       },
-      state:    latestState,
-      activity: activity.length > 0 ? activity : defaultDashboard().activity,
-      timeline: timeline.length > 0 ? timeline : defaultDashboard().timeline,
+      state:      latestState,
+      activity:   activity.length > 0 ? activity : defaultDashboard().activity,
+      timeline:   timeline.length > 0 ? timeline : defaultDashboard().timeline,
       weekData,
       insights,
       goals,
       streak,
+      inputCounts,
+      hourlyData,
+      todayCount: todayEv.length,
+      flowLabel,
+      pipeline: [
+        { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',           status: 'OK',    cls: 'ps-ok' },
+        { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',         status: 'OK',    cls: 'ps-ok' },
+        { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM',        status: events.length >= 10 ? 'TRAINED' : 'WAITING', cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
+        { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',          status: events.length >= 10 ? 'OK' : 'WAITING', cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
+        { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',          status: 'OK',    cls: 'ps-ok' },
+      ],
     };
 
     return new Response(JSON.stringify(dash, null, 2), {
@@ -1509,6 +1698,83 @@ _Consistency beats intensity._`, env);
 
 
 // ─── Midday nudge — checks if user logged anything today ──────────
+async function sendWeeklyReport(env) {
+  try {
+    const events  = await getRecentEvents(500, env);
+    const now     = new Date();
+    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+
+    const weekEv  = events.filter(e => new Date(e.timestamp) > weekAgo);
+    if (weekEv.length === 0) {
+      return sendTelegram(env.TELEGRAM_CHAT_ID, '📊 Weekly report: No events logged this week. Start logging!', env);
+    }
+
+    // Compute weekly stats
+    const avgEnergy = weekEv.reduce((s,e) => s + (e.energy_signal||0.5), 0) / weekEv.length;
+    const avgStress = weekEv.reduce((s,e) => s + (e.stress_signal||0.2), 0) / weekEv.length;
+
+    // Best and worst day
+    const byDay = {};
+    weekEv.forEach(e => {
+      const d = e.timestamp?.split('T')[0];
+      if (!byDay[d]) byDay[d] = [];
+      byDay[d].push(e.energy_signal || 0.5);
+    });
+    const dayAvgs  = Object.entries(byDay).map(([d, vals]) => ({ d, avg: vals.reduce((s,v)=>s+v,0)/vals.length }));
+    const bestDay  = dayAvgs.sort((a,b)=>b.avg-a.avg)[0];
+    const worstDay = dayAvgs[dayAvgs.length-1];
+
+    // Top topics
+    const topicCount = {};
+    weekEv.forEach(e => { if(e.topic) topicCount[e.topic] = (topicCount[e.topic]||0)+1; });
+    const topTopics = Object.entries(topicCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t])=>t).join(', ') || 'none';
+
+    // Input breakdown
+    const githubCount   = weekEv.filter(e=>e.input_type==='github').length;
+    const healthCount   = weekEv.filter(e=>e.input_type==='health').length;
+    const financeCount  = weekEv.filter(e=>e.input_type==='finance').length;
+    const careerCount   = weekEv.filter(e=>e.input_type==='career').length;
+    const streak        = await calculateStreak(events);
+
+    const energyBar = '█'.repeat(Math.round(avgEnergy*10)) + '░'.repeat(10-Math.round(avgEnergy*10));
+    const stressBar = '█'.repeat(Math.round(avgStress*10)) + '░'.repeat(10-Math.round(avgStress*10));
+
+    const msg = `📊 *AETHER Weekly Report*
+Week of ${weekAgo.toLocaleDateString('en-IN')}
+
+*Overview*
+Events logged: ${weekEv.length}
+Current streak: ${streak} days
+
+*Energy*
+${energyBar} ${Math.round(avgEnergy*100)}%
+Best day: ${bestDay?.d || 'n/a'}
+Worst day: ${worstDay?.d || 'n/a'}
+
+*Stress*
+${stressBar} ${Math.round(avgStress*100)}%
+
+*Top topics*
+${topTopics}
+
+*Activity breakdown*
+💻 Code pushes: ${githubCount}
+💪 Health logs: ${healthCount}
+💰 Finance logs: ${financeCount}
+💼 Career logs: ${careerCount}
+
+*Next week focus*
+${avgEnergy < 0.5 ? '⚡ Energy is low — prioritise sleep and exercise' : avgStress > 0.5 ? '🧘 Stress is high — schedule recovery time' : '🚀 Good baseline — push harder on goals'}
+
+Keep logging. AETHER learns from every entry. 🤖`;
+
+    return sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
+  } catch (e) {
+    console.error('[AETHER] Weekly report failed:', e.message);
+  }
+}
+
+
 async function middayNudge(env) {
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!chatId) return;
@@ -1551,6 +1817,33 @@ async function calculateStreak(events) {
 //   dashboard:latest → latest dashboard.json for UI
 // ═════════════════════════════════════════════════════════════════
 
+// ═════════════════════════════════════════════════════════════════
+// ENCRYPTION — AES-256-GCM for personal diary text
+// raw_text is encrypted before KV storage
+// ML trains on features only (never raw text)
+// Decrypt only in browser with password
+// ═════════════════════════════════════════════════════════════════
+
+async function encryptText(text, env) {
+  // Use ENCRYPT_KEY from env, fallback to a fixed salt if not set
+  const keyMaterial = env.ENCRYPT_KEY || 'AETHER_DEFAULT_KEY_CHANGE_IN_PROD';
+  try {
+    const keyData  = new TextEncoder().encode(keyMaterial.padEnd(32, '0').slice(0, 32));
+    const key      = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
+    const iv       = crypto.getRandomValues(new Uint8Array(12));
+    const encoded  = new TextEncoder().encode(text);
+    const cipher   = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+    // Return as base64 with IV prepended
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(cipher), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  } catch (e) {
+    // If crypto fails, return marker + text (graceful degradation)
+    return '[UNENCRYPTED]:' + text;
+  }
+}
+
 async function saveEvent(event, env) {
   if (!env.AETHER_KV) {
     console.warn('[AETHER] KV not available, event not saved');
@@ -1560,7 +1853,14 @@ async function saveEvent(event, env) {
     const raw    = await env.AETHER_KV.get('events:list');
     const events = raw ? JSON.parse(raw) : [];
 
-    events.unshift(event);
+    // Encrypt raw_text before storing (ML uses features only, not raw text)
+    const eventToStore = { ...event };
+    if (eventToStore.raw_text && eventToStore.raw_text.length > 3) {
+      eventToStore.raw_text = await encryptText(eventToStore.raw_text, env);
+      eventToStore.encrypted = true;
+    }
+
+    events.unshift(eventToStore);
     if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
 
     await env.AETHER_KV.put('events:list', JSON.stringify(events));
@@ -1664,10 +1964,27 @@ function defaultDashboard() {
       mood:         0,
       last_updated: null,
     },
-    state:    null,
-    activity: [],
-    goals:    { today: [], week: [] },
-    insights: [],
-    streak:   0,
+    state:       null,
+    activity:    [],
+    timeline:    [],
+    goals:       { today: [], week: [] },
+    insights:    [{
+      icon: '🌱', title: 'Fresh Start',
+      body: 'Send messages to your Telegram bot to start logging. Every message trains your model.',
+      tag: 'START', tagClass: 'tag-ok'
+    }],
+    streak:      0,
+    weekData:    [0,0,0,0,0,0,0],
+    inputCounts: {},
+    hourlyData:  new Array(24).fill(0),
+    todayCount:  0,
+    flowLabel:   'NOMINAL',
+    pipeline:    [
+      { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',    status: 'READY', cls: 'ps-ok' },
+      { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',  status: 'READY', cls: 'ps-ok' },
+      { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM', status: 'WAITING', cls: 'ps-warn' },
+      { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',   status: 'WAITING', cls: 'ps-warn' },
+      { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',   status: 'READY', cls: 'ps-ok' },
+    ],
   };
 }

@@ -13,6 +13,33 @@ id = "4154fa683ced47c9871d0b43dfbd7a54"
 [ai]
 binding = "AI"
 
-# Cron triggers — morning briefing 8:30am IST, evening summary 8:30pm IST
 [triggers]
-crons = ["30 3 * * *", "30 15 * * *"]
+crons = ["30 3 * * *", "30 7 * * *", "30 15 * * *", "30 15 * * 0"]
+# 8:30am IST = 3:00 UTC
+# 12:30pm IST = 7:00 UTC  
+# 8:30pm IST = 15:00 UTC
+# Sunday 9pm IST weekly report = 15:30 UTC Sunday
+
+# ── DEV ENVIRONMENT ───────────────────────────────────────────
+# Deploy with: wrangler deploy --env dev
+# Uses separate KV + no crons (no accidental briefings while testing)
+[env.dev]
+name = "learning-bot-dev"
+
+[env.dev.assets]
+directory = "./site"
+binding = "ASSETS"
+
+[[env.dev.kv_namespaces]]
+binding = "AETHER_KV"
+id = "4154fa683ced47c9871d0b43dfbd7a54"
+# TODO: Create a separate KV namespace for dev:
+#   wrangler kv:namespace create "AETHER_KV_DEV"
+# Then replace the id above with the dev namespace id
+
+[env.dev.ai]
+binding = "AI"
+
+[env.dev.triggers]
+crons = []
+# No crons in dev — prevents accidental Telegram spam while testing
