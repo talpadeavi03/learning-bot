@@ -3,13 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AETHER">
-<meta name="theme-color" content="#00ffff">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>AETHER — Personal AI OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -82,7 +75,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 #workerStatus.err{border-color:rgba(255,51,85,.35);color:var(--r)}
 
 /* VIEWS */
-.view{display:none;animation:fadeIn .35s ease}#view-docs,#view-docs *{animation-play-state:paused!important}#view-docs{animation:none!important;opacity:1!important}#view-docs .panel-static{opacity:1!important;transform:none!important}
+.view{display:none;animation:fadeIn .35s ease}
 .view.on{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
@@ -98,7 +91,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);
   animation:pIn .5s ease forwards;opacity:0;transform:translateY(14px)}
-.panel-static{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);opacity:1;transform:none;animation:none}
+.panel-static{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;position:relative;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05)}
 .panel::before{content:'';position:absolute;top:0;left:-200%;width:200%;height:1px;
   background:linear-gradient(90deg,transparent,var(--c),transparent);animation:sweep 5s infinite}
 @keyframes sweep{0%{left:-200%}100%{left:200%}}
@@ -438,8 +431,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
         <button class="ntab" onclick="showView('learn',this)">LEARNING</button>
         <button class="ntab" onclick="showView('goals',this)">GOALS</button>
         <button class="ntab" onclick="showView('system',this)">SYSTEM</button>
-        <button class="ntab" onclick="window.location='timeline.html'">TIMELINE</button>
-        <button class="ntab" onclick="showView('docs',this)">DOCS</button>
+        <button class="ntab" onclick="showDocsWithGate(this)">DOCS 🔒</button>
       </div>
       <div id="workerStatus" class="err"><span>●</span><span>WORKER</span></div>
       <div class="hpill"><div class="dot g"></div><span>ONLINE</span></div>
@@ -463,6 +455,33 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   <!-- OVERVIEW -->
   <div class="view on" id="view-dash">
     <div class="grid3">
+
+      <!-- LIVE STAT CARDS -->
+      <div class="panel-static g-full" style="padding:12px 20px">
+        <div class="stat-cards">
+          <div class="sc"><div class="sc-n" id="sc-energy" style="color:var(--c)">—</div><div class="sc-l">ENERGY</div></div>
+          <div class="sc"><div class="sc-n" id="sc-focus"  style="color:var(--g)">—</div><div class="sc-l">FOCUS</div></div>
+          <div class="sc"><div class="sc-n" id="sc-stress" style="color:var(--o)">—</div><div class="sc-l">STRESS</div></div>
+          <div class="sc"><div class="sc-n" id="sc-events" style="color:var(--p)">—</div><div class="sc-l">TODAY EVENTS</div></div>
+          <div class="sc"><div class="sc-n" id="sc-streak" style="color:var(--g)">—</div><div class="sc-l">STREAK</div></div>
+          <div class="sc"><div class="sc-n" id="sc-flow"   style="color:var(--c)">—</div><div class="sc-l">FLOW STATE</div></div>
+        </div>
+      </div>
+
+      <!-- 7-DAY ENERGY TREND -->
+      <div class="panel g2">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">7-Day Energy Trend <span>FROM YOUR EVENTS</span></div>
+        <div style="position:relative;height:170px"><canvas id="energyTrendChart"></canvas></div>
+      </div>
+
+      <!-- INPUT TYPE BAR -->
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Input Sources <span>HOW YOU LOG</span></div>
+        <div style="position:relative;height:170px"><canvas id="inputTypeChart"></canvas></div>
+      </div>
+
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">System Metrics <span>LIVE</span></div>
@@ -492,14 +511,25 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
         <div class="pt">System Pipeline <span>STATUS</span></div>
         <div class="pipeline" id="pipeline"></div>
       </div>
-      <div class="panel g-full">
+      <div class="panel g2">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Learning Distribution <span>CHART</span></div>
+        <div class="pt">Topic Distribution <span>CHART</span></div>
         <div class="chart-row">
           <div><div class="chart-wrap"><canvas id="donutChart"></canvas></div></div>
           <div class="clegend" id="donutLegend"></div>
         </div>
       </div>
+
+      <!-- HOURLY HEATMAP -->
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Activity by Hour <span>IST HEATMAP</span></div>
+        <div id="heatmap-wrap" style="display:flex;gap:3px;align-items:flex-end;height:100px;padding-top:8px"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:Share Tech Mono,monospace;font-size:9px;opacity:.3">
+          <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -590,7 +620,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
         <div class="pt">System Architecture <span>AETHER OS</span></div>
         <div class="sys-grid">
           <div class="sys-item"><div class="sys-key">FRONTEND</div><div class="sys-val">Cloudflare Pages</div><div class="sys-sub">site/index.html</div></div>
-          <div class="sys-item"><div class="sys-key">API LAYER</div><div class="sys-val">CF Worker</div><div class="sys-sub">aether-api.talpadeavi0303.workers.dev</div></div>
+          <div class="sys-item"><div class="sys-key">API LAYER</div><div class="sys-val">CF Worker</div><div class="sys-sub">learning-bot.talpadeavi0303.workers.dev</div></div>
           <div class="sys-item"><div class="sys-key">AI MODEL</div><div class="sys-val">Claude Sonnet</div><div class="sys-sub">via Anthropic API</div></div>
           <div class="sys-item"><div class="sys-key">ML MODEL</div><div class="sys-val">RandomForest</div><div class="sys-sub">productivity_model.pkl</div></div>
           <div class="sys-item"><div class="sys-key">DATA INGESTION</div><div class="sys-val">Telegram Bot</div><div class="sys-sub">→ GitHub Actions pipeline</div></div>
@@ -630,141 +660,113 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   </div>
 </div>
 
-
-<!-- ── DOCS VIEW ── -->
-<div class="view" id="view-docs" style="animation:none!important;opacity:1!important;transform:none!important">
-<div class="grid1" style="opacity:1">
-
-  <div class="panel-static g-full">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">AETHER OS Documentation <span>v2.0</span></div>
-    <div class="stat-cards">
-      <div class="sc"><div class="sc-n" style="color:var(--g)">9</div><div class="sc-l">API ROUTES</div></div>
-      <div class="sc"><div class="sc-n" style="color:var(--c)">12</div><div class="sc-l">BOT COMMANDS</div></div>
-      <div class="sc"><div class="sc-n" style="color:var(--p)">0</div><div class="sc-l">MONTHLY COST</div></div>
-      <div class="sc"><div class="sc-n" style="color:var(--o)">65%</div><div class="sc-l">COMPLETE</div></div>
-    </div>
-  </div>
-
-  <div class="panel-static g-full">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">What is AETHER OS</div>
-    <p style="font-size:14px;line-height:1.9;margin-bottom:10px"><span style="color:var(--c);font-weight:700">AETHER</span> is your Personal AI Operating System. Tracks behavior, cognitive state, productivity and learning. Uses machine learning to understand your patterns and help you perform better every day.</p>
-    <p style="font-size:14px;line-height:1.9;margin-bottom:10px">Every message, voice note, image and code push gets analyzed by free Cloudflare AI, stored as structured data, and trains a model that learns specifically about you.</p>
-    <p style="font-size:14px;line-height:1.9;color:var(--g);font-weight:600">The more you log, the smarter it gets. Over 90 days AETHER knows your peaks, crashes, and best work conditions better than you do.</p>
-  </div>
-
-  <div class="panel-static g-full">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">How Data Flows</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2.5">
-      <div><span style="color:var(--c)">YOU</span> send message / voice / image / check-in / git push</div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--g)">Cloudflare Worker</span> /webhook receives + routes it</div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--o)">Llama 3</span> extracts 22 NLP features (energy, stress, topic, emotion)</div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--o)">Worker</span> adds 11 auto-features (hour_sin, word_count, complexity)</div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--g)">Cloudflare KV</span> stores structured event JSON</div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--p)">Every 5 events</span> triggers GitHub Actions ML pipeline</div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--o)">pull &#8594; clean &#8594; train &#8594; predict &#8594; push dashboard</span></div>
-      <div style="color:var(--text2);padding-left:16px">&#8595;</div>
-      <div><span style="color:var(--g)">Dashboard</span> shows real ML predictions + <span style="color:var(--p)">Telegram</span> sends briefings</div>
-    </div>
-  </div>
-
-  <div class="panel-static g-full">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">Repo Structure</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:12px;line-height:2.3">
-      <div><span style="color:var(--c)">api/worker.js</span><span style="color:var(--text2)"> &#8212; THE BRAIN. 1673 lines. All routes, NLP, cron, commands.</span></div>
-      <div><span style="color:var(--c)">wrangler.toml</span><span style="color:var(--text2)"> &#8212; CF config. KV + AI + 4 cron schedules.</span></div>
-      <div><span style="color:var(--c)">site/index.html</span><span style="color:var(--text2)"> &#8212; This dashboard.</span></div>
-      <div><span style="color:var(--c)">site/manifest.json + sw.js</span><span style="color:var(--text2)"> &#8212; PWA installable + offline.</span></div>
-      <div><span style="color:var(--c)">site/checkin.html</span><span style="color:var(--text2)"> &#8212; One-tap state check-in.</span></div>
-      <div style="margin-top:6px"><span style="color:var(--g)">scripts/pipeline/pull_events.py</span><span style="color:var(--text2)"> &#8212; KV events &#8594; events.csv</span></div>
-      <div><span style="color:var(--g)">scripts/pipeline/data_cleaner.py</span><span style="color:var(--text2)"> &#8212; Remove gibberish + dupes</span></div>
-      <div><span style="color:var(--g)">scripts/pipeline/push_dashboard.py</span><span style="color:var(--text2)"> &#8212; ML predictions &#8594; KV</span></div>
-      <div><span style="color:var(--g)">scripts/pipeline/run_pipeline.py</span><span style="color:var(--text2)"> &#8212; Master runner</span></div>
-      <div style="margin-top:6px"><span style="color:var(--p)">scripts/ml/train_models.py</span><span style="color:var(--text2)"> &#8212; RandomForest + GBM</span></div>
-      <div><span style="color:var(--p)">scripts/ml/predict.py</span><span style="color:var(--text2)"> &#8212; Flow class + peak hour + dashboard.json</span></div>
-      <div style="margin-top:6px"><span style="color:var(--o)">.github/workflows/deploy.yml</span><span style="color:var(--text2)"> &#8212; Auto-deploy on push</span></div>
-      <div><span style="color:var(--o)">.github/workflows/ml_pipeline.yml</span><span style="color:var(--text2)"> &#8212; Nightly ML at 1am IST</span></div>
-      <div><span style="color:var(--o)">.github/workflows/github_activity.yml</span><span style="color:var(--text2)"> &#8212; Auto-logs every commit</span></div>
-    </div>
-  </div>
-
-  <div class="panel-static">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">API Routes</div>
-    <div class="insights">
-      <div class="insight"><div class="ins-icon">&#128994;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /webhook</div><div class="ins-body">Telegram all types. NLP parsed and saved to KV.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /chat</div><div class="ins-body">AI assistant. Llama 3 reply with your live data as context.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /log-state</div><div class="ins-body">One-tap check-in saves state vector to KV.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">GET /dashboard</div><div class="ins-body">Live metrics computed from your events.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128309;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">GET /events</div><div class="ins-body">Raw event log for ML pipeline.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128993;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /trigger</div><div class="ins-body">Automations: nudge, notion, spotify, webhook.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128993;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /log-github</div><div class="ins-body">Auto-logs every git push as coding event.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128308;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">POST /reset-data</div><div class="ins-body">Clears all events. Needs confirm body.</div></div></div>
-      <div class="insight"><div class="ins-icon">&#128994;</div><div><div class="ins-title" style="font-family:'Share Tech Mono',monospace">GET /health</div><div class="ins-body">Status check — all services OK or MISSING.</div></div></div>
-    </div>
-  </div>
-
-  <div class="panel-static">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">Bot Commands</div>
-    <div class="pipeline">
-      <div class="pipe-item"><div class="pipe-icon">&#128202;</div><div><div class="pipe-name">/stats</div><div class="pipe-sub">Weekly performance summary</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#127919;</div><div><div class="pipe-name">/flow</div><div class="pipe-sub">Current flow state</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">/goal TEXT</div><div class="pipe-sub">Set today goal</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#128578;</div><div><div class="pipe-name">/mood 1-5</div><div class="pipe-sub">Quick mood log</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#128197;</div><div><div class="pipe-name">/week</div><div class="pipe-sub">7-day activity overview</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#128293;</div><div><div class="pipe-name">/streak</div><div class="pipe-sub">Current logging streak</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#127749;</div><div><div class="pipe-name">/morning</div><div class="pipe-sub">Morning briefing (auto 8:30am IST)</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#127762;</div><div><div class="pipe-name">/evening</div><div class="pipe-sub">Evening summary (auto 8:30pm IST)</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9889;</div><div><div class="pipe-name">/automate</div><div class="pipe-sub">Trigger notion, spotify, nudge, webhook</div></div><div class="pipe-status ps-ok">LIVE</div></div>
-    </div>
-  </div>
-
-  <div class="panel-static g-full">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">Status Tracker</div>
-    <div class="pipeline">
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">Worker v2 all routes live</div><div class="pipe-sub">1673 lines deployed</div></div><div class="pipe-status ps-ok">DONE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">ML pipeline 5 scripts</div><div class="pipe-sub">pull, clean, train, predict, push</div></div><div class="pipe-status ps-ok">DONE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">Dashboard live data + PWA</div><div class="pipe-sub">Real KV metrics, installs on phone</div></div><div class="pipe-status ps-ok">DONE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">12 bot commands + 4 daily briefings</div><div class="pipe-sub">All active and automated</div></div><div class="pipe-status ps-ok">DONE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9989;</div><div><div class="pipe-name">GitHub auto-logging + data cleaner</div><div class="pipe-sub">Passive data + clean training set</div></div><div class="pipe-status ps-ok">DONE</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9203;</div><div><div class="pipe-name">Feed 10+ clean events</div><div class="pipe-sub">Fresh start done, start logging today</div></div><div class="pipe-status ps-warn">NOW</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#9203;</div><div><div class="pipe-name">Add GITHUB_TOKEN to Cloudflare</div><div class="pipe-sub">Enables auto ML trigger every 5 events</div></div><div class="pipe-status ps-warn">NOW</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#10060;</div><div><div class="pipe-name">/exercise /sleep /food /spend</div><div class="pipe-sub">Health and money tracking</div></div><div class="pipe-status ps-off">NEXT</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#10060;</div><div><div class="pipe-name">CF Vectorize semantic memory</div><div class="pipe-sub">Search past events by meaning</div></div><div class="pipe-status ps-off">NEXT</div></div>
-      <div class="pipe-item"><div class="pipe-icon">&#10060;</div><div><div class="pipe-name">Native APK + Calendar</div><div class="pipe-sub">Capacitor build + Calendar OAuth</div></div><div class="pipe-status ps-off">FUTURE</div></div>
-    </div>
-  </div>
-
-  <div class="panel-static g-full">
-    <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-    <div class="pt">Next Steps</div>
-    <div class="tlist">
-      <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent"><strong>Send 10+ clean messages to bot</strong> &#8212; mix high energy, low energy, study sessions, goals. Most important thing right now.</div></div>
-      <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent"><strong>Add GITHUB_TOKEN to Cloudflare</strong> &#8212; Cloudflare &#8594; learning-bot &#8594; Settings &#8594; Variables.</div></div>
-      <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent"><strong>Run ML pipeline manually</strong> &#8212; GitHub &#8594; Actions &#8594; AETHER ML Pipeline &#8594; Run workflow.</div></div>
-      <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent"><strong>Add health commands</strong> &#8212; /exercise /sleep /food /spend /job for life data.</div></div>
-      <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent"><strong>CF Vectorize</strong> &#8212; semantic memory so you can search past events.</div></div>
-      <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent"><strong>Dev environment</strong> &#8212; dev branch + separate KV + separate bot for testing.</div></div>
-      <div class="titem"><div class="ttime" style="color:var(--text2)">MONTH 2</div><div class="tevent"><strong>Native APK</strong> &#8212; Capacitor wraps PWA in 3 commands. Real app with push notifications.</div></div>
-    </div>
-  </div>
-
-</div>
-</div>
-
 <!-- ── FULL-SCREEN AETHER CHAT PAGE ── -->
+<!-- ── DOCS VIEW ── -->
+<!-- Password gate for docs/personal data -->
+<div id="pw-gate" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,6,14,.97);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+  <div style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:6px;color:var(--c);opacity:.6;margin-bottom:8px">AETHER SECURE ACCESS</div>
+  <div style="font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;color:var(--text);letter-spacing:4px">🔒 ENTER PASSWORD</div>
+  <div style="font-size:13px;opacity:.4;text-align:center;max-width:300px">Personal diary data is encrypted.<br>Enter your password to decrypt and view.</div>
+  <input id="pw-input" type="password" placeholder="password" style="background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.25);color:var(--c);font-family:'Share Tech Mono',monospace;font-size:16px;padding:12px 20px;width:260px;outline:none;letter-spacing:4px;text-align:center">
+  <div style="display:flex;gap:10px">
+    <button onclick="checkPassword()" style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;padding:10px 24px;background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.3);color:var(--c);cursor:pointer">UNLOCK</button>
+    <button onclick="closeGate()" style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;padding:10px 24px;background:transparent;border:1px solid rgba(255,255,255,.1);color:var(--text2);cursor:pointer">CANCEL</button>
+  </div>
+  <div id="pw-error" style="color:var(--r);font-size:12px;letter-spacing:2px;opacity:0">INCORRECT PASSWORD</div>
+</div>
+
+<div class="view" id="view-docs">
+  <!-- sub-tabs -->
+  <div style="display:flex;gap:2px;background:rgba(0,255,255,.04);border:1px solid var(--border);padding:2px;margin:12px 20px 0 20px;width:fit-content">
+    <button class="ntab on" id="dtab-plan" onclick="showDoc('plan',this)">MASTER PLAN</button>
+    <button class="ntab" id="dtab-arch" onclick="showDoc('arch',this)">ARCHITECTURE</button>
+    <button class="ntab" id="dtab-progress" onclick="showDoc('progress',this)">PROGRESS</button>
+  </div>
+
+  <!-- PLAN doc -->
+  <div id="doc-plan" class="doc-frame">
+    <div class="grid1" style="padding-top:12px">
+      <div class="panel-static g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">AETHER OS — Full Documentation</div>
+        <p style="font-size:14px;line-height:1.9;margin-bottom:14px">Open the full plan pages for detailed architecture, security, ML pipeline, cost breakdown and roadmap.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="/aether-plan.html" target="_blank" style="border:1px solid rgba(0,255,255,.3);padding:12px 16px;color:var(--c);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">MASTER PLAN — Architecture, Security, MLflow, Roadmap <span>↗</span></a>
+          <a href="/aether-architecture.html" target="_blank" style="border:1px solid rgba(0,255,136,.2);padding:12px 16px;color:var(--g);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">ARCHITECTURE — Full system map with all components <span>↗</span></a>
+          <a href="/aether-progress.html" target="_blank" style="border:1px solid rgba(255,170,0,.2);padding:12px 16px;color:var(--o);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">PROGRESS — Changes made, version history, completion % <span>↗</span></a>
+          <a href="/aether-vision.html" target="_blank" style="border:1px solid rgba(255,0,170,.2);padding:12px 16px;color:var(--p);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">VISION — Datasets, cost, prod/dev, full roadmap <span>↗</span></a>
+        </div>
+      </div>
+      <div class="panel-static g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Status Tracker</div>
+        <div class="pipeline">
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Worker v2 — 9 routes live</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">ML pipeline — 5 scripts built</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Dashboard live data + PWA</div><div class="pipe-sub">Energy trend, heatmap, stat cards all live</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">12 bot commands + 4 daily briefings</div><div class="pipe-sub">All automated</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">GITHUB_TOKEN in Cloudflare</div><div class="pipe-sub">Add to enable auto ML trigger</div></div><div class="pipe-status ps-warn">NOW</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">Log 30+ clean events</div><div class="pipe-sub">Need for real ML predictions</div></div><div class="pipe-status ps-warn">NOW</div></div>
+          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Data encryption + password login</div><div class="pipe-sub">AES-256 + CF Access</div></div><div class="pipe-status ps-off">NEXT</div></div>
+          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Health + finance commands</div><div class="pipe-sub">/exercise /sleep /food /spend</div></div><div class="pipe-status ps-off">NEXT</div></div>
+          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">MLflow + Colab pipeline</div><div class="pipe-sub">DagsHub free experiment tracking</div></div><div class="pipe-status ps-off">MONTH 2</div></div>
+        </div>
+      </div>
+      <div class="panel-static g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Next Steps — In Order</div>
+        <div class="tlist">
+          <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent">Send 10+ clean messages to bot — mix energy levels, topics, goals</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent">Add GITHUB_TOKEN to Cloudflare Worker variables (workflow scope)</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">Add /exercise /sleep /food /spend /job commands to worker</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">Set up dev branch + wrangler.toml env.dev + separate KV</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">CF Vectorize semantic memory + AES-256 data encryption</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--text2)">MONTH 2</div><div class="tevent">MLflow on DagsHub + Colab training + native APK + Calendar</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARCH doc -->
+  <div id="doc-arch" class="doc-frame" style="display:none">
+    <div class="grid1" style="padding-top:12px">
+      <div class="panel-static g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Architecture <span>OPEN FULL PAGE FOR INTERACTIVE MAP</span></div>
+        <a href="/aether-architecture.html" target="_blank" style="border:1px solid rgba(0,255,136,.2);padding:14px 20px;color:var(--g);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">OPEN FULL ARCHITECTURE MAP ↗</a>
+        <div class="pipeline">
+          <div class="pipe-item"><div class="pipe-icon">💬</div><div><div class="pipe-name">Text / Voice / Image / Check-in / GitHub</div><div class="pipe-sub">All input types live and auto-logging</div></div><div class="pipe-status ps-ok">INPUT</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⚙️</div><div><div class="pipe-name">Cloudflare Worker — 9 routes</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">BRAIN</div></div>
+          <div class="pipe-item"><div class="pipe-icon">🦙</div><div><div class="pipe-name">Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All on CF Workers AI — completely free</div></div><div class="pipe-status ps-ok">FREE AI</div></div>
+          <div class="pipe-item"><div class="pipe-icon">🗄</div><div><div class="pipe-name">Cloudflare KV</div><div class="pipe-sub">events · state · dashboard · goals</div></div><div class="pipe-status ps-ok">STORAGE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">🔬</div><div><div class="pipe-name">ML Pipeline — GitHub Actions</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">NIGHTLY</div></div>
+          <div class="pipe-item"><div class="pipe-icon">📱</div><div><div class="pipe-name">Dashboard PWA + Telegram Bot</div><div class="pipe-sub">learning-bot.pages.dev · installable</div></div><div class="pipe-status ps-ok">OUTPUT</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS doc -->
+  <div id="doc-progress" class="doc-frame" style="display:none">
+    <div class="grid1" style="padding-top:12px">
+      <div class="panel-static g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Progress <span>OPEN FULL PAGE FOR CHARTS</span></div>
+        <a href="/aether-progress.html" target="_blank" style="border:1px solid rgba(255,170,0,.2);padding:14px 20px;color:var(--o);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">OPEN FULL PROGRESS TRACKER ↗</a>
+        <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv g">100%</span></div><div class="btrack"><div class="bfill bf-g" style="width:100%;transition:none"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Data ingestion</span><span class="mv c">90%</span></div><div class="btrack"><div class="bfill bf-c" style="width:90%;transition:none"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv c">85%</span></div><div class="btrack"><div class="bfill bf-c" style="width:85%;transition:none"></div></div></div>
+        <div class="mrow"><div class="ml"><span>ML Pipeline</span><span class="mv o">70%</span></div><div class="btrack"><div class="bfill bf-o" style="width:70%;transition:none"></div></div></div>
+        <div class="mrow"><div class="ml"><span>AI Intelligence</span><span class="mv o">50%</span></div><div class="btrack"><div class="bfill bf-o" style="width:50%;transition:none"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Security / Encryption</span><span class="mv p">10%</span></div><div class="btrack"><div class="bfill bf-p" style="width:10%;transition:none"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Mobile APK</span><span class="mv" style="color:var(--r)">20%</span></div><div class="btrack"><div class="bfill" style="width:20%;background:var(--r);transition:none"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div id="chatPage">
   <!-- Animated background canvas (shared) -->
   <div id="chatBg" style="position:absolute;inset:0;z-index:0;pointer-events:none;
@@ -779,7 +781,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
       <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">NEURAL INTERFACE</span>
     </div>
     <div style="display:flex;align-items:center;gap:16px">
-      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text2);opacity:.8">FULL CONTEXT MODE</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text2);opacity:.5">FULL CONTEXT MODE</div>
       <button class="cc" onclick="closeChat()">← BACK TO OS</button>
     </div>
   </div>
@@ -847,7 +849,7 @@ const D = {
     { icon:"⚙️", name:"NLP Parser", sub:"nlp_parser.py", status:"IDLE", cls:"ps-off" },
     { icon:"🤖", name:"ML Training", sub:"train_models.py", status:"RUNNING", cls:"ps-run" },
     { icon:"📊", name:"Dashboard Sync", sub:"predict.py → dashboard.json", status:"OK", cls:"ps-ok" },
-    { icon:"🌐", name:"Cloudflare Worker", sub:"aether-api.talpadeavi0303.workers.dev", status:"LIVE", cls:"ps-ok" }
+    { icon:"🌐", name:"Cloudflare Worker", sub:"learning-bot.talpadeavi0303.workers.dev", status:"LIVE", cls:"ps-ok" }
   ],
   weekData: [1.5, 2.8, 3.1, 2.4, 3.6, 2.9, 3.2],
   memory: [
@@ -891,61 +893,31 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&chatOpen) closeCh
 async function checkWorker() {
   const badge = document.getElementById('workerStatus');
   try {
-    const r = await fetch(WORKER_URL + '/health');
-    const data = await r.json();
-    const allOk = data.services && Object.values(data.services).every(v => v === 'OK');
-    badge.className = allOk ? 'ok' : 'err';
-    badge.innerHTML = allOk
-      ? '<span>●</span><span>AETHER LIVE</span>'
-      : '<span>●</span><span>PARTIAL</span>';
+    const r = await fetch(WORKER_URL, { method: 'GET' });
+    if (r.ok) {
+      badge.className = 'ok';
+      badge.innerHTML = '<span>●</span><span>WORKER OK</span>';
+    } else {
+      throw new Error('not ok');
+    }
   } catch {
     badge.className = 'err';
     badge.innerHTML = '<span>●</span><span>WORKER ERR</span>';
   }
 }
 
-/* ══ LOAD dashboard from live worker ══ */
+/* ══ LOAD dashboard.json ══ */
 async function loadData() {
   try {
-    // Pull live data from Cloudflare KV via worker
     const res = await fetch(WORKER_URL + '/dashboard?t=' + Date.now());
-    if (!res.ok) throw new Error('worker not ok');
+    if (!res.ok) throw new Error('not found');
     const json = await res.json();
-
-    // Merge live metrics into D
     if (json.metrics)  D.metrics  = { ...D.metrics,  ...json.metrics };
     if (json.activity?.length) D.activity = json.activity;
     if (json.timeline?.length) D.timeline = json.timeline;
-    if (json.goals?.today?.length) D.goals.today = json.goals.today;
-    if (json.goals?.week?.length)  D.goals.week  = json.goals.week;
-    if (json.insights?.length) D.insights = json.insights;
-
-    // Show live state badge if today's check-in exists
-    if (json.state) {
-      const s = json.state;
-      const strip = document.getElementById('workerStatus');
-      if (strip) {
-        strip.className = 'ok';
-        strip.innerHTML = '<span>●</span><span>' + (s.state_label || 'LIVE') + '</span>';
-      }
-    }
-
-    // Update welcome strip stats from live events
-    if (json.metrics.streak)       animN('wStreak', 0, json.metrics.streak, 800);
-    if (json.metrics.hours_today)  animN('wHours',  0, json.metrics.hours_today, 800);
-    if (json.metrics.tasks_done)   animN('wTasks',  0, json.metrics.tasks_done, 800);
-
-    console.log('[AETHER] Live data loaded from worker ✓');
-  } catch(e) {
-    console.log('[AETHER] Worker data unavailable, using fallback:', e.message);
-    // Fallback: try local dashboard.json
-    try {
-      const res2 = await fetch('./data/dashboard.json?t=' + Date.now());
-      if (res2.ok) {
-        const json2 = await res2.json();
-        if (json2.metrics) D.metrics = { ...D.metrics, ...json2.metrics };
-      }
-    } catch {}
+    console.log('[AETHER] Live dashboard.json loaded ✓');
+  } catch {
+    console.log('[AETHER] Using static fallback data');
   }
 }
 
@@ -1050,6 +1022,91 @@ function initDash(){
   renderPipeline('pipeline');
   renderPipeline('sysPipeline');
 
+  // ── Stat cards from live data ───────────────────────────────
+  function sc(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
+  sc('sc-energy',  (D.metrics.focus||0)+'%');
+  sc('sc-focus',   (D.metrics.learning||0)+'%');
+  sc('sc-stress',  (D.metrics.productivity||0)+'%');
+  sc('sc-events',  D.todayCount!=null ? D.todayCount : D.activity.length);
+  sc('sc-streak',  (D.user.streak||0)+'d');
+  sc('sc-flow',    D.flowLabel||'NOMINAL');
+
+  // ── 7-day energy trend line chart ───────────────────────────
+  (function(){
+    var ctx = document.getElementById('energyTrendChart');
+    if(!ctx) return;
+    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var today = new Date().getDay();
+    var labels = [];
+    for(var i=6;i>=0;i--) labels.push(days[(today-i+7)%7]);
+    new Chart(ctx,{
+      type:'line',
+      data:{
+        labels: labels,
+        datasets:[{
+          label:'Energy %',
+          data: (D.weekData||[0,0,0,0,0,0,0]).map(function(v){return Math.round(v*100);}),
+          borderColor:'rgba(0,255,255,.85)',
+          backgroundColor:'rgba(0,255,255,.07)',
+          pointBackgroundColor:'rgba(0,255,255,1)',
+          pointRadius:4,pointHoverRadius:6,
+          borderWidth:2,fill:true,tension:.4
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{
+          backgroundColor:'rgba(0,8,18,.95)',borderColor:'rgba(0,255,255,.2)',borderWidth:1,padding:10,
+          bodyFont:{family:'Rajdhani',size:13},titleFont:{family:'Orbitron',size:10}
+        }},
+        scales:{
+          x:{grid:{color:'rgba(0,255,255,.05)'},ticks:{color:'rgba(0,255,255,.45)',font:{family:'Orbitron',size:9}}},
+          y:{min:0,max:100,grid:{color:'rgba(0,255,255,.05)'},ticks:{color:'rgba(0,255,255,.4)',font:{family:'Orbitron',size:9},callback:function(v){return v+'%';}}}
+        }
+      }
+    });
+  })();
+
+  // ── Input type bar chart ─────────────────────────────────────
+  (function(){
+    var ctx = document.getElementById('inputTypeChart');
+    if(!ctx) return;
+    var counts = D.inputCounts || {};
+    var types  = ['text','voice','image','github','goal','checkin'];
+    var labels = ['Text','Voice','Image','GitHub','Goal','Check-in'];
+    var vals   = types.map(function(t){return counts[t]||0;});
+    var cols   = ['rgba(0,255,255,.7)','rgba(255,0,170,.7)','rgba(0,255,136,.7)','rgba(255,170,0,.7)','rgba(255,51,85,.7)','rgba(100,180,255,.7)'];
+    new Chart(ctx,{
+      type:'bar',
+      data:{labels:labels,datasets:[{data:vals,backgroundColor:cols,borderColor:cols,borderWidth:1,borderRadius:3}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(0,8,18,.95)',borderColor:'rgba(0,255,255,.2)',borderWidth:1,padding:10}},
+        scales:{
+          x:{grid:{display:false},ticks:{color:'rgba(0,255,255,.45)',font:{family:'Orbitron',size:8}}},
+          y:{grid:{color:'rgba(0,255,255,.04)'},ticks:{color:'rgba(0,255,255,.4)',font:{family:'Orbitron',size:9}}}
+        }
+      }
+    });
+  })();
+
+  // ── Hourly heatmap ───────────────────────────────────────────
+  (function(){
+    var hw = document.getElementById('heatmap-wrap');
+    if(!hw) return;
+    var hourly = D.hourlyData || new Array(24).fill(0);
+    var maxH   = Math.max.apply(null, hourly.concat([1]));
+    hw.innerHTML = '';
+    hourly.forEach(function(count, hour){
+      var pct = count/maxH;
+      var istH = (hour+5)%24;
+      var bar  = document.createElement('div');
+      bar.style.cssText = 'flex:1;background:rgba(0,255,255,'+(0.06+pct*0.72)+');border-radius:2px 2px 0 0;min-height:4px;height:'+Math.max(4,pct*92)+'px;transition:height 1s ease';
+      bar.title = istH+':00 IST — '+count+' event'+(count!==1?'s':'');
+      hw.appendChild(bar);
+    });
+  })();
+
   const tot=D.activity.reduce((s,a)=>s+a.minutes,0);
   new Chart(document.getElementById('donutChart'),{
     type:'doughnut',
@@ -1136,6 +1193,12 @@ function animN(id,from,to,dur,sfx=''){
     el.textContent=Math.round(from+(to-from)*e)+sfx;if(t<1)requestAnimationFrame(step)}
   requestAnimationFrame(step);
 }
+function showDoc(id,btn){
+  document.querySelectorAll('.doc-frame').forEach(function(f){f.style.display='none';});
+  document.querySelectorAll('#view-docs .ntab').forEach(function(b){b.classList.remove('on');});
+  document.getElementById('doc-'+id).style.display='block';
+  btn.classList.add('on');
+}
 function showView(id,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
   document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
@@ -1143,206 +1206,145 @@ function showView(id,btn){
   btn.classList.add('on');
 }
 
-/* ══ CHAT — full-screen slide page ══ */
-let chatOpen = false;
+/* ══ PASSWORD GATE ══ */
+// Simple password for viewing personal/encrypted data
+// In production this will derive an AES key from the password
+const AETHER_PW_HASH = localStorage.getItem('aether_pw_hash') || '';
+let docsUnlocked = false;
 
-// Restore chat history from sessionStorage so it survives close/reopen
-const hist = JSON.parse(localStorage.getItem('aether_chat_hist') || '[]');
-
-function saveHist() {
-  // Keep last 30 messages to avoid sessionStorage bloat
-  const trimmed = hist.slice(-30);
-  try {
-    localStorage.setItem('aether_chat_hist', JSON.stringify(trimmed));
-  } catch(e) {
-    // sessionStorage full — clear and retry
-    localStorage.removeItem('aether_chat_hist');
-    localStorage.setItem('aether_chat_hist', JSON.stringify(trimmed.slice(-10)));
+function showDocsWithGate(btn) {
+  if (docsUnlocked) {
+    showView('docs', btn);
+    return;
+  }
+  // Show password gate
+  const gate = document.getElementById('pw-gate');
+  if (gate) {
+    gate.style.display = 'flex';
+    setTimeout(() => document.getElementById('pw-input').focus(), 100);
+    gate._pendingBtn = btn;
   }
 }
 
-function openChat() {
-  if (chatOpen) return;
-  chatOpen = true;
-  document.getElementById('chatPage').classList.add('open');
-  document.getElementById('app').classList.add('shifted');
-
-  // Push history state so Android back button closes chat not app
-  history.pushState({ chat: true }, '', '#chat');
-
-  // Restore previous messages if any
-  restoreChatHistory();
-
-  setTimeout(() => document.getElementById('chatIn').focus(), 560);
-}
-
-function closeChat() {
-  if (!chatOpen) return;
-  chatOpen = false;
-  document.getElementById('chatPage').classList.remove('open');
-  document.getElementById('app').classList.remove('shifted');
-  // Go back in history if we pushed a state
-  if (location.hash === '#chat') history.back();
-}
-
-// Handle Android/browser back button
-window.addEventListener('popstate', e => {
-  if (chatOpen) {
-    chatOpen = false;
-    document.getElementById('chatPage').classList.remove('open');
-    document.getElementById('app').classList.remove('shifted');
+function checkPassword() {
+  const pw = document.getElementById('pw-input').value;
+  // Simple hash check — in production use PBKDF2
+  const hash = btoa(pw + 'AETHER_SALT_2026');
+  const stored = localStorage.getItem('aether_pw_hash');
+  if (!stored) {
+    // First time — set password
+    localStorage.setItem('aether_pw_hash', hash);
+    unlockDocs();
+  } else if (hash === stored) {
+    unlockDocs();
+  } else {
+    const err = document.getElementById('pw-error');
+    if (err) { err.style.opacity='1'; setTimeout(()=>err.style.opacity='0', 2000); }
   }
+}
+
+function unlockDocs() {
+  docsUnlocked = true;
+  const gate = document.getElementById('pw-gate');
+  if (gate) {
+    const btn = gate._pendingBtn;
+    gate.style.display = 'none';
+    document.getElementById('pw-input').value = '';
+    if (btn) showView('docs', btn);
+  }
+}
+
+function closeGate() {
+  const gate = document.getElementById('pw-gate');
+  if (gate) gate.style.display = 'none';
+}
+
+// Allow Enter key in password input
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('pw-input');
+  if (input) input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPassword();
+  });
 });
 
-function toggleChat() { chatOpen ? closeChat() : openChat(); }
+/* ══ CHAT — full-screen slide page ══ */
+let chatOpen=false;
 
-function quickSend(t) {
+function openChat(){
+  if(chatOpen)return;
+  chatOpen=true;
+  document.getElementById('chatPage').classList.add('open');
+  document.getElementById('app').classList.add('shifted');
+  // Focus input after transition
+  setTimeout(()=>document.getElementById('chatIn').focus(),560);
+}
+
+function closeChat(){
+  if(!chatOpen)return;
+  chatOpen=false;
+  document.getElementById('chatPage').classList.remove('open');
+  document.getElementById('app').classList.remove('shifted');
+}
+
+// Keep legacy toggleChat for any other callers
+function toggleChat(){
+  chatOpen ? closeChat() : openChat();
+}
+
+function quickSend(t){
   openChat();
-  setTimeout(() => { document.getElementById('chatIn').value = t; sendChat(); }, chatOpen ? 0 : 600);
+  setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat();},chatOpen?0:600);
 }
-
-// Restore chat messages from history into the DOM
-function restoreChatHistory() {
-  const box = document.getElementById('chatMsgs');
-  if (hist.length === 0) return;
-
-  // Clear everything except the first welcome message
-  while (box.children.length > 1) box.removeChild(box.lastChild);
-
-  // Replay stored history
-  hist.forEach(m => {
-    if (m.role === 'user') addMsg('user', m.content);
-    else if (m.role === 'assistant') addMsg('ai', m.content);
-  });
-
-  // Scroll to bottom
-  box.scrollTop = box.scrollHeight;
-}
-
-async function sendChat() {
-  const inp = document.getElementById('chatIn');
-  const txt = inp.value.trim();
-  if (!txt) return;
-  inp.value = '';
-  addMsg('user', txt);
-  hist.push({ role: 'user', content: txt });
-  saveHist();
-
+const hist=[];
+async function sendChat(){
+  const inp=document.getElementById('chatIn');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';addMsg('user',txt);hist.push({role:'user',content:txt});
   document.getElementById('thinking').classList.remove('hidden');
-  document.getElementById('sendBtn').disabled = true;
+  document.getElementById('sendBtn').disabled=true;
 
-  try {
+  try{
+    // ✅ calls your Cloudflare Worker — API key stays safe on server
     const r = await fetch(WORKER_URL + '/chat', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        history:  hist.slice(-10), // send last 10 turns only
+        history:  hist,
         metrics:  D.metrics,
         activity: D.activity,
         goals:    D.goals.today
       })
     });
-    const data  = await r.json();
+    const data = await r.json();
     const reply = data.reply || data.error || 'Neural pathway disrupted.';
-    hist.push({ role: 'assistant', content: reply });
-    saveHist();
+    hist.push({role:'assistant', content:reply});
     document.getElementById('thinking').classList.add('hidden');
-    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('sendBtn').disabled=false;
     typeMsg(reply);
-  } catch (err) {
+  } catch(err) {
     document.getElementById('thinking').classList.add('hidden');
-    document.getElementById('sendBtn').disabled = false;
-    addMsg('ai', 'Connection failed. Check worker status.');
+    document.getElementById('sendBtn').disabled=false;
+    addMsg('ai','Worker connection failed. Check console.');
     console.error('[AETHER]', err);
   }
 }
-
-function addMsg(role, text) {
-  const box = document.getElementById('chatMsgs');
-  const el  = document.createElement('div');
-  el.className = 'msg ' + role;
-  el.innerHTML = `<div class="mlbl">${role === 'user' ? 'YOU' : 'AETHER'}</div>${text}`;
-  box.appendChild(el);
-  box.scrollTop = box.scrollHeight;
+function addMsg(role,text){
+  const box=document.getElementById('chatMsgs');
+  const el=document.createElement('div');el.className='msg '+role;
+  el.innerHTML=`<div class="mlbl">${role==='user'?'YOU':'AETHER'}</div>${text}`;
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
 }
-
-function typeMsg(text) {
-  const box = document.getElementById('chatMsgs');
-  const el  = document.createElement('div');
-  el.className = 'msg ai';
-  const lb  = document.createElement('div');
-  lb.className = 'mlbl';
-  lb.textContent = 'AETHER';
-  const sp  = document.createElement('span');
-  const cur = document.createElement('span');
-  cur.textContent = '▋';
-  cur.style.animation = 'blink .7s infinite';
-  el.appendChild(lb);
-  el.appendChild(sp);
-  el.appendChild(cur);
-  box.appendChild(el);
-  let i = 0;
-  function type() {
-    if (i < text.length) {
-      sp.textContent += text[i++];
-      box.scrollTop = box.scrollHeight;
-      setTimeout(type, 12);
-    } else {
-      cur.remove();
-    }
-  }
+function typeMsg(text){
+  const box=document.getElementById('chatMsgs');
+  const el=document.createElement('div');el.className='msg ai';
+  const lb=document.createElement('div');lb.className='mlbl';lb.textContent='AETHER';
+  const sp=document.createElement('span');const cur=document.createElement('span');
+  cur.textContent='▋';cur.style.animation='blink .7s infinite';
+  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur);
+  box.appendChild(el);let i=0;
+  function type(){if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;setTimeout(type,15)}else cur.remove()}
   type();
 }
-
-
-
-
-</script>
-
-<script>
-// ── PWA Service Worker Registration ──────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // Only register SW on actual deployed domain
-    const hostname = location.hostname;
-    const isDeployed = hostname.includes('pages.dev') || hostname.includes('workers.dev');
-    if (!isDeployed) {
-      console.log('[AETHER] Skipping SW on preview domain');
-      return;
-    }
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => {
-        console.log('[AETHER] Service worker registered ✓', reg.scope);
-        setInterval(() => reg.update(), 60000);
-      })
-      .catch(err => console.warn('[AETHER] SW registration failed:', err));
-  });
-}
-
-// ── PWA Install prompt ────────────────────────────────────────────
-let installPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  installPrompt = e;
-  // Show install button if exists
-  const btn = document.getElementById('installBtn');
-  if (btn) btn.style.display = 'flex';
-});
-
-function installPWA() {
-  if (!installPrompt) return;
-  installPrompt.prompt();
-  installPrompt.userChoice.then(result => {
-    console.log('[AETHER] Install result:', result.outcome);
-    installPrompt = null;
-    const btn = document.getElementById('installBtn');
-    if (btn) btn.style.display = 'none';
-  });
-}
-
-window.addEventListener('appinstalled', () => {
-  console.log('[AETHER] App installed successfully ✓');
-});
 </script>
 </body>
 </html>
