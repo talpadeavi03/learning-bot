@@ -14,11 +14,11 @@ id = "4154fa683ced47c9871d0b43dfbd7a54"
 binding = "AI"
 
 [triggers]
-crons = ["30 3 * * *", "30 7 * * *", "30 15 * * *", "30 15 * * 0"]
+crons = ["30 3 * * *", "30 7 * * *", "30 15 * * *"]
 # 8:30am IST = 3:00 UTC
-# 12:30pm IST = 7:00 UTC  
+# 12:30pm IST = 7:00 UTC
 # 8:30pm IST = 15:00 UTC
-# Sunday 9pm IST weekly report = 15:30 UTC Sunday
+# Sunday weekly report handled inside evening cron (checks day in code)
 
 # ── DEV ENVIRONMENT ───────────────────────────────────────────
 # Deploy with: wrangler deploy --env dev
