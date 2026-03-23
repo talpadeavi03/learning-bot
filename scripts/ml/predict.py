@@ -1,171 +1,224 @@
 """
-predict.py
-Loads trained model, runs predictions, writes site/data/dashboard.json
-Input:  models/saved_models/productivity_model.pkl
-        data/raw/events.csv
-Output: site/data/dashboard.json
+predict.py — AETHER ML Pipeline
+Loads trained models, generates predictions, writes dashboard.json.
+Robust — works with or without a trained model.
 """
-import os
-import json
-import pickle
-from collections import Counter
-from datetime import datetime, timedelta
-
-import pandas as pd
+import os, json, warnings
 import numpy as np
+import pandas as pd
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+from collections import Counter
 
-FLOW_LABELS = {
-    2:  'FLOW',
-    1:  'PRE_FLOW',
-    0:  'NOMINAL',
-    -1: 'ANXIETY',
-    -2: 'RECOVERY',
-}
+warnings.filterwarnings('ignore')
+
+FLOW_LABELS = {2:'FLOW', 1:'PRE_FLOW', 0:'NOMINAL', -1:'ANXIETY', -2:'RECOVERY'}
 
 FEATURES = [
-    'energy_signal', 'stress_signal', 'focus_signal', 'motivation_signal',
-    'hour_sin', 'hour_cos',
-    'is_study_session', 'is_goal_mention', 'is_complaint',
+    'energy_signal','stress_signal','focus_signal','motivation_signal',
+    'hour_sin','hour_cos','day_of_week','is_weekend',
+    'word_count','complexity','question_ratio',
+    'is_study_session','is_goal_mention','is_complaint',
 ]
 
-def predict():
-    model_path = 'models/saved_models/productivity_model.pkl'
-    csv_path   = 'data/raw/events.csv'
+def load_model():
+    for path in ['models/productivity_model.pkl','models/saved_models/productivity_model.pkl']:
+        if not Path(path).exists(): continue
+        try:
+            import joblib
+            m = joblib.load(path)
+            print(f'[AETHER] Model loaded: {path}')
+            return m
+        except Exception as e:
+            print(f'[AETHER] joblib failed for {path}: {e}')
+    print('[AETHER] No model found — using rule-based predictions')
+    return None
 
-    if not os.path.exists(model_path):
-        print("[AETHER] No model found — run train_models.py first")
-        return
-    if not os.path.exists(csv_path):
-        print("[AETHER] No events.csv — run pull_events.py first")
-        return
+def load_data():
+    for path in ['data/processed/events_clean.csv','data/raw/events.csv']:
+        if Path(path).exists():
+            df = pd.read_csv(path)
+            print(f'[AETHER] {len(df)} events from {path}')
+            return df
+    return pd.DataFrame()
 
-    # Load model
-    with open(model_path, 'rb') as f:
-        m = pickle.load(f)
-    clf, reg, scaler = m['clf'], m['reg'], m['scaler']
-
-    # Load and prepare data
-    df = pd.read_csv(csv_path)
+def prepare(df):
+    df = df.copy()
     df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
     df = df.dropna(subset=['timestamp'])
-    df['hour']     = df['timestamp'].dt.hour
-    df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
-    df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
+    if df.empty: return df
+    df['hour']        = df['timestamp'].dt.hour
+    df['hour_sin']    = np.sin(2*np.pi*df['hour']/24)
+    df['hour_cos']    = np.cos(2*np.pi*df['hour']/24)
+    df['day_of_week'] = df['timestamp'].dt.dayofweek
+    df['is_weekend']  = df['day_of_week'].isin([5,6]).astype(float)
+    for c in ['energy_signal','stress_signal','focus_signal','motivation_signal']:
+        df[c] = pd.to_numeric(df.get(c,0.5), errors='coerce').fillna(0.5)
+    for c in ['word_count','complexity','question_ratio']:
+        df[c] = pd.to_numeric(df.get(c,0), errors='coerce').fillna(0.0)
+    for c in ['is_study_session','is_goal_mention','is_complaint']:
+        val = df.get(c, False)
+        if hasattr(val, 'fillna'):
+            df[c] = val.fillna(False).astype(float)
+        else:
+            df[c] = 0.0
+    return df
 
-    for col in ['energy_signal', 'stress_signal', 'focus_signal', 'motivation_signal']:
-        df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.5)
-    for col in ['is_study_session', 'is_goal_mention', 'is_complaint']:
-        df[col] = df[col].fillna(False).astype(int)
+def rule_flow(row):
+    e,s,f = row.get('energy_signal',0.5), row.get('stress_signal',0.3), row.get('focus_signal',0.5)
+    if e>0.75 and s<0.25 and f>0.65: return 2
+    if e>0.60 and s<0.35:            return 1
+    if s>0.65:                       return -1
+    if e<0.30:                       return -2
+    return 0
 
-    # Use today's events or last 20 if not enough
-    today    = datetime.now().date()
-    today_df = df[df['timestamp'].dt.date == today]
-    src      = today_df if len(today_df) >= 3 else df.tail(20)
+def predict():
+    df    = load_data()
+    model = load_model()
+    now   = datetime.now(timezone.utc)
+    today = now.date().isoformat()
 
-    Xs         = scaler.transform(src[FEATURES].fillna(0))
-    flow_preds = clf.predict(Xs)
-    prod_preds = reg.predict(Xs)
+    if df.empty:
+        print('[AETHER] No data — writing default dashboard')
+        write_default(); return
 
-    # Dominant flow state
-    dom_flow   = Counter(flow_preds).most_common(1)[0][0]
-    flow_label = FLOW_LABELS.get(dom_flow, 'NOMINAL')
-    flow_prob  = round(float(np.mean(flow_preds == dom_flow) * 100))
+    df     = prepare(df)
+    if df.empty:
+        write_default(); return
 
-    avg_energy = round(float(src['energy_signal'].mean()) * 100)
-    avg_stress = round(float(src['stress_signal'].mean()) * 100)
-    avg_focus  = round(float(src['focus_signal'].mean()) * 100)
-    avg_prod   = round(float(np.mean(prod_preds)) * 100)
+    today_df = df[df['timestamp'].dt.date.astype(str) == today]
+    src      = today_df if not today_df.empty else df.head(30)
 
-    # Peak hour (IST)
-    df['prod_pred'] = reg.predict(scaler.transform(df[FEATURES].fillna(0)))
-    peak_utc        = int(df.groupby('hour')['prod_pred'].mean().idxmax())
-    peak_ist        = (peak_utc + 5) % 24
-    peak_str        = f"{peak_ist % 12 or 12}{'pm' if peak_ist >= 12 else 'am'} IST"
+    avg_e = float(src['energy_signal'].mean())
+    avg_s = float(src['stress_signal'].mean())
+    avg_f = float(src['focus_signal'].mean())
 
-    # 7-day energy trend
+    # Flow prediction
+    flow_class, flow_prob, flow_label = 0, 0.5, 'NOMINAL'
+    if model is not None:
+        try:
+            X = src[FEATURES].values
+            preds = model.predict(X)
+            flow_class = int(Counter(preds).most_common(1)[0][0])
+            flow_prob  = float(np.mean(preds == flow_class))
+            flow_label = FLOW_LABELS.get(flow_class, 'NOMINAL')
+            print(f'[AETHER] ML Flow: {flow_label} ({flow_prob:.0%})')
+        except Exception as e:
+            print(f'[AETHER] ML predict failed: {e} — using rules')
+            flow_class = rule_flow(src.iloc[-1])
+            flow_label = FLOW_LABELS.get(flow_class, 'NOMINAL')
+    else:
+        flow_class = rule_flow(src.iloc[-1]) if not src.empty else 0
+        flow_label = FLOW_LABELS.get(flow_class, 'NOMINAL')
+    print(f'[AETHER] Flow: {flow_label}')
+
+    # Peak hour IST
+    he = df.groupby(df['timestamp'].dt.hour)['energy_signal'].mean()
+    peak_str = f"{(int(he.idxmax())+5)%24:02d}:00 IST" if not he.empty else 'Unknown'
+
+    # 7-day weekData
     week_data = []
-    for i in range(6, -1, -1):
-        d     = (datetime.now() - timedelta(days=i)).date()
-        day_e = df[df['timestamp'].dt.date == d]['energy_signal']
-        week_data.append(round(float(day_e.mean()), 2) if len(day_e) > 0 else 0)
+    for i in range(6,-1,-1):
+        d = (now-timedelta(days=i)).date().isoformat()
+        ev = df[df['timestamp'].dt.date.astype(str)==d]
+        week_data.append(round(float(ev['energy_signal'].mean()),2) if not ev.empty else 0.0)
 
     # Streak
-    all_days = set(df['timestamp'].dt.date.astype(str))
-    streak   = 0
-    for i in range(365):
-        d = (datetime.now() - timedelta(days=i)).date().isoformat()
-        if d in all_days:
-            streak += 1
-        elif i > 0:
-            break
+    streak, check = 0, now.date()
+    for _ in range(365):
+        if not df[df['timestamp'].dt.date.astype(str)==check.isoformat()].empty:
+            streak += 1; check -= timedelta(days=1)
+        else: break
 
-    # Topics today
-    topic_counts = {}
-    for _, row in today_df.iterrows():
-        t = row.get('topic', '')
-        if t and t not in ('general', 'nan', ''):
-            topic_counts[t] = topic_counts.get(t, 0) + 1
-    activity = [
-        {'topic': t, 'minutes': c * 25, 'cat': 'LOGGED'}
-        for t, c in sorted(topic_counts.items(), key=lambda x: -x[1])[:5]
-    ]
+    # Topics
+    tc = Counter(src['topic'].dropna())
+    activity = [{'topic':t,'minutes':c*20,'cat':'LOGGED'}
+                for t,c in tc.most_common(6)
+                if t and str(t).lower() not in ('none','null','general','')]
 
-    # Build dashboard
+    # Timeline
+    timeline = []
+    for _,row in today_df.head(8).iterrows():
+        ist = row['timestamp'] + timedelta(hours=5,minutes=30)
+        timeline.append({'time':ist.strftime('%H:%M'),
+            'event':f"{row.get('input_type','log')}: {str(row.get('summary',row.get('topic','logged')))[:60]}"})
+
+    # Hourly heatmap + input counts
+    hourly = [0]*24
+    for h,cnt in df.groupby(df['timestamp'].dt.hour).size().items():
+        hourly[int(h)] = int(cnt)
+    input_counts = dict(Counter(df['input_type'].dropna()))
+
+    # Insights
+    insights = []
+    if peak_str != 'Unknown':
+        insights.append({'icon':'⚡','title':f'Peak hour: {peak_str}',
+            'body':f'Your energy peaks around {peak_str}. Schedule deep work then.',
+            'tag':'PATTERN','tagClass':'tag-ok'})
+    if avg_e > 0.7:
+        insights.append({'icon':'🔥','title':'High energy today',
+            'body':f'Energy at {avg_e:.0%}. Good time for hard problems.',
+            'tag':'ENERGY','tagClass':'tag-ok'})
+    elif avg_e < 0.4:
+        insights.append({'icon':'💤','title':'Low energy detected',
+            'body':'Rest or lighter tasks today. Recovery is performance.',
+            'tag':'RECOVERY','tagClass':'tag-med'})
+    if avg_s > 0.6:
+        insights.append({'icon':'🧘','title':'Stress elevated',
+            'body':f'Stress at {avg_s:.0%}. Take breaks and breathe.',
+            'tag':'STRESS','tagClass':'tag-hi'})
+    if streak >= 3:
+        insights.append({'icon':'🏆','title':f'{streak}-day streak!',
+            'body':'Consistency builds the model that knows you.',
+            'tag':'STREAK','tagClass':'tag-ok'})
+    if not insights:
+        insights.append({'icon':'📊','title':'Keep logging',
+            'body':f'{len(df)} events. More data = smarter AETHER.',
+            'tag':'INFO','tagClass':'tag-ok'})
+
     dashboard = {
+        'generated_at': now.isoformat(),
+        'n_events':     len(df),
+        'flow_label':   flow_label,
+        'flow_class':   flow_class,
+        'flow_prob':    round(flow_prob,3),
+        'peak_hour':    peak_str,
+        'streak':       streak,
+        'todayCount':   len(today_df),
         'metrics': {
-            'focus':        avg_focus,
-            'learning':     avg_energy,
-            'productivity': avg_prod,
-            'mood':         100 - avg_stress,
-            'flow_prob':    flow_prob,
-            'flow_class':   flow_label,
-            'peak_hour':    peak_str,
-            'total_events': len(df),
-            'streak':       streak,
-            'last_updated': datetime.now().isoformat(),
-            'model_events': int(m.get('n_events', len(df))),
+            'focus':        round(avg_f*100),
+            'learning':     round(avg_e*90),
+            'productivity': round(flow_prob*100),
+            'mood':         round((1-avg_s)*100),
+            'last_updated': now.isoformat(),
         },
-        'weekData': week_data,
-        'activity': activity,
-        'insights': [
-            {
-                'icon':     '🎯',
-                'title':    f'Flow state: {flow_label}',
-                'body':     f'ML model confidence {flow_prob}%. Based on {len(src)} recent events. '
-                            + ('Protect this window — deep work only.' if flow_label == 'FLOW'
-                               else 'Build momentum with a small focused task.' if flow_label == 'PRE_FLOW'
-                               else 'Break tasks into smaller steps.' if flow_label == 'ANXIETY'
-                               else 'Light tasks only — you need recovery.' if flow_label == 'RECOVERY'
-                               else 'Keep logging to improve predictions.'),
-                'tag':      'ML PREDICTION',
-                'tagClass': 'tag-ok' if flow_label in ('FLOW', 'PRE_FLOW') else 'tag-med',
-            },
-            {
-                'icon':     '⚡',
-                'title':    f'Peak hour: {peak_str}',
-                'body':     f'Your data shows highest productivity around {peak_str}. Schedule deep work then.',
-                'tag':      'PATTERN',
-                'tagClass': 'tag-ok',
-            },
-            {
-                'icon':     '🔥',
-                'title':    f'{streak}-day streak',
-                'body':     f'You have logged data for {streak} consecutive days. Model trained on {len(df)} total events.',
-                'tag':      'HIGH PRIORITY' if streak >= 7 else 'POSITIVE',
-                'tagClass': 'tag-hi' if streak >= 7 else 'tag-ok',
-            },
-        ],
+        'weekData':    week_data,
+        'activity':    activity,
+        'timeline':    timeline,
+        'insights':    insights,
+        'inputCounts': input_counts,
+        'hourlyData':  hourly,
+        'goals':       {'today':[],'week':[]},
     }
 
-    os.makedirs('site/data', exist_ok=True)
-    with open('site/data/dashboard.json', 'w') as f:
+    Path('site/data').mkdir(parents=True, exist_ok=True)
+    with open('site/data/dashboard.json','w') as f:
         json.dump(dashboard, f, indent=2)
+    print(f'[AETHER] ✅ dashboard.json → Flow:{flow_label} Energy:{avg_e:.0%} Streak:{streak}d Events:{len(df)}')
 
-    print(f"[AETHER] dashboard.json written successfully")
-    print(f"  Flow:    {flow_label} ({flow_prob}%)")
-    print(f"  Energy:  {avg_energy}%  Stress: {avg_stress}%  Focus: {avg_focus}%")
-    print(f"  Peak:    {peak_str}")
-    print(f"  Streak:  {streak} days")
+def write_default():
+    Path('site/data').mkdir(parents=True, exist_ok=True)
+    d = {'generated_at':datetime.now(timezone.utc).isoformat(),
+         'n_events':0,'flow_label':'NOMINAL','flow_class':0,'flow_prob':0.5,
+         'peak_hour':'Unknown','streak':0,'todayCount':0,
+         'metrics':{'focus':0,'learning':0,'productivity':0,'mood':0,'last_updated':datetime.now(timezone.utc).isoformat()},
+         'weekData':[0]*7,'activity':[],'timeline':[],
+         'insights':[{'icon':'🌱','title':'Start logging',
+             'body':'Send messages to your Telegram bot to start.','tag':'START','tagClass':'tag-ok'}],
+         'inputCounts':{},'hourlyData':[0]*24,'goals':{'today':[],'week':[]}}
+    with open('site/data/dashboard.json','w') as f:
+        json.dump(d,f,indent=2)
+    print('[AETHER] Default dashboard.json written')
 
 if __name__ == '__main__':
     predict()
