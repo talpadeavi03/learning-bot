@@ -775,64 +775,69 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
 
   <!-- Header -->
   <div class="ch">
-    <div class="ct">
-  <div class="od"></div>
-  AETHER
-  <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">
-    NEURAL INTERFACE
-  </span>
-</div>
 
-<div style="display:flex;align-items:center;gap:16px">
+  <!-- LEFT SIDE -->
+  <div class="ct">
+    <div class="od"></div>
+    AETHER
+    <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">
+      NEURAL INTERFACE
+    </span>
+  </div>
 
-  <!-- AI ENGINE SELECTOR -->
-  <div style="display:flex;align-items:center;gap:8px">
+  <!-- RIGHT SIDE -->
+  <div style="display:flex;align-items:center;gap:14px">
 
-    <span style="
+    <!-- ENGINE SELECTOR -->
+    <div style="display:flex;align-items:center;gap:6px">
+
+      <span style="
+        font-family:'Orbitron',sans-serif;
+        font-size:9px;
+        letter-spacing:2px;
+        opacity:.5;
+        color:var(--text2);
+      ">
+        ENGINE
+      </span>
+
+      <select id="aiEngine"
+        style="
+        background:rgba(0,255,255,.06);
+        border:1px solid rgba(0,255,255,.25);
+        color:var(--c);
+        font-family:'Orbitron',sans-serif;
+        font-size:9px;
+        letter-spacing:2px;
+        padding:4px 8px;
+        outline:none;
+      ">
+
+        <option value="hybrid">HYBRID</option>
+        <option value="ml">AETHER ML</option>
+        <option value="worker">WORKERS AI</option>
+
+      </select>
+
+    </div>
+
+    <!-- MODE TEXT -->
+    <div style="
       font-family:'Orbitron',sans-serif;
       font-size:9px;
       letter-spacing:2px;
       color:var(--text2);
-      opacity:.6;
+      opacity:.5
     ">
-      AI ENGINE
-    </span>
+      FULL CONTEXT MODE
+    </div>
 
-    <select id="aiEngine"
-      style="
-      background:rgba(0,255,255,.06);
-      border:1px solid rgba(0,255,255,.25);
-      color:var(--c);
-      font-family:'Orbitron',sans-serif;
-      font-size:9px;
-      letter-spacing:2px;
-      padding:4px 8px;
-      outline:none;
-    ">
-
-      <option value="hybrid">HYBRID</option>
-      <option value="ml">AETHER ML</option>
-      <option value="worker">WORKERS AI</option>
-
-    </select>
+    <!-- BACK BUTTON -->
+    <button class="cc" onclick="closeChat()">
+      ← BACK TO OS
+    </button>
 
   </div>
-
-  <!-- MODE LABEL -->
-  <div style="
-    font-family:'Orbitron',sans-serif;
-    font-size:9px;
-    letter-spacing:2px;
-    color:var(--text2);
-    opacity:.5
-  ">
-    FULL CONTEXT MODE
-  </div>
-
-  <!-- BACK BUTTON -->
-  <button class="cc" onclick="closeChat()">
-    ← BACK TO OS
-  </button>
 
 </div>
 
