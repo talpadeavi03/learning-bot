@@ -44,24 +44,58 @@ def load_data():
 
 def prepare(df):
     df = df.copy()
-    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+
+    # timestamp parsing
+    df['timestamp'] = pd.to_datetime(df.get('timestamp'), errors='coerce')
     df = df.dropna(subset=['timestamp'])
-    if df.empty: return df
-    df['hour']        = df['timestamp'].dt.hour
-    df['hour_sin']    = np.sin(2*np.pi*df['hour']/24)
-    df['hour_cos']    = np.cos(2*np.pi*df['hour']/24)
+    if df.empty:
+        return df
+
+    # time features
+    df['hour'] = df['timestamp'].dt.hour
+    df['hour_sin'] = np.sin(2*np.pi*df['hour']/24)
+    df['hour_cos'] = np.cos(2*np.pi*df['hour']/24)
     df['day_of_week'] = df['timestamp'].dt.dayofweek
-    df['is_weekend']  = df['day_of_week'].isin([5,6]).astype(float)
-    for c in ['energy_signal','stress_signal','focus_signal','motivation_signal']:
-        df[c] = pd.to_numeric(df.get(c,0.5), errors='coerce').fillna(0.5)
-    for c in ['word_count','complexity','question_ratio']:
-        df[c] = pd.to_numeric(df.get(c,0), errors='coerce').fillna(0.0)
-    for c in ['is_study_session','is_goal_mention','is_complaint']:
-        val = df.get(c, False)
-        if hasattr(val, 'fillna'):
-            df[c] = val.fillna(False).astype(float)
-        else:
+    df['is_weekend'] = df['day_of_week'].isin([5,6]).astype(float)
+
+    # numeric signals
+    signal_cols = [
+        'energy_signal',
+        'stress_signal',
+        'focus_signal',
+        'motivation_signal'
+    ]
+
+    for c in signal_cols:
+        if c not in df.columns:
+            df[c] = 0.5
+        df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.5)
+
+    # text features
+    text_cols = [
+        'word_count',
+        'complexity',
+        'question_ratio'
+    ]
+
+    for c in text_cols:
+        if c not in df.columns:
+            df[c] = 0
+        df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
+
+    # boolean flags
+    bool_cols = [
+        'is_study_session',
+        'is_goal_mention',
+        'is_complaint'
+    ]
+
+    for c in bool_cols:
+        if c not in df.columns:
             df[c] = 0.0
+        else:
+            df[c] = df[c].fillna(False).astype(float)
+
     return df
 
 def rule_flow(row):
