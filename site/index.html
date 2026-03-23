@@ -774,10 +774,10 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
                radial-gradient(ellipse 50% 80% at 80% 20%,rgba(255,0,170,.03) 0%,transparent 70%)"></div>
 
   <!-- Header -->
-  <div class="ch">
+  <div class="ch" style="display:flex;justify-content:space-between;align-items:center">
 
-  <!-- LEFT SIDE -->
-  <div class="ct">
+  <!-- LEFT -->
+  <div class="ct" style="display:flex;align-items:center;gap:8px">
     <div class="od"></div>
     AETHER
     <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">
@@ -785,56 +785,40 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
     </span>
   </div>
 
-  <!-- RIGHT SIDE -->
-  <div style="display:flex;align-items:center;gap:14px">
+  <!-- RIGHT -->
+  <div style="display:flex;align-items:center;gap:12px">
 
-    <!-- ENGINE SELECTOR -->
-    <div style="display:flex;align-items:center;gap:6px">
-
-      <span style="
-        font-family:'Orbitron',sans-serif;
-        font-size:9px;
-        letter-spacing:2px;
-        opacity:.5;
-        color:var(--text2);
-      ">
-        ENGINE
-      </span>
-
-      <select id="aiEngine"
-        style="
-        background:rgba(0,255,255,.06);
-        border:1px solid rgba(0,255,255,.25);
-        color:var(--c);
-        font-family:'Orbitron',sans-serif;
-        font-size:9px;
-        letter-spacing:2px;
-        padding:4px 8px;
-        outline:none;
-      ">
-
-        <option value="hybrid">HYBRID</option>
-        <option value="ml">AETHER ML</option>
-        <option value="worker">WORKERS AI</option>
-
-      </select>
-
-    </div>
-
-    <!-- MODE TEXT -->
-    <div style="
+    <span style="
       font-family:'Orbitron',sans-serif;
       font-size:9px;
       letter-spacing:2px;
+      opacity:.6;
       color:var(--text2);
-      opacity:.5
     ">
-      FULL CONTEXT MODE
-    </div>
+      ENGINE
+    </span>
 
-    <!-- BACK BUTTON -->
+    <select id="aiEngine"
+      style="
+      background:rgba(0,255,255,.06);
+      border:1px solid rgba(0,255,255,.25);
+      color:var(--c);
+      font-family:'Orbitron',sans-serif;
+      font-size:9px;
+      letter-spacing:2px;
+      padding:3px 8px;
+      outline:none;
+      max-width:120px;
+    ">
+
+      <option value="hybrid">HYBRID</option>
+      <option value="ml">AETHER ML</option>
+      <option value="worker">WORKERS AI</option>
+
+    </select>
+
     <button class="cc" onclick="closeChat()">
-      ← BACK TO OS
+      ← BACK
     </button>
 
   </div>
