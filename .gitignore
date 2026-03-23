@@ -51,3 +51,6 @@ events.json
 # -----------------------------
 
 tree.txt
+
+data/vector/*.faiss
+data/vector/event_metadata.json

@@ -5,3 +5,5 @@ matplotlib
 seaborn
 pyarrow
 joblib
+sentence-transformers
+faiss-cpu
