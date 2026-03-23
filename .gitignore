@@ -1,23 +1,53 @@
+# -----------------------------
 # Logs
+# -----------------------------
+
 pipeline.log
+*.log
 
-# Generated insights
-analytics/daily_insights.md
-
-# Feature datasets
-data/features/*.parquet
-
-# Trained models
-models/*.pkl
-
-# Worker payload
-events.json
-
+# -----------------------------
 # Python cache
+# -----------------------------
+
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
+# -----------------------------
 # Environment
+# -----------------------------
+
 .env
+.venv/
+
+# -----------------------------
+# ML datasets
+# -----------------------------
+
+data/features/*.parquet
+
+# -----------------------------
+# MLflow experiments
+# -----------------------------
+
+experiments/mlruns/
+
+# -----------------------------
+# Trained models
+# -----------------------------
+
+models/*.pkl
+models/saved_models/
+
+# -----------------------------
+# Temporary worker payload
+# -----------------------------
+
+events.json
+
+# -----------------------------
+# Local files
+# -----------------------------
 
 tree.txt

@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-03-23T13:14:36.000330+00:00",
+  "insights": [
+    {
+      "icon": "\u26a1",
+      "title": "Peak productivity hour",
+      "body": "Your energy peaks around 9:00. Schedule deep work then.",
+      "tag": "PATTERN"
+    },
+    {
+      "icon": "\ud83d\udcda",
+      "title": "Top learning topics",
+      "body": "You have focused mostly on: general, python.",
+      "tag": "LEARNING"
+    }
+  ]
+}

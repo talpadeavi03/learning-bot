@@ -2,7 +2,7 @@ name: AETHER ML Pipeline
 
 on:
   schedule:
-    - cron: '30 19 * * *'
+    - cron: '30 19 * * *'   # 01:00 IST
   workflow_dispatch:
 
 jobs:
@@ -11,24 +11,53 @@ jobs:
     timeout-minutes: 20
 
     steps:
+
+      # --------------------------------
+      # Checkout repository
+      # --------------------------------
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        run: python3 --version
+      # --------------------------------
+      # Setup Python
+      # --------------------------------
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      # --------------------------------
+      # Install dependencies
+      # --------------------------------
 
       - name: Install dependencies
         run: |
-          pip install pandas scikit-learn numpy requests joblib pyarrow mlflow
-      
+          pip install -r requirements-ml.txt
+          pip install -r requirements-analytics.txt || true
+          pip install -r requirements-ingest.txt || true
+          pip install mlflow
+
+      # --------------------------------
+      # Pull events from Worker
+      # --------------------------------
 
       - name: Pull events
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
         run: python scripts/pipeline/pull_events.py
 
+      # --------------------------------
+      # Clean dataset
+      # --------------------------------
+
       - name: Clean data
         run: python scripts/pipeline/data_cleaner.py
+
+      # --------------------------------
+      # Train ML models
+      # --------------------------------
 
       - name: Train models
         env:
@@ -37,18 +66,57 @@ jobs:
           DAGSHUB_REPO: learning-bot
         run: python scripts/ml/train_models.py
 
+      # --------------------------------
+      # Predict productivity
+      # --------------------------------
+
       - name: Predict
         run: python scripts/ml/predict.py
+
+      # --------------------------------
+      # Generate insights
+      # --------------------------------
+
+      - name: Generate insights
+        run: python scripts/analytics/insight_engine.py
+
+      # --------------------------------
+      # Detect behavior patterns
+      # --------------------------------
+
+      - name: Pattern engine
+        run: python scripts/analytics/pattern_engine.py
+
+      # --------------------------------
+      # Build memory graph
+      # --------------------------------
+
+      - name: Build memory graph
+        run: python scripts/analytics/memory_graph_builder.py
+
+      # --------------------------------
+      # Push dashboard to Worker
+      # --------------------------------
 
       - name: Push dashboard
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
         run: python scripts/pipeline/push_dashboard.py
 
+      # --------------------------------
+      # Commit safe artifacts
+      # --------------------------------
+
       - name: Commit results
         run: |
           git config --local user.email "aether-bot@noreply.com"
           git config --local user.name "AETHER Bot"
-          git add data/ models/ || true
-          git diff --staged --quiet || git commit -m "chore: nightly ML [skip ci]"
+
+          git add data/raw/ || true
+          git add data/processed/ || true
+          git add data/graph/ || true
+          git add models/training_stats.json || true
+          git add site/data/ || true
+
+          git diff --staged --quiet || git commit -m "chore: nightly AETHER ML update [skip ci]"
           git push || true

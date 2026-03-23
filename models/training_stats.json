@@ -1,0 +1,49 @@
+{
+  "n_events": 9,
+  "n_features": 14,
+  "rf_accuracy": 1.0,
+  "cv_score": 0.0,
+  "gbm_rmse": 0.0,
+  "flow_distribution": {
+    "NOMINAL": 9
+  },
+  "top_features": [
+    [
+      "energy_signal",
+      0.0
+    ],
+    [
+      "stress_signal",
+      0.0
+    ],
+    [
+      "focus_signal",
+      0.0
+    ],
+    [
+      "motivation_signal",
+      0.0
+    ],
+    [
+      "hour_sin",
+      0.0
+    ]
+  ],
+  "trained_at": "2026-03-23T18:44:26.955482",
+  "features": [
+    "energy_signal",
+    "stress_signal",
+    "focus_signal",
+    "motivation_signal",
+    "hour_sin",
+    "hour_cos",
+    "day_of_week",
+    "is_weekend",
+    "word_count",
+    "complexity",
+    "question_ratio",
+    "is_study_session",
+    "is_goal_mention",
+    "is_complaint"
+  ]
+}
