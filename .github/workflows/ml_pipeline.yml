@@ -1,34 +1,54 @@
 name: AETHER ML Pipeline
 
 on:
-  workflow_dispatch:
   schedule:
     - cron: '30 19 * * *'
+  workflow_dispatch:
 
 jobs:
-  run:
+  ml_pipeline:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 20
 
-      - name: Install deps
-        run: pip install pandas scikit-learn numpy requests joblib pyarrow
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        run: python3 --version
+
+      - name: Install dependencies
+        run: |
+          pip install pandas scikit-learn numpy requests joblib pyarrow
+          pip install mlflow dagshub
 
       - name: Pull events
-        run: python scripts/pipeline/pull_events.py
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
+        run: python scripts/pipeline/pull_events.py
 
-      - name: Clean
+      - name: Clean data
         run: python scripts/pipeline/data_cleaner.py
 
-      - name: Train
+      - name: Train models
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          DAGSHUB_USER: talpadeavi03
+          DAGSHUB_REPO: learning-bot
         run: python scripts/ml/train_models.py
 
       - name: Predict
         run: python scripts/ml/predict.py
 
-      - name: Push
-        run: python scripts/pipeline/push_dashboard.py
+      - name: Push dashboard
         env:
           WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
+        run: python scripts/pipeline/push_dashboard.py
+
+      - name: Commit results
+        run: |
+          git config --local user.email "aether-bot@noreply.com"
+          git config --local user.name "AETHER Bot"
+          git add data/ models/ || true
+          git diff --staged --quiet || git commit -m "chore: nightly ML [skip ci]"
+          git push || true
