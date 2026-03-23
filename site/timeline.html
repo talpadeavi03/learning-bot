@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AETHER Timeline</title>
+
+<style>
+
+body{
+background:#000;
+color:#fff;
+font-family:system-ui;
+margin:0;
+}
+
+header{
+padding:20px;
+font-size:24px;
+font-weight:bold;
+border-bottom:1px solid #333;
+}
+
+nav{
+display:flex;
+gap:20px;
+padding:15px;
+border-bottom:1px solid #333;
+}
+
+nav a{
+color:white;
+text-decoration:none;
+opacity:.7;
+}
+
+nav a:hover{
+opacity:1;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.day{
+margin-top:30px;
+}
+
+.day h2{
+font-size:18px;
+opacity:.7;
+border-bottom:1px solid #222;
+padding-bottom:6px;
+}
+
+.event{
+padding:12px;
+border-left:2px solid white;
+margin:10px 0;
+background:#0a0a0a;
+}
+
+.time{
+font-size:12px;
+opacity:.6;
+}
+
+.topic{
+font-size:16px;
+margin-top:4px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+AETHER Timeline
+</header>
+
+<nav>
+<a href="index.html">Dashboard</a>
+<a href="timeline.html">Timeline</a>
+<a href="chat.html">AI Chat</a>
+<a href="architecture.html">Architecture</a>
+</nav>
+
+<div class="container">
+
+<div id="timeline"></div>
+
+</div>
+
+<script>
+
+async function loadTimeline(){
+
+try{
+
+const res = await fetch("https://learning-bot.talpadeavi0303.workers.dev/events");
+
+const data = await res.json();
+
+const container = document.getElementById("timeline");
+
+container.innerHTML="";
+
+data.reverse().forEach(e=>{
+
+const div=document.createElement("div");
+div.className="event";
+
+div.innerHTML=`
+<div class="time">${new Date(e.timestamp).toLocaleTimeString()}</div>
+<div class="topic">${e.topic || e.text || "Activity logged"}</div>
+`;
+
+container.appendChild(div);
+
+});
+
+}catch(err){
+
+console.log("timeline error",err);
+
+}
+
+}
+
+loadTimeline();
+
+</script>
+
+</body>
+</html>

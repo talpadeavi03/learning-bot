@@ -18,6 +18,9 @@
 │       └── events.csv
 ├── docs
 │   ├── PROJECT_MAP.md
+│   ├── aether-architecture.html
+│   ├── aether-progress.html
+│   ├── aether-vision.html
 │   └── secrets.md
 ├── experiments
 │   └── mlruns
@@ -29,6 +32,7 @@
 ├── readme.md
 ├── requirements-analytics.txt
 ├── requirements-ingest.txt
+├── requirements-ml.txt
 ├── scripts
 │   ├── analytics
 │   │   ├── analytics.py
@@ -51,16 +55,25 @@
 │   │   ├── predict.py
 │   │   └── train_models.py
 │   └── pipeline
+│       ├── data_cleaner.py
+│       ├── pull_events.py
+│       ├── push_dashboard.py
+│       ├── reset_data.py
 │       └── run_pipeline.py
 ├── site
 │   ├── data
 │   │   ├── aether_response.json
 │   │   ├── dashboard.json
-│   │   └── state.json
-│   └── index.html
+│   │   ├── state.json
+│   │   └── sw.js
+│   ├── icons
+│   │   ├── icon-192.png
+│   │   └── icon-512.png
+│   ├── index.html
+│   └── manifest.json
 ├── state
 │   └── last_update.txt
 ├── tree.txt
 └── wrangler.toml
 
-22 directories, 42 files
+23 directories, 54 files
