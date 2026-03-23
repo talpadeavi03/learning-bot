@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from scripts.analytics.goal_engine import goal_summary
 
 # -----------------------------------
 # Add project root to Python path
@@ -112,6 +113,12 @@ def recommendation_from_state(state):
 def answer_question(question):
 
     answer = []
+
+    intent = classify(question)
+
+    if intent == "goal":
+        answer.append(goal_summary())
+    return "\n".join(answer)
 
     # -------------------------
     # Intent classification

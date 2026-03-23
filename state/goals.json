@@ -1,0 +1,14 @@
+{
+  "goals": [
+    {
+      "name": "learn kubernetes",
+      "topic": "kubernetes",
+      "target_sessions": 20
+    },
+    {
+      "name": "improve python",
+      "topic": "python",
+      "target_sessions": 30
+    }
+  ]
+}

@@ -4,19 +4,18 @@ def classify(question):
 
     q = question.lower()
 
-    # productivity questions
-    if re.search(r"\b(study|focus|productive|deep work)\b", q):
-        return "productivity"
+    if re.search(r"\b(goal|progress|learning)\b", q):
+        return "goal"
 
-    # temporal questions
     if re.search(r"\b(yesterday|today|last week|when did)\b", q):
         return "temporal"
 
-    # pattern questions
     if re.search(r"\b(pattern|trend|habit)\b", q):
         return "pattern"
 
-    # memory questions
+    if re.search(r"\b(study|focus|productive)\b", q):
+        return "productivity"
+
     if re.search(r"\b(remember|did i|what did i)\b", q):
         return "memory"
 
