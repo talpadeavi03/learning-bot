@@ -87,6 +87,10 @@ jobs:
       - name: Pattern engine
         run: python scripts/analytics/pattern_engine.py
 
+      # Habit Tracker
+      - name: Habit tracker
+        run: python scripts/analytics/habit_tracker.py
+
       # --------------------------------
       # Build memory graph
       # --------------------------------

@@ -1,17 +1,22 @@
 import os
 import sys
+import json
+
+# -----------------------------------
+# Add project root to Python path
+# -----------------------------------
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 )
-
-import json
 
 from scripts.analytics.vector_query import search
 from scripts.analytics.goal_engine import goal_summary
 from scripts.analytics.temporal_engine import yesterday_summary
 from scripts.ai.intent_classifier import classify
 
+
+HABITS = "site/data/habits.json"
 PATTERNS = "site/data/patterns.json"
 INSIGHTS = "site/data/insights.json"
 DASHBOARD = "site/data/dashboard.json"
@@ -67,7 +72,7 @@ def extract_insights(data):
 
 
 # -----------------------------------
-# State loader (AETHER v4)
+# State loader
 # -----------------------------------
 
 def load_state():
@@ -111,19 +116,18 @@ def answer_question(question):
 
     answer = []
 
-    intent = classify(question)
-
-    if intent == "goal":
-        answer.append(goal_summary())
-    return "\n".join(answer)
-
     # -------------------------
     # Intent classification
     # -------------------------
 
     intent = classify(question)
 
-    # Temporal questions handled separately
+    # Goal progress
+    if intent == "goal":
+        answer.append(goal_summary())
+        return "\n".join(answer)
+
+    # Temporal queries
     if intent == "temporal":
         answer.append(yesterday_summary())
         return "\n".join(answer)
@@ -143,6 +147,7 @@ def answer_question(question):
 
     patterns_raw = load_json(PATTERNS)
     insights_raw = load_json(INSIGHTS)
+    habits = load_json(HABITS)
     dashboard = load_json(DASHBOARD)
     state = load_state()
 
@@ -150,7 +155,7 @@ def answer_question(question):
     insights = extract_insights(insights_raw)
 
     # -------------------------
-    # State awareness (AETHER v4)
+    # State awareness
     # -------------------------
 
     if state:
@@ -201,6 +206,20 @@ def answer_question(question):
 
         if body:
             answer.append(body)
+
+    # -------------------------
+    # Habit tracker results
+    # -------------------------
+
+    if habits:
+
+        answer.append("\nHabit tracking:")
+
+        for topic, h in habits.items():
+
+            answer.append(
+                f"{topic}: {h['max_streak']} day streak ({h['days_active']} active days)"
+            )
 
     # -------------------------
     # Vector memory recall

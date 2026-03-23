@@ -1,0 +1,10 @@
+{
+  "general": {
+    "days_active": 2,
+    "max_streak": 2
+  },
+  "python": {
+    "days_active": 1,
+    "max_streak": 1
+  }
+}
