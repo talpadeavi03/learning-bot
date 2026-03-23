@@ -29,18 +29,19 @@ DAGSHUB_REPO  = os.environ.get('DAGSHUB_REPO', 'learning-bot')
 mlflow_available = False
 try:
     import mlflow
-    import dagshub
     if DAGSHUB_TOKEN:
+        # Set credentials BEFORE dagshub.init to avoid interactive auth prompt
         os.environ['DAGSHUB_USER_TOKEN'] = DAGSHUB_TOKEN
-        dagshub.init(
-            repo_owner=DAGSHUB_USER,
-            repo_name=DAGSHUB_REPO,
-            mlflow=True
+        os.environ['MLFLOW_TRACKING_USERNAME'] = DAGSHUB_USER
+        os.environ['MLFLOW_TRACKING_PASSWORD'] = DAGSHUB_TOKEN
+        # Set tracking URI directly — most reliable method
+        mlflow.set_tracking_uri(
+            f'https://dagshub.com/{DAGSHUB_USER}/{DAGSHUB_REPO}.mlflow'
         )
         mlflow.set_experiment('aether-flow-classifier')
         mlflow_available = True
         print('[AETHER] MLflow → DagsHub connected ✅')
-        print(f'[AETHER] Tracking URI: {mlflow.get_tracking_uri()}')
+        print(f'[AETHER] Tracking: https://dagshub.com/{DAGSHUB_USER}/{DAGSHUB_REPO}/experiments')
     else:
         print('[AETHER] DAGSHUB_TOKEN not set — skipping MLflow')
         print('[AETHER] Add DAGSHUB_TOKEN to GitHub Secrets to enable')

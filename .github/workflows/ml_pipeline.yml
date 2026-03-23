@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pandas scikit-learn numpy requests joblib pyarrow
-          pip install mlflow dagshub
+          pip install mlflow
 
       - name: Pull events
         env:
