@@ -1,19 +1,16 @@
-import json
 import os
 import sys
-from scripts.analytics.goal_engine import goal_summary
-
-# -----------------------------------
-# Add project root to Python path
-# -----------------------------------
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 )
 
+import json
+
 from scripts.analytics.vector_query import search
-from scripts.ai.intent_classifier import classify
+from scripts.analytics.goal_engine import goal_summary
 from scripts.analytics.temporal_engine import yesterday_summary
+from scripts.ai.intent_classifier import classify
 
 PATTERNS = "site/data/patterns.json"
 INSIGHTS = "site/data/insights.json"
