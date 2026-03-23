@@ -1,77 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>AETHER Timeline</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 
 body{
-background:#000;
-color:#fff;
-font-family:system-ui;
+background:#010b12;
+color:#bde0ea;
+font-family:'Rajdhani',sans-serif;
 margin:0;
 }
 
 header{
-padding:20px;
-font-size:24px;
-font-weight:bold;
-border-bottom:1px solid #333;
-}
-
-nav{
 display:flex;
-gap:20px;
-padding:15px;
-border-bottom:1px solid #333;
+justify-content:space-between;
+align-items:center;
+padding:15px 30px;
+border-bottom:1px solid rgba(0,255,255,.2);
 }
 
-nav a{
-color:white;
+.logo{
+font-family:'Orbitron',sans-serif;
+color:#00ffff;
+letter-spacing:4px;
+font-weight:900;
+}
+
+.back{
+color:#00ffff;
 text-decoration:none;
-opacity:.7;
-}
-
-nav a:hover{
-opacity:1;
+font-family:'Orbitron',sans-serif;
+font-size:12px;
+letter-spacing:2px;
 }
 
 .container{
 max-width:900px;
 margin:auto;
-padding:20px;
+padding:40px 20px;
 }
 
-.day{
-margin-top:30px;
+.title{
+font-family:'Orbitron';
+letter-spacing:4px;
+margin-bottom:30px;
+color:#00ffff;
 }
 
-.day h2{
-font-size:18px;
-opacity:.7;
-border-bottom:1px solid #222;
-padding-bottom:6px;
+.timeline{
+border-left:2px solid rgba(0,255,255,.2);
+padding-left:25px;
 }
 
 .event{
-padding:12px;
-border-left:2px solid white;
-margin:10px 0;
-background:#0a0a0a;
+margin-bottom:25px;
+position:relative;
+}
+
+.event::before{
+content:"";
+position:absolute;
+left:-33px;
+top:6px;
+width:10px;
+height:10px;
+background:#00ffff;
+border-radius:50%;
+box-shadow:0 0 10px #00ffff;
 }
 
 .time{
+font-family:'Orbitron';
 font-size:12px;
-opacity:.6;
+color:#ff00aa;
+margin-bottom:5px;
 }
 
-.topic{
-font-size:16px;
-margin-top:4px;
+.text{
+font-size:15px;
+opacity:.9;
 }
 
 </style>
@@ -80,19 +94,15 @@ margin-top:4px;
 <body>
 
 <header>
-AETHER Timeline
+<div class="logo">AETHER OS</div>
+<a href="index.html" class="back">← DASHBOARD</a>
 </header>
-
-<nav>
-<a href="index.html">Dashboard</a>
-<a href="timeline.html">Timeline</a>
-<a href="chat.html">AI Chat</a>
-<a href="architecture.html">Architecture</a>
-</nav>
 
 <div class="container">
 
-<div id="timeline"></div>
+<div class="title">TIMELINE</div>
+
+<div class="timeline" id="timeline"></div>
 
 </div>
 
@@ -102,37 +112,40 @@ async function loadTimeline(){
 
 try{
 
-const res = await fetch("https://learning-bot.talpadeavi0303.workers.dev/events");
+const res = await fetch("https://aether-api.talpadeavi0303.workers.dev/events")
 
-const data = await res.json();
+const data = await res.json()
 
-const container = document.getElementById("timeline");
+const container = document.getElementById("timeline")
 
-container.innerHTML="";
+container.innerHTML=""
 
-data.reverse().forEach(e=>{
+data.slice(0,30).forEach(e=>{
 
-const div=document.createElement("div");
-div.className="event";
+const div=document.createElement("div")
+
+div.className="event"
 
 div.innerHTML=`
+
 <div class="time">${new Date(e.timestamp).toLocaleTimeString()}</div>
-<div class="topic">${e.topic || e.text || "Activity logged"}</div>
-`;
+<div class="text">${e.text}</div>
 
-container.appendChild(div);
+`
 
-});
+container.appendChild(div)
+
+})
 
 }catch(err){
 
-console.log("timeline error",err);
+document.getElementById("timeline").innerHTML="<p>No timeline data yet.</p>"
 
 }
 
 }
 
-loadTimeline();
+loadTimeline()
 
 </script>
 
