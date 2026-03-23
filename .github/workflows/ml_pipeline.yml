@@ -13,17 +13,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
       - name: Install dependencies
-        run: pip install -r requirements-ml.txt
+        run: pip install pandas scikit-learn numpy requests joblib pyarrow
 
       - name: Pull events from worker
         env:
@@ -48,6 +45,6 @@ jobs:
         run: |
           git config --local user.email "aether-bot@noreply.com"
           git config --local user.name "AETHER Bot"
-          git add data/ models/training_stats.json site/data/dashboard.json || true
+          git add data/ models/ site/data/ || true
           git diff --staged --quiet || git commit -m "chore: nightly ML pipeline [skip ci]"
           git push || true
