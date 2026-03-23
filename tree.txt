@@ -12,11 +12,18 @@
 │   │   ├── behavior_features.parquet
 │   │   ├── daily_behavior.parquet
 │   │   └── daily_state_vector.parquet
+│   ├── graph
+│   │   └── memory_graph.json
 │   ├── insights
 │   ├── processed
-│   └── raw
-│       └── events.csv
+│   │   └── events_clean.csv
+│   ├── raw
+│   │   └── events.csv
+│   └── vector
+│       ├── event_index.faiss
+│       └── event_metadata.json
 ├── docs
+│   ├── MASTER_PLAN.md
 │   ├── PROJECT_MAP.md
 │   ├── aether-architecture.html
 │   ├── aether-progress.html
@@ -25,21 +32,32 @@
 ├── experiments
 │   └── mlruns
 ├── models
+│   ├── energy_regressor.pkl
 │   ├── productivity_model.pkl
-│   └── saved_models
-│       └── productivity_model.pkl
+│   ├── saved_models
+│   │   └── productivity_model.pkl
+│   └── training_stats.json
 ├── pipeline.log
 ├── readme.md
 ├── requirements-analytics.txt
 ├── requirements-ingest.txt
 ├── requirements-ml.txt
 ├── scripts
+│   ├── ai
+│   │   └── aether_agent.py
 │   ├── analytics
+│   │   ├── __pycache__
+│   │   │   └── vector_query.cpython-314.pyc
 │   │   ├── analytics.py
 │   │   ├── dashboard.py
 │   │   ├── dashboard_data.py
 │   │   ├── heatmap.py
+│   │   ├── insight_engine.py
 │   │   ├── insight_generator.py
+│   │   ├── memory_graph_builder.py
+│   │   ├── pattern_engine.py
+│   │   ├── vector_memory_builder.py
+│   │   ├── vector_query.py
 │   │   └── weekly_summary.py
 │   ├── features
 │   │   ├── daily_aggregator.py
@@ -64,16 +82,19 @@
 │   ├── data
 │   │   ├── aether_response.json
 │   │   ├── dashboard.json
+│   │   ├── insights.json
+│   │   ├── patterns.json
 │   │   ├── state.json
 │   │   └── sw.js
 │   ├── icons
 │   │   ├── icon-192.png
 │   │   └── icon-512.png
 │   ├── index.html
-│   └── manifest.json
+│   ├── manifest.json
+│   └── timeline.html
 ├── state
 │   └── last_update.txt
 ├── tree.txt
 └── wrangler.toml
 
-23 directories, 54 files
+27 directories, 71 files

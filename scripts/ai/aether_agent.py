@@ -15,6 +15,7 @@ from scripts.analytics.vector_query import search
 PATTERNS = "site/data/patterns.json"
 INSIGHTS = "site/data/insights.json"
 DASHBOARD = "site/data/dashboard.json"
+STATE = "state/current_state.json"
 
 
 # -----------------------------------
@@ -26,8 +27,11 @@ def load_json(path):
     if not os.path.exists(path):
         return None
 
-    with open(path) as f:
-        return json.load(f)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return None
 
 
 # -----------------------------------
@@ -63,6 +67,43 @@ def extract_insights(data):
 
 
 # -----------------------------------
+# State loader (AETHER v4)
+# -----------------------------------
+
+def load_state():
+
+    if not os.path.exists(STATE):
+        return None
+
+    try:
+        with open(STATE) as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
+# -----------------------------------
+# Recommendation engine
+# -----------------------------------
+
+def recommendation_from_state(state):
+
+    if not state:
+        return None
+
+    energy = state.get("energy", 0.5)
+    focus = state.get("focus", 0.5)
+
+    if energy > 0.7:
+        return "Energy is high. Good time for deep work."
+
+    if focus < 0.4:
+        return "Focus seems low. Consider taking a short break."
+
+    return None
+
+
+# -----------------------------------
 # AETHER reasoning engine
 # -----------------------------------
 
@@ -86,12 +127,32 @@ def answer_question(question):
     patterns_raw = load_json(PATTERNS)
     insights_raw = load_json(INSIGHTS)
     dashboard = load_json(DASHBOARD)
+    state = load_state()
 
     patterns = extract_patterns(patterns_raw)
     insights = extract_insights(insights_raw)
 
     # -------------------------
-    # Reasoning logic
+    # State awareness (AETHER v4)
+    # -------------------------
+
+    if state:
+
+        energy = state.get("energy")
+        focus = state.get("focus")
+        last_activity = state.get("last_activity")
+
+        if energy is not None:
+            answer.append(f"Current energy level: {energy:.2f}")
+
+        if focus is not None:
+            answer.append(f"Current focus level: {focus:.2f}")
+
+        if last_activity:
+            answer.append(f"Last activity: {last_activity}")
+
+    # -------------------------
+    # Dashboard flow state
     # -------------------------
 
     if dashboard and "flow_state" in dashboard:
@@ -99,7 +160,9 @@ def answer_question(question):
         flow = dashboard["flow_state"]
         answer.append(f"Current flow state: {flow}")
 
+    # -------------------------
     # Pattern engine results
+    # -------------------------
 
     for p in patterns:
 
@@ -111,7 +174,9 @@ def answer_question(question):
                 f"Your peak productivity is around {hour}:00."
             )
 
+    # -------------------------
     # Insight engine results
+    # -------------------------
 
     for i in insights[:2]:
 
@@ -120,7 +185,9 @@ def answer_question(question):
         if body:
             answer.append(body)
 
+    # -------------------------
     # Vector memory recall
+    # -------------------------
 
     if memories:
 
@@ -132,6 +199,15 @@ def answer_question(question):
             ts = m.get("timestamp", "")
 
             answer.append(f"- {text} ({ts})")
+
+    # -------------------------
+    # Recommendation engine
+    # -------------------------
+
+    rec = recommendation_from_state(state)
+
+    if rec:
+        answer.append(f"\nRecommendation: {rec}")
 
     if not answer:
 
