@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from scripts.analytics.graph_query import query
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -42,6 +43,8 @@ def build_context(question):
 
     # daily plan
     context["plan"] = load_json(PLAN)
+
+    context["graph"] = query(question)
 
     # vector memory
     try:

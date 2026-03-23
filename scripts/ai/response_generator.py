@@ -9,6 +9,16 @@ def generate_response(question, context):
     plan = context.get("plan")
     memories = context.get("memories")
 
+
+    graph = context.get("graph")
+
+    if graph:
+
+      lines.append("\nRelated concepts:")
+
+      for g in graph[:5]:
+         lines.append(f"- {g}")
+
     # -------------------------
     # State summary
     # -------------------------
