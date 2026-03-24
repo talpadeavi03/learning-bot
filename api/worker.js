@@ -15,21 +15,13 @@ async function handleCommand(text, chatId, env) {
   switch (command) {
     case '/help':
     case '/start': {
-      await sendTelegram(chatId, 
-        `🤖 *AETHER OS — Commands*
-
-` +
-        `/stats — weekly performance summary
-` +
-        `/flow  — are you in flow right now?
-` +
-        `/goal  — set today's main goal
-` +
-        `/mood  — quick mood check-in
-` +
-        `/week  — 7-day activity overview
-
-` +
+      await sendTelegram(chatId,
+        `🤖 *AETHER OS — Commands*\n\n` +
+        `/stats — weekly performance summary\n` +
+        `/flow  — are you in flow right now?\n` +
+        `/goal  — set today's main goal\n` +
+        `/mood  — quick mood check-in\n` +
+        `/week  — 7-day activity overview\n\n` +
         `Or just send any message, voice note, or photo and AETHER will log it.`, env);
       return true;
     }
@@ -46,24 +38,13 @@ async function handleCommand(text, chatId, env) {
       const topics = [...new Set(events.map(e => e.topic).filter(Boolean))].slice(0, 5);
       const checkins = events.filter(e => e.input_type === 'checkin').length;
       await sendTelegram(chatId,
-        `📊 *AETHER Weekly Stats*
-
-` +
-        `Events logged: ${events.length}
-` +
-        `Study sessions: ${studySessions}
-` +
-        `Check-ins: ${checkins}
-
-` +
-        `⚡ Avg energy: ${Math.round(avgEnergy * 100)}%
-` +
-        `😤 Avg stress: ${Math.round(avgStress * 100)}%
-
-` +
-        `🧠 Topics: ${topics.join(', ') || 'none yet'}
-
-` +
+        `📊 *AETHER Weekly Stats*\n\n` +
+        `Events logged: ${events.length}\n` +
+        `Study sessions: ${studySessions}\n` +
+        `Check-ins: ${checkins}\n\n` +
+        `⚡ Avg energy: ${Math.round(avgEnergy * 100)}%\n` +
+        `😤 Avg stress: ${Math.round(avgStress * 100)}%\n\n` +
+        `🧠 Topics: ${topics.join(', ') || 'none yet'}\n\n` +
         `Keep logging — model trains after 30 days!`, env);
       return true;
     }
@@ -95,16 +76,10 @@ async function handleCommand(text, chatId, env) {
       }
 
       await sendTelegram(chatId,
-        `🎯 *Flow State*
-
-` +
-        `Status: *${flowStatus}*
-` +
-        `Energy: ${Math.round(recentEnergy * 100)}%
-` +
-        `Stress: ${Math.round(recentStress * 100)}%
-
-` +
+        `🎯 *Flow State*\n\n` +
+        `Status: *${flowStatus}*\n` +
+        `Energy: ${Math.round(recentEnergy * 100)}%\n` +
+        `Stress: ${Math.round(recentStress * 100)}%\n\n` +
         `${advice}`, env);
       return true;
     }
@@ -127,9 +102,7 @@ async function handleCommand(text, chatId, env) {
         is_goal_mention: true,
         summary:         args,
       }, env);
-      await sendTelegram(chatId, `✅ Goal set: *${args}*
-
-AETHER will track this today.`, env);
+      await sendTelegram(chatId, `✅ Goal set: *${args}*\n\nAETHER will track this today.`, env);
       return true;
     }
 
@@ -156,9 +129,8 @@ AETHER will track this today.`, env);
         sentiment:     args >= '4' ? 'positive' : args === '3' ? 'neutral' : 'negative',
         summary:       `Mood rated ${args}/5: ${mood.label}`,
       }, env);
-      await sendTelegram(chatId, `${args >= '4' ? '😊' : args === '3' ? '😐' : '😔'} Mood logged: *${mood.label}* (${args}/5)
-
-Energy: ${Math.round(mood.energy*100)}%`, env);
+      await sendTelegram(chatId,
+        `${args >= '4' ? '😊' : args === '3' ? '😐' : '😔'} Mood logged: *${mood.label}* (${args}/5)\n\nEnergy: ${Math.round(mood.energy*100)}%`, env);
       return true;
     }
 
@@ -179,13 +151,7 @@ Energy: ${Math.round(mood.energy*100)}%`, env);
         return `${day}: ${bar} ${d.count} events`;
       }).join('\n');
       await sendTelegram(chatId,
-        `📅 *7-Day Activity*
-
-\`\`\`
-${dayLines || 'No data yet'}
-\`\`\`
-
-Keep logging daily!`, env);
+        `📅 *7-Day Activity*\n\n\`\`\`\n${dayLines || 'No data yet'}\n\`\`\`\n\nKeep logging daily!`, env);
       return true;
     }
 
@@ -225,7 +191,7 @@ Keep logging daily!`, env);
           await sendTelegram(chatId, '⚠️ Usage: /automate webhook https://yoururl.com', env);
           return true;
         }
-        const r = await handleTrigger(
+        await handleTrigger(
           new Request('https://x/trigger', {
             method: 'POST',
             body: JSON.stringify({ action: 'webhook', data: { url: webhookUrl } }),
@@ -253,11 +219,8 @@ Keep logging daily!`, env);
       const streak = await calculateStreak(events);
       const total  = events.length;
       await sendTelegram(chatId,
-        `🔥 *Streak: ${streak} day${streak !== 1 ? 's' : ''}*
-
-` +
-        `Total events logged: ${total}
-` +
+        `🔥 *Streak: ${streak} day${streak !== 1 ? 's' : ''}*\n\n` +
+        `Total events logged: ${total}\n` +
         `Keep logging daily to maintain your streak!`, env);
       return true;
     }
@@ -287,7 +250,8 @@ Keep logging daily!`, env);
         is_study_session:false, is_goal_mention:false,
         health_type:'sleep', sleep_hours:hrs, sleep_quality:quality,
         summary:`Sleep: ${hrs}h (${quality})` }, env);
-      await sendTelegram(chatId, `😴 *Sleep logged*\n\n${hrs}h — ${quality.toUpperCase()}\nEnergy forecast: ${Math.round(energy*100)}%\n\n${hrs < 6 ? '⚠️ Low sleep — take it easy.' : hrs >= 8 ? '✅ Well rested!' : '👍 Decent sleep.'}`, env);
+      await sendTelegram(chatId,
+        `😴 *Sleep logged*\n\n${hrs}h — ${quality.toUpperCase()}\nEnergy forecast: ${Math.round(energy*100)}%\n\n${hrs < 6 ? '⚠️ Low sleep — take it easy.' : hrs >= 8 ? '✅ Well rested!' : '👍 Decent sleep.'}`, env);
       return true;
     }
 
@@ -385,79 +349,42 @@ Keep logging daily!`, env);
     }
 
     case '/commands': {
-      await sendTelegram(chatId, `*AETHER Commands* 🤖
-
-*📊 CORE*
-/goal [text] — set today goal
-/mood [1-5] — quick mood log
-/stats — weekly summary
-/flow — current flow state
-
-*💪 HEALTH*
-/exercise [mins] [type]
-/sleep [hours]
-/food [description]
-/water [litres]
-/weight [kg]
-
-*💰 MONEY*
-/spend [amount] [category]
-/income [amount] [source]
-
-*💼 CAREER*
-/job [company] — log application
-/interview [company]
-
-*📈 INSIGHTS*
-/week /streak /morning /evening`, env);
+      await sendTelegram(chatId, `*AETHER Commands* 🤖\n\n` +
+        `*📊 CORE*\n/goal [text] — set today goal\n/mood [1-5] — quick mood log\n/stats — weekly summary\n/flow — current flow state\n\n` +
+        `*💪 HEALTH*\n/exercise [mins] [type]\n/sleep [hours]\n/food [description]\n/water [litres]\n/weight [kg]\n\n` +
+        `*💰 MONEY*\n/spend [amount] [category]\n/income [amount] [source]\n\n` +
+        `*💼 CAREER*\n/job [company] — log application\n/interview [company]\n\n` +
+        `*📈 INSIGHTS*\n/week /streak /morning /evening`, env);
       return true;
     }
 
     default:
-      return false; // not a recognized command, treat as regular text
+      return false;
   }
 }
 
-/**
- * ╔══════════════════════════════════════════════════════════════╗
- * ║            AETHER OS — Cloudflare Worker v2.0               ║
- * ║            api/worker.js                                    ║
- * ╠══════════════════════════════════════════════════════════════╣
- * ║  ROUTES                                                      ║
- * ║  POST /webhook        ← Telegram messages (all types)       ║
- * ║  POST /chat           ← Dashboard AI chat                   ║
- * ║  POST /log-state      ← One-tap check-in widget             ║
- * ║  GET  /dashboard      ← Latest dashboard.json for UI        ║
- * ║  GET  /events         ← Raw events log (for ML pipeline)    ║
- * ║  GET  /health         ← Status check                        ║
- * ╠══════════════════════════════════════════════════════════════╣
- * ║  SECRETS — add all in GitHub → Repo Settings → Secrets      ║
- * ║  Also add in Cloudflare Worker → Settings → Variables       ║
- * ║                                                              ║
- * ║  TELEGRAM_BOT_TOKEN   from @BotFather on Telegram           ║
- * ║  TELEGRAM_CHAT_ID     your personal numeric chat ID         ║
- * ║  OPENAI_API_KEY       from platform.openai.com            ║
- * ║                       used for chat, NLP, vision & voice   ║
- * ║                                                              ║
- * ║  KV NAMESPACE — create in Cloudflare dashboard              ║
- * ║  Add binding named AETHER_KV in wrangler.toml:              ║
- * ║  [[kv_namespaces]]                                          ║
- * ║  binding = "AETHER_KV"                                      ║
- * ║  id = "YOUR_KV_NAMESPACE_ID"                                ║
- * ╚══════════════════════════════════════════════════════════════╝
- */
+// ╔══════════════════════════════════════════════════════════════╗
+// ║            AETHER OS — Cloudflare Worker v2.1               ║
+// ║            api/worker.js                                    ║
+// ╠══════════════════════════════════════════════════════════════╣
+// ║  ROUTES                                                      ║
+// ║  POST /webhook        ← Telegram messages (all types)       ║
+// ║  POST /chat           ← Dashboard AI chat                   ║
+// ║  POST /log-state      ← One-tap check-in widget             ║
+// ║  GET  /dashboard      ← Latest dashboard.json for UI        ║
+// ║  GET  /events         ← Raw events log (for ML pipeline)    ║
+// ║  GET  /health         ← Status check                        ║
+// ╚══════════════════════════════════════════════════════════════╝
 
 // ─────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 
-// All AI now runs on Cloudflare Workers AI (free)
-// CF models used: llama-3-8b-instruct (chat+NLP), llava-1.5-7b (vision), whisper (voice)
-const MAX_EVENTS       = 500;   // max rows kept in KV events log
-const MAX_HISTORY      = 20;    // max chat turns kept per session
+const MAX_EVENTS  = 500;
+const MAX_HISTORY = 20;
 
 // ─────────────────────────────────────────────────────────────────
-// HELPERS — Response builders
+// HELPERS
 // ─────────────────────────────────────────────────────────────────
 
 const CORS_HEADERS = {
@@ -486,23 +413,16 @@ function textResp(text, status = 200) {
 
 export default {
 
-  // ── Cron jobs — runs on schedule set in wrangler.toml ──────────
   async scheduled(event, env, ctx) {
     const hour = new Date().getUTCHours();
-    // Adjust for IST (UTC+5:30) — 8am IST = 2:30 UTC, 9pm IST = 15:30 UTC
-    // We use UTC 3 for morning (8:30am IST) and UTC 15 for evening (8:30pm IST)
     if (hour === 3)  ctx.waitUntil(sendMorningBriefing(env));
     if (hour === 15) ctx.waitUntil(sendEveningSummary(env));
-    // Midday nudge at 12:30pm IST (7:00 UTC) if no data logged yet today
     if (hour === 7)  ctx.waitUntil(middayNudge(env));
-    // Sunday weekly report at 9pm IST (15:30 UTC)
-    const dayOfWeek = new Date().getUTCDay(); // 0=Sunday
+    const dayOfWeek = new Date().getUTCDay();
     if (hour === 15 && dayOfWeek === 0) ctx.waitUntil(sendWeeklyReport(env));
   },
 
   async fetch(request, env) {
-
-    // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS_HEADERS });
     }
@@ -510,24 +430,21 @@ export default {
     const url = new URL(request.url);
 
     try {
-      // ── Route table ──────────────────────────────────────────
-      if (url.pathname === '/webhook'   && request.method === 'POST') return handleWebhook(request, env);
-      if (url.pathname === '/chat'      && request.method === 'POST') return handleChat(request, env);
-      if (url.pathname === '/log-state' && request.method === 'POST') return handleLogState(request, env);
-      if (url.pathname === '/dashboard' && request.method === 'GET')  return handleDashboard(request, env);
-      if (url.pathname === '/events'    && request.method === 'GET')  return handleEvents(request, env);
+      if (url.pathname === '/webhook'          && request.method === 'POST') return handleWebhook(request, env);
+      if (url.pathname === '/chat'             && request.method === 'POST') return handleChat(request, env);
+      if (url.pathname === '/log-state'        && request.method === 'POST') return handleLogState(request, env);
+      if (url.pathname === '/dashboard'        && request.method === 'GET')  return handleDashboard(request, env);
+      if (url.pathname === '/events'           && request.method === 'GET')  return handleEvents(request, env);
       if (url.pathname === '/update-dashboard' && request.method === 'POST') return handleUpdateDashboard(request, env);
-      if (url.pathname === '/reset-data'        && request.method === 'POST') return handleResetData(request, env);
+      if (url.pathname === '/reset-data'       && request.method === 'POST') return handleResetData(request, env);
       if (url.pathname === '/log-github'       && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger'          && request.method === 'POST') return handleTrigger(request, env);
-      if (url.pathname === '/health'    && request.method === 'GET')  return handleHealth(request, env);
+      if (url.pathname === '/health'           && request.method === 'GET')  return handleHealth(request, env);
 
-      // ── Legacy: keep old /api route working ──────────────────
       if (url.pathname.startsWith('/api')) {
-        return jsonResp({ status: 'AETHER API ONLINE', version: '2.0' });
+        return jsonResp({ status: 'AETHER API ONLINE', version: '2.1' });
       }
 
-      // ── Serve static frontend (Cloudflare Pages assets) ──────
       return env.ASSETS.fetch(request);
 
     } catch (err) {
@@ -539,11 +456,6 @@ export default {
 
 // ═════════════════════════════════════════════════════════════════
 // 1. TELEGRAM WEBHOOK
-//    Receives all message types from Telegram bot
-//    Text → direct NLP
-//    Voice / Video note → Whisper → NLP
-//    Photo → GPT-4o Vision → NLP
-//    All paths converge into processText() → saveEvent()
 // ═════════════════════════════════════════════════════════════════
 
 async function handleWebhook(request, env) {
@@ -555,24 +467,21 @@ async function handleWebhook(request, env) {
   }
 
   const msg = body?.message || body?.edited_message;
-  if (!msg) return textResp('No message', 200); // Telegram needs 200 or it retries
+  if (!msg) return textResp('No message', 200);
 
   const chatId    = msg.chat?.id?.toString();
   const timestamp = new Date(msg.date * 1000).toISOString();
 
-  // Security: only accept from your own chat ID
   if (env.TELEGRAM_CHAT_ID && chatId !== env.TELEGRAM_CHAT_ID.toString()) {
     console.warn('[AETHER] Rejected message from unknown chat:', chatId);
-    return textResp('Unauthorized', 200); // still 200 so Telegram stops retrying
+    return textResp('Unauthorized', 200);
   }
 
   let rawText   = '';
   let inputType = 'text';
   let extra     = {};
 
-  // ── TEXT ─────────────────────────────────────────────────────
   if (msg.text) {
-    // Handle bot commands first
     if (msg.text.startsWith('/')) {
       const handled = await handleCommand(msg.text, chatId, env);
       if (handled) return textResp('OK', 200);
@@ -581,10 +490,9 @@ async function handleWebhook(request, env) {
     inputType = 'text';
   }
 
-  // ── VOICE NOTE (hold mic button) ─────────────────────────────
   else if (msg.voice) {
     if (!env.AI) {
-      await sendTelegram(chatId, '🎙 Voice noted! AI binding not configured yet.\nAdd [ai] to wrangler.toml', env);
+      await sendTelegram(chatId, '🎙 Voice noted! AI binding not configured yet.', env);
       return textResp('No AI binding', 200);
     }
     await sendTelegram(chatId, '🎙 Transcribing...', env);
@@ -599,10 +507,9 @@ async function handleWebhook(request, env) {
     }
   }
 
-  // ── VIDEO NOTE (circle video) ─────────────────────────────────
   else if (msg.video_note) {
     if (!env.AI) {
-      await sendTelegram(chatId, '🎥 Video noted! AI binding not configured yet.\nAdd [ai] to wrangler.toml', env);
+      await sendTelegram(chatId, '🎥 Video noted! AI binding not configured yet.', env);
       return textResp('No AI binding', 200);
     }
     await sendTelegram(chatId, '🎥 Processing video...', env);
@@ -617,11 +524,9 @@ async function handleWebhook(request, env) {
     }
   }
 
-  // ── PHOTO (whiteboard, book page, handwritten notes) ──────────
   else if (msg.photo) {
     await sendTelegram(chatId, '🖼 Reading image...', env);
     try {
-      // Telegram sends multiple sizes — take the largest (last)
       const bestPhoto = msg.photo[msg.photo.length - 1];
       const fileUrl   = await getTelegramFileUrl(bestPhoto.file_id, env);
       rawText         = await openaiVisionExtract(fileUrl, msg.caption || '', env);
@@ -632,7 +537,6 @@ async function handleWebhook(request, env) {
     }
   }
 
-  // ── DOCUMENT (PDF, text file) ─────────────────────────────────
   else if (msg.document) {
     const mime = msg.document.mime_type || '';
     if (mime === 'text/plain') {
@@ -651,56 +555,44 @@ async function handleWebhook(request, env) {
     }
   }
 
-  // ── STICKER / OTHER — ignore silently ────────────────────────
   else {
     return textResp('Unsupported message type', 200);
   }
 
-  // ── Skip empty ───────────────────────────────────────────────
   if (!rawText.trim()) {
     await sendTelegram(chatId, '🤔 Could not extract any text from that.', env);
     return textResp('Empty text', 200);
   }
 
-  // ── NLP Parse ────────────────────────────────────────────────
   const parsed = await nlpParse(rawText, inputType, env);
 
-  // ── Enrich + Save event to KV ────────────────────────────────
   const hour      = new Date(timestamp).getUTCHours();
-  const dayOfWeek = new Date(timestamp).getUTCDay(); // 0=Sun, 6=Sat
+  const dayOfWeek = new Date(timestamp).getUTCDay();
   const wordCount = rawText.trim().split(/\s+/).length;
-
-  // Message complexity — longer = deeper thinking
   const complexity = Math.min(1, wordCount / 50);
-
-  // Question ratio — questions = exploration mode
   const questionCount = (rawText.match(/\?/g) || []).length;
   const questionRatio = Math.min(1, questionCount / Math.max(1, wordCount / 10));
-
-  // Exclamation = high energy signal
   const exclamations = (rawText.match(/!/g) || []).length;
 
   const event = {
     timestamp,
-    input_type:      inputType,
-    raw_text:        rawText.slice(0, 500),
-    // Computed behavioral features
-    hour_utc:        hour,
-    hour_sin:        Math.sin(2 * Math.PI * hour / 24),
-    hour_cos:        Math.cos(2 * Math.PI * hour / 24),
-    day_of_week:     dayOfWeek,
-    is_weekend:      dayOfWeek === 0 || dayOfWeek === 6,
-    word_count:      wordCount,
-    complexity:      Math.round(complexity * 100) / 100,
-    question_ratio:  Math.round(questionRatio * 100) / 100,
+    input_type:        inputType,
+    raw_text:          rawText.slice(0, 500),
+    hour_utc:          hour,
+    hour_sin:          Math.sin(2 * Math.PI * hour / 24),
+    hour_cos:          Math.cos(2 * Math.PI * hour / 24),
+    day_of_week:       dayOfWeek,
+    is_weekend:        dayOfWeek === 0 || dayOfWeek === 6,
+    word_count:        wordCount,
+    complexity:        Math.round(complexity * 100) / 100,
+    question_ratio:    Math.round(questionRatio * 100) / 100,
     exclamation_count: exclamations,
-    message_length:  rawText.length,
+    message_length:    rawText.length,
     ...parsed,
     ...extra,
   };
   await saveEvent(event, env);
 
-  // ── Reply to user ─────────────────────────────────────────────
   const reply = buildTelegramReply(parsed, inputType, rawText);
   await sendTelegram(chatId, reply, env);
 
@@ -708,10 +600,10 @@ async function handleWebhook(request, env) {
 }
 
 // ═════════════════════════════════════════════════════════════════
-// 2. CHAT ENDPOINT
-//    Called by the AETHER dashboard chat UI
-//    Receives conversation history + current metrics
-//    Returns AI response as { reply: "..." }
+// 2. CHAT ENDPOINT — ENGINE SWITCHER
+//    engine = "ml"     → runAetherML()     (rule-based signals)
+//    engine = "worker" → runWorkersAI()    (pure Llama-3)
+//    engine = "hybrid" → runHybrid()       (ML context + Llama-3)
 // ═════════════════════════════════════════════════════════════════
 
 async function handleChat(request, env) {
@@ -722,23 +614,26 @@ async function handleChat(request, env) {
     return jsonResp({ error: 'Bad JSON' }, 400);
   }
 
-  const { history = [], metrics = {}, activity = [], goals = [] } = body;
+  const {
+    history  = [],
+    metrics  = {},
+    activity = [],
+    goals    = [],
+    engine   = "hybrid",
+  } = body;
 
-  // Pull recent events to give AETHER context about the user
-  const recentEvents  = await getRecentEvents(10, env);
-  const latestState   = await getLatestState(env);
-
-  // Build system prompt with full personal context
-  const systemPrompt = buildSystemPrompt(metrics, activity, goals, recentEvents, latestState);
-
-  // Trim history to avoid token overflow
+  const recentEvents   = await getRecentEvents(10, env);
+  const latestState    = await getLatestState(env);
+  const systemPrompt   = buildSystemPrompt(metrics, activity, goals, recentEvents, latestState);
   const trimmedHistory = history.slice(-MAX_HISTORY);
 
   let reply;
   try {
-    reply = await callOpenAI(systemPrompt, trimmedHistory, env);
+    if (engine === "ml")          reply = await runAetherML(env);
+    else if (engine === "worker") reply = await runWorkersAI(systemPrompt, trimmedHistory, env);
+    else                          reply = await runHybrid(systemPrompt, trimmedHistory, env);
   } catch (e) {
-    console.error('[AETHER] OpenAI error:', e);
+    console.error('[AETHER] Chat engine error:', e);
     return jsonResp({ error: 'AI unavailable: ' + e.message }, 500);
   }
 
@@ -746,9 +641,7 @@ async function handleChat(request, env) {
 }
 
 // ═════════════════════════════════════════════════════════════════
-// 3. LOG STATE ENDPOINT
-//    Called by the one-tap check-in widget (aether-checkin.html)
-//    Saves structured state vector to KV
+// 3. LOG STATE
 // ═════════════════════════════════════════════════════════════════
 
 async function handleLogState(request, env) {
@@ -759,19 +652,15 @@ async function handleLogState(request, env) {
     return jsonResp({ error: 'Bad JSON' }, 400);
   }
 
-  // Validate minimum fields
   if (!stateVector.state_label || stateVector.energy === undefined) {
     return jsonResp({ error: 'Missing required fields: state_label, energy' }, 400);
   }
 
-  // Add server timestamp
   stateVector.server_timestamp = new Date().toISOString();
 
-  // Save as today's state
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
   await env.AETHER_KV.put(`state:${today}`, JSON.stringify(stateVector));
 
-  // Also append as an event
   const event = {
     timestamp:   stateVector.server_timestamp,
     input_type:  'checkin',
@@ -785,8 +674,6 @@ async function handleLogState(request, env) {
     mods:        (stateVector.mods || []).join(','),
   };
   await saveEvent(event, env);
-
-  // Update dashboard metrics with new state
   await refreshDashboardFromState(stateVector, env);
 
   console.log('[AETHER] State logged:', stateVector.state_label, '| energy:', stateVector.energy);
@@ -795,23 +682,17 @@ async function handleLogState(request, env) {
 
 // ═════════════════════════════════════════════════════════════════
 // 4. DASHBOARD ENDPOINT
-//    Serves the latest dashboard.json to the frontend UI
-//    Falls back to sensible defaults if no data yet
 // ═════════════════════════════════════════════════════════════════
 
 async function handleDashboard(request, env) {
   try {
-    // Always recompute from real events for freshness
-    const events     = await getRecentEvents(200, env);
+    const events      = await getRecentEvents(200, env);
     const latestState = await getLatestState(env);
-    const today      = new Date().toISOString().split('T')[0];
-    const todayEv    = events.filter(e => e.timestamp?.startsWith(today));
-    const todayGoal  = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
+    const today       = new Date().toISOString().split('T')[0];
+    const todayEv     = events.filter(e => e.timestamp?.startsWith(today));
+    const todayGoal   = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
+    const streak      = await calculateStreak(events);
 
-    // Streak
-    const streak = await calculateStreak(events);
-
-    // Today metrics
     const avgEnergy = todayEv.length > 0
       ? Math.round(todayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / todayEv.length * 100)
       : latestState ? Math.round((latestState.energy || 0.5) * 100) : 0;
@@ -827,14 +708,12 @@ async function handleDashboard(request, env) {
     const studySessions = todayEv.filter(e => e.is_study_session).length;
     const hoursToday    = Math.round(studySessions * 0.5 * 10) / 10;
 
-    // Flow probability
     let flowProb = 0;
-    if (latestState?.flow_prob) flowProb = Math.round(latestState.flow_prob * 100);
-    else if (avgEnergy > 75 && avgStress < 25) flowProb = 85;
-    else if (avgEnergy > 55 && avgStress < 45) flowProb = 55;
-    else flowProb = 20;
+    if (latestState?.flow_prob)                     flowProb = Math.round(latestState.flow_prob * 100);
+    else if (avgEnergy > 75 && avgStress < 25)      flowProb = 85;
+    else if (avgEnergy > 55 && avgStress < 45)      flowProb = 55;
+    else                                             flowProb = 20;
 
-    // Topics breakdown from today's events
     const topicCounts = {};
     todayEv.forEach(e => {
       if (e.topic && e.topic !== 'general') {
@@ -844,22 +723,15 @@ async function handleDashboard(request, env) {
     const activity = Object.entries(topicCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5)
-      .map(([topic, count]) => ({
-        topic,
-        minutes: count * 25, // rough estimate
-        cat: 'LOGGED',
-      }));
+      .map(([topic, count]) => ({ topic, minutes: count * 25, cat: 'LOGGED' }));
 
-    // Timeline from today's events
     const timeline = todayEv.slice(0, 8).map(e => ({
       time: new Date(e.timestamp).toLocaleTimeString('en-IN', {
-        hour: '2-digit', minute: '2-digit', hour12: false,
-        timeZone: 'Asia/Kolkata'
+        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata'
       }),
       event: `${e.input_type}: ${e.summary || e.topic || 'logged'}`,
     }));
 
-    // 7-day energy trend
     const weekData = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
@@ -867,28 +739,23 @@ async function handleDashboard(request, env) {
       const ds = d.toISOString().split('T')[0];
       const dayEv = events.filter(e => e.timestamp?.startsWith(ds));
       const dayEnergy = dayEv.length > 0
-        ? dayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / dayEv.length
-        : 0;
+        ? dayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / dayEv.length : 0;
       weekData.push(Math.round(dayEnergy * 10) / 10);
     }
 
-    // Insights generated from patterns
     const insights = generateInsights(events, todayEv, avgEnergy, avgStress, streak);
 
-    // Today's goal as a goal item
     const goals = {
       today: todayGoal ? [{ text: todayGoal, done: false, cat: 'TODAY' }] : [],
       week:  [],
     };
 
-    // Input type breakdown
     const inputCounts = {};
     events.forEach(e => {
       const t = e.input_type || 'text';
       inputCounts[t] = (inputCounts[t] || 0) + 1;
     });
 
-    // Hourly activity heatmap (UTC hours → we convert to IST in frontend)
     const hourlyData = new Array(24).fill(0);
     events.forEach(e => {
       if (e.timestamp) {
@@ -897,9 +764,8 @@ async function handleDashboard(request, env) {
       }
     });
 
-    // Flow label from latest state or computed
     let flowLabel = 'NOMINAL';
-    if (latestState?.flow_class)    flowLabel = latestState.flow_class;
+    if (latestState?.flow_class)               flowLabel = latestState.flow_class;
     else if (avgEnergy > 75 && avgStress < 25) flowLabel = 'FLOW';
     else if (avgEnergy > 60 && avgStress < 35) flowLabel = 'PRE-FLOW';
     else if (avgStress > 60)                   flowLabel = 'ANXIETY';
@@ -929,11 +795,11 @@ async function handleDashboard(request, env) {
       todayCount: todayEv.length,
       flowLabel,
       pipeline: [
-        { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',           status: 'OK',    cls: 'ps-ok' },
-        { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',         status: 'OK',    cls: 'ps-ok' },
-        { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM',        status: events.length >= 10 ? 'TRAINED' : 'WAITING', cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
-        { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',          status: events.length >= 10 ? 'OK' : 'WAITING', cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
-        { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',          status: 'OK',    cls: 'ps-ok' },
+        { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',    status: 'OK',    cls: 'ps-ok' },
+        { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',  status: 'OK',    cls: 'ps-ok' },
+        { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM', status: events.length >= 10 ? 'TRAINED' : 'WAITING', cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
+        { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',   status: events.length >= 10 ? 'OK' : 'WAITING',     cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
+        { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',   status: 'OK',    cls: 'ps-ok' },
       ],
     };
 
@@ -947,11 +813,9 @@ async function handleDashboard(request, env) {
   }
 }
 
-// Generate insights from event patterns
 function generateInsights(events, todayEv, avgEnergy, avgStress, streak) {
   const insights = [];
 
-  // Peak energy insight
   const hourEnergy = {};
   events.forEach(e => {
     const h = new Date(e.timestamp).getUTCHours();
@@ -967,52 +831,40 @@ function generateInsights(events, todayEv, avgEnergy, avgStress, streak) {
     const ampm = istHour >= 12 ? 'pm' : 'am';
     const h12 = istHour % 12 || 12;
     insights.push({
-      icon: '⚡',
-      title: 'Peak Performance Window',
+      icon: '⚡', title: 'Peak Performance Window',
       body: `Your energy peaks around ${h12}${ampm} IST based on ${events.length} logged events. Schedule your hardest tasks then.`,
-      tag: 'PATTERN',
-      tagClass: 'tag-ok',
+      tag: 'PATTERN', tagClass: 'tag-ok',
     });
   }
 
-  // Stress insight
   if (avgStress > 60) {
     insights.push({
-      icon: '⚠️',
-      title: 'High Stress Detected',
+      icon: '⚠️', title: 'High Stress Detected',
       body: 'Your stress signals are elevated today. Break tasks into smaller steps and take short breaks.',
-      tag: 'WARNING',
-      tagClass: 'tag-med',
+      tag: 'WARNING', tagClass: 'tag-med',
     });
   } else if (avgEnergy > 70) {
     insights.push({
-      icon: '🔥',
-      title: 'High Energy Day',
+      icon: '🔥', title: 'High Energy Day',
       body: `Energy at ${avgEnergy}% — good conditions for deep work. Protect this window.`,
-      tag: 'POSITIVE',
-      tagClass: 'tag-ok',
+      tag: 'POSITIVE', tagClass: 'tag-ok',
     });
   }
 
-  // Streak insight
   if (streak >= 3) {
     insights.push({
-      icon: '🔥',
-      title: `${streak}-Day Streak`,
+      icon: '🔥', title: `${streak}-Day Streak`,
       body: `You have logged data for ${streak} consecutive days. AETHER is building your behavioral model.`,
       tag: streak >= 7 ? 'HIGH PRIORITY' : 'POSITIVE',
       tagClass: streak >= 7 ? 'tag-hi' : 'tag-ok',
     });
   }
 
-  // Today's activity insight
   if (todayEv.length === 0) {
     insights.push({
-      icon: '💡',
-      title: 'No Data Today Yet',
+      icon: '💡', title: 'No Data Today Yet',
       body: 'Send a message to your Telegram bot to start logging today activity.',
-      tag: 'ACTION',
-      tagClass: 'tag-med',
+      tag: 'ACTION', tagClass: 'tag-med',
     });
   }
 
@@ -1021,8 +873,6 @@ function generateInsights(events, todayEv, avgEnergy, avgStress, streak) {
 
 // ═════════════════════════════════════════════════════════════════
 // 5. EVENTS ENDPOINT
-//    Returns raw event log — used by ML pipeline (GitHub Actions)
-//    to pull data and train models
 // ═════════════════════════════════════════════════════════════════
 
 async function handleEvents(request, env) {
@@ -1036,17 +886,31 @@ async function handleEvents(request, env) {
 // 6. HEALTH CHECK
 // ═════════════════════════════════════════════════════════════════
 
+async function handleHealth(request, env) {
+  const kvOk       = !!env.AETHER_KV;
+  const openaiOk   = !!env.OPENAI_API_KEY;
+  const telegramOk = !!env.TELEGRAM_BOT_TOKEN;
+  const chatIdOk   = !!env.TELEGRAM_CHAT_ID;
+  const eventCount = await getEventCount(env);
+  const coreReady  = kvOk && !!env.AI && telegramOk && chatIdOk;
+
+  return jsonResp({
+    status:    coreReady ? 'AETHER ONLINE ✅' : 'AETHER PARTIAL ⚠️',
+    version:   '2.1',
+    timestamp: new Date().toISOString(),
+    services: {
+      kv:               kvOk       ? 'OK' : '❌ MISSING',
+      cf_ai:            env.AI     ? 'OK' : '❌ MISSING — add [ai] to wrangler.toml',
+      telegram_token:   telegramOk ? 'OK' : '❌ MISSING',
+      telegram_chat_id: chatIdOk   ? 'OK' : '❌ MISSING',
+      openai:           openaiOk   ? 'OK' : '⚪ OPTIONAL',
+    },
+    data: { total_events: eventCount },
+  });
+}
 
 // ═════════════════════════════════════════════════════════════════
 // AUTOMATION ENGINE
-// POST /trigger — AETHER triggers external actions
-// Called by: cron, ML pipeline, flow detection, bot commands
-//
-// Supported actions:
-//   spotify_flow    — start focus playlist
-//   notion_log      — append to Notion journal
-//   webhook         — call any custom URL
-//   telegram_nudge  — send smart nudge to self
 // ═════════════════════════════════════════════════════════════════
 
 async function handleTrigger(request, env) {
@@ -1059,39 +923,29 @@ async function handleTrigger(request, env) {
 
     switch (action) {
 
-      // ── Smart nudge based on time + state ──────────────────────
       case 'smart_nudge': {
         const state  = await getLatestState(env);
         const events = await getRecentEvents(5, env);
         const avgE   = events.reduce((s,e) => s+(e.energy_signal||0.5),0) / Math.max(events.length,1);
-
         let msg;
-        if (!state && events.length === 0) {
-          msg = '👋 AETHER here. No data logged today yet. What are you working on?';
-        } else if (avgE > 0.75) {
-          msg = `⚡ You're in high energy mode. What's the hardest thing on your list right now?`;
-        } else if (avgE < 0.35) {
-          msg = `😴 Low energy detected. Small task or rest? Reply to log your state.`;
-        } else {
-          msg = `🎯 Mid-day check: still on track with your goal? Reply to update AETHER.`;
-        }
+        if (!state && events.length === 0)  msg = '👋 AETHER here. No data logged today yet. What are you working on?';
+        else if (avgE > 0.75)               msg = `⚡ You're in high energy mode. What's the hardest thing on your list right now?`;
+        else if (avgE < 0.35)               msg = `😴 Low energy detected. Small task or rest? Reply to log your state.`;
+        else                                msg = `🎯 Mid-day check: still on track with your goal? Reply to update AETHER.`;
         await sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
         return jsonResp({ ok: true, action, sent: msg });
       }
 
-      // ── Notion journal entry ────────────────────────────────────
       case 'notion_log': {
         if (!env.NOTION_TOKEN || !env.NOTION_DATABASE_ID) {
           return jsonResp({ ok: false, error: 'NOTION_TOKEN and NOTION_DATABASE_ID not set' });
         }
-        const events = await getRecentEvents(20, env);
-        const today  = new Date().toISOString().split('T')[0];
+        const events  = await getRecentEvents(20, env);
+        const today   = new Date().toISOString().split('T')[0];
         const todayEv = events.filter(e => e.timestamp?.startsWith(today));
-        const avgE   = todayEv.length > 0
-          ? Math.round(todayEv.reduce((s,e)=>s+(e.energy_signal||0.5),0)/todayEv.length*100)
-          : 0;
-        const topics = [...new Set(todayEv.map(e=>e.topic).filter(Boolean))].slice(0,5).join(', ');
-
+        const avgE    = todayEv.length > 0
+          ? Math.round(todayEv.reduce((s,e)=>s+(e.energy_signal||0.5),0)/todayEv.length*100) : 0;
+        const topics  = [...new Set(todayEv.map(e=>e.topic).filter(Boolean))].slice(0,5).join(', ');
         const resp = await fetch('https://api.notion.com/v1/pages', {
           method: 'POST',
           headers: {
@@ -1102,10 +956,10 @@ async function handleTrigger(request, env) {
           body: JSON.stringify({
             parent: { database_id: env.NOTION_DATABASE_ID },
             properties: {
-              'Name':   { title:  [{ text: { content: `AETHER Log — ${today}` } }] },
-              'Date':   { date:   { start: today } },
-              'Energy': { number: avgE },
-              'Events': { number: todayEv.length },
+              'Name':   { title:     [{ text: { content: `AETHER Log — ${today}` } }] },
+              'Date':   { date:      { start: today } },
+              'Energy': { number:    avgE },
+              'Events': { number:    todayEv.length },
               'Topics': { rich_text: [{ text: { content: topics } }] },
             },
           }),
@@ -1114,14 +968,13 @@ async function handleTrigger(request, env) {
         return jsonResp({ ok: resp.ok, notion_id: notionData.id });
       }
 
-      // ── Custom webhook — call any URL ───────────────────────────
       case 'webhook': {
         if (!data.url) return jsonResp({ error: 'data.url required' }, 400);
         const state  = await getLatestState(env);
         const events = await getRecentEvents(5, env);
         const payload = {
-          timestamp:   new Date().toISOString(),
-          state:       state,
+          timestamp:     new Date().toISOString(),
+          state,
           recent_events: events.slice(0,3),
           ...data.extra,
         };
@@ -1133,24 +986,17 @@ async function handleTrigger(request, env) {
         return jsonResp({ ok: resp.ok, status: resp.status });
       }
 
-      // ── Spotify — open focus playlist ───────────────────────────
       case 'spotify_flow': {
-        // Spotify requires OAuth — send deep link via Telegram instead
         const playlistUrl = env.SPOTIFY_FLOW_PLAYLIST || 'https://open.spotify.com/playlist/37i9dQZF1DX8Uebhn9wzrS';
         await sendTelegram(env.TELEGRAM_CHAT_ID,
-          `🎵 *Flow playlist*
-You entered flow state — time to focus.
-${playlistUrl}`, env);
+          `🎵 *Flow playlist*\nYou entered flow state — time to focus.\n${playlistUrl}`, env);
         return jsonResp({ ok: true, action, playlist: playlistUrl });
       }
 
-      // ── Check-in reminder ───────────────────────────────────────
       case 'checkin_reminder': {
         const url = 'https://learning-bot.pages.dev/checkin.html';
         await sendTelegram(env.TELEGRAM_CHAT_ID,
-          `📊 *Quick check-in*
-How are you right now?
-${url}`, env);
+          `📊 *Quick check-in*\nHow are you right now?\n${url}`, env);
         return jsonResp({ ok: true });
       }
 
@@ -1167,50 +1013,40 @@ ${url}`, env);
 async function handleGitHubLog(request, env) {
   try {
     const body = await request.json();
-
-    // Build enriched event from GitHub data
-    const now   = new Date().toISOString();
+    const now  = new Date().toISOString();
     const event = {
-      timestamp:        now,
-      input_type:       'github',
-      raw_text:         `git push: ${body.commit_message}`,
-      topic:            body.topic || 'Coding',
-      topics:           ['coding', 'github', body.repo?.split('/')[1] || 'project'],
-      sentiment:        'positive',
-      energy_signal:    parseFloat(body.energy_signal) || 0.7,
-      stress_signal:    0.15,
-      focus_signal:     0.8,  // coding = high focus
+      timestamp:         now,
+      input_type:        'github',
+      raw_text:          `git push: ${body.commit_message}`,
+      topic:             body.topic || 'Coding',
+      topics:            ['coding', 'github', body.repo?.split('/')[1] || 'project'],
+      sentiment:         'positive',
+      energy_signal:     parseFloat(body.energy_signal) || 0.7,
+      stress_signal:     0.15,
+      focus_signal:      0.8,
       motivation_signal: 0.75,
-      dominant_emotion: 'neutral',
-      is_study_session: true,
-      is_goal_mention:  body.commit_message?.toLowerCase().includes('feat') || false,
-      is_complaint:     false,
+      dominant_emotion:  'neutral',
+      is_study_session:  true,
+      is_goal_mention:   body.commit_message?.toLowerCase().includes('feat') || false,
+      is_complaint:      false,
       estimated_minutes: Math.min(120, (body.files_changed || 1) * 15),
-      summary:          `GitHub push: ${body.commit_message?.slice(0, 80)}`,
-      // GitHub specific
-      github_repo:      body.repo,
-      github_branch:    body.branch,
-      files_changed:    body.files_changed || 0,
-      lines_added:      body.additions || 0,
-      lines_deleted:    body.deletions || 0,
-      // Time features
-      hour_utc:         new Date().getUTCHours(),
-      hour_sin:         Math.sin(2 * Math.PI * new Date().getUTCHours() / 24),
-      hour_cos:         Math.cos(2 * Math.PI * new Date().getUTCHours() / 24),
-      day_of_week:      new Date().getUTCDay(),
-      is_weekend:       [0, 6].includes(new Date().getUTCDay()),
+      summary:           `GitHub push: ${body.commit_message?.slice(0, 80)}`,
+      github_repo:       body.repo,
+      github_branch:     body.branch,
+      files_changed:     body.files_changed || 0,
+      lines_added:       body.additions || 0,
+      lines_deleted:     body.deletions || 0,
+      hour_utc:          new Date().getUTCHours(),
+      hour_sin:          Math.sin(2 * Math.PI * new Date().getUTCHours() / 24),
+      hour_cos:          Math.cos(2 * Math.PI * new Date().getUTCHours() / 24),
+      day_of_week:       new Date().getUTCDay(),
+      is_weekend:        [0, 6].includes(new Date().getUTCDay()),
     };
-
     await saveEvent(event, env);
-
-    // Send Telegram notification for big commits
     if ((body.files_changed || 0) >= 5 && env.TELEGRAM_CHAT_ID) {
-      const msg = `⚡ *Code logged*
-${body.commit_message?.slice(0,60)}
-${body.files_changed} files · +${body.additions || 0} −${body.deletions || 0}`;
-      await sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
+      await sendTelegram(env.TELEGRAM_CHAT_ID,
+        `⚡ *Code logged*\n${body.commit_message?.slice(0,60)}\n${body.files_changed} files · +${body.additions || 0} −${body.deletions || 0}`, env);
     }
-
     console.log('[AETHER] GitHub push logged:', body.commit_message?.slice(0, 50));
     return jsonResp({ ok: true, message: 'GitHub activity logged to AETHER' });
   } catch (e) {
@@ -1218,25 +1054,22 @@ ${body.files_changed} files · +${body.additions || 0} −${body.deletions || 0}
   }
 }
 
-
 async function handleResetData(request, env) {
   try {
     const body = await request.json();
     if (body.confirm !== 'RESET_ALL_EVENTS') {
       return jsonResp({ error: 'Confirmation required: send confirm: RESET_ALL_EVENTS' }, 400);
     }
-    // Clear all KV event data
     await env.AETHER_KV.put('events:list',  JSON.stringify([]));
     await env.AETHER_KV.put('events:count', '0');
-    // Keep state and goals but clear dashboard
     await env.AETHER_KV.put('dashboard:latest', JSON.stringify({
       metrics: { focus:0, learning:0, productivity:0, mood:0, last_updated: new Date().toISOString() },
       state: null, activity: [], timeline: [], weekData: [0,0,0,0,0,0,0],
-      insights: [{ icon:'🌱', title:'Fresh start', body:'Clean data logging begins now. Every message builds a better model.', tag:'RESET', tagClass:'tag-ok' }],
+      insights: [{ icon:'🌱', title:'Fresh start', body:'Clean data logging begins now.', tag:'RESET', tagClass:'tag-ok' }],
       goals: { today: [], week: [] }, streak: 0,
     }));
     console.log('[AETHER] Data reset completed');
-    return jsonResp({ ok: true, message: 'All events cleared. Fresh start ready. Start logging!' });
+    return jsonResp({ ok: true, message: 'All events cleared. Fresh start ready.' });
   } catch (e) {
     return jsonResp({ error: e.message }, 500);
   }
@@ -1252,39 +1085,8 @@ async function handleUpdateDashboard(request, env) {
   }
 }
 
-async function handleHealth(request, env) {
-  const kvOk        = !!env.AETHER_KV;
-  const openaiOk = !!env.OPENAI_API_KEY;
-  const telegramOk  = !!env.TELEGRAM_BOT_TOKEN;
-  const chatIdOk    = !!env.TELEGRAM_CHAT_ID;
-  const whisperOk   = !!env.AI;
-
-  const eventCount = await getEventCount(env);
-
-  // Overall ready = core 4 are present (OpenAI is optional)
-  const coreReady = kvOk && !!env.AI && telegramOk && chatIdOk;
-
-  return jsonResp({
-    status:     coreReady ? 'AETHER ONLINE ✅' : 'AETHER PARTIAL ⚠️',
-    version:    '2.0',
-    timestamp:  new Date().toISOString(),
-    services: {
-      kv:               kvOk       ? 'OK' : '❌ MISSING — create KV namespace + add to wrangler.toml',
-      cf_ai:            env.AI     ? 'OK' : '❌ MISSING — add [ai] to wrangler.toml (chat, NLP, vision, voice)',
-      telegram_token:   telegramOk ? 'OK' : '❌ MISSING — add TELEGRAM_BOT_TOKEN secret',
-      telegram_chat_id: chatIdOk   ? 'OK' : '❌ MISSING — add TELEGRAM_CHAT_ID secret',
-      openai:           openaiOk   ? 'OK' : '⚪ OPTIONAL — not required, CF AI handles everything',
-    },
-    data: {
-      total_events: eventCount,
-    },
-  });
-}
-
 // ═════════════════════════════════════════════════════════════════
 // NLP PARSER
-// Extracts structured features from any raw text
-// Uses GPT-4o-mini to understand content deeply
 // ═════════════════════════════════════════════════════════════════
 
 async function nlpParse(text, inputType, env) {
@@ -1304,7 +1106,6 @@ Return ONLY this JSON, no other text:
 {"topic":"2-3 word subject","topics":["topic1","topic2"],"sentiment":"positive|neutral|negative","energy_signal":0.0,"stress_signal":0.0,"focus_signal":0.0,"motivation_signal":0.0,"dominant_emotion":"joy|sadness|anger|fear|surprise|neutral","is_study_session":false,"is_goal_mention":false,"is_complaint":false,"estimated_minutes":null,"summary":"one sentence"}`;
 
   try {
-    // Use Cloudflare Workers AI — free, no OpenAI quota needed
     if (!env.AI) throw new Error('No AI binding');
 
     const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
@@ -1313,15 +1114,13 @@ Return ONLY this JSON, no other text:
     });
 
     const raw = result?.response || '{}';
-    // Extract JSON — model often wraps it in markdown or text
     let parsed = null;
     const jsonMatch = raw.match(/\{[\s\S]*?\}/);
     if (jsonMatch) {
       try { parsed = JSON.parse(jsonMatch[0]); } catch {}
     }
-    // Validate parsed has required fields, else use fallback
     if (!parsed || typeof parsed.energy_signal !== 'number') {
-      console.warn('[AETHER] Llama JSON invalid, using rule-based fallback');
+      console.warn('[AETHER] Llama JSON invalid, using fallback');
       return fallbackNLP(text);
     }
     return parsed;
@@ -1332,57 +1131,53 @@ Return ONLY this JSON, no other text:
   }
 }
 
-// Rule-based fallback if Claude call fails
 function fallbackNLP(text) {
   const lower = text.toLowerCase();
-  const energyWords  = ['excited', 'great', 'amazing', 'productive', 'focused', 'motivated', 'energy'];
-  const stressWords  = ['stressed', 'tired', 'overwhelmed', 'anxious', 'worried', 'stuck', 'confused'];
-  const studyWords   = ['learned', 'studied', 'reading', 'course', 'practice', 'revision', 'chapter'];
+  const energyWords = ['excited', 'great', 'amazing', 'productive', 'focused', 'motivated', 'energy'];
+  const stressWords = ['stressed', 'tired', 'overwhelmed', 'anxious', 'worried', 'stuck', 'confused'];
+  const studyWords  = ['learned', 'studied', 'reading', 'course', 'practice', 'revision', 'chapter'];
 
   const energyScore = energyWords.filter(w => lower.includes(w)).length / energyWords.length;
   const stressScore = stressWords.filter(w => lower.includes(w)).length / stressWords.length;
   const isStudy     = studyWords.some(w => lower.includes(w));
 
   return {
-    topic:              'general',
-    topics:             [],
-    sentiment:          stressScore > 0.2 ? 'negative' : energyScore > 0.2 ? 'positive' : 'neutral',
-    energy_signal:      Math.min(1, 0.5 + energyScore - stressScore),
-    stress_signal:      Math.min(1, stressScore * 2),
-    focus_signal:       0.5,
-    motivation_signal:  0.5,
-    dominant_emotion:   'neutral',
-    is_study_session:   isStudy,
-    is_goal_mention:    lower.includes('goal') || lower.includes('target') || lower.includes('plan'),
-    is_complaint:       stressScore > 0.3,
-    estimated_minutes:  null,
-    summary:            text.slice(0, 80),
+    topic:             'general',
+    topics:            [],
+    sentiment:         stressScore > 0.2 ? 'negative' : energyScore > 0.2 ? 'positive' : 'neutral',
+    energy_signal:     Math.min(1, 0.5 + energyScore - stressScore),
+    stress_signal:     Math.min(1, stressScore * 2),
+    focus_signal:      0.5,
+    motivation_signal: 0.5,
+    dominant_emotion:  'neutral',
+    is_study_session:  isStudy,
+    is_goal_mention:   lower.includes('goal') || lower.includes('target') || lower.includes('plan'),
+    is_complaint:      stressScore > 0.3,
+    estimated_minutes: null,
+    summary:           text.slice(0, 80),
   };
 }
 
 // ═════════════════════════════════════════════════════════════════
-// CLAUDE VISION
-// Extracts text and topics from photos
+// VISION
 // ═════════════════════════════════════════════════════════════════
 
 async function openaiVisionExtract(imageUrl, caption, env) {
-  // Download image from Telegram
   const imgResp = await fetch(imageUrl);
   if (!imgResp.ok) throw new Error('Could not download image');
 
   const imgBuffer = await imgResp.arrayBuffer();
   const imgArray  = [...new Uint8Array(imgBuffer)];
 
-  // Use Cloudflare Workers AI — free vision model
   if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
 
   const prompt = caption
     ? `Image caption: "${caption}". Describe what you see in this image in English. Extract any visible text, topics, tasks or key information.`
-    : 'Describe what you see in this image in English only. List any visible text, objects, activities, or key information. If you cannot read text clearly, describe the visual content instead. Never invent text that is not visible.';
+    : 'Describe what you see in this image in English only. List any visible text, objects, activities, or key information.';
 
   const result = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', {
-    image:    imgArray,
-    prompt:   prompt,
+    image:      imgArray,
+    prompt:     prompt,
     max_tokens: 512,
   });
 
@@ -1391,31 +1186,26 @@ async function openaiVisionExtract(imageUrl, caption, env) {
 }
 
 // ═════════════════════════════════════════════════════════════════
-// WHISPER — Voice/Video → Text
+// WHISPER
 // ═════════════════════════════════════════════════════════════════
 
 async function whisperTranscribe(audioUrl, env) {
-  // Download audio from Telegram CDN
   const audioResponse = await fetch(audioUrl);
   if (!audioResponse.ok) throw new Error('Could not download audio file');
 
   const audioBuffer = await audioResponse.arrayBuffer();
-
-  // Cloudflare Workers AI — free Whisper, no OpenAI billing
   if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
 
-  // CF Whisper has a ~25MB file size limit and ~30s timeout
   if (audioBuffer.byteLength > 25 * 1024 * 1024) {
-    throw new Error('Audio file too large (max 25MB). Keep voice notes under 5 minutes.');
+    throw new Error('Audio file too large (max 25MB).');
   }
 
   const result = await env.AI.run('@cf/openai/whisper', {
     audio: [...new Uint8Array(audioBuffer)],
   });
 
-  // CF Whisper returns { text, word_count, segments }
   const transcript = result?.text || result?.transcription || '';
-  if (!transcript.trim()) throw new Error('Could not transcribe — try speaking more clearly or send as text.');
+  if (!transcript.trim()) throw new Error('Could not transcribe — try speaking more clearly.');
   return transcript.trim();
 }
 
@@ -1423,47 +1213,29 @@ async function whisperTranscribe(audioUrl, env) {
 // TELEGRAM HELPERS
 // ═════════════════════════════════════════════════════════════════
 
-// Get direct download URL for a file
 async function getTelegramFileUrl(fileId, env) {
   const resp = await fetch(
     `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${fileId}`
   );
   const data = await resp.json();
   if (!data.ok) throw new Error('Telegram getFile failed: ' + JSON.stringify(data));
-  const filePath = data.result.file_path;
-  return `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${filePath}`;
+  return `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${data.result.file_path}`;
 }
 
-// Send a message back to user
 async function sendTelegram(chatId, text, env) {
   try {
     await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id:    chatId,
-        text:       text,
-        parse_mode: 'Markdown',
-      }),
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
     });
   } catch (e) {
     console.warn('[AETHER] sendTelegram failed:', e.message);
   }
 }
 
-// Build the reply message shown after each Telegram input
 function buildTelegramReply(parsed, inputType, rawText) {
-  const icons = {
-    text:       '📝',
-    voice:      '🎙',
-    video_note: '🎥',
-    image:      '🖼',
-    document:   '📄',
-    goal:       '🎯',
-    mood:       '😊',
-    checkin:    '✅',
-  };
-
+  const icons = { text:'📝', voice:'🎙', video_note:'🎥', image:'🖼', document:'📄', goal:'🎯', mood:'😊', checkin:'✅' };
   const icon      = icons[inputType] || '📨';
   const energy    = Math.round((parsed.energy_signal || 0.5) * 100);
   const stress    = Math.round((parsed.stress_signal || 0.2) * 100);
@@ -1472,7 +1244,6 @@ function buildTelegramReply(parsed, inputType, rawText) {
   const topic     = parsed.topic || 'general';
   const summary   = parsed.summary || rawText.slice(0, 80);
 
-  // Flow state label
   let flowLabel;
   if      (energy > 80 && stress < 20) flowLabel = '🟢 FLOW ZONE';
   else if (energy > 60 && stress < 40) flowLabel = '🟡 PRE-FLOW';
@@ -1480,40 +1251,24 @@ function buildTelegramReply(parsed, inputType, rawText) {
   else if (energy < 25)                flowLabel = '⚫ LOW ENERGY';
   else                                 flowLabel = '⚪ NOMINAL';
 
-  // Emoji for sentiment
   const moodEmoji = sentiment === 'positive' ? '😊' : sentiment === 'negative' ? '😔' : '😐';
 
-  // Image gets a simpler reply showing what was seen
   if (inputType === 'image') {
-    return `🖼 *Image logged*\n\n` +
-      `Seen: ${summary}\n` +
-      `Topic: ${topic}\n\n` +
-      `⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%  ${flowLabel}`;
+    return `🖼 *Image logged*\n\nSeen: ${summary}\nTopic: ${topic}\n\n⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%  ${flowLabel}`;
   }
-
-  // Voice gets transcript confirmation
   if (inputType === 'voice' || inputType === 'video_note') {
-    return `🎙 *Voice logged*\n\n` +
-      `"_${summary}_"\n\n` +
-      `Topic: ${topic}  ${moodEmoji} ${sentiment}\n` +
-      `⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%\n${flowLabel}`;
+    return `🎙 *Voice logged*\n\n"_${summary}_"\n\nTopic: ${topic}  ${moodEmoji} ${sentiment}\n⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%\n${flowLabel}`;
   }
-
-  // Standard text reply
-  return `${icon} *Logged* · ${topic}\n` +
-    `${moodEmoji} ${sentiment}  ⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%\n` +
-    `${flowLabel}\n` +
-    `_${summary.slice(0, 100)}_`;
+  return `${icon} *Logged* · ${topic}\n${moodEmoji} ${sentiment}  ⚡ ${energy}%  😤 ${stress}%  🎯 ${focus}%\n${flowLabel}\n_${summary.slice(0, 100)}_`;
 }
 
 // ═════════════════════════════════════════════════════════════════
-// CLAUDE CHAT
-// Called by /chat endpoint for the dashboard AI assistant
+// CHAT AI — SYSTEM PROMPT + ENGINE FUNCTIONS
 // ═════════════════════════════════════════════════════════════════
 
 function buildSystemPrompt(metrics, activity, goals, recentEvents, latestState) {
   const stateContext = latestState
-    ? `\nUser's current state (from check-in): ${latestState.state_label}, energy: ${latestState.energy}, stress: ${latestState.stress}, flow class: ${latestState.flow_class}`
+    ? `\nUser's current state: ${latestState.state_label}, energy: ${latestState.energy}, stress: ${latestState.stress}, flow: ${latestState.flow_class}`
     : '';
 
   const eventsContext = recentEvents.length > 0
@@ -1533,35 +1288,73 @@ ${stateContext}${eventsContext}
 Goals: ${todayGoals} | Activity: ${todayActivity}
 
 STRICT RULES:
-1. Max 2-3 sentences. Never longer. Cut everything that is not essential.
-2. No greetings, no "Great question", no preamble. Start with the answer.
+1. Max 2-3 sentences. Never longer.
+2. No greetings, no preamble. Start with the answer.
 3. Use actual numbers from the data above when relevant.
 4. End with ONE specific action if asked about focus/goals/productivity.
 5. If stressed or low energy detected: one sentence acknowledgment then solution.
 6. Be direct, occasionally blunt. You know Avi well.`;
 }
 
+// ── Legacy wrapper (kept for safety, not called by handleChat anymore) ──
 async function callOpenAI(systemPrompt, history, env) {
-  // Convert history to OpenAI format (prepend system message)
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...history,
-  ];
-
-  // Use Cloudflare Workers AI — free Llama 3
   if (!env.AI) throw new Error('AI binding missing');
-
   const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
-    messages,
+    messages:   [{ role: 'system', content: systemPrompt }, ...history],
     max_tokens: 400,
   });
-
   return result?.response || 'No response from AI.';
 }
 
+// ── Engine: AETHER ML (rule-based, no AI call, instant) ──────────
+async function runAetherML(env) {
+  const dash = await env.AETHER_KV.get("dashboard:latest", { type: "json" }) || {};
+
+  const focus        = Math.round(dash.metrics?.focus        || 0);
+  const energy       = Math.round(dash.metrics?.learning     || 0);
+  const productivity = Math.round(dash.metrics?.productivity || 0);
+  const mood         = Math.round(dash.metrics?.mood         || 0);
+
+  let insights = [];
+  if (focus > 70)        insights.push("Focus is strong. Good time for deep work.");
+  else if (focus < 40)   insights.push("Focus is low. Consider a short break.");
+  if (energy > 70)       insights.push("Energy levels are high.");
+  else if (energy < 40)  insights.push("Energy seems low.");
+  if (productivity < 50) insights.push("Productivity signals are moderate.");
+  if (mood > 80)         insights.push("Mood is very positive.");
+  if (insights.length === 0) insights.push("All signals nominal. Keep logging for better insights.");
+
+  return `[ML]\nFocus: ${focus}%\nEnergy: ${energy}%\nProductivity: ${productivity}%\nMood: ${mood}%\n\n${insights.join(" ")}`;
+}
+
+// ── Engine: Workers AI (pure Llama-3, no ML context) ─────────────
+async function runWorkersAI(systemPrompt, history, env) {
+  if (!env.AI) throw new Error('AI binding missing');
+  const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+    messages:   [{ role: 'system', content: systemPrompt }, ...history],
+    max_tokens: 400,
+  });
+  return `[Workers AI]\n` + (result?.response || 'No response.');
+}
+
+// ── Engine: Hybrid (ML state injected into Llama-3 context) ──────
+async function runHybrid(systemPrompt, history, env) {
+  if (!env.AI) throw new Error('AI binding missing');
+
+  const state = await getLatestState(env);
+  const mlContext = state
+    ? `\n[ML STATE] energy:${state.energy} stress:${state.stress} flow:${state.flow_class}`
+    : '';
+
+  const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+    messages:   [{ role: 'system', content: systemPrompt + mlContext }, ...history],
+    max_tokens: 400,
+  });
+  return `[Hybrid]\n` + (result?.response || 'No response.');
+}
 
 // ═════════════════════════════════════════════════════════════════
-// MORNING BRIEFING — runs at 8:30am IST via cron
+// MORNING BRIEFING
 // ═════════════════════════════════════════════════════════════════
 
 async function sendMorningBriefing(env) {
@@ -1571,61 +1364,35 @@ async function sendMorningBriefing(env) {
   const today      = new Date().toISOString().split('T')[0];
   const events     = await getRecentEvents(50, env);
   const todayGoal  = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
-  const latestState = await getLatestState(env);
 
-  // Calculate yesterday stats
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const ydStr = yesterday.toISOString().split('T')[0];
+  const ydStr    = yesterday.toISOString().split('T')[0];
   const ydEvents = events.filter(e => e.timestamp?.startsWith(ydStr));
   const avgEnergy = ydEvents.length > 0
     ? Math.round(ydEvents.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / ydEvents.length * 100)
     : null;
 
-  // Streak calculation
-  const streak = await calculateStreak(events);
-
-  // Day of week motivation
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const streak  = await calculateStreak(events);
+  const days    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const dayName = days[new Date().getDay()];
 
-  let msg = `🌅 *Good morning, Avi!*
+  let msg = `🌅 *Good morning, Avi!*\n\n📅 ${dayName} · ${today}\n🔥 Streak: ${streak} day${streak !== 1 ? 's' : ''}\n\n`;
+  if (avgEnergy !== null) msg += `Yesterday: ⚡ ${avgEnergy}% energy · ${ydEvents.length} events logged\n\n`;
+  if (todayGoal)          msg += `🎯 *Today's goal:* ${todayGoal}\n\n`;
+  else                    msg += `💡 Set your goal: /goal [what you want to achieve today]\n\n`;
 
-`;
-  msg += `📅 ${dayName} · ${today}
-`;
-  msg += `🔥 Streak: ${streak} day${streak !== 1 ? 's' : ''}
-
-`;
-
-  if (avgEnergy !== null) {
-    msg += `Yesterday: ⚡ ${avgEnergy}% energy · ${ydEvents.length} events logged
-
-`;
-  }
-
-  if (todayGoal) {
-    msg += `🎯 *Today's goal:* ${todayGoal}
-
-`;
-  } else {
-    msg += `💡 Set your goal: /goal [what you want to achieve today]
-
-`;
-  }
-
-  // Motivational nudge based on streak
-  if (streak === 0)      msg += `_Start your streak today — just send one message._`;
-  else if (streak < 3)   msg += `_${streak} days in. Keep the momentum going._`;
-  else if (streak < 7)   msg += `_${streak} days strong. You're building a habit._`;
-  else if (streak < 30)  msg += `_${streak} day streak. AETHER is learning your patterns._`;
-  else                   msg += `_${streak} days. The model knows you well now._`;
+  if (streak === 0)     msg += `_Start your streak today — just send one message._`;
+  else if (streak < 3)  msg += `_${streak} days in. Keep the momentum going._`;
+  else if (streak < 7)  msg += `_${streak} days strong. You're building a habit._`;
+  else if (streak < 30) msg += `_${streak} day streak. AETHER is learning your patterns._`;
+  else                  msg += `_${streak} days. The model knows you well now._`;
 
   await sendTelegram(chatId, msg, env);
 }
 
 // ═════════════════════════════════════════════════════════════════
-// EVENING SUMMARY — runs at 8:30pm IST via cron
+// EVENING SUMMARY
 // ═════════════════════════════════════════════════════════════════
 
 async function sendEveningSummary(env) {
@@ -1636,27 +1403,18 @@ async function sendEveningSummary(env) {
   const events  = await getRecentEvents(100, env);
   const todayEv = events.filter(e => e.timestamp?.startsWith(today));
   const goal    = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
-  const state   = await getLatestState(env);
 
   if (todayEv.length === 0) {
     await sendTelegram(chatId,
-      `🌙 *Evening check-in*
-
-No activity logged today, Avi.
-
-Tomorrow: start with one message to AETHER when you wake up.
-
-_Consistency beats intensity._`, env);
+      `🌙 *Evening check-in*\n\nNo activity logged today, Avi.\n\nTomorrow: start with one message to AETHER when you wake up.\n\n_Consistency beats intensity._`, env);
     return;
   }
 
   const avgEnergy = Math.round(todayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / todayEv.length * 100);
   const avgStress = Math.round(todayEv.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / todayEv.length * 100);
   const topics    = [...new Set(todayEv.map(e => e.topic).filter(Boolean))].slice(0, 4);
-  const studyMins = todayEv.filter(e => e.is_study_session).length * 30; // rough estimate
   const streak    = await calculateStreak(events);
 
-  // Flow assessment
   let flowSummary;
   if      (avgEnergy > 75 && avgStress < 25) flowSummary = '🟢 Strong flow day';
   else if (avgEnergy > 55 && avgStress < 45) flowSummary = '🟡 Decent focus day';
@@ -1664,56 +1422,39 @@ _Consistency beats intensity._`, env);
   else if (avgEnergy < 30)                   flowSummary = '⚫ Low energy day — sleep early';
   else                                        flowSummary = '⚪ Normal day';
 
-  let msg = `🌙 *AETHER Daily Summary*
-
-`;
-  msg += `📊 ${todayEv.length} events logged
-`;
-  msg += `⚡ Avg energy: ${avgEnergy}%
-`;
-  msg += `😤 Avg stress: ${avgStress}%
-`;
-  msg += `${flowSummary}
-
-`;
-
-  if (topics.length > 0) msg += `🧠 Topics: ${topics.join(', ')}
-`;
-  if (goal)              msg += `🎯 Goal was: ${goal}
-`;
-  msg += `🔥 Streak: ${streak} days
-
-`;
-
-  // Tomorrow nudge
-  const hour = new Date().getHours();
-  if (avgEnergy < 40 || avgStress > 60) {
-    msg += `_Rest well tonight. Recovery is productive._`;
-  } else {
-    msg += `_Good work today. Log your state tomorrow morning to keep AETHER learning._`;
-  }
+  let msg = `🌙 *AETHER Daily Summary*\n\n`;
+  msg += `📊 ${todayEv.length} events logged\n`;
+  msg += `⚡ Avg energy: ${avgEnergy}%\n`;
+  msg += `😤 Avg stress: ${avgStress}%\n`;
+  msg += `${flowSummary}\n\n`;
+  if (topics.length > 0) msg += `🧠 Topics: ${topics.join(', ')}\n`;
+  if (goal)              msg += `🎯 Goal was: ${goal}\n`;
+  msg += `🔥 Streak: ${streak} days\n\n`;
+  msg += avgEnergy < 40 || avgStress > 60
+    ? `_Rest well tonight. Recovery is productive._`
+    : `_Good work today. Log your state tomorrow morning to keep AETHER learning._`;
 
   await sendTelegram(chatId, msg, env);
 }
 
+// ═════════════════════════════════════════════════════════════════
+// WEEKLY REPORT
+// ═════════════════════════════════════════════════════════════════
 
-// ─── Midday nudge — checks if user logged anything today ──────────
 async function sendWeeklyReport(env) {
   try {
     const events  = await getRecentEvents(500, env);
     const now     = new Date();
     const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-
     const weekEv  = events.filter(e => new Date(e.timestamp) > weekAgo);
+
     if (weekEv.length === 0) {
       return sendTelegram(env.TELEGRAM_CHAT_ID, '📊 Weekly report: No events logged this week. Start logging!', env);
     }
 
-    // Compute weekly stats
     const avgEnergy = weekEv.reduce((s,e) => s + (e.energy_signal||0.5), 0) / weekEv.length;
     const avgStress = weekEv.reduce((s,e) => s + (e.stress_signal||0.2), 0) / weekEv.length;
 
-    // Best and worst day
     const byDay = {};
     weekEv.forEach(e => {
       const d = e.timestamp?.split('T')[0];
@@ -1724,49 +1465,26 @@ async function sendWeeklyReport(env) {
     const bestDay  = dayAvgs.sort((a,b)=>b.avg-a.avg)[0];
     const worstDay = dayAvgs[dayAvgs.length-1];
 
-    // Top topics
     const topicCount = {};
     weekEv.forEach(e => { if(e.topic) topicCount[e.topic] = (topicCount[e.topic]||0)+1; });
     const topTopics = Object.entries(topicCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t])=>t).join(', ') || 'none';
 
-    // Input breakdown
-    const githubCount   = weekEv.filter(e=>e.input_type==='github').length;
-    const healthCount   = weekEv.filter(e=>e.input_type==='health').length;
-    const financeCount  = weekEv.filter(e=>e.input_type==='finance').length;
-    const careerCount   = weekEv.filter(e=>e.input_type==='career').length;
-    const streak        = await calculateStreak(events);
+    const githubCount  = weekEv.filter(e=>e.input_type==='github').length;
+    const healthCount  = weekEv.filter(e=>e.input_type==='health').length;
+    const financeCount = weekEv.filter(e=>e.input_type==='finance').length;
+    const careerCount  = weekEv.filter(e=>e.input_type==='career').length;
+    const streak       = await calculateStreak(events);
 
     const energyBar = '█'.repeat(Math.round(avgEnergy*10)) + '░'.repeat(10-Math.round(avgEnergy*10));
     const stressBar = '█'.repeat(Math.round(avgStress*10)) + '░'.repeat(10-Math.round(avgStress*10));
 
-    const msg = `📊 *AETHER Weekly Report*
-Week of ${weekAgo.toLocaleDateString('en-IN')}
-
-*Overview*
-Events logged: ${weekEv.length}
-Current streak: ${streak} days
-
-*Energy*
-${energyBar} ${Math.round(avgEnergy*100)}%
-Best day: ${bestDay?.d || 'n/a'}
-Worst day: ${worstDay?.d || 'n/a'}
-
-*Stress*
-${stressBar} ${Math.round(avgStress*100)}%
-
-*Top topics*
-${topTopics}
-
-*Activity breakdown*
-💻 Code pushes: ${githubCount}
-💪 Health logs: ${healthCount}
-💰 Finance logs: ${financeCount}
-💼 Career logs: ${careerCount}
-
-*Next week focus*
-${avgEnergy < 0.5 ? '⚡ Energy is low — prioritise sleep and exercise' : avgStress > 0.5 ? '🧘 Stress is high — schedule recovery time' : '🚀 Good baseline — push harder on goals'}
-
-Keep logging. AETHER learns from every entry. 🤖`;
+    const msg = `📊 *AETHER Weekly Report*\nWeek of ${weekAgo.toLocaleDateString('en-IN')}\n\n` +
+      `*Overview*\nEvents logged: ${weekEv.length}\nCurrent streak: ${streak} days\n\n` +
+      `*Energy*\n${energyBar} ${Math.round(avgEnergy*100)}%\nBest day: ${bestDay?.d || 'n/a'}\nWorst day: ${worstDay?.d || 'n/a'}\n\n` +
+      `*Stress*\n${stressBar} ${Math.round(avgStress*100)}%\n\n` +
+      `*Top topics*\n${topTopics}\n\n` +
+      `*Activity breakdown*\n💻 Code pushes: ${githubCount}\n💪 Health logs: ${healthCount}\n💰 Finance logs: ${financeCount}\n💼 Career logs: ${careerCount}\n\n` +
+      `*Next week focus*\n${avgEnergy < 0.5 ? '⚡ Energy is low — prioritise sleep and exercise' : avgStress > 0.5 ? '🧘 Stress is high — schedule recovery time' : '🚀 Good baseline — push harder on goals'}\n\nKeep logging. AETHER learns from every entry. 🤖`;
 
     return sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
   } catch (e) {
@@ -1774,26 +1492,26 @@ Keep logging. AETHER learns from every entry. 🤖`;
   }
 }
 
+// ═════════════════════════════════════════════════════════════════
+// MIDDAY NUDGE
+// ═════════════════════════════════════════════════════════════════
 
 async function middayNudge(env) {
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!chatId) return;
   const today   = new Date().toISOString().split('T')[0];
   const events  = await getRecentEvents(20, env);
-  const todayEv = events.filter(e => e.timestamp?.startsWith(today)
-                                  && e.input_type !== 'checkin');
+  const todayEv = events.filter(e => e.timestamp?.startsWith(today) && e.input_type !== 'checkin');
   if (todayEv.length === 0) {
     await sendTelegram(chatId,
-      `🌞 *Midday check*
-
-No activity logged yet today.
-What are you working on?
-
-Just reply or use /goal to set your focus.`, env);
+      `🌞 *Midday check*\n\nNo activity logged yet today.\nWhat are you working on?\n\nJust reply or use /goal to set your focus.`, env);
   }
 }
 
-// ─── Streak calculator ────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+// STREAK CALCULATOR
+// ═════════════════════════════════════════════════════════════════
+
 async function calculateStreak(events) {
   const days = new Set(events.map(e => e.timestamp?.split('T')[0]).filter(Boolean));
   let streak = 0;
@@ -1802,44 +1520,28 @@ async function calculateStreak(events) {
     d.setDate(d.getDate() - i);
     const ds = d.toISOString().split('T')[0];
     if (days.has(ds)) streak++;
-    else if (i > 0) break; // gap found
+    else if (i > 0) break;
   }
   return streak;
 }
 
 // ═════════════════════════════════════════════════════════════════
 // KV STORAGE HELPERS
-// All data is stored in Cloudflare KV (key-value store)
-// Keys used:
-//   events:list      → JSON array of all events (capped at MAX_EVENTS)
-//   events:count     → integer count
-//   state:YYYY-MM-DD → daily state vector from check-in
-//   dashboard:latest → latest dashboard.json for UI
-// ═════════════════════════════════════════════════════════════════
-
-// ═════════════════════════════════════════════════════════════════
-// ENCRYPTION — AES-256-GCM for personal diary text
-// raw_text is encrypted before KV storage
-// ML trains on features only (never raw text)
-// Decrypt only in browser with password
 // ═════════════════════════════════════════════════════════════════
 
 async function encryptText(text, env) {
-  // Use ENCRYPT_KEY from env, fallback to a fixed salt if not set
   const keyMaterial = env.ENCRYPT_KEY || 'AETHER_DEFAULT_KEY_CHANGE_IN_PROD';
   try {
-    const keyData  = new TextEncoder().encode(keyMaterial.padEnd(32, '0').slice(0, 32));
-    const key      = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
-    const iv       = crypto.getRandomValues(new Uint8Array(12));
-    const encoded  = new TextEncoder().encode(text);
-    const cipher   = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-    // Return as base64 with IV prepended
+    const keyData = new TextEncoder().encode(keyMaterial.padEnd(32, '0').slice(0, 32));
+    const key     = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
+    const iv      = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(text);
+    const cipher  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
     const combined = new Uint8Array(iv.length + cipher.byteLength);
     combined.set(iv, 0);
     combined.set(new Uint8Array(cipher), iv.length);
     return btoa(String.fromCharCode(...combined));
   } catch (e) {
-    // If crypto fails, return marker + text (graceful degradation)
     return '[UNENCRYPTED]:' + text;
   }
 }
@@ -1853,7 +1555,6 @@ async function saveEvent(event, env) {
     const raw    = await env.AETHER_KV.get('events:list');
     const events = raw ? JSON.parse(raw) : [];
 
-    // Encrypt raw_text before storing (ML uses features only, not raw text)
     const eventToStore = { ...event };
     if (eventToStore.raw_text && eventToStore.raw_text.length > 3) {
       eventToStore.raw_text = await encryptText(eventToStore.raw_text, env);
@@ -1863,10 +1564,9 @@ async function saveEvent(event, env) {
     events.unshift(eventToStore);
     if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
 
-    await env.AETHER_KV.put('events:list', JSON.stringify(events));
+    await env.AETHER_KV.put('events:list',  JSON.stringify(events));
     await env.AETHER_KV.put('events:count', String(events.length));
 
-    // Auto-trigger ML pipeline every 5 real events (not commands/checkins)
     const realTypes = ['text', 'voice', 'image', 'document', 'video_note'];
     if (realTypes.includes(event.input_type)) {
       const realCount = events.filter(e => realTypes.includes(e.input_type)).length;
@@ -1881,7 +1581,6 @@ async function saveEvent(event, env) {
   }
 }
 
-// Trigger GitHub Actions ML pipeline via API
 async function triggerMLPipeline(env) {
   if (!env.GITHUB_TOKEN) return;
   console.log('[AETHER] Triggering ML pipeline...');
@@ -1905,8 +1604,7 @@ async function getRecentEvents(limit, env) {
   try {
     const raw = await env.AETHER_KV.get('events:list');
     if (!raw) return [];
-    const events = JSON.parse(raw);
-    return events.slice(0, limit);
+    return JSON.parse(raw).slice(0, limit);
   } catch {
     return [];
   }
@@ -1933,17 +1631,14 @@ async function getLatestState(env) {
   }
 }
 
-// Refresh dashboard.json in KV when a new state is logged
 async function refreshDashboardFromState(stateVector, env) {
   if (!env.AETHER_KV) return;
   try {
-    // Load existing dashboard or start fresh
     const existing = await env.AETHER_KV.get('dashboard:latest');
     const dash     = existing ? JSON.parse(existing) : defaultDashboard();
 
-    // Update metrics from state vector
     dash.metrics.focus        = Math.round((stateVector.energy || 0.5) * 100);
-    dash.metrics.mood         = Math.round(((1 - (stateVector.stress || 0.2)) * 100));
+    dash.metrics.mood         = Math.round((1 - (stateVector.stress || 0.2)) * 100);
     dash.metrics.productivity = Math.round((stateVector.flow_prob || 0.3) * 100);
     dash.metrics.last_updated = new Date().toISOString();
     dash.state                = stateVector;
@@ -1954,16 +1649,9 @@ async function refreshDashboardFromState(stateVector, env) {
   }
 }
 
-// Default dashboard structure before any real data
 function defaultDashboard() {
   return {
-    metrics: {
-      focus:        0,
-      learning:     0,
-      productivity: 0,
-      mood:         0,
-      last_updated: null,
-    },
+    metrics: { focus:0, learning:0, productivity:0, mood:0, last_updated: null },
     state:       null,
     activity:    [],
     timeline:    [],
@@ -1979,12 +1667,12 @@ function defaultDashboard() {
     hourlyData:  new Array(24).fill(0),
     todayCount:  0,
     flowLabel:   'NOMINAL',
-    pipeline:    [
-      { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',    status: 'READY', cls: 'ps-ok' },
-      { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',  status: 'READY', cls: 'ps-ok' },
+    pipeline: [
+      { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',    status: 'READY',   cls: 'ps-ok' },
+      { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',  status: 'READY',   cls: 'ps-ok' },
       { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM', status: 'WAITING', cls: 'ps-warn' },
       { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',   status: 'WAITING', cls: 'ps-warn' },
-      { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',   status: 'READY', cls: 'ps-ok' },
+      { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',   status: 'READY',   cls: 'ps-ok' },
     ],
   };
 }
