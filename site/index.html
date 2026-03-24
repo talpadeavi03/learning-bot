@@ -912,6 +912,10 @@ const D = {
     ]
   }
 };
+D.hourlyData  = D.hourlyData  || new Array(24).fill(0);
+D.inputCounts = D.inputCounts || {};
+D.todayCount  = D.todayCount  != null ? D.todayCount : D.activity.length;
+D.flowLabel   = D.flowLabel   || 'NOMINAL';
 const COLS=["#00ffff","#ff00aa","#00ff88","#ffaa00"];
 
 /* ══ CURSOR ══ */
@@ -945,18 +949,35 @@ async function checkWorker() {
   }
 }
 
-/* ══ LOAD dashboard.json ══ */
+/* ══ LOAD dashboard.json from Worker ══ */
 async function loadData() {
   try {
     const res = await fetch(WORKER_URL + '/dashboard?t=' + Date.now());
     if (!res.ok) throw new Error('not found');
     const json = await res.json();
-    if (json.metrics)  D.metrics  = { ...D.metrics,  ...json.metrics };
-    if (json.activity?.length) D.activity = json.activity;
-    if (json.timeline?.length) D.timeline = json.timeline;
-    console.log('[AETHER] Live dashboard.json loaded ✓');
-  } catch {
-    console.log('[AETHER] Using static fallback data');
+
+    // Merge every field that the Worker sends
+    if (json.metrics)          D.metrics   = { ...D.metrics,  ...json.metrics };
+    if (json.activity?.length) D.activity  = json.activity;
+    if (json.timeline?.length) D.timeline  = json.timeline;
+    if (json.insights?.length) D.insights  = json.insights;
+    if (json.weekData?.length) D.weekData  = json.weekData;
+    if (json.pipeline?.length) D.pipeline  = json.pipeline;
+    if (json.goals)            D.goals     = { ...D.goals, ...json.goals };
+    if (json.streak   != null) D.user.streak    = json.streak;
+    if (json.todayCount != null) D.todayCount   = json.todayCount;
+    if (json.flowLabel)        D.flowLabel = json.flowLabel;
+    if (json.hourlyData)       D.hourlyData = json.hourlyData;
+    if (json.inputCounts)      D.inputCounts = json.inputCounts;
+
+    // Update welcome strip stats from live data
+    if (json.metrics?.streak   != null) D.user.streak    = json.metrics.streak;
+    if (json.metrics?.hours_today != null) D.user.hoursToday = json.metrics.hours_today;
+    if (json.metrics?.tasks_done  != null) D.user.tasksDone  = json.metrics.tasks_done;
+
+    console.log('[AETHER] Live data loaded ✓ | events:', json.metrics?.total_events);
+  } catch(e) {
+    console.log('[AETHER] Using static fallback data —', e.message);
   }
 }
 
@@ -1342,16 +1363,20 @@ async function sendChat(){
   document.getElementById('thinking').classList.remove('hidden');
   document.getElementById('sendBtn').disabled=true;
 
+  // Read selected engine from dropdown (hybrid / ml / worker)
+  const engine = (document.getElementById('aiEngine') || {}).value || 'hybrid';
+
   try{
-    // ✅ calls your Cloudflare Worker — API key stays safe on server
     const r = await fetch(WORKER_URL + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        message:  txt,
         history:  hist,
         metrics:  D.metrics,
         activity: D.activity,
-        goals:    D.goals.today
+        goals:    D.goals.today,
+        engine:   engine
       })
     });
     const data = await r.json();
