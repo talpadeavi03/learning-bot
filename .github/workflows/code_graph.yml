@@ -52,8 +52,8 @@ jobs:
 
     - name: Commit graph and architecture
       run: |
-        git config --local user.email "aether-bot@noreply.com"
-        git config --local user.name "AETHER Bot"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
         git add data/code_graph.json || true
         git add docs/aether-live-architecture.html || true

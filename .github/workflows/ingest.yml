@@ -34,6 +34,9 @@ jobs:
       - name: Ensure directories exist
         run: |
           mkdir -p data/raw
+          mkdir -p data/features
+          mkdir -p analytics
+          mkdir -p site/data
 
       - name: Save batch payload
         run: |
@@ -48,12 +51,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions@github.com"
 
-          git add data/raw/events.csv
+          git add data/raw/ || true
           git add data/features/ || true
           git add analytics/ || true
           git add site/data/ || true
 
-          git commit -m "update pipeline outputs" || echo "no changes"
+          git diff --staged --quiet || git commit -m "update pipeline outputs"
 
           git pull --rebase origin master
           git push origin master
