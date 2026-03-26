@@ -1,0 +1,34 @@
+
+<html>
+<head>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+
+<h2>AETHER System Brain</h2>
+
+<div id="network" style="width:100%;height:800px;"></div>
+
+<script>
+
+var nodes = new vis.DataSet([]);
+var edges = new vis.DataSet([]);
+
+var container = document.getElementById('network');
+
+var data = {
+  nodes: nodes,
+  edges: edges
+};
+
+var options = {
+  layout:{improvedLayout:true},
+  physics:{enabled:true}
+};
+
+new vis.Network(container, data, options);
+
+</script>
+
+</body>
+</html>
