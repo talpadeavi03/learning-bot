@@ -1,3 +1,87 @@
+                    ┌────────────────────┐
+                    │      INPUTS        │
+                    │────────────────────│
+                    │ Telegram messages  │
+                    │ GitHub pushes      │
+                    │ Goals / check-ins  │
+                    │ Images / voice     │
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────┐
+                 │  INGESTION LAYER        │
+                 │  (Cloudflare Worker)    │
+                 │─────────────────────────│
+                 │ /webhook                │
+                 │ NLP parser              │
+                 │ Feature extraction      │
+                 │ saveEvent()             │
+                 └─────────┬───────────────┘
+                           │
+                           ▼
+                ┌──────────────────────────┐
+                │  EVENT STORAGE           │
+                │──────────────────────────│
+                │ Cloudflare KV            │
+                │ events:list              │
+                │ events:count             │
+                │ state:YYYY-MM-DD         │
+                └─────────┬────────────────┘
+                          │
+                          ▼
+             ┌─────────────────────────────┐
+             │  TRIGGER ENGINE             │
+             │─────────────────────────────│
+             │ every 3 events              │
+             │ triggerMLPipeline()         │
+             └─────────┬───────────────────┘
+                       │
+                       ▼
+        ┌────────────────────────────────────┐
+        │        ML PIPELINE                 │
+        │        (GitHub Actions)            │
+        │────────────────────────────────────│
+        │ pull_events.py                     │
+        │ data_cleaner.py                    │
+        │ train_models.py                    │
+        │ predict.py                         │
+        │ insight_engine.py                  │
+        │ pattern_engine.py                  │
+        │ habit_tracker.py                   │
+        │ memory_graph_builder.py            │
+        │ push_dashboard.py                  │
+        └─────────────┬──────────────────────┘
+                      │
+                      ▼
+           ┌─────────────────────────────┐
+           │        AI BRAIN             │
+           │─────────────────────────────│
+           │ Behavior model (RF + GBM)   │
+           │ Flow state prediction       │
+           │ Productivity signals        │
+           │ Habit analysis              │
+           │ Pattern detection           │
+           └────────────┬────────────────┘
+                        │
+                        ▼
+         ┌────────────────────────────────┐
+         │         OUTPUT LAYER           │
+         │────────────────────────────────│
+         │ dashboard.json                 │
+         │ insights.json                  │
+         │ Worker /dashboard API          │
+         │ Telegram responses             │
+         └──────────────┬─────────────────┘
+                        │
+                        ▼
+             ┌────────────────────────┐
+             │        USER            │
+             │────────────────────────│
+             │ Telegram               │
+             │ Web dashboard          │
+             │ Future Android app     │
+             └────────────────────────┘
+
 # AETHER OS — Master Plan v3.0
 > Personal AI Operating System · Zero Cost · Production Ready
 

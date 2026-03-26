@@ -1,0 +1,44 @@
+name: Build Code Graph
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build_graph:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Clone GitNexus
+      run: |
+        git clone https://github.com/abhigyanpatwari/GitNexus.git
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install GitNexus
+      run: |
+        cd GitNexus/gitnexus
+        npm install
+
+    - name: Run GitNexus analysis
+      run: |
+        node GitNexus/gitnexus/cli.js \
+        --repo . \
+        --output data/code_graph.json
+
+    - name: Commit graph
+      run: |
+        git config --local user.email "aether-bot@noreply.com"
+        git config --local user.name "AETHER Bot"
+
+        git add data/code_graph.json
+        git diff --staged --quiet || git commit -m "update code graph [skip ci]"
+        git push

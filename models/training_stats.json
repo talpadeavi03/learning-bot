@@ -1,35 +1,37 @@
 {
-  "n_events": 9,
+  "n_events": 95,
   "n_features": 14,
   "rf_accuracy": 1.0,
-  "cv_score": 0.0,
-  "gbm_rmse": 0.0,
+  "cv_score": 0.989247311827957,
+  "gbm_rmse": 2.8859159926123622e-06,
   "flow_distribution": {
-    "NOMINAL": 9
+    "NOMINAL": 49,
+    "PRE_FLOW": 32,
+    "FLOW": 14
   },
   "top_features": [
     [
       "energy_signal",
-      0.0
-    ],
-    [
-      "stress_signal",
-      0.0
+      0.4711014089063282
     ],
     [
       "focus_signal",
-      0.0
+      0.17317870432493432
     ],
     [
       "motivation_signal",
-      0.0
+      0.15025862462314962
     ],
     [
-      "hour_sin",
-      0.0
+      "is_study_session",
+      0.11629246816336695
+    ],
+    [
+      "stress_signal",
+      0.04444863210315437
     ]
   ],
-  "trained_at": "2026-03-23T18:44:26.955482",
+  "trained_at": "2026-03-26T15:56:46.757895",
   "features": [
     "energy_signal",
     "stress_signal",

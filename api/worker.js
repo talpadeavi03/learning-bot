@@ -438,9 +438,26 @@ export default {
       if (url.pathname === '/trigger'          && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health'           && request.method === 'GET')  return handleHealth(request, env);
 
-      if (url.pathname.startsWith('/api')) {
-        return jsonResp({ status: 'AETHER API ONLINE', version: '2.1' });
-      }
+      if (url.pathname === '/update-code-graph' && request.method === 'POST') {
+
+        const graph = await request.json();
+
+        await env.AETHER_KV.put(
+          "code_graph",
+          JSON.stringify(graph)
+       );
+
+       console.log("[AETHER] Code graph updated");
+
+      return jsonResp({
+         status: "code graph stored",
+         nodes: graph.nodes ? graph.nodes.length : 0
+      });
+    }
+
+    if (url.pathname.startsWith('/api')) {
+    return jsonResp({ status: 'AETHER API ONLINE', version: '2.1' });
+   }
 
       return env.ASSETS.fetch(request);
 

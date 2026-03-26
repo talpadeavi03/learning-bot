@@ -1,18 +1,18 @@
 {
   "flow_state": "NOMINAL",
-  "flow_probability": 1.0,
-  "avg_energy": 0.5,
-  "avg_stress": 0.5,
-  "avg_focus": 0.5,
-  "peak_hour": "14:00 IST",
+  "flow_probability": 0.853,
+  "avg_energy": 0.588,
+  "avg_stress": 0.135,
+  "avg_focus": 0.456,
+  "peak_hour": "08:00 IST",
   "week_energy": [
     0.0,
     0.0,
-    0.0,
     0.5,
-    0.5,
-    0.0,
-    0.0
+    0.57,
+    0.59,
+    0.55,
+    0.59
   ],
-  "generated_at": "2026-03-23T13:14:32.155919+00:00"
+  "generated_at": "2026-03-26T10:26:48.515108+00:00"
 }
