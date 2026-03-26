@@ -1437,34 +1437,35 @@ function typeMsg(text){
 
 async function loadSystemBrain(){
 
-  const res = await fetch("data/code_graph.json");
+  const res = await fetch("../data/code_graph.json");
   const graph = await res.json();
 
-  const nodes = new vis.DataSet(
-    graph.nodes.map(n => ({
-      id: n.id,
-      label: n.label || n.id
-    }))
-  );
+  console.log("GRAPH DATA:", graph);   // debug
 
-  const edges = new vis.DataSet(
-    graph.edges.map(e => ({
-      from: e.source,
-      to: e.target
-    }))
-  );
+  const nodes = new vis.DataSet(graph.nodes);
+  const edges = new vis.DataSet(graph.edges);
 
   const container = document.getElementById("network");
 
-  const data = { nodes, edges };
-
-  const options = {
-    nodes:{shape:"dot",size:10},
-    edges:{arrows:"to"},
-    physics:{stabilization:false}
+  const data = {
+    nodes: nodes,
+    edges: edges
   };
 
-  new vis.Network(container,data,options);
+  const options = {
+    nodes:{
+      shape:"dot",
+      size:12
+    },
+    edges:{
+      arrows:"to"
+    },
+    physics:{
+      stabilization:false
+    }
+  };
+
+  new vis.Network(container, data, options);
 
 }
 
