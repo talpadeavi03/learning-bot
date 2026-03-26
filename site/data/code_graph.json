@@ -1,5 +1,56 @@
 {
-  "id":"processData",
-  "label":"processData",
-  "group":"pipeline"
+  "nodes":[
+
+    {"id":"ui_dashboard","label":"Dashboard","group":"ui"},
+    {"id":"ui_graph","label":"System Brain","group":"ui"},
+    {"id":"ui_learning","label":"Learning","group":"ui"},
+
+    {"id":"api_worker","label":"API Worker","group":"api"},
+    {"id":"api_events","label":"Event Router","group":"api"},
+    {"id":"api_webhook","label":"Webhook Handler","group":"api"},
+
+    {"id":"pipeline_ingest","label":"Ingestion Pipeline","group":"pipeline"},
+    {"id":"pipeline_features","label":"Feature Builder","group":"pipeline"},
+    {"id":"pipeline_training","label":"Training Pipeline","group":"pipeline"},
+    {"id":"pipeline_scoring","label":"Scoring Pipeline","group":"pipeline"},
+
+    {"id":"ml_model","label":"ML Model","group":"ml"},
+    {"id":"ml_embeddings","label":"Embedding Model","group":"ml"},
+    {"id":"ml_classifier","label":"Classifier","group":"ml"},
+
+    {"id":"data_events","label":"Events Store","group":"data"},
+    {"id":"data_features","label":"Features Store","group":"data"},
+    {"id":"data_models","label":"Models Store","group":"data"},
+    {"id":"data_logs","label":"Logs Store","group":"data"}
+
+  ],
+
+  "edges":[
+
+    {"from":"ui_dashboard","to":"api_worker"},
+    {"from":"ui_graph","to":"api_worker"},
+    {"from":"ui_learning","to":"api_worker"},
+
+    {"from":"api_worker","to":"api_events"},
+    {"from":"api_events","to":"pipeline_ingest"},
+    {"from":"api_webhook","to":"pipeline_ingest"},
+
+    {"from":"pipeline_ingest","to":"data_events"},
+    {"from":"pipeline_ingest","to":"pipeline_features"},
+
+    {"from":"pipeline_features","to":"data_features"},
+    {"from":"pipeline_features","to":"pipeline_training"},
+
+    {"from":"pipeline_training","to":"ml_model"},
+    {"from":"pipeline_training","to":"ml_embeddings"},
+    {"from":"pipeline_training","to":"ml_classifier"},
+
+    {"from":"ml_model","to":"data_models"},
+    {"from":"ml_embeddings","to":"data_models"},
+    {"from":"ml_classifier","to":"data_models"},
+
+    {"from":"pipeline_scoring","to":"ml_model"},
+    {"from":"pipeline_scoring","to":"data_logs"}
+
+  ]
 }
