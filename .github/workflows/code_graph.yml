@@ -32,8 +32,9 @@ jobs:
 
     - name: Run GitNexus analysis
       run: |
+        mkdir -p data
         cd GitNexus/gitnexus
-        npx gitnexus analyze $GITHUB_WORKSPACE --output $GITHUB_WORKSPACE/data/code_graph.json
+        npx gitnexus analyze $GITHUB_WORKSPACE > $GITHUB_WORKSPACE/data/code_graph.json
 
     - name: Setup Python
       uses: actions/setup-python@v5
