@@ -8,6 +8,7 @@
 │   └── worker.js
 ├── commands
 ├── data
+│   ├── code_graph.json
 │   ├── features
 │   │   ├── behavior_features.parquet
 │   │   ├── daily_behavior.parquet
@@ -37,6 +38,573 @@
 │   ├── saved_models
 │   │   └── productivity_model.pkl
 │   └── training_stats.json
+├── node_modules
+│   ├── @babel
+│   │   ├── code-frame
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── lib
+│   │   │   │   ├── index.js
+│   │   │   │   └── index.js.map
+│   │   │   └── package.json
+│   │   ├── generator
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── lib
+│   │   │   │   ├── buffer.js
+│   │   │   │   ├── buffer.js.map
+│   │   │   │   ├── generators
+│   │   │   │   │   ├── base.js
+│   │   │   │   │   ├── base.js.map
+│   │   │   │   │   ├── classes.js
+│   │   │   │   │   ├── classes.js.map
+│   │   │   │   │   ├── deprecated.js
+│   │   │   │   │   ├── deprecated.js.map
+│   │   │   │   │   ├── expressions.js
+│   │   │   │   │   ├── expressions.js.map
+│   │   │   │   │   ├── flow.js
+│   │   │   │   │   ├── flow.js.map
+│   │   │   │   │   ├── index.js
+│   │   │   │   │   ├── index.js.map
+│   │   │   │   │   ├── jsx.js
+│   │   │   │   │   ├── jsx.js.map
+│   │   │   │   │   ├── methods.js
+│   │   │   │   │   ├── methods.js.map
+│   │   │   │   │   ├── modules.js
+│   │   │   │   │   ├── modules.js.map
+│   │   │   │   │   ├── statements.js
+│   │   │   │   │   ├── statements.js.map
+│   │   │   │   │   ├── template-literals.js
+│   │   │   │   │   ├── template-literals.js.map
+│   │   │   │   │   ├── types.js
+│   │   │   │   │   ├── types.js.map
+│   │   │   │   │   ├── typescript.js
+│   │   │   │   │   └── typescript.js.map
+│   │   │   │   ├── index.js
+│   │   │   │   ├── index.js.map
+│   │   │   │   ├── node
+│   │   │   │   │   ├── index.js
+│   │   │   │   │   ├── index.js.map
+│   │   │   │   │   ├── parentheses.js
+│   │   │   │   │   └── parentheses.js.map
+│   │   │   │   ├── nodes.js
+│   │   │   │   ├── nodes.js.map
+│   │   │   │   ├── printer.js
+│   │   │   │   ├── printer.js.map
+│   │   │   │   ├── source-map.js
+│   │   │   │   ├── source-map.js.map
+│   │   │   │   ├── token-map.js
+│   │   │   │   └── token-map.js.map
+│   │   │   └── package.json
+│   │   ├── helper-globals
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── data
+│   │   │   │   ├── browser-upper.json
+│   │   │   │   ├── builtin-lower.json
+│   │   │   │   └── builtin-upper.json
+│   │   │   └── package.json
+│   │   ├── helper-string-parser
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── lib
+│   │   │   │   ├── index.js
+│   │   │   │   └── index.js.map
+│   │   │   └── package.json
+│   │   ├── helper-validator-identifier
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── lib
+│   │   │   │   ├── identifier.js
+│   │   │   │   ├── identifier.js.map
+│   │   │   │   ├── index.js
+│   │   │   │   ├── index.js.map
+│   │   │   │   ├── keyword.js
+│   │   │   │   └── keyword.js.map
+│   │   │   └── package.json
+│   │   ├── parser
+│   │   │   ├── CHANGELOG.md
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── bin
+│   │   │   │   └── babel-parser.js
+│   │   │   ├── lib
+│   │   │   │   ├── index.js
+│   │   │   │   └── index.js.map
+│   │   │   ├── package.json
+│   │   │   └── typings
+│   │   │       └── babel-parser.d.ts
+│   │   ├── template
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── lib
+│   │   │   │   ├── builder.js
+│   │   │   │   ├── builder.js.map
+│   │   │   │   ├── formatters.js
+│   │   │   │   ├── formatters.js.map
+│   │   │   │   ├── index.js
+│   │   │   │   ├── index.js.map
+│   │   │   │   ├── literal.js
+│   │   │   │   ├── literal.js.map
+│   │   │   │   ├── options.js
+│   │   │   │   ├── options.js.map
+│   │   │   │   ├── parse.js
+│   │   │   │   ├── parse.js.map
+│   │   │   │   ├── populate.js
+│   │   │   │   ├── populate.js.map
+│   │   │   │   ├── string.js
+│   │   │   │   └── string.js.map
+│   │   │   └── package.json
+│   │   ├── traverse
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── lib
+│   │   │   │   ├── cache.js
+│   │   │   │   ├── cache.js.map
+│   │   │   │   ├── context.js
+│   │   │   │   ├── context.js.map
+│   │   │   │   ├── hub.js
+│   │   │   │   ├── hub.js.map
+│   │   │   │   ├── index.js
+│   │   │   │   ├── index.js.map
+│   │   │   │   ├── path
+│   │   │   │   │   ├── ancestry.js
+│   │   │   │   │   ├── ancestry.js.map
+│   │   │   │   │   ├── comments.js
+│   │   │   │   │   ├── comments.js.map
+│   │   │   │   │   ├── context.js
+│   │   │   │   │   ├── context.js.map
+│   │   │   │   │   ├── conversion.js
+│   │   │   │   │   ├── conversion.js.map
+│   │   │   │   │   ├── evaluation.js
+│   │   │   │   │   ├── evaluation.js.map
+│   │   │   │   │   ├── family.js
+│   │   │   │   │   ├── family.js.map
+│   │   │   │   │   ├── index.js
+│   │   │   │   │   ├── index.js.map
+│   │   │   │   │   ├── inference
+│   │   │   │   │   │   ├── index.js
+│   │   │   │   │   │   ├── index.js.map
+│   │   │   │   │   │   ├── inferer-reference.js
+│   │   │   │   │   │   ├── inferer-reference.js.map
+│   │   │   │   │   │   ├── inferers.js
+│   │   │   │   │   │   ├── inferers.js.map
+│   │   │   │   │   │   ├── util.js
+│   │   │   │   │   │   └── util.js.map
+│   │   │   │   │   ├── introspection.js
+│   │   │   │   │   ├── introspection.js.map
+│   │   │   │   │   ├── lib
+│   │   │   │   │   │   ├── hoister.js
+│   │   │   │   │   │   ├── hoister.js.map
+│   │   │   │   │   │   ├── removal-hooks.js
+│   │   │   │   │   │   ├── removal-hooks.js.map
+│   │   │   │   │   │   ├── virtual-types-validator.js
+│   │   │   │   │   │   ├── virtual-types-validator.js.map
+│   │   │   │   │   │   ├── virtual-types.js
+│   │   │   │   │   │   └── virtual-types.js.map
+│   │   │   │   │   ├── modification.js
+│   │   │   │   │   ├── modification.js.map
+│   │   │   │   │   ├── removal.js
+│   │   │   │   │   ├── removal.js.map
+│   │   │   │   │   ├── replacement.js
+│   │   │   │   │   └── replacement.js.map
+│   │   │   │   ├── scope
+│   │   │   │   │   ├── binding.js
+│   │   │   │   │   ├── binding.js.map
+│   │   │   │   │   ├── index.js
+│   │   │   │   │   ├── index.js.map
+│   │   │   │   │   ├── lib
+│   │   │   │   │   │   ├── renamer.js
+│   │   │   │   │   │   └── renamer.js.map
+│   │   │   │   │   ├── traverseForScope.js
+│   │   │   │   │   └── traverseForScope.js.map
+│   │   │   │   ├── traverse-node.js
+│   │   │   │   ├── traverse-node.js.map
+│   │   │   │   ├── types.js
+│   │   │   │   ├── types.js.map
+│   │   │   │   ├── visitors.js
+│   │   │   │   └── visitors.js.map
+│   │   │   ├── package.json
+│   │   │   └── tsconfig.overrides.json
+│   │   └── types
+│   │       ├── LICENSE
+│   │       ├── README.md
+│   │       ├── lib
+│   │       │   ├── asserts
+│   │       │   │   ├── assertNode.js
+│   │       │   │   ├── assertNode.js.map
+│   │       │   │   └── generated
+│   │       │   │       ├── index.js
+│   │       │   │       └── index.js.map
+│   │       │   ├── ast-types
+│   │       │   │   └── generated
+│   │       │   │       ├── index.js
+│   │       │   │       └── index.js.map
+│   │       │   ├── builders
+│   │       │   │   ├── flow
+│   │       │   │   │   ├── createFlowUnionType.js
+│   │       │   │   │   ├── createFlowUnionType.js.map
+│   │       │   │   │   ├── createTypeAnnotationBasedOnTypeof.js
+│   │       │   │   │   └── createTypeAnnotationBasedOnTypeof.js.map
+│   │       │   │   ├── generated
+│   │       │   │   │   ├── index.js
+│   │       │   │   │   ├── index.js.map
+│   │       │   │   │   ├── lowercase.js
+│   │       │   │   │   ├── lowercase.js.map
+│   │       │   │   │   ├── uppercase.js
+│   │       │   │   │   └── uppercase.js.map
+│   │       │   │   ├── productions.js
+│   │       │   │   ├── productions.js.map
+│   │       │   │   ├── react
+│   │       │   │   │   ├── buildChildren.js
+│   │       │   │   │   └── buildChildren.js.map
+│   │       │   │   ├── typescript
+│   │       │   │   │   ├── createTSUnionType.js
+│   │       │   │   │   └── createTSUnionType.js.map
+│   │       │   │   ├── validateNode.js
+│   │       │   │   └── validateNode.js.map
+│   │       │   ├── clone
+│   │       │   │   ├── clone.js
+│   │       │   │   ├── clone.js.map
+│   │       │   │   ├── cloneDeep.js
+│   │       │   │   ├── cloneDeep.js.map
+│   │       │   │   ├── cloneDeepWithoutLoc.js
+│   │       │   │   ├── cloneDeepWithoutLoc.js.map
+│   │       │   │   ├── cloneNode.js
+│   │       │   │   ├── cloneNode.js.map
+│   │       │   │   ├── cloneWithoutLoc.js
+│   │       │   │   └── cloneWithoutLoc.js.map
+│   │       │   ├── comments
+│   │       │   │   ├── addComment.js
+│   │       │   │   ├── addComment.js.map
+│   │       │   │   ├── addComments.js
+│   │       │   │   ├── addComments.js.map
+│   │       │   │   ├── inheritInnerComments.js
+│   │       │   │   ├── inheritInnerComments.js.map
+│   │       │   │   ├── inheritLeadingComments.js
+│   │       │   │   ├── inheritLeadingComments.js.map
+│   │       │   │   ├── inheritTrailingComments.js
+│   │       │   │   ├── inheritTrailingComments.js.map
+│   │       │   │   ├── inheritsComments.js
+│   │       │   │   ├── inheritsComments.js.map
+│   │       │   │   ├── removeComments.js
+│   │       │   │   └── removeComments.js.map
+│   │       │   ├── constants
+│   │       │   │   ├── generated
+│   │       │   │   │   ├── index.js
+│   │       │   │   │   └── index.js.map
+│   │       │   │   ├── index.js
+│   │       │   │   └── index.js.map
+│   │       │   ├── converters
+│   │       │   │   ├── ensureBlock.js
+│   │       │   │   ├── ensureBlock.js.map
+│   │       │   │   ├── gatherSequenceExpressions.js
+│   │       │   │   ├── gatherSequenceExpressions.js.map
+│   │       │   │   ├── toBindingIdentifierName.js
+│   │       │   │   ├── toBindingIdentifierName.js.map
+│   │       │   │   ├── toBlock.js
+│   │       │   │   ├── toBlock.js.map
+│   │       │   │   ├── toComputedKey.js
+│   │       │   │   ├── toComputedKey.js.map
+│   │       │   │   ├── toExpression.js
+│   │       │   │   ├── toExpression.js.map
+│   │       │   │   ├── toIdentifier.js
+│   │       │   │   ├── toIdentifier.js.map
+│   │       │   │   ├── toKeyAlias.js
+│   │       │   │   ├── toKeyAlias.js.map
+│   │       │   │   ├── toSequenceExpression.js
+│   │       │   │   ├── toSequenceExpression.js.map
+│   │       │   │   ├── toStatement.js
+│   │       │   │   ├── toStatement.js.map
+│   │       │   │   ├── valueToNode.js
+│   │       │   │   └── valueToNode.js.map
+│   │       │   ├── definitions
+│   │       │   │   ├── core.js
+│   │       │   │   ├── core.js.map
+│   │       │   │   ├── deprecated-aliases.js
+│   │       │   │   ├── deprecated-aliases.js.map
+│   │       │   │   ├── experimental.js
+│   │       │   │   ├── experimental.js.map
+│   │       │   │   ├── flow.js
+│   │       │   │   ├── flow.js.map
+│   │       │   │   ├── index.js
+│   │       │   │   ├── index.js.map
+│   │       │   │   ├── jsx.js
+│   │       │   │   ├── jsx.js.map
+│   │       │   │   ├── misc.js
+│   │       │   │   ├── misc.js.map
+│   │       │   │   ├── placeholders.js
+│   │       │   │   ├── placeholders.js.map
+│   │       │   │   ├── typescript.js
+│   │       │   │   ├── typescript.js.map
+│   │       │   │   ├── utils.js
+│   │       │   │   └── utils.js.map
+│   │       │   ├── index-legacy.d.ts
+│   │       │   ├── index.d.ts
+│   │       │   ├── index.js
+│   │       │   ├── index.js.flow
+│   │       │   ├── index.js.map
+│   │       │   ├── modifications
+│   │       │   │   ├── appendToMemberExpression.js
+│   │       │   │   ├── appendToMemberExpression.js.map
+│   │       │   │   ├── flow
+│   │       │   │   │   ├── removeTypeDuplicates.js
+│   │       │   │   │   └── removeTypeDuplicates.js.map
+│   │       │   │   ├── inherits.js
+│   │       │   │   ├── inherits.js.map
+│   │       │   │   ├── prependToMemberExpression.js
+│   │       │   │   ├── prependToMemberExpression.js.map
+│   │       │   │   ├── removeProperties.js
+│   │       │   │   ├── removeProperties.js.map
+│   │       │   │   ├── removePropertiesDeep.js
+│   │       │   │   ├── removePropertiesDeep.js.map
+│   │       │   │   └── typescript
+│   │       │   │       ├── removeTypeDuplicates.js
+│   │       │   │       └── removeTypeDuplicates.js.map
+│   │       │   ├── retrievers
+│   │       │   │   ├── getAssignmentIdentifiers.js
+│   │       │   │   ├── getAssignmentIdentifiers.js.map
+│   │       │   │   ├── getBindingIdentifiers.js
+│   │       │   │   ├── getBindingIdentifiers.js.map
+│   │       │   │   ├── getFunctionName.js
+│   │       │   │   ├── getFunctionName.js.map
+│   │       │   │   ├── getOuterBindingIdentifiers.js
+│   │       │   │   └── getOuterBindingIdentifiers.js.map
+│   │       │   ├── traverse
+│   │       │   │   ├── traverse.js
+│   │       │   │   ├── traverse.js.map
+│   │       │   │   ├── traverseFast.js
+│   │       │   │   └── traverseFast.js.map
+│   │       │   ├── utils
+│   │       │   │   ├── deprecationWarning.js
+│   │       │   │   ├── deprecationWarning.js.map
+│   │       │   │   ├── inherit.js
+│   │       │   │   ├── inherit.js.map
+│   │       │   │   ├── react
+│   │       │   │   │   ├── cleanJSXElementLiteralChild.js
+│   │       │   │   │   └── cleanJSXElementLiteralChild.js.map
+│   │       │   │   ├── shallowEqual.js
+│   │       │   │   └── shallowEqual.js.map
+│   │       │   └── validators
+│   │       │       ├── buildMatchMemberExpression.js
+│   │       │       ├── buildMatchMemberExpression.js.map
+│   │       │       ├── generated
+│   │       │       │   ├── index.js
+│   │       │       │   └── index.js.map
+│   │       │       ├── is.js
+│   │       │       ├── is.js.map
+│   │       │       ├── isBinding.js
+│   │       │       ├── isBinding.js.map
+│   │       │       ├── isBlockScoped.js
+│   │       │       ├── isBlockScoped.js.map
+│   │       │       ├── isImmutable.js
+│   │       │       ├── isImmutable.js.map
+│   │       │       ├── isLet.js
+│   │       │       ├── isLet.js.map
+│   │       │       ├── isNode.js
+│   │       │       ├── isNode.js.map
+│   │       │       ├── isNodesEquivalent.js
+│   │       │       ├── isNodesEquivalent.js.map
+│   │       │       ├── isPlaceholderType.js
+│   │       │       ├── isPlaceholderType.js.map
+│   │       │       ├── isReferenced.js
+│   │       │       ├── isReferenced.js.map
+│   │       │       ├── isScope.js
+│   │       │       ├── isScope.js.map
+│   │       │       ├── isSpecifierDefault.js
+│   │       │       ├── isSpecifierDefault.js.map
+│   │       │       ├── isType.js
+│   │       │       ├── isType.js.map
+│   │       │       ├── isValidES3Identifier.js
+│   │       │       ├── isValidES3Identifier.js.map
+│   │       │       ├── isValidIdentifier.js
+│   │       │       ├── isValidIdentifier.js.map
+│   │       │       ├── isVar.js
+│   │       │       ├── isVar.js.map
+│   │       │       ├── matchesPattern.js
+│   │       │       ├── matchesPattern.js.map
+│   │       │       ├── react
+│   │       │       │   ├── isCompatTag.js
+│   │       │       │   ├── isCompatTag.js.map
+│   │       │       │   ├── isReactComponent.js
+│   │       │       │   └── isReactComponent.js.map
+│   │       │       ├── validate.js
+│   │       │       └── validate.js.map
+│   │       └── package.json
+│   ├── @jridgewell
+│   │   ├── gen-mapping
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── dist
+│   │   │   │   ├── gen-mapping.mjs
+│   │   │   │   ├── gen-mapping.mjs.map
+│   │   │   │   ├── gen-mapping.umd.js
+│   │   │   │   ├── gen-mapping.umd.js.map
+│   │   │   │   └── types
+│   │   │   │       ├── gen-mapping.d.ts
+│   │   │   │       ├── set-array.d.ts
+│   │   │   │       ├── sourcemap-segment.d.ts
+│   │   │   │       └── types.d.ts
+│   │   │   ├── package.json
+│   │   │   ├── src
+│   │   │   │   ├── gen-mapping.ts
+│   │   │   │   ├── set-array.ts
+│   │   │   │   ├── sourcemap-segment.ts
+│   │   │   │   └── types.ts
+│   │   │   └── types
+│   │   │       ├── gen-mapping.d.cts
+│   │   │       ├── gen-mapping.d.cts.map
+│   │   │       ├── gen-mapping.d.mts
+│   │   │       ├── gen-mapping.d.mts.map
+│   │   │       ├── set-array.d.cts
+│   │   │       ├── set-array.d.cts.map
+│   │   │       ├── set-array.d.mts
+│   │   │       ├── set-array.d.mts.map
+│   │   │       ├── sourcemap-segment.d.cts
+│   │   │       ├── sourcemap-segment.d.cts.map
+│   │   │       ├── sourcemap-segment.d.mts
+│   │   │       ├── sourcemap-segment.d.mts.map
+│   │   │       ├── types.d.cts
+│   │   │       ├── types.d.cts.map
+│   │   │       ├── types.d.mts
+│   │   │       └── types.d.mts.map
+│   │   ├── resolve-uri
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── dist
+│   │   │   │   ├── resolve-uri.mjs
+│   │   │   │   ├── resolve-uri.mjs.map
+│   │   │   │   ├── resolve-uri.umd.js
+│   │   │   │   ├── resolve-uri.umd.js.map
+│   │   │   │   └── types
+│   │   │   │       └── resolve-uri.d.ts
+│   │   │   └── package.json
+│   │   ├── sourcemap-codec
+│   │   │   ├── LICENSE
+│   │   │   ├── README.md
+│   │   │   ├── dist
+│   │   │   │   ├── sourcemap-codec.mjs
+│   │   │   │   ├── sourcemap-codec.mjs.map
+│   │   │   │   ├── sourcemap-codec.umd.js
+│   │   │   │   └── sourcemap-codec.umd.js.map
+│   │   │   ├── package.json
+│   │   │   ├── src
+│   │   │   │   ├── scopes.ts
+│   │   │   │   ├── sourcemap-codec.ts
+│   │   │   │   ├── strings.ts
+│   │   │   │   └── vlq.ts
+│   │   │   └── types
+│   │   │       ├── scopes.d.cts
+│   │   │       ├── scopes.d.cts.map
+│   │   │       ├── scopes.d.mts
+│   │   │       ├── scopes.d.mts.map
+│   │   │       ├── sourcemap-codec.d.cts
+│   │   │       ├── sourcemap-codec.d.cts.map
+│   │   │       ├── sourcemap-codec.d.mts
+│   │   │       ├── sourcemap-codec.d.mts.map
+│   │   │       ├── strings.d.cts
+│   │   │       ├── strings.d.cts.map
+│   │   │       ├── strings.d.mts
+│   │   │       ├── strings.d.mts.map
+│   │   │       ├── vlq.d.cts
+│   │   │       ├── vlq.d.cts.map
+│   │   │       ├── vlq.d.mts
+│   │   │       └── vlq.d.mts.map
+│   │   └── trace-mapping
+│   │       ├── LICENSE
+│   │       ├── README.md
+│   │       ├── dist
+│   │       │   ├── trace-mapping.mjs
+│   │       │   ├── trace-mapping.mjs.map
+│   │       │   ├── trace-mapping.umd.js
+│   │       │   └── trace-mapping.umd.js.map
+│   │       ├── package.json
+│   │       ├── src
+│   │       │   ├── binary-search.ts
+│   │       │   ├── by-source.ts
+│   │       │   ├── flatten-map.ts
+│   │       │   ├── resolve.ts
+│   │       │   ├── sort.ts
+│   │       │   ├── sourcemap-segment.ts
+│   │       │   ├── strip-filename.ts
+│   │       │   ├── trace-mapping.ts
+│   │       │   └── types.ts
+│   │       └── types
+│   │           ├── binary-search.d.cts
+│   │           ├── binary-search.d.cts.map
+│   │           ├── binary-search.d.mts
+│   │           ├── binary-search.d.mts.map
+│   │           ├── by-source.d.cts
+│   │           ├── by-source.d.cts.map
+│   │           ├── by-source.d.mts
+│   │           ├── by-source.d.mts.map
+│   │           ├── flatten-map.d.cts
+│   │           ├── flatten-map.d.cts.map
+│   │           ├── flatten-map.d.mts
+│   │           ├── flatten-map.d.mts.map
+│   │           ├── resolve.d.cts
+│   │           ├── resolve.d.cts.map
+│   │           ├── resolve.d.mts
+│   │           ├── resolve.d.mts.map
+│   │           ├── sort.d.cts
+│   │           ├── sort.d.cts.map
+│   │           ├── sort.d.mts
+│   │           ├── sort.d.mts.map
+│   │           ├── sourcemap-segment.d.cts
+│   │           ├── sourcemap-segment.d.cts.map
+│   │           ├── sourcemap-segment.d.mts
+│   │           ├── sourcemap-segment.d.mts.map
+│   │           ├── strip-filename.d.cts
+│   │           ├── strip-filename.d.cts.map
+│   │           ├── strip-filename.d.mts
+│   │           ├── strip-filename.d.mts.map
+│   │           ├── trace-mapping.d.cts
+│   │           ├── trace-mapping.d.cts.map
+│   │           ├── trace-mapping.d.mts
+│   │           ├── trace-mapping.d.mts.map
+│   │           ├── types.d.cts
+│   │           ├── types.d.cts.map
+│   │           ├── types.d.mts
+│   │           └── types.d.mts.map
+│   ├── debug
+│   │   ├── LICENSE
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   └── src
+│   │       ├── browser.js
+│   │       ├── common.js
+│   │       ├── index.js
+│   │       └── node.js
+│   ├── js-tokens
+│   │   ├── CHANGELOG.md
+│   │   ├── LICENSE
+│   │   ├── README.md
+│   │   ├── index.js
+│   │   └── package.json
+│   ├── jsesc
+│   │   ├── LICENSE-MIT.txt
+│   │   ├── README.md
+│   │   ├── bin
+│   │   │   └── jsesc
+│   │   ├── jsesc.js
+│   │   ├── man
+│   │   │   └── jsesc.1
+│   │   └── package.json
+│   ├── ms
+│   │   ├── index.js
+│   │   ├── license.md
+│   │   ├── package.json
+│   │   └── readme.md
+│   └── picocolors
+│       ├── LICENSE
+│       ├── README.md
+│       ├── package.json
+│       ├── picocolors.browser.js
+│       ├── picocolors.d.ts
+│       ├── picocolors.js
+│       └── types.d.ts
+├── package-lock.json
+├── package.json
 ├── pipeline.log
 ├── readme.md
 ├── requirements-analytics.txt
@@ -44,18 +612,37 @@
 ├── requirements-ml.txt
 ├── scripts
 │   ├── ai
-│   │   └── aether_agent.py
+│   │   ├── __pycache__
+│   │   │   ├── agent_router.cpython-314.pyc
+│   │   │   ├── context_builder.cpython-314.pyc
+│   │   │   ├── intent_classifier.cpython-314.pyc
+│   │   │   └── response_generator.cpython-314.pyc
+│   │   ├── aether_agent.py
+│   │   ├── agent_router.py
+│   │   ├── context_builder.py
+│   │   ├── intent_classifier.py
+│   │   └── response_generator.py
 │   ├── analytics
 │   │   ├── __pycache__
+│   │   │   ├── goal_engine.cpython-314.pyc
+│   │   │   ├── temporal_engine.cpython-314.pyc
 │   │   │   └── vector_query.cpython-314.pyc
 │   │   ├── analytics.py
+│   │   ├── build_code_graph.js
+│   │   ├── build_code_graph.py
 │   │   ├── dashboard.py
 │   │   ├── dashboard_data.py
+│   │   ├── goal_engine.py
+│   │   ├── graph_query.py
+│   │   ├── habit_tracker.py
 │   │   ├── heatmap.py
 │   │   ├── insight_engine.py
 │   │   ├── insight_generator.py
+│   │   ├── knowledge_graph_builder.py
 │   │   ├── memory_graph_builder.py
 │   │   ├── pattern_engine.py
+│   │   ├── task_planner.py
+│   │   ├── temporal_engine.py
 │   │   ├── vector_memory_builder.py
 │   │   ├── vector_query.py
 │   │   └── weekly_summary.py
@@ -72,16 +659,21 @@
 │   │   ├── generate_synthetic_data.py
 │   │   ├── predict.py
 │   │   └── train_models.py
-│   └── pipeline
-│       ├── data_cleaner.py
-│       ├── pull_events.py
-│       ├── push_dashboard.py
-│       ├── reset_data.py
-│       └── run_pipeline.py
+│   ├── pipeline
+│   │   ├── data_cleaner.py
+│   │   ├── pull_events.py
+│   │   ├── push_code_graph.py
+│   │   ├── push_dashboard.py
+│   │   ├── reset_data.py
+│   │   └── run_pipeline.py
+│   └── realtime
+│       └── state_updater.py
 ├── site
 │   ├── data
 │   │   ├── aether_response.json
+│   │   ├── daily_plan.json
 │   │   ├── dashboard.json
+│   │   ├── habits.json
 │   │   ├── insights.json
 │   │   ├── patterns.json
 │   │   ├── state.json
@@ -93,8 +685,10 @@
 │   ├── manifest.json
 │   └── timeline.html
 ├── state
+│   ├── current_state.json
+│   ├── goals.json
 │   └── last_update.txt
 ├── tree.txt
 └── wrangler.toml
 
-27 directories, 71 files
+108 directories, 584 files
