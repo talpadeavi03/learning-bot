@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-{"nodes":[],"edges":[]}
-=======
 {
   "nodes":[
     {"id":"site","label":"site"},
@@ -14,4 +11,3 @@
     {"from":"scripts","to":"data"}
   ]
 }
->>>>>>> 20b69ea (graph fix 3.0)
