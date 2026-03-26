@@ -1437,35 +1437,53 @@ function typeMsg(text){
 
 async function loadSystemBrain(){
 
-  const res = await fetch("../data/code_graph.json");
-  const graph = await res.json();
+  const res = await fetch("data/code_graph.json")
+  const graph = await res.json()
 
-  console.log("GRAPH DATA:", graph);   // debug
+  const nodes = new vis.DataSet(graph.nodes)
+  const edges = new vis.DataSet(graph.edges)
 
-  const nodes = new vis.DataSet(graph.nodes);
-  const edges = new vis.DataSet(graph.edges);
-
-  const container = document.getElementById("network");
+  const container = document.getElementById("network")
 
   const data = {
     nodes: nodes,
     edges: edges
-  };
+  }
 
   const options = {
+
     nodes:{
       shape:"dot",
-      size:12
+      size:14,
+      font:{size:14}
     },
-    edges:{
-      arrows:"to"
-    },
-    physics:{
-      stabilization:false
-    }
-  };
 
-  new vis.Network(container, data, options);
+    edges:{
+      arrows:"to",
+      color:"#999"
+    },
+
+    groups:{
+
+      ui:{ color:{background:"#00ffff"} },
+      api:{ color:{background:"#bb66ff"} },
+      pipeline:{ color:{background:"#ff9933"} },
+      ml:{ color:{background:"#33ff66"} },
+      data:{ color:{background:"#3399ff"} },
+      other:{ color:{background:"#888888"} }
+
+    },
+
+    physics:{
+      stabilization:false,
+      barnesHut:{
+        gravitationalConstant:-3000
+      }
+    }
+
+  }
+
+  new vis.Network(container, data, options)
 
 }
 

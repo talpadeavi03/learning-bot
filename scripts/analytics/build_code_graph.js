@@ -61,9 +61,18 @@ function analyzeFile(filePath){
       if(!nodeSet.has(fnName)){
         nodeSet.add(fnName)
 
+        let group = "other"
+
+        if(filePath.includes("site")) group = "ui"
+        else if(filePath.includes("api")) group = "api"
+        else if(filePath.includes("scripts/ml")) group = "ml"
+        else if(filePath.includes("scripts/pipeline")) group = "pipeline"
+        else if(filePath.includes("data")) group = "data"
+
         nodes.push({
           id: fnName,
           label: fnName,
+          group: group,
           file: filePath
         })
       }

@@ -1,1 +1,5 @@
-{"nodes":[],"edges":[]}
+{
+  "id":"processData",
+  "label":"processData",
+  "group":"pipeline"
+}
