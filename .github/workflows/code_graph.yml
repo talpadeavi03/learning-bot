@@ -3,6 +3,12 @@ name: Build Code Graph
 on:
   push:
     branches: [master]
+    paths:
+      - "scripts/**"
+      - "api/**"
+      - "site/**"
+      - "*.js"
+      - "*.py"
 
 jobs:
   build_graph:
@@ -14,6 +20,12 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
+    - name: Cache GitNexus
+      uses: actions/cache@v4
+      with:
+        path: GitNexus
+        key: gitnexus-${{ runner.os }}
+
     - name: Clone GitNexus
       run: git clone https://github.com/abhigyanpatwari/GitNexus.git
 
@@ -21,6 +33,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
+        cache: "npm"
 
     - name: Install GitNexus
       run: |
@@ -52,11 +65,11 @@ jobs:
 
     - name: Commit graph and architecture
       run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.email "aether-bot@noreply.com"
+        git config --local user.name "AETHER Bot"
 
         git add data/code_graph.json || true
         git add docs/aether-live-architecture.html || true
 
         git diff --staged --quiet || git commit -m "update code graph + architecture [skip ci]"
-        git push
+        git push https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} HEAD:master
