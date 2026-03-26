@@ -33,13 +33,18 @@ jobs:
     - name: Run GitNexus analysis
       run: |
         mkdir -p data
-        echo "Running GitNexus..."
-        npx gitnexus analyze $GITHUB_WORKSPACE | tee $GITHUB_WORKSPACE/data/code_graph.json
+        cd GitNexus/gitnexus
+        npx gitnexus analyze $GITHUB_WORKSPACE | awk 'BEGIN{p=0} /^\{/ {p=1} p' > $GITHUB_WORKSPACE/data/code_graph.json
 
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
+
+    - name: Debug graph file
+      run: |
+        echo "---- GRAPH FILE ----"
+        cat data/code_graph.json
 
     - name: Generate architecture diagram
       run: |
