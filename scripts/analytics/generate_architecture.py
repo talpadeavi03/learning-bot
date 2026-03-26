@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 
 path = "data/code_graph.json"
 
@@ -10,6 +11,10 @@ if not os.path.exists(path):
 if os.stat(path).st_size == 0:
     print("code_graph.json empty — skipping")
     exit(0)
+
+# COPY GRAPH TO SITE (IMPORTANT)
+os.makedirs("site/data", exist_ok=True)
+shutil.copy(path, "site/data/code_graph.json")
 
 with open(path) as f:
     graph = json.load(f)
