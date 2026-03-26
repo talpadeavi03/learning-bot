@@ -1,0 +1,2446 @@
+{
+  "nodes": [
+    {
+      "name": "handleCommand",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "jsonResp",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "textResp",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleWebhook",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleChat",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleLogState",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleDashboard",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "generateInsights",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleEvents",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleHealth",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleTrigger",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleGitHubLog",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleResetData",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "handleUpdateDashboard",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "nlpParse",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "fallbackNLP",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "openaiVisionExtract",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "whisperTranscribe",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "triggerMLPipeline",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "getTelegramFileUrl",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "sendTelegram",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "buildTelegramReply",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "buildSystemPrompt",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "callOpenAI",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "runAetherML",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "runWorkersAI",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "runHybrid",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "sendMorningBriefing",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "sendEveningSummary",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "sendWeeklyReport",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "middayNudge",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "calculateStreak",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "encryptText",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "saveEvent",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "getRecentEvents",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "getEventCount",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "getLatestState",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "refreshDashboardFromState",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "defaultDashboard",
+      "file": "api/worker.js"
+    },
+    {
+      "name": "scanDir",
+      "file": "scripts/analytics/build_code_graph.js"
+    },
+    {
+      "name": "analyzeFile",
+      "file": "scripts/analytics/build_code_graph.js"
+    }
+  ],
+  "edges": [
+    {
+      "from": "handleCommand",
+      "to": "split"
+    },
+    {
+      "from": "handleCommand",
+      "to": "trim"
+    },
+    {
+      "from": "handleCommand",
+      "to": "toLowerCase"
+    },
+    {
+      "from": "handleCommand",
+      "to": "join"
+    },
+    {
+      "from": "handleCommand",
+      "to": "slice"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "reduce"
+    },
+    {
+      "from": "handleCommand",
+      "to": "reduce"
+    },
+    {
+      "from": "handleCommand",
+      "to": "filter"
+    },
+    {
+      "from": "handleCommand",
+      "to": "slice"
+    },
+    {
+      "from": "handleCommand",
+      "to": "filter"
+    },
+    {
+      "from": "handleCommand",
+      "to": "map"
+    },
+    {
+      "from": "handleCommand",
+      "to": "filter"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "join"
+    },
+    {
+      "from": "handleCommand",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleCommand",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleCommand",
+      "to": "reduce"
+    },
+    {
+      "from": "handleCommand",
+      "to": "reduce"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "split"
+    },
+    {
+      "from": "handleCommand",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleCommand",
+      "to": "put"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleCommand",
+      "to": "forEach"
+    },
+    {
+      "from": "handleCommand",
+      "to": "push"
+    },
+    {
+      "from": "handleCommand",
+      "to": "join"
+    },
+    {
+      "from": "handleCommand",
+      "to": "map"
+    },
+    {
+      "from": "handleCommand",
+      "to": "slice"
+    },
+    {
+      "from": "handleCommand",
+      "to": "entries"
+    },
+    {
+      "from": "handleCommand",
+      "to": "reduce"
+    },
+    {
+      "from": "handleCommand",
+      "to": "repeat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "repeat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendMorningBriefing"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendEveningSummary"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "split"
+    },
+    {
+      "from": "handleCommand",
+      "to": "split"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "handleTrigger"
+    },
+    {
+      "from": "handleCommand",
+      "to": "stringify"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "handleTrigger"
+    },
+    {
+      "from": "handleCommand",
+      "to": "stringify"
+    },
+    {
+      "from": "handleCommand",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleCommand",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "trim"
+    },
+    {
+      "from": "handleCommand",
+      "to": "replace"
+    },
+    {
+      "from": "handleCommand",
+      "to": "parseInt"
+    },
+    {
+      "from": "handleCommand",
+      "to": "match"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "parseFloat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "toUpperCase"
+    },
+    {
+      "from": "handleCommand",
+      "to": "round"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "parseFloat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "parseFloat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "split"
+    },
+    {
+      "from": "handleCommand",
+      "to": "parseFloat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "join"
+    },
+    {
+      "from": "handleCommand",
+      "to": "slice"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "split"
+    },
+    {
+      "from": "handleCommand",
+      "to": "parseFloat"
+    },
+    {
+      "from": "handleCommand",
+      "to": "join"
+    },
+    {
+      "from": "handleCommand",
+      "to": "slice"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "jsonResp",
+      "to": "stringify"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "json"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "toString"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "warn"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "startsWith"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "handleCommand"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "getTelegramFileUrl"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "whisperTranscribe"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "getTelegramFileUrl"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "whisperTranscribe"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "getTelegramFileUrl"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "openaiVisionExtract"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "getTelegramFileUrl"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "fetch"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "text"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "trim"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "nlpParse"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "getUTCHours"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "getUTCDay"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "split"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "trim"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "min"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "match"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "min"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "max"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "match"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "slice"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sin"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "cos"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "round"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "round"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "buildTelegramReply"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "json"
+    },
+    {
+      "from": "handleChat",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleChat",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleChat",
+      "to": "buildSystemPrompt"
+    },
+    {
+      "from": "handleChat",
+      "to": "slice"
+    },
+    {
+      "from": "handleChat",
+      "to": "runAetherML"
+    },
+    {
+      "from": "handleChat",
+      "to": "runWorkersAI"
+    },
+    {
+      "from": "handleChat",
+      "to": "runHybrid"
+    },
+    {
+      "from": "handleChat",
+      "to": "error"
+    },
+    {
+      "from": "handleChat",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleLogState",
+      "to": "json"
+    },
+    {
+      "from": "handleLogState",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleLogState",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleLogState",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleLogState",
+      "to": "split"
+    },
+    {
+      "from": "handleLogState",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleLogState",
+      "to": "put"
+    },
+    {
+      "from": "handleLogState",
+      "to": "stringify"
+    },
+    {
+      "from": "handleLogState",
+      "to": "join"
+    },
+    {
+      "from": "handleLogState",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleLogState",
+      "to": "refreshDashboardFromState"
+    },
+    {
+      "from": "handleLogState",
+      "to": "log"
+    },
+    {
+      "from": "handleLogState",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "split"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "filter"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "catch"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "get"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "reduce"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "reduce"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "reduce"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "filter"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "forEach"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "map"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "slice"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "sort"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "entries"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "map"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "slice"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "toLocaleTimeString"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "setDate"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "getDate"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "split"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "filter"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "reduce"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "push"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "generateInsights"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "forEach"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "fill"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "forEach"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "getUTCHours"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "round"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "filter"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "stringify"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "warn"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "generateInsights",
+      "to": "forEach"
+    },
+    {
+      "from": "generateInsights",
+      "to": "getUTCHours"
+    },
+    {
+      "from": "generateInsights",
+      "to": "push"
+    },
+    {
+      "from": "generateInsights",
+      "to": "sort"
+    },
+    {
+      "from": "generateInsights",
+      "to": "map"
+    },
+    {
+      "from": "generateInsights",
+      "to": "entries"
+    },
+    {
+      "from": "generateInsights",
+      "to": "parseInt"
+    },
+    {
+      "from": "generateInsights",
+      "to": "reduce"
+    },
+    {
+      "from": "generateInsights",
+      "to": "push"
+    },
+    {
+      "from": "generateInsights",
+      "to": "push"
+    },
+    {
+      "from": "generateInsights",
+      "to": "push"
+    },
+    {
+      "from": "generateInsights",
+      "to": "push"
+    },
+    {
+      "from": "generateInsights",
+      "to": "push"
+    },
+    {
+      "from": "generateInsights",
+      "to": "slice"
+    },
+    {
+      "from": "handleEvents",
+      "to": "parseInt"
+    },
+    {
+      "from": "handleEvents",
+      "to": "get"
+    },
+    {
+      "from": "handleEvents",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleEvents",
+      "to": "min"
+    },
+    {
+      "from": "handleEvents",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleHealth",
+      "to": "getEventCount"
+    },
+    {
+      "from": "handleHealth",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleHealth",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "json"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "log"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "reduce"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "max"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "split"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "filter"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "round"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "reduce"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "join"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "slice"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "filter"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "map"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "fetch"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "stringify"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "json"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "slice"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "fetch"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "stringify"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "error"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "json"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "parseFloat"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "min"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "getUTCHours"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "sin"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "getUTCHours"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "cos"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "getUTCHours"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "getUTCDay"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "includes"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "getUTCDay"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "log"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleGitHubLog",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "json"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "put"
+    },
+    {
+      "from": "handleResetData",
+      "to": "stringify"
+    },
+    {
+      "from": "handleResetData",
+      "to": "put"
+    },
+    {
+      "from": "handleResetData",
+      "to": "put"
+    },
+    {
+      "from": "handleResetData",
+      "to": "stringify"
+    },
+    {
+      "from": "handleResetData",
+      "to": "toISOString"
+    },
+    {
+      "from": "handleResetData",
+      "to": "log"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "json"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "put"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "stringify"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "jsonResp"
+    },
+    {
+      "from": "nlpParse",
+      "to": "run"
+    },
+    {
+      "from": "nlpParse",
+      "to": "match"
+    },
+    {
+      "from": "nlpParse",
+      "to": "parse"
+    },
+    {
+      "from": "nlpParse",
+      "to": "warn"
+    },
+    {
+      "from": "nlpParse",
+      "to": "fallbackNLP"
+    },
+    {
+      "from": "nlpParse",
+      "to": "warn"
+    },
+    {
+      "from": "nlpParse",
+      "to": "fallbackNLP"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "toLowerCase"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "filter"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "includes"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "filter"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "includes"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "some"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "includes"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "min"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "min"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "includes"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "includes"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "includes"
+    },
+    {
+      "from": "fallbackNLP",
+      "to": "slice"
+    },
+    {
+      "from": "openaiVisionExtract",
+      "to": "fetch"
+    },
+    {
+      "from": "openaiVisionExtract",
+      "to": "arrayBuffer"
+    },
+    {
+      "from": "openaiVisionExtract",
+      "to": "run"
+    },
+    {
+      "from": "whisperTranscribe",
+      "to": "fetch"
+    },
+    {
+      "from": "whisperTranscribe",
+      "to": "arrayBuffer"
+    },
+    {
+      "from": "whisperTranscribe",
+      "to": "run"
+    },
+    {
+      "from": "whisperTranscribe",
+      "to": "trim"
+    },
+    {
+      "from": "whisperTranscribe",
+      "to": "trim"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "warn"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "log"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "fetch"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "stringify"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "text"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "log"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "log"
+    },
+    {
+      "from": "getTelegramFileUrl",
+      "to": "fetch"
+    },
+    {
+      "from": "getTelegramFileUrl",
+      "to": "json"
+    },
+    {
+      "from": "getTelegramFileUrl",
+      "to": "stringify"
+    },
+    {
+      "from": "sendTelegram",
+      "to": "fetch"
+    },
+    {
+      "from": "sendTelegram",
+      "to": "stringify"
+    },
+    {
+      "from": "sendTelegram",
+      "to": "warn"
+    },
+    {
+      "from": "buildTelegramReply",
+      "to": "round"
+    },
+    {
+      "from": "buildTelegramReply",
+      "to": "round"
+    },
+    {
+      "from": "buildTelegramReply",
+      "to": "round"
+    },
+    {
+      "from": "buildTelegramReply",
+      "to": "slice"
+    },
+    {
+      "from": "buildTelegramReply",
+      "to": "slice"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "join"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "map"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "toFixed"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "join"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "map"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "join"
+    },
+    {
+      "from": "buildSystemPrompt",
+      "to": "map"
+    },
+    {
+      "from": "callOpenAI",
+      "to": "run"
+    },
+    {
+      "from": "runAetherML",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "runAetherML",
+      "to": "split"
+    },
+    {
+      "from": "runAetherML",
+      "to": "toISOString"
+    },
+    {
+      "from": "runAetherML",
+      "to": "filter"
+    },
+    {
+      "from": "runAetherML",
+      "to": "slice"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "reduce"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "reduce"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "reduce"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "reduce"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "round"
+    },
+    {
+      "from": "runAetherML",
+      "to": "getLatestState"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "push"
+    },
+    {
+      "from": "runAetherML",
+      "to": "join"
+    },
+    {
+      "from": "runWorkersAI",
+      "to": "run"
+    },
+    {
+      "from": "runHybrid",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "runHybrid",
+      "to": "split"
+    },
+    {
+      "from": "runHybrid",
+      "to": "toISOString"
+    },
+    {
+      "from": "runHybrid",
+      "to": "filter"
+    },
+    {
+      "from": "runHybrid",
+      "to": "slice"
+    },
+    {
+      "from": "runHybrid",
+      "to": "round"
+    },
+    {
+      "from": "runHybrid",
+      "to": "reduce"
+    },
+    {
+      "from": "runHybrid",
+      "to": "round"
+    },
+    {
+      "from": "runHybrid",
+      "to": "reduce"
+    },
+    {
+      "from": "runHybrid",
+      "to": "round"
+    },
+    {
+      "from": "runHybrid",
+      "to": "reduce"
+    },
+    {
+      "from": "runHybrid",
+      "to": "getLatestState"
+    },
+    {
+      "from": "runHybrid",
+      "to": "run"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "split"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "toISOString"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "catch"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "get"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "setDate"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "getDate"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "split"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "toISOString"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "filter"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "round"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "reduce"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "getDay"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "split"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "toISOString"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "filter"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "catch"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "get"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "round"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "reduce"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "round"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "reduce"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "slice"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "filter"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "map"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "join"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "filter"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "reduce"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "reduce"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "forEach"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "push"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "map"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "entries"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "reduce"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "sort"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "forEach"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "join"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "map"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "slice"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "sort"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "entries"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "filter"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "filter"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "filter"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "filter"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "repeat"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "round"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "repeat"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "round"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "repeat"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "round"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "repeat"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "round"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "toLocaleDateString"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "round"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "round"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "error"
+    },
+    {
+      "from": "middayNudge",
+      "to": "split"
+    },
+    {
+      "from": "middayNudge",
+      "to": "toISOString"
+    },
+    {
+      "from": "middayNudge",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "middayNudge",
+      "to": "filter"
+    },
+    {
+      "from": "middayNudge",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "filter"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "map"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "setDate"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "getDate"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "split"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "toISOString"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "has"
+    },
+    {
+      "from": "encryptText",
+      "to": "encode"
+    },
+    {
+      "from": "encryptText",
+      "to": "slice"
+    },
+    {
+      "from": "encryptText",
+      "to": "padEnd"
+    },
+    {
+      "from": "encryptText",
+      "to": "importKey"
+    },
+    {
+      "from": "encryptText",
+      "to": "getRandomValues"
+    },
+    {
+      "from": "encryptText",
+      "to": "encode"
+    },
+    {
+      "from": "encryptText",
+      "to": "encrypt"
+    },
+    {
+      "from": "encryptText",
+      "to": "set"
+    },
+    {
+      "from": "encryptText",
+      "to": "set"
+    },
+    {
+      "from": "encryptText",
+      "to": "btoa"
+    },
+    {
+      "from": "encryptText",
+      "to": "fromCharCode"
+    },
+    {
+      "from": "saveEvent",
+      "to": "warn"
+    },
+    {
+      "from": "saveEvent",
+      "to": "get"
+    },
+    {
+      "from": "saveEvent",
+      "to": "parse"
+    },
+    {
+      "from": "saveEvent",
+      "to": "encryptText"
+    },
+    {
+      "from": "saveEvent",
+      "to": "unshift"
+    },
+    {
+      "from": "saveEvent",
+      "to": "splice"
+    },
+    {
+      "from": "saveEvent",
+      "to": "put"
+    },
+    {
+      "from": "saveEvent",
+      "to": "stringify"
+    },
+    {
+      "from": "saveEvent",
+      "to": "put"
+    },
+    {
+      "from": "saveEvent",
+      "to": "includes"
+    },
+    {
+      "from": "saveEvent",
+      "to": "filter"
+    },
+    {
+      "from": "saveEvent",
+      "to": "includes"
+    },
+    {
+      "from": "saveEvent",
+      "to": "catch"
+    },
+    {
+      "from": "saveEvent",
+      "to": "triggerMLPipeline"
+    },
+    {
+      "from": "saveEvent",
+      "to": "warn"
+    },
+    {
+      "from": "saveEvent",
+      "to": "error"
+    },
+    {
+      "from": "getRecentEvents",
+      "to": "get"
+    },
+    {
+      "from": "getRecentEvents",
+      "to": "slice"
+    },
+    {
+      "from": "getRecentEvents",
+      "to": "parse"
+    },
+    {
+      "from": "getEventCount",
+      "to": "get"
+    },
+    {
+      "from": "getEventCount",
+      "to": "parseInt"
+    },
+    {
+      "from": "getLatestState",
+      "to": "split"
+    },
+    {
+      "from": "getLatestState",
+      "to": "toISOString"
+    },
+    {
+      "from": "getLatestState",
+      "to": "get"
+    },
+    {
+      "from": "getLatestState",
+      "to": "parse"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "get"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "parse"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "round"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "round"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "round"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "toISOString"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "put"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "stringify"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "warn"
+    },
+    {
+      "from": "defaultDashboard",
+      "to": "fill"
+    },
+    {
+      "from": "scanDir",
+      "to": "readdirSync"
+    },
+    {
+      "from": "scanDir",
+      "to": "join"
+    },
+    {
+      "from": "scanDir",
+      "to": "statSync"
+    },
+    {
+      "from": "scanDir",
+      "to": "isDirectory"
+    },
+    {
+      "from": "scanDir",
+      "to": "scanDir"
+    },
+    {
+      "from": "scanDir",
+      "to": "endsWith"
+    },
+    {
+      "from": "scanDir",
+      "to": "analyzeFile"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "readFileSync"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "parse"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "traverse"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "push"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "traverse"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "has"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "push"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "has"
+    },
+    {
+      "from": "analyzeFile",
+      "to": "push"
+    }
+  ]
+}

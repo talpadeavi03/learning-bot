@@ -153,6 +153,77 @@ async function handleCommand(text, chatId, env) {
       return true;
     }
 
+    case '/trace': {
+
+      const fn = args.trim()
+
+      if (!fn) {
+        await sendTelegram(
+          chatId,
+          "Usage: /trace functionName\nExample: /trace triggerMLPipeline",
+          env
+        )
+        return true
+      }
+
+      const raw = await env.AETHER_KV.get("code_graph")
+
+      if (!raw) {
+        await sendTelegram(chatId, "Code graph not loaded.", env)
+        return true
+      }
+
+      const graph = JSON.parse(raw)
+
+      function trace(target, visited = new Set()) {
+
+        if (visited.has(target)) return []
+
+        visited.add(target)
+
+        const callers = graph.edges
+          .filter(e => e.to === target)
+          .map(e => e.from)
+
+        if (callers.length === 0) {
+          return [[target]]
+        }
+
+        let paths = []
+
+        for (const caller of callers) {
+
+          const subPaths = trace(caller, visited)
+
+          for (const p of subPaths) {
+            paths.push([...p, target])
+          }
+
+        }
+
+        return paths
+      }
+
+      const paths = trace(fn)
+
+      if (!paths.length) {
+        await sendTelegram(chatId, `No trace found for ${fn}`, env)
+        return true
+      }
+
+      let msg = `🧠 Code Trace for *${fn}*\n\n`
+
+      paths.forEach((p, i) => {
+        msg += `Flow ${i+1}\n`
+        msg += p.join("\n↓\n")
+        msg += "\n\n"
+      })
+
+      await sendTelegram(chatId, msg, env)
+
+      return true
+    }
+
     case '/briefing':
     case '/morning': {
       await sendMorningBriefing(env);
@@ -437,7 +508,7 @@ export default {
       if (url.pathname === '/log-github'       && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger'          && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health'           && request.method === 'GET')  return handleHealth(request, env);
-
+     
       if (url.pathname === '/update-code-graph' && request.method === 'POST') {
 
         const graph = await request.json();
@@ -453,6 +524,88 @@ export default {
          status: "code graph stored",
          nodes: graph.nodes ? graph.nodes.length : 0
       });
+    }
+
+      if (url.pathname === '/code' && request.method === 'GET') {
+
+      const fn = url.searchParams.get("fn")
+
+      const raw = await env.AETHER_KV.get("code_graph")
+
+      if (!raw) {
+        return jsonResp({ error: "code graph not loaded" })
+      }
+
+      const graph = JSON.parse(raw)
+
+      const defined = graph.nodes
+        .filter(n => n.name === fn)
+        .map(n => n.file)
+
+      const calls = graph.edges
+        .filter(e => e.from === fn)
+        .map(e => e.to)
+
+      const used = graph.edges
+        .filter(e => e.to === fn)
+        .map(e => e.from)
+
+      return jsonResp({
+        function: fn,
+        defined_in: defined,
+        calls: [...new Set(calls)],
+        used_in: [...new Set(used)]
+      })
+    }
+    
+
+      if (url.pathname === '/codepath' && request.method === 'GET') {
+
+      const fn = url.searchParams.get("fn")
+
+      const raw = await env.AETHER_KV.get("code_graph")
+
+      if (!raw) {
+        return jsonResp({ error: "code graph not loaded" })
+      }
+
+      const graph = JSON.parse(raw)
+
+      function trace(target, visited = new Set()) {
+
+        if (visited.has(target)) return []
+
+        visited.add(target)
+
+        const callers = graph.edges
+          .filter(e => e.to === target)
+          .map(e => e.from)
+
+        if (callers.length === 0) {
+          return [[target]]
+        }
+
+        let paths = []
+
+        for (const caller of callers) {
+
+          const subPaths = trace(caller, visited)
+
+          for (const p of subPaths) {
+            paths.push([...p, target])
+          }
+
+        }
+
+        return paths
+      }
+
+      const paths = trace(fn)
+
+      return jsonResp({
+        function: fn,
+        paths
+      })
     }
 
     if (url.pathname.startsWith('/api')) {
