@@ -632,6 +632,7 @@
 │   │   ├── build_code_graph.py
 │   │   ├── dashboard.py
 │   │   ├── dashboard_data.py
+│   │   ├── generate_architecture.py
 │   │   ├── goal_engine.py
 │   │   ├── graph_query.py
 │   │   ├── habit_tracker.py
@@ -683,6 +684,7 @@
 │   │   └── icon-512.png
 │   ├── index.html
 │   ├── manifest.json
+│   ├── system-brain.html
 │   └── timeline.html
 ├── state
 │   ├── current_state.json
@@ -691,4 +693,4 @@
 ├── tree.txt
 └── wrangler.toml
 
-108 directories, 584 files
+108 directories, 586 files
