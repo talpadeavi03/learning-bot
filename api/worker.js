@@ -1167,6 +1167,42 @@ async function whisperTranscribe(audioUrl, env) {
   return transcript.trim();
 }
 
+
+
+// ═══════════════════════════════════════════
+// ML PIPELINE TRIGGER
+// ═══════════════════════════════════════════
+
+async function triggerMLPipeline(env) {
+  if (!env.GITHUB_TOKEN) {
+    console.warn("[AETHER] No GitHub token configured");
+    return;
+  }
+
+  console.log("[AETHER] Triggering ML pipeline...");
+
+  const resp = await fetch(
+    "https://api.github.com/repos/talpadeavi03/learning-bot/dispatches",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `token ${env.GITHUB_TOKEN}`,
+        Accept: "application/vnd.github+json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        event_type: "telegram_batch",
+      }),
+    }
+  );
+
+  const text = await resp.text();
+
+  console.log("[AETHER] GitHub status:", resp.status);
+  console.log("[AETHER] GitHub body:", text);
+}
+
+
 // ═════════════════════════════════════════════════════════════════
 // TELEGRAM HELPERS
 // ═════════════════════════════════════════════════════════════════
@@ -1588,24 +1624,6 @@ async function saveEvent(event, env) {
   } catch (e) {
     console.error('[AETHER] saveEvent failed:', e.message);
   }
-}
-
-async function triggerMLPipeline(env) {
-  if (!env.GITHUB_TOKEN) return;
-  console.log('[AETHER] Triggering ML pipeline...');
-  const resp = await fetch(
-    'https://api.github.com/repos/talpadeavi03/learning-bot/actions/workflows/ml_pipeline.yml/dispatches',
-    {
-      method:  'POST',
-      headers: {
-        'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
-        'Accept':        'application/vnd.github.v3+json',
-        'Content-Type':  'application/json',
-      },
-      body: JSON.stringify({ ref: 'master' }),
-    }
-  );
-  console.log('[AETHER] ML pipeline triggered:', resp.status);
 }
 
 async function getRecentEvents(limit, env) {
