@@ -1189,6 +1189,7 @@ async function triggerMLPipeline(env) {
         Authorization: `token ${env.GITHUB_TOKEN}`,
         Accept: "application/vnd.github+json",
         "Content-Type": "application/json",
+        "User-Agent": "aether-worker"
       },
       body: JSON.stringify({
         event_type: "telegram_batch",
