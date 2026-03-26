@@ -8,6 +8,8 @@ const SOURCE_DIRS = ["api","scripts"]
 const nodes = []
 const edges = []
 
+const nodeSet = new Set()
+
 const IGNORE = new Set([
   "console",
   "String",
@@ -18,6 +20,8 @@ const IGNORE = new Set([
 ])
 
 function scanDir(dir){
+
+  if(!fs.existsSync(dir)) return
 
   const files = fs.readdirSync(dir)
 
@@ -54,10 +58,15 @@ function analyzeFile(filePath){
 
       const fnName = pathNode.node.id.name
 
-      nodes.push({
-        name:fnName,
-        file:filePath
-      })
+      if(!nodeSet.has(fnName)){
+        nodeSet.add(fnName)
+
+        nodes.push({
+          id: fnName,
+          label: fnName,
+          file: filePath
+        })
+      }
 
       pathNode.traverse({
 
@@ -65,33 +74,22 @@ function analyzeFile(filePath){
 
           const callee = callPath.node.callee
 
+          let called = null
+
           if(callee.type === "Identifier"){
-
-            const called = callee.name
-
-            if(!IGNORE.has(called)){
-
-              edges.push({
-                from:fnName,
-                to:called
-              })
-
-            }
-
+            called = callee.name
           }
 
           if(callee.type === "MemberExpression" && callee.property){
+            called = callee.property.name
+          }
 
-            const called = callee.property.name
+          if(called && !IGNORE.has(called)){
 
-            if(!IGNORE.has(called)){
-
-              edges.push({
-                from:fnName,
-                to:called
-              })
-
-            }
+            edges.push({
+              from: fnName,
+              to: called
+            })
 
           }
 
@@ -109,10 +107,16 @@ SOURCE_DIRS.forEach(scanDir)
 
 const graph = {nodes,edges}
 
-if(!fs.existsSync("data")) fs.mkdirSync("data")
+if(!fs.existsSync("data")) fs.mkdirSync("data",{recursive:true})
+if(!fs.existsSync("site/data")) fs.mkdirSync("site/data",{recursive:true})
 
 fs.writeFileSync(
   "data/code_graph.json",
+  JSON.stringify(graph,null,2)
+)
+
+fs.writeFileSync(
+  "site/data/code_graph.json",
   JSON.stringify(graph,null,2)
 )
 
