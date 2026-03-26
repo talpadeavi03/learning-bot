@@ -15,8 +15,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Clone GitNexus
-      run: |
-        git clone https://github.com/abhigyanpatwari/GitNexus.git
+      run: git clone https://github.com/abhigyanpatwari/GitNexus.git
 
     - name: Setup Node
       uses: actions/setup-node@v4
@@ -27,13 +26,15 @@ jobs:
       run: |
         cd GitNexus/gitnexus
         npm install
-        npm run build
+
+    - name: Ensure data directory
+      run: mkdir -p data
 
     - name: Run GitNexus analysis
       run: |
         cd GitNexus/gitnexus
-        node dist/cli.js --repo $GITHUB_WORKSPACE --output $GITHUB_WORKSPACE/data/code_graph.json
-        
+        npx gitnexus analyze $GITHUB_WORKSPACE --output $GITHUB_WORKSPACE/data/code_graph.json
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
