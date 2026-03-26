@@ -27,6 +27,11 @@ jobs:
         cd GitNexus/gitnexus
         npm install
 
+    - name: Debug graph
+      run: |
+        echo "---- code_graph.json ----"
+        cat data/code_graph.json
+
     - name: Ensure data directory
       run: mkdir -p data
 
@@ -41,11 +46,6 @@ jobs:
       with:
         python-version: "3.11"
 
-    - name: Debug graph file
-      run: |
-        echo "---- GRAPH FILE ----"
-        cat data/code_graph.json
-
     - name: Generate architecture diagram
       run: |
         python scripts/analytics/generate_architecture.py
@@ -55,8 +55,8 @@ jobs:
         git config --local user.email "aether-bot@noreply.com"
         git config --local user.name "AETHER Bot"
 
-        git add data/code_graph.json
-        git add docs/aether-live-architecture.html
+        git add data/code_graph.json || true
+        git add docs/aether-live-architecture.html || true
 
         git diff --staged --quiet || git commit -m "update code graph + architecture [skip ci]"
         git push
