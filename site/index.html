@@ -429,6 +429,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
       <div class="nav-tabs">
         <button class="ntab on" onclick="showView('dash',this)">OVERVIEW</button>
         <button class="ntab" onclick="showView('learn',this)">LEARNING</button>
+        <button class="ntab" onclick="showView('graph',this)">GRAPH</button>
         <button class="ntab" onclick="showView('goals',this)">GOALS</button>
         <button class="ntab" onclick="showView('system',this)">SYSTEM</button>
         <button class="ntab" onclick="showDocsWithGate(this)">DOCS 🔒</button>
@@ -610,6 +611,17 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
         </div>
       </div>
     </div>
+  </div>
+  
+
+  <!-- SYSTEM BRAIN GRAPH -->
+  <div class="view" id="view-graph">
+
+    <div style="padding:20px">
+      <div class="pt">System Brain <span>CODE GRAPH</span></div>
+      <div id="network" style="height:80vh;border:1px solid rgba(0,255,255,.15)"></div>
+    </div>
+
   </div>
 
   <!-- SYSTEM -->
@@ -1259,11 +1271,19 @@ function showDoc(id,btn){
   document.getElementById('doc-'+id).style.display='block';
   btn.classList.add('on');
 }
-function showView(id,btn){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
-  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('on'));
-  document.getElementById('view-'+id).classList.add('on');
-  btn.classList.add('on');
+function showView(v, btn){
+
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'))
+  document.getElementById('view-'+v).classList.add('on')
+
+  document.querySelectorAll('.ntab').forEach(x=>x.classList.remove('on'))
+  btn.classList.add('on')
+
+  // load system brain when graph tab opens
+  if(v === "graph"){
+      loadSystemBrain();
+  }
+
 }
 
 /* ══ PASSWORD GATE ══ */
@@ -1410,5 +1430,46 @@ function typeMsg(text){
   type();
 }
 </script>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<script>
+
+async function loadSystemBrain(){
+
+  const res = await fetch("data/code_graph.json");
+  const graph = await res.json();
+
+  const nodes = new vis.DataSet(
+    graph.nodes.map(n => ({
+      id: n.id,
+      label: n.label || n.id
+    }))
+  );
+
+  const edges = new vis.DataSet(
+    graph.edges.map(e => ({
+      from: e.source,
+      to: e.target
+    }))
+  );
+
+  const container = document.getElementById("network");
+
+  const data = { nodes, edges };
+
+  const options = {
+    nodes:{shape:"dot",size:10},
+    edges:{arrows:"to"},
+    physics:{stabilization:false}
+  };
+
+  new vis.Network(container,data,options);
+
+}
+
+</script>
+
+
 </body>
 </html>

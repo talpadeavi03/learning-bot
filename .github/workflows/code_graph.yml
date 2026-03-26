@@ -14,31 +14,35 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: Clone GitNexus
-      run: |
-        git clone https://github.com/abhigyanpatwari/GitNexus.git
-
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
         node-version: 20
 
-    - name: Install GitNexus
+    - name: Install GitNexus CLI
       run: |
-        cd GitNexus/gitnexus
-        npm install
+        npm install -g gitnexus
 
     - name: Run GitNexus analysis
       run: |
-        cd GitNexus/gitnexus
-        npm install
-        node dist/cli.js --repo $GITHUB_WORKSPACE --output $GITHUB_WORKSPACE/data/code_graph.json
+        gitnexus --repo $GITHUB_WORKSPACE --output $GITHUB_WORKSPACE/data/code_graph.json
 
-    - name: Commit graph
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Generate architecture diagram
+      run: |
+        python scripts/analytics/generate_architecture.py
+
+    - name: Commit graph and architecture
       run: |
         git config --local user.email "aether-bot@noreply.com"
         git config --local user.name "AETHER Bot"
 
         git add data/code_graph.json
-        git diff --staged --quiet || git commit -m "update code graph [skip ci]"
+        git add docs/aether-live-architecture.html
+
+        git diff --staged --quiet || git commit -m "update code graph + architecture [skip ci]"
         git push

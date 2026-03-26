@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>AETHER System Brain</title>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<style>
+body{
+  background:#0f172a;
+  color:white;
+  font-family:Arial;
+}
+
+#network{
+  width:100%;
+  height:90vh;
+  border:1px solid #333;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>AETHER System Brain</h2>
+
+<div id="network"></div>
+
+<script>
+
+fetch("../data/code_graph.json")
+.then(res => res.json())
+.then(graph => {
+
+    const nodes = new vis.DataSet(
+        graph.nodes.map(n => ({
+            id: n.id,
+            label: n.label || n.id
+        }))
+    );
+
+    const edges = new vis.DataSet(
+        graph.edges.map(e => ({
+            from: e.source,
+            to: e.target
+        }))
+    );
+
+    const container = document.getElementById("network");
+
+    const data = {
+        nodes: nodes,
+        edges: edges
+    };
+
+    const options = {
+        nodes:{
+            shape:"dot",
+            size:10
+        },
+        edges:{
+            arrows:"to"
+        },
+        physics:{
+            stabilization:false
+        }
+    };
+
+    new vis.Network(container, data, options);
+
+});
+
+</script>
+
+</body>
+</html>

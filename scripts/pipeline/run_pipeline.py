@@ -1,4 +1,8 @@
 import subprocess
+import os
+
+os.system("node scripts/analytics/build_code_graph.js")
+os.system("python scripts/analytics/generate_architecture.py")
 
 steps = [
     "python scripts/features/feature_extractor.py",
