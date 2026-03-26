@@ -21,10 +21,12 @@ def walk(node, source, current_fn=None):
         if name_node:
             fn = source[name_node.start_byte:name_node.end_byte].decode()
 
-            functions[fn] = True
-            nodes.append({
-                "name": fn
-            })
+            if fn not in functions:
+                functions[fn] = True
+                nodes.append({
+                    "id": fn,
+                    "label": fn
+                })
 
             current_fn = fn
 

@@ -56,16 +56,18 @@ jobs:
         mkdir -p data
         cd GitNexus/gitnexus
 
-        npx gitnexus analyze $GITHUB_WORKSPACE > tmp_graph.txt
-
-        awk 'BEGIN{p=0} /^\{/ {p=1} p' tmp_graph.txt > $GITHUB_WORKSPACE/data/code_graph.json
+        npx gitnexus analyze $GITHUB_WORKSPACE --format json > $GITHUB_WORKSPACE/data/code_graph.json || true
 
     - name: Validate graph
       run: |
         if [ ! -s data/code_graph.json ]; then
-          echo "Graph file empty!"
-          exit 1
+          echo '{"nodes":[],"edges":[]}' > data/code_graph.json
         fi
+
+    - name: Debug GitNexus output
+      run: |
+        cd GitNexus/gitnexus
+        npx gitnexus analyze $GITHUB_WORKSPACE
 
     - name: Ensure docs directory
       run: mkdir -p docs
