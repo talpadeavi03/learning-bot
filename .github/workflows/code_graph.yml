@@ -9,6 +9,7 @@ on:
       - "site/**"
       - "*.js"
       - "*.py"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,14 +24,18 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
+    # Restore cached GitNexus
     - name: Cache GitNexus
       uses: actions/cache@v4
       with:
         path: GitNexus
         key: gitnexus-${{ runner.os }}
 
-    - name: Clone GitNexus
-      run: git clone https://github.com/abhigyanpatwari/GitNexus.git
+    - name: Clone GitNexus if missing
+      run: |
+        if [ ! -d "GitNexus" ]; then
+          git clone https://github.com/abhigyanpatwari/GitNexus.git
+        fi
 
     - name: Setup Node
       uses: actions/setup-node@v4
@@ -43,17 +48,11 @@ jobs:
         cd GitNexus/gitnexus
         npm install
 
-    - name: Debug graph
-      run: |
-        echo "---- code_graph.json ----"
-        cat data/code_graph.json
-
     - name: Ensure data directory
       run: mkdir -p data
 
     - name: Run GitNexus analysis
       run: |
-        mkdir -p data
         cd GitNexus/gitnexus
         npx gitnexus analyze $GITHUB_WORKSPACE | awk 'BEGIN{p=0} /^\{/ {p=1} p' > $GITHUB_WORKSPACE/data/code_graph.json
 
@@ -68,11 +67,12 @@ jobs:
 
     - name: Commit graph and architecture
       run: |
-        git config --local user.email "aether-bot@noreply.com"
-        git config --local user.name "AETHER Bot"
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
         git add data/code_graph.json || true
         git add docs/aether-live-architecture.html || true
 
         git diff --staged --quiet || git commit -m "update code graph + architecture [skip ci]"
+
         git push https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} HEAD:master
