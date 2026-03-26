@@ -24,7 +24,7 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    # Restore cached GitNexus
+    # Cache GitNexus
     - name: Cache GitNexus
       uses: actions/cache@v4
       with:
@@ -48,39 +48,57 @@ jobs:
         cd GitNexus/gitnexus
         npm install
 
-    - name: Ensure data directory
-      run: mkdir -p data
-
-    - name: Run GitNexus analysis
+    - name: Ensure graph directories
       run: |
         mkdir -p data
+        mkdir -p site/data
+
+    # SAFE GRAPH GENERATION
+    - name: Run GitNexus analysis
+      run: |
         cd GitNexus/gitnexus
 
-        npx gitnexus analyze $GITHUB_WORKSPACE --format json > $GITHUB_WORKSPACE/data/code_graph.json || true
+        echo "Running GitNexus..."
 
+        npx gitnexus analyze $GITHUB_WORKSPACE --format json > tmp_graph.json || true
+
+        if [ -s tmp_graph.json ]; then
+          echo "Valid graph generated"
+          mv tmp_graph.json $GITHUB_WORKSPACE/data/code_graph.json
+        else
+          echo "Graph empty — keeping previous graph"
+        fi
+
+    # Ensure graph file always exists
     - name: Validate graph
       run: |
-        if [ ! -s data/code_graph.json ]; then
+        if [ ! -f data/code_graph.json ]; then
           echo '{"nodes":[],"edges":[]}' > data/code_graph.json
         fi
 
-    - name: Debug GitNexus output
+    # Copy graph to site for frontend
+    - name: Copy graph to site
       run: |
-        cd GitNexus/gitnexus
-        npx gitnexus analyze $GITHUB_WORKSPACE
+        cp data/code_graph.json site/data/code_graph.json
 
-    - name: Ensure docs directory
-      run: mkdir -p docs
-
+    # Setup Python
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
+    - name: Install Python deps
+      run: |
+        pip install networkx
+
+    - name: Ensure docs directory
+      run: mkdir -p docs
+
     - name: Generate architecture diagram
       run: |
         python scripts/analytics/generate_architecture.py
 
+    # Commit outputs
     - name: Commit graph and architecture
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -89,8 +107,9 @@ jobs:
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
         git add data/ || true
+        git add site/data/ || true
         git add docs/ || true
 
-        git diff --staged --quiet || git commit -m "update code graph + architecture [skip ci]"
+        git diff --staged --quiet || git commit -m "update system brain graph [skip ci]"
 
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} HEAD:master
