@@ -27,12 +27,13 @@ jobs:
       run: |
         cd GitNexus/gitnexus
         npm install
+        npm run build
 
     - name: Run GitNexus analysis
       run: |
         cd GitNexus/gitnexus
         node dist/cli.js --repo $GITHUB_WORKSPACE --output $GITHUB_WORKSPACE/data/code_graph.json
-
+        
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
