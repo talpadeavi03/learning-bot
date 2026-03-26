@@ -6,592 +6,539 @@
 <title>AETHER — Personal AI OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 :root{
-  --c:#00ffff; --p:#ff00aa; --g:#00ff88; --o:#ffaa00; --r:#ff3355;
-  --dark:#010b12; --panel:rgba(0,16,26,0.9); --border:rgba(0,255,255,0.18);
-  --text:#bde0ea; --text2:rgba(189,224,234,0.55);
+  --c:#00ffff;--p:#ff00aa;--g:#00ff88;--o:#ffaa00;--r:#ff3355;
+  --dark:#010b12;--panel:rgba(0,16,26,0.88);--border:rgba(0,255,255,0.16);
+  --text:#bde0ea;--text2:rgba(189,224,234,0.5);
+  --glow-c:0 0 20px rgba(0,255,255,.4),0 0 40px rgba(0,255,255,.15);
+  --glow-p:0 0 20px rgba(255,0,170,.4),0 0 40px rgba(255,0,170,.15);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;scroll-behavior:smooth}
 body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;font-weight:500;min-height:100vh;overflow-x:hidden;cursor:none}
 
-/* CURSOR */
-#cur,#curd{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s}
-#cur{width:22px;height:22px;border:1.5px solid var(--c);border-radius:50%;mix-blend-mode:screen}
-#curd{width:4px;height:4px;background:var(--c);border-radius:50%}
+/* ═══ CUSTOM CURSOR ═══ */
+#cur{position:fixed;pointer-events:none;z-index:9999;mix-blend-mode:screen;
+  width:24px;height:24px;border:1.5px solid var(--c);border-radius:50%;
+  transform:translate(-50%,-50%);transition:transform .08s,width .15s,height .15s,border-color .15s;
+  box-shadow:0 0 8px rgba(0,255,255,.3)}
+#curd{position:fixed;pointer-events:none;z-index:9999;
+  width:4px;height:4px;background:var(--c);border-radius:50%;
+  transform:translate(-50%,-50%);transition:transform .03s}
+#cur.hov{width:48px;height:48px;border-color:var(--p);box-shadow:var(--glow-p);opacity:.7}
 @media(hover:none){#cur,#curd{display:none}body{cursor:auto}}
 
-/* BG */
-#bgc{position:fixed;inset:0;z-index:0;pointer-events:none}
-#dim{position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse 80% 70% at 50% 30%,rgba(0,18,32,0.5) 0%,rgba(0,4,10,0.88) 100%)}
-#dim::after{content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px)}
+/* ═══ THREE.JS CANVAS ═══ */
+#three-bg{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-/* APP */
-#app{position:relative;z-index:2;display:flex;flex-direction:column;min-height:100vh}
+/* ═══ PARTICLE CANVAS ═══ */
+#pcanvas{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.6}
 
-/* HEADER */
-header{display:flex;justify-content:space-between;align-items:center;padding:13px 28px;
-  border-bottom:1px solid var(--border);background:rgba(0,6,14,0.95);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+/* ═══ SCAN OVERLAY ═══ */
+#scan-overlay{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.05) 3px,rgba(0,0,0,.05) 4px)}
+#vignette{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse 90% 80% at 50% 40%,transparent 40%,rgba(0,0,0,.7) 100%)}
+
+/* ═══ APP SHELL ═══ */
+#app{position:relative;z-index:3;display:flex;flex-direction:column;min-height:100vh;
+  transition:transform .55s cubic-bezier(.77,0,.18,1);will-change:transform}
+#app.shifted{transform:translateX(-6%)}
+
+/* ═══ LOADER ═══ */
+#loader{position:fixed;inset:0;background:var(--dark);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity .8s .2s}
+#loader.gone{opacity:0;pointer-events:none}
+.ll{font-family:'Orbitron',sans-serif;font-size:clamp(24px,8vw,44px);font-weight:900;
+  letter-spacing:12px;color:var(--c);text-shadow:var(--glow-c);animation:glitch 4s infinite}
+.lb{width:280px;height:2px;background:rgba(0,255,255,.1);overflow:hidden;margin-top:4px}
+.lbf{height:100%;background:linear-gradient(90deg,transparent,var(--c));width:0;
+  animation:lfill 2.5s cubic-bezier(.4,0,.2,1) forwards;box-shadow:0 0 14px var(--c)}
+@keyframes lfill{to{width:100%}}
+.ls{font-size:12px;font-weight:600;letter-spacing:5px;opacity:.35}
+.ls2{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--g);opacity:.6;margin-top:2px;min-height:16px;letter-spacing:1px}
+
+/* ═══ HEADER ═══ */
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 28px;
+  border-bottom:1px solid var(--border);
+  background:rgba(1,11,18,.96);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
   position:sticky;top:0;z-index:200;gap:10px}
+header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+  animation:hline 6s infinite linear}
+@keyframes hline{0%{opacity:.3}50%{opacity:1}100%{opacity:.3}}
+
 .logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(16px,3.5vw,26px);
-  letter-spacing:5px;color:var(--c);text-shadow:0 0 16px var(--c),0 0 32px rgba(0,255,255,.35);
-  animation:glitch 7s infinite;flex-shrink:0}
-.logo span{color:var(--p);text-shadow:0 0 12px var(--p)}
+  letter-spacing:6px;color:var(--c);text-shadow:var(--glow-c);animation:glitch 7s infinite;flex-shrink:0}
+.logo span{color:var(--p);text-shadow:var(--glow-p)}
 @keyframes glitch{
-  0%,85%,100%{text-shadow:0 0 16px var(--c),0 0 32px rgba(0,255,255,.35);transform:none}
-  87%{text-shadow:-3px 0 var(--p),3px 0 var(--g);transform:skewX(-4deg)}
+  0%,85%,100%{text-shadow:var(--glow-c);transform:none;filter:none}
+  87%{text-shadow:-3px 0 var(--p),3px 0 var(--g);transform:skewX(-4deg);filter:hue-rotate(30deg)}
   89%{text-shadow:3px 0 var(--p),-3px 0 var(--g);transform:skewX(2deg)}
-  91%{text-shadow:0 0 16px var(--c);transform:none}
+  91%{text-shadow:var(--glow-c);transform:none;filter:none}
 }
-.hright{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
-.hpill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:2px;opacity:.65;color:var(--text)}
+
+.hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.hpill{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:2px;opacity:.6}
 .dot{width:7px;height:7px;border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
 .dot.g{background:var(--g);box-shadow:0 0 8px var(--g)}
 .dot.c{background:var(--c);box-shadow:0 0 8px var(--c)}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-#clk{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--c);opacity:.75;letter-spacing:2px}
-#date{font-size:12px;font-weight:600;letter-spacing:1px;opacity:.5;color:var(--text)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+#clk{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--c);opacity:.7;letter-spacing:2px}
+#date{font-size:12px;font-weight:600;letter-spacing:1px;opacity:.45}
+
 .hbtn{background:transparent;border:1px solid var(--c);color:var(--c);padding:8px 18px;
-  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;
-  cursor:pointer;position:relative;overflow:hidden;transition:color .3s;
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;
+  cursor:pointer;position:relative;overflow:hidden;transition:color .25s,box-shadow .25s;
   clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);white-space:nowrap}
-.hbtn::before{content:'';position:absolute;inset:0;background:var(--c);transform:translateX(-110%);transition:transform .3s;z-index:-1}
+.hbtn::before{content:'';position:absolute;inset:0;background:var(--c);transform:translateX(-110%);transition:transform .25s;z-index:-1}
 .hbtn:hover::before{transform:translateX(0)}
-.hbtn:hover{color:var(--dark)}
+.hbtn:hover{color:var(--dark);box-shadow:0 0 20px rgba(0,255,255,.5)}
+
 .nav-tabs{display:flex;gap:2px;background:rgba(0,255,255,.04);border:1px solid var(--border);padding:2px}
 .ntab{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;
-  padding:7px 14px;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent}
-.ntab.on{background:rgba(0,255,255,.12);color:var(--c);text-shadow:0 0 8px var(--c)}
-.ntab:hover:not(.on){color:var(--text);background:rgba(0,255,255,.06)}
+  padding:7px 14px;cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent;position:relative}
+.ntab.on{background:rgba(0,255,255,.1);color:var(--c);text-shadow:0 0 10px var(--c)}
+.ntab.on::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--c);box-shadow:0 0 6px var(--c)}
+.ntab:hover:not(.on){color:var(--text);background:rgba(0,255,255,.05)}
 
-/* WORKER STATUS */
 #workerStatus{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;
   letter-spacing:1px;padding:4px 12px;border:1px solid var(--border);font-family:'Orbitron',sans-serif}
 #workerStatus.ok{border-color:rgba(0,255,136,.35);color:var(--g)}
 #workerStatus.err{border-color:rgba(255,51,85,.35);color:var(--r)}
 
-/* VIEWS */
-.view{display:none;animation:fadeIn .35s ease}
-.view.on{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* GRID */
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;padding:16px 20px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:16px 20px}
-.grid1{display:grid;grid-template-columns:1fr;gap:13px;padding:16px 20px}
-.g-full{grid-column:1/-1}
-.g2{grid-column:span 2}
-
-/* PANEL */
-.panel{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;
-  position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05);
-  animation:pIn .5s ease forwards;opacity:0;transform:translateY(14px)}
-.panel-static{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:4px;position:relative;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 4px 32px rgba(0,0,0,.6),inset 0 1px 0 rgba(0,255,255,.05)}
-.panel::before{content:'';position:absolute;top:0;left:-200%;width:200%;height:1px;
-  background:linear-gradient(90deg,transparent,var(--c),transparent);animation:sweep 5s infinite}
-@keyframes sweep{0%{left:-200%}100%{left:200%}}
-@keyframes pIn{to{opacity:1;transform:translateY(0)}}
-.panel:nth-child(1){animation-delay:.04s}.panel:nth-child(2){animation-delay:.1s}
-.panel:nth-child(3){animation-delay:.16s}.panel:nth-child(4){animation-delay:.22s}
-.panel:nth-child(5){animation-delay:.28s}.panel:nth-child(6){animation-delay:.34s}
-.panel:nth-child(7){animation-delay:.40s}.panel:nth-child(8){animation-delay:.46s}
-.co{position:absolute;width:12px;height:12px;border-color:rgba(0,255,255,.4);border-style:solid}
-.co.tl{top:5px;left:5px;border-width:1px 0 0 1px}
-.co.tr{top:5px;right:5px;border-width:1px 1px 0 0}
-.co.bl{bottom:5px;left:5px;border-width:0 0 1px 1px}
-.co.br{bottom:5px;right:5px;border-width:0 1px 1px 0}
-.pt{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;
-  color:var(--c);opacity:.55;margin-bottom:18px;text-transform:uppercase;
-  display:flex;align-items:center;gap:10px}
-.pt span{opacity:.3;font-size:9px}
-.pt::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.18),transparent)}
-
-/* WELCOME */
-.welcome-strip{background:linear-gradient(135deg,rgba(0,255,255,.06) 0%,rgba(255,0,170,.04) 100%);
-  border-bottom:1px solid var(--border);padding:16px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+/* ═══ WELCOME STRIP ═══ */
+.welcome-strip{
+  background:linear-gradient(135deg,rgba(0,255,255,.05) 0%,rgba(255,0,170,.03) 50%,rgba(0,255,136,.03) 100%);
+  border-bottom:1px solid var(--border);padding:16px 28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  position:relative;overflow:hidden}
+.welcome-strip::before{content:'';position:absolute;left:-100%;top:0;bottom:0;width:60%;
+  background:linear-gradient(90deg,transparent,rgba(0,255,255,.04),transparent);
+  animation:wsweep 8s infinite ease-in-out}
+@keyframes wsweep{0%,100%{left:-100%}50%{left:100%}}
 .wname{font-family:'Orbitron',sans-serif;font-size:clamp(14px,3vw,20px);font-weight:900;
-  letter-spacing:3px;color:var(--c);text-shadow:0 0 12px rgba(0,255,255,.4)}
-.wname span{color:var(--text2);font-size:.75em;letter-spacing:2px;display:block;margin-bottom:2px}
+  letter-spacing:3px;color:var(--c);text-shadow:var(--glow-c)}
+.wname span{color:var(--text2);font-size:.72em;letter-spacing:2px;display:block;margin-bottom:2px}
 .wstats{display:flex;gap:20px;flex-wrap:wrap}
 .wstat{text-align:center}
 .wstat-n{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;line-height:1}
-.wstat-l{font-size:11px;font-weight:600;letter-spacing:2px;opacity:.45;margin-top:3px}
+.wstat-l{font-size:11px;font-weight:600;letter-spacing:2px;opacity:.4;margin-top:3px}
 
-/* METRICS */
-.big-stat{text-align:center;padding:16px 0 18px;border:1px solid var(--border);margin-bottom:18px;background:rgba(0,255,255,.025)}
-.bnum{font-family:'Orbitron',sans-serif;font-size:clamp(36px,5vw,50px);font-weight:900;color:var(--c);
-  text-shadow:0 0 24px var(--c),0 0 50px rgba(0,255,255,.2);line-height:1}
-.blbl{font-size:12px;font-weight:600;letter-spacing:3px;opacity:.38;margin-top:6px}
+/* ═══ VIEWS ═══ */
+.view{display:none;animation:fadeIn .4s ease}
+.view.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ GRIDS ═══ */
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;padding:16px 20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:16px 20px}
+.grid1{display:grid;grid-template-columns:1fr;gap:14px;padding:16px 20px}
+.g-full{grid-column:1/-1}.g2{grid-column:span 2}
+
+/* ═══ PANEL — 3D tilt card ═══ */
+.panel{
+  background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:3px;
+  position:relative;overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 4px 40px rgba(0,0,0,.7),inset 0 1px 0 rgba(0,255,255,.04);
+  animation:pIn .55s ease forwards;opacity:0;transform:translateY(16px) perspective(600px) rotateX(2deg);
+  transition:transform .3s ease,box-shadow .3s ease,border-color .3s;
+  transform-style:preserve-3d;cursor:default}
+.panel:hover{
+  box-shadow:0 8px 60px rgba(0,0,0,.8),0 0 30px rgba(0,255,255,.06),inset 0 1px 0 rgba(0,255,255,.08);
+  border-color:rgba(0,255,255,.28)}
+.panel::before{content:'';position:absolute;top:0;left:-250%;width:200%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);
+  animation:sweep 7s infinite linear}
+@keyframes sweep{0%{left:-250%}100%{left:250%}}
+@keyframes pIn{to{opacity:1;transform:translateY(0) perspective(600px) rotateX(0)}}
+.panel:nth-child(1){animation-delay:.04s}.panel:nth-child(2){animation-delay:.1s}
+.panel:nth-child(3){animation-delay:.17s}.panel:nth-child(4){animation-delay:.24s}
+.panel:nth-child(5){animation-delay:.31s}.panel:nth-child(6){animation-delay:.38s}
+.panel:nth-child(7){animation-delay:.45s}.panel:nth-child(8){animation-delay:.52s}
+
+.panel-static{background:var(--panel);border:1px solid var(--border);padding:20px;border-radius:3px;
+  position:relative;overflow:hidden;backdrop-filter:blur(14px);
+  box-shadow:0 4px 40px rgba(0,0,0,.7),inset 0 1px 0 rgba(0,255,255,.04)}
+
+/* corner brackets */
+.co{position:absolute;width:12px;height:12px;border-color:rgba(0,255,255,.35);border-style:solid;transition:all .3s}
+.co.tl{top:4px;left:4px;border-width:1px 0 0 1px}
+.co.tr{top:4px;right:4px;border-width:1px 1px 0 0}
+.co.bl{bottom:4px;left:4px;border-width:0 0 1px 1px}
+.co.br{bottom:4px;right:4px;border-width:0 1px 1px 0}
+.panel:hover .co{width:16px;height:16px;border-color:var(--c)}
+
+/* ═══ PANEL TITLE ═══ */
+.pt{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:4px;
+  color:var(--c);opacity:.5;margin-bottom:18px;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px}
+.pt span{opacity:.3;font-size:9px}
+.pt::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,255,.2),transparent)}
+
+/* ═══ BIG STAT ═══ */
+.big-stat{text-align:center;padding:16px 0 18px;border:1px solid var(--border);margin-bottom:18px;
+  background:rgba(0,255,255,.02);position:relative;overflow:hidden}
+.big-stat::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 100%,rgba(0,255,255,.06),transparent 60%)}
+.bnum{font-family:'Orbitron',sans-serif;font-size:clamp(36px,5vw,52px);font-weight:900;color:var(--c);
+  text-shadow:var(--glow-c);line-height:1;animation:numPulse 4s ease infinite}
+@keyframes numPulse{0%,100%{text-shadow:var(--glow-c)}50%{text-shadow:0 0 30px var(--c),0 0 60px rgba(0,255,255,.4)}}
+.blbl{font-size:12px;font-weight:600;letter-spacing:3px;opacity:.35;margin-top:6px}
+
+/* ═══ METRICS / BARS ═══ */
 .mrow{margin-bottom:18px}
 .ml{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:700;
   letter-spacing:1.5px;color:var(--text);margin-bottom:8px}
 .mv{font-family:'Orbitron',sans-serif;font-size:12px;text-shadow:0 0 8px currentColor}
 .mv.c{color:var(--c)}.mv.p{color:var(--p)}.mv.g{color:var(--g)}.mv.o{color:var(--o)}
-.btrack{height:7px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
-.bfill{height:100%;width:0%;border-radius:2px;transition:width 1.6s cubic-bezier(.4,0,.2,1)}
-.bf-c{background:linear-gradient(90deg,var(--c),rgba(0,180,180,.4));box-shadow:0 0 12px rgba(0,255,255,.5)}
-.bf-p{background:linear-gradient(90deg,var(--p),rgba(180,0,120,.4));box-shadow:0 0 12px rgba(255,0,170,.5)}
-.bf-g{background:linear-gradient(90deg,var(--g),rgba(0,180,80,.4));box-shadow:0 0 12px rgba(0,255,136,.5)}
-.bf-o{background:linear-gradient(90deg,var(--o),rgba(180,120,0,.4));box-shadow:0 0 12px rgba(255,170,0,.5)}
+.btrack{height:7px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;position:relative}
+.bfill{height:100%;width:0;border-radius:2px;transition:width 1.8s cubic-bezier(.4,0,.2,1)}
+.bfill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:6px;background:rgba(255,255,255,.4);
+  filter:blur(2px);animation:blink 2s infinite}
+.bf-c{background:linear-gradient(90deg,rgba(0,255,255,.3),var(--c));box-shadow:0 0 14px rgba(0,255,255,.5)}
+.bf-p{background:linear-gradient(90deg,rgba(255,0,170,.3),var(--p));box-shadow:0 0 14px rgba(255,0,170,.5)}
+.bf-g{background:linear-gradient(90deg,rgba(0,255,136,.3),var(--g));box-shadow:0 0 14px rgba(0,255,136,.5)}
+.bf-o{background:linear-gradient(90deg,rgba(255,170,0,.3),var(--o));box-shadow:0 0 14px rgba(255,170,0,.5)}
 
-/* STAT CARDS */
+/* ═══ STAT CARDS ═══ */
 .stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:2px}
-.sc{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.02);
-  display:flex;flex-direction:column;gap:4px;transition:border-color .2s,background .2s}
-.sc:hover{border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.05)}
+.sc{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.015);
+  display:flex;flex-direction:column;gap:4px;transition:all .25s;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0;transition:opacity .3s}
+.sc:hover{border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.05);transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 20px rgba(0,255,255,.08)}
+.sc:hover::before{opacity:1}
 .sc-n{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;line-height:1}
-.sc-l{font-size:12px;font-weight:600;letter-spacing:2px;opacity:.45}
+.sc-l{font-size:12px;font-weight:600;letter-spacing:2px;opacity:.4}
 .sc-sub{font-size:11px;font-weight:600;letter-spacing:1px;margin-top:2px}
 
-/* ACTIVITY */
+/* ═══ ACTIVITY ═══ */
 .aitem{display:flex;justify-content:space-between;align-items:center;padding:12px 0;
-  border-bottom:1px solid rgba(0,255,255,.07);animation:sIn .4s ease forwards;opacity:0}
+  border-bottom:1px solid rgba(0,255,255,.06);animation:sIn .45s ease forwards;opacity:0;
+  transition:background .2s;padding:12px 8px;margin:0 -8px;border-radius:2px}
+.aitem:hover{background:rgba(0,255,255,.03)}
 .aitem:last-child{border-bottom:none}
-@keyframes sIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-.atop{font-size:15px;font-weight:600;letter-spacing:.5px;color:var(--text)}
-.asub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
+@keyframes sIn{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+.atop{font-size:15px;font-weight:600;letter-spacing:.5px}
+.asub{font-size:11px;font-weight:600;opacity:.35;letter-spacing:1px;margin-top:2px}
 .amins{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--p);
   background:rgba(255,0,170,.07);border:1px solid rgba(255,0,170,.22);padding:3px 10px}
 .abadge{font-size:10px;padding:2px 8px;border-radius:2px;font-weight:700;letter-spacing:1px;margin-left:8px}
 .ab-l{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.2)}
 .ab-c{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.2)}
 
-/* TIMELINE */
+/* ═══ TIMELINE ═══ */
 .tlist{padding-left:22px;border-left:1px solid var(--border)}
 .titem{display:flex;gap:14px;padding:11px 0;position:relative;animation:fIn .4s ease forwards;opacity:0}
-.titem::before{content:'';position:absolute;left:-25px;top:16px;width:7px;height:7px;
-  background:var(--c);border-radius:50%;box-shadow:0 0 7px var(--c);animation:blink 2.5s infinite}
+.titem::before{content:'';position:absolute;left:-25px;top:17px;width:7px;height:7px;
+  background:var(--c);border-radius:50%;box-shadow:0 0 8px var(--c),0 0 14px rgba(0,255,255,.3);animation:blink 2.5s infinite}
 .ttime{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;color:var(--p);
-  white-space:nowrap;padding-top:2px;min-width:42px;text-shadow:0 0 6px var(--p)}
-.tevent{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);opacity:.85}
+  white-space:nowrap;padding-top:2px;min-width:44px;text-shadow:0 0 6px var(--p)}
+.tevent{font-size:14px;font-weight:500;line-height:1.55;opacity:.82}
 @keyframes fIn{to{opacity:1}}
 
-/* INSIGHTS */
+/* ═══ INSIGHTS ═══ */
 .insights{display:flex;flex-direction:column;gap:10px}
 .insight{border:1px solid var(--border);padding:14px 16px;background:rgba(0,255,255,.02);
-  display:flex;gap:14px;align-items:flex-start;transition:border-color .2s,background .2s;cursor:default}
-.insight:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.04)}
+  display:flex;gap:14px;align-items:flex-start;transition:all .2s;cursor:default}
+.insight:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.04);transform:translateX(3px)}
 .ins-icon{font-size:20px;flex-shrink:0;margin-top:2px}
 .ins-title{font-size:14px;font-weight:700;letter-spacing:.5px;color:var(--c);margin-bottom:5px}
-.ins-body{font-size:13px;font-weight:500;line-height:1.6;opacity:.8}
+.ins-body{font-size:13px;font-weight:500;line-height:1.6;opacity:.78}
 .ins-tag{display:inline-block;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;
   padding:2px 8px;margin-top:7px;font-weight:700}
 .tag-hi{background:rgba(255,51,85,.1);color:var(--r);border:1px solid rgba(255,51,85,.25)}
 .tag-med{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
 .tag-ok{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.25)}
 
-/* PIPELINE */
+/* ═══ PIPELINE ═══ */
 .pipeline{display:flex;flex-direction:column;gap:8px}
 .pipe-item{display:flex;align-items:center;gap:14px;padding:12px 14px;
-  border:1px solid var(--border);background:rgba(0,255,255,.02);transition:all .2s}
-.pipe-item:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.04)}
+  border:1px solid var(--border);background:rgba(0,255,255,.015);transition:all .2s;position:relative;overflow:hidden}
+.pipe-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:rgba(0,255,255,.2);transition:background .3s}
+.pipe-item:hover{border-color:rgba(0,255,255,.28);background:rgba(0,255,255,.04);padding-left:18px}
+.pipe-item:hover::before{background:var(--c);box-shadow:0 0 8px var(--c)}
 .pipe-icon{font-size:16px;flex-shrink:0}
-.pipe-name{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text)}
-.pipe-sub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
-.pipe-status{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;border-radius:2px}
+.pipe-name{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px}
+.pipe-sub{font-size:11px;font-weight:600;opacity:.35;letter-spacing:1px;margin-top:2px}
+.pipe-status{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px}
 .ps-ok{background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.25)}
 .ps-warn{background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.25)}
-.ps-off{background:rgba(255,255,255,.05);color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1)}
+.ps-off{background:rgba(255,255,255,.04);color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.1)}
 .ps-run{background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.25);animation:blink 1.5s infinite}
 
-/* CHART */
-.chart-wrap{position:relative;max-height:220px}
+/* ═══ CHART ═══ */
+.chart-wrap{position:relative;max-height:230px}
 .chart-row{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:center}
 .clegend{display:flex;flex-direction:column;gap:9px}
 .li{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);
-  background:rgba(0,255,255,.02);transition:all .2s;cursor:default}
-.li:hover{border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.05)}
+  background:rgba(0,255,255,.015);transition:all .2s;cursor:default}
+.li:hover{border-color:rgba(0,255,255,.35);background:rgba(0,255,255,.05);transform:translateX(3px)}
 .ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.lname{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text)}
+.lname{flex:1;font-size:14px;font-weight:600;letter-spacing:.5px}
 .lpct{font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700}
+.week-wrap{position:relative;height:190px}
 
-/* WEEK CHART */
-.week-wrap{position:relative;height:180px}
-
-/* MEMORY */
-.mem-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(0,255,255,.07)}
+/* ═══ MEMORY ═══ */
+.mem-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid rgba(0,255,255,.06);transition:all .2s}
+.mem-item:hover{padding-left:6px}
 .mem-item:last-child{border-bottom:none}
 .mem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.mem-txt{font-size:14px;font-weight:500;line-height:1.55;color:var(--text);opacity:.85;flex:1}
-.mem-time{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--c);opacity:.4;white-space:nowrap;margin-top:2px}
+.mem-txt{font-size:14px;font-weight:500;line-height:1.55;opacity:.82;flex:1}
+.mem-time{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--c);opacity:.38;white-space:nowrap;margin-top:2px}
 
-/* QUICK ACTIONS */
+/* ═══ QUICK ACTIONS ═══ */
 .qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .qa{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);
-  background:rgba(0,255,255,.02);cursor:pointer;transition:all .2s}
-.qa:hover{border-color:rgba(0,255,255,.4);background:rgba(0,255,255,.06);transform:translateY(-1px)}
-.qa-icon{font-size:20px;flex-shrink:0}
-.qa-label{font-size:14px;font-weight:700;letter-spacing:.5px;color:var(--text)}
-.qa-sub{font-size:11px;font-weight:600;opacity:.4;letter-spacing:1px;margin-top:2px}
+  background:rgba(0,255,255,.015);cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.qa::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,255,255,.06),transparent);
+  opacity:0;transition:opacity .3s}
+.qa:hover::before{opacity:1}
+.qa:hover{border-color:rgba(0,255,255,.4);background:rgba(0,255,255,.05);transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 20px rgba(0,255,255,.1)}
+.qa-icon{font-size:22px;flex-shrink:0}
+.qa-label{font-size:14px;font-weight:700;letter-spacing:.5px}
+.qa-sub{font-size:11px;font-weight:600;opacity:.38;letter-spacing:1px;margin-top:2px}
 
-/* GOALS */
-.goal-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,255,255,.07)}
+/* ═══ GOALS ═══ */
+.goal-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,255,255,.06)}
 .goal-item:last-child{border-bottom:none}
 .goal-check{width:18px;height:18px;border:1.5px solid var(--border);border-radius:2px;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .2s}
-.goal-check.done{background:var(--g);border-color:var(--g);box-shadow:0 0 8px var(--g)}
+.goal-check.done{background:var(--g);border-color:var(--g);box-shadow:0 0 10px var(--g)}
 .goal-check.done::after{content:'✓';color:var(--dark);font-size:11px;font-weight:900}
-.goal-txt{flex:1;font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
-.goal-txt.done{text-decoration:line-through;opacity:.4}
+.goal-txt{flex:1;font-size:14px;font-weight:600;line-height:1.4}
+.goal-txt.done{text-decoration:line-through;opacity:.35}
 .goal-cat{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;padding:2px 7px;font-weight:700}
 
-/* MOOD */
+/* ═══ MOOD ═══ */
 .mood-row{display:flex;gap:10px;justify-content:space-around;margin:10px 0}
 .mood-btn{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;
-  padding:12px 16px;border:1px solid var(--border);background:transparent;transition:all .2s;flex:1}
-.mood-btn.sel{border-color:var(--c);background:rgba(0,255,255,.08);box-shadow:0 0 12px rgba(0,255,255,.15)}
+  padding:12px 16px;border:1px solid var(--border);background:transparent;transition:all .2s;flex:1;position:relative;overflow:hidden}
+.mood-btn::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 120%,rgba(0,255,255,.15),transparent 70%);
+  opacity:0;transition:opacity .3s}
+.mood-btn:hover::after,.mood-btn.sel::after{opacity:1}
+.mood-btn.sel{border-color:var(--c);background:rgba(0,255,255,.07);box-shadow:0 0 14px rgba(0,255,255,.15)}
 .mood-emoji{font-size:22px}
 .mood-label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text2)}
 
-/* SYSTEM */
+/* ═══ SYS ═══ */
 .sys-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sys-item{padding:14px;border:1px solid var(--border);background:rgba(0,255,255,.02)}
-.sys-key{font-size:11px;font-weight:700;letter-spacing:3px;opacity:.4;margin-bottom:6px}
-.sys-val{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--c)}
-.sys-sub{font-size:11px;opacity:.4;margin-top:3px}
+.sys-item{padding:14px;border:1px solid var(--border);background:rgba(0,255,255,.015);transition:all .2s}
+.sys-item:hover{border-color:rgba(0,255,255,.3);background:rgba(0,255,255,.04)}
+.sys-key{font-size:11px;font-weight:700;letter-spacing:3px;opacity:.38;margin-bottom:6px}
+.sys-val{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:var(--c)}
+.sys-sub{font-size:11px;opacity:.35;margin-top:3px}
 
-/* ── FULL-SCREEN CHAT PAGE ── */
-/* Slide wrapper: sits to the right of viewport, slides left over the main app */
+/* ═══ SYSTEM BRAIN GRAPH ═══ */
+#network{height:80vh;border:1px solid rgba(0,255,255,.15);background:rgba(0,4,10,.8);position:relative;border-radius:3px}
+.graph-controls{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.gc-btn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;font-weight:700;
+  padding:6px 14px;border:1px solid var(--border);background:rgba(0,255,255,.04);color:var(--text2);
+  cursor:pointer;transition:all .2s}
+.gc-btn.on,.gc-btn:hover{border-color:rgba(0,255,255,.4);color:var(--c);background:rgba(0,255,255,.1)}
+
+/* ═══ 2D WAVEFORM VIZ ═══ */
+#waveCanvas{width:100%;height:80px;display:block}
+
+/* ═══ HEXGRID DECORATIVE ═══ */
+.hexgrid{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:.04}
+
+/* ═══ CHAT PAGE ═══ */
 #chatPage{
-  position:fixed;inset:0;z-index:300;
-  display:flex;flex-direction:column;
-  background:var(--dark);
-  transform:translateX(100%);
-  transition:transform .55s cubic-bezier(.77,0,.18,1);
-  will-change:transform;
-}
-#chatPage.open{ transform:translateX(0); }
-
-/* Push main app to the left when chat opens */
-#app{
-  transition:transform .55s cubic-bezier(.77,0,.18,1);
-  will-change:transform;
-}
-#app.shifted{ transform:translateX(-6%); }
-
-/* Scanline overlay on chat page */
-#chatPage::after{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px);
-}
-
-/* Header bar */
-.ch{
-  display:flex;justify-content:space-between;align-items:center;
+  position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;
+  background:var(--dark);transform:translateX(100%);
+  transition:transform .55s cubic-bezier(.77,0,.18,1);will-change:transform}
+#chatPage.open{transform:translateX(0)}
+#chatPage::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.05) 3px,rgba(0,0,0,.05) 4px)}
+.ch{display:flex;justify-content:space-between;align-items:center;
   padding:16px 28px;border-bottom:1px solid var(--border);
   background:rgba(0,6,14,.98);flex-shrink:0;position:relative;z-index:1;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-}
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
 .ct{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:5px;color:var(--c);
-  display:flex;align-items:center;gap:12px;text-shadow:0 0 14px var(--c)}
+  display:flex;align-items:center;gap:12px;text-shadow:var(--glow-c)}
 .od{width:8px;height:8px;background:var(--g);border-radius:50%;animation:blink 2s infinite;box-shadow:0 0 8px var(--g)}
 .cc{background:none;border:1px solid rgba(255,0,170,.35);color:var(--p);
   padding:8px 20px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
   letter-spacing:3px;display:flex;align-items:center;gap:8px;transition:all .2s;
   clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
 .cc:hover{background:rgba(255,0,170,.12);border-color:rgba(255,0,170,.6)}
-/* Messages area — takes all available vertical space */
-#chatMsgs{
-  flex:1;overflow-y:auto;padding:24px clamp(16px,4vw,80px);
+#chatMsgs{flex:1;overflow-y:auto;padding:24px clamp(16px,4vw,80px);
   display:flex;flex-direction:column;gap:16px;
-  scrollbar-width:thin;scrollbar-color:rgba(0,255,255,.15) transparent;
-  position:relative;z-index:1;
-}
+  scrollbar-width:thin;scrollbar-color:rgba(0,255,255,.12) transparent;position:relative;z-index:1}
 #chatMsgs::-webkit-scrollbar{width:3px}
-#chatMsgs::-webkit-scrollbar-thumb{background:rgba(0,255,255,.2)}
+#chatMsgs::-webkit-scrollbar-thumb{background:rgba(0,255,255,.18)}
 .msg{max-width:min(700px,82%);padding:14px 18px;font-size:15px;font-weight:500;line-height:1.65;animation:msgIn .35s ease}
 @keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .msg.user{align-self:flex-end;background:rgba(0,255,255,.07);border:1px solid rgba(0,255,255,.25);
   color:#d0f5f5;clip-path:polygon(0 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%)}
 .msg.ai{align-self:flex-start;background:rgba(255,0,170,.05);border:1px solid rgba(255,0,170,.18);
   color:#eaeaea;clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px)}
-.mlbl{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;opacity:.38;margin-bottom:6px}
+.mlbl{font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:2px;opacity:.35;margin-bottom:6px}
 #thinking{display:flex;align-items:center;gap:10px;padding:8px clamp(16px,4vw,80px);font-size:13px;font-weight:600;
-  color:var(--p);opacity:.7;letter-spacing:1px;flex-shrink:0;position:relative;z-index:1}
+  color:var(--p);opacity:.65;letter-spacing:1px;flex-shrink:0;position:relative;z-index:1}
 #thinking.hidden{display:none}
 .tdots span{display:inline-block;width:5px;height:5px;background:var(--p);border-radius:50%;
   margin:0 2px;animation:bnc 1s infinite}
 .tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
 @keyframes bnc{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-7px)}}
-/* Quick chips */
-.qchips{
-  display:flex;flex-wrap:wrap;gap:8px;
-  padding:12px clamp(16px,4vw,80px);
-  flex-shrink:0;position:relative;z-index:1;
-  border-top:1px solid rgba(0,255,255,.06);
-}
+.qchips{display:flex;flex-wrap:wrap;gap:8px;padding:12px clamp(16px,4vw,80px);
+  flex-shrink:0;position:relative;z-index:1;border-top:1px solid rgba(0,255,255,.06)}
 .chip{font-size:12px;font-weight:600;padding:6px 14px;border:1px solid var(--border);
-  color:rgba(0,255,255,.5);cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px}
+  color:rgba(0,255,255,.45);cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.5px}
 .chip:hover{border-color:var(--c);color:var(--c);background:rgba(0,255,255,.06);transform:translateY(-1px)}
-/* Input bar */
-.cinput{
-  display:flex;padding:16px clamp(16px,4vw,80px);
-  border-top:1px solid var(--border);background:rgba(0,4,12,.96);
-  flex-shrink:0;gap:0;position:relative;z-index:1;
-}
-#chatIn{
-  flex:1;background:rgba(0,255,255,.04);border:1px solid var(--border);border-right:none;
-  color:var(--c);padding:14px 18px;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:500;
-  outline:none;transition:border-color .3s;min-width:0;
-}
+.cinput{display:flex;padding:16px clamp(16px,4vw,80px);
+  border-top:1px solid var(--border);background:rgba(0,4,12,.96);flex-shrink:0;position:relative;z-index:1}
+#chatIn{flex:1;background:rgba(0,255,255,.04);border:1px solid var(--border);border-right:none;
+  color:var(--c);padding:14px 18px;font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:500;outline:none;transition:border-color .3s;min-width:0}
 #chatIn:focus{border-color:rgba(0,255,255,.45);background:rgba(0,255,255,.06)}
-#chatIn::placeholder{color:rgba(0,255,255,.22)}
-#sendBtn{
-  background:var(--c);color:var(--dark);border:none;padding:14px 28px;
+#chatIn::placeholder{color:rgba(0,255,255,.2)}
+#sendBtn{background:var(--c);color:var(--dark);border:none;padding:14px 28px;
   font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;cursor:pointer;
   transition:background .2s,box-shadow .2s;white-space:nowrap;flex-shrink:0;
-  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px);
-}
-#sendBtn:hover{background:#fff;box-shadow:0 0 20px rgba(0,255,255,.55)}
+  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px)}
+#sendBtn:hover{background:#fff;box-shadow:0 0 24px rgba(0,255,255,.6)}
 #sendBtn:disabled{opacity:.3;cursor:not-allowed}
 
-/* LOADER */
-#loader{position:fixed;inset:0;background:var(--dark);z-index:9999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-  transition:opacity .7s}
-#loader.gone{opacity:0;pointer-events:none}
-.ll{font-family:'Orbitron',sans-serif;font-size:clamp(24px,8vw,42px);font-weight:900;
-  letter-spacing:10px;color:var(--c);text-shadow:0 0 30px var(--c),0 0 60px rgba(0,255,255,.25);
-  animation:glitch 4s infinite}
-.lb{width:260px;height:2px;background:rgba(0,255,255,.1);overflow:hidden}
-.lbf{height:100%;background:var(--c);width:0;animation:lfill 2.2s ease forwards;box-shadow:0 0 12px var(--c)}
-@keyframes lfill{to{width:100%}}
-.ls{font-size:13px;font-weight:600;letter-spacing:4px;opacity:.4}
-.ls2{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--g);opacity:.7;margin-top:4px;min-height:18px;letter-spacing:1px}
+/* ═══ PASSWORD GATE ═══ */
+#pw-gate{position:fixed;inset:0;z-index:9000;background:rgba(1,11,18,.97);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+#pw-gate.show{display:flex}
 
-/* MOBILE */
+/* ═══ DOC ═══ */
+.doc-frame{display:none}.doc-frame.on{display:block}
+
+/* ═══ DATA VIZ — HEXAGON ═══ */
+#hexCanvas{display:block;margin:0 auto}
+
+/* ═══ FOOTER LINE ═══ */
+.footline{height:40px;display:flex;align-items:center;justify-content:center;
+  border-top:1px solid var(--border);
+  font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;opacity:.2}
+
+/* ═══ MOBILE ═══ */
 @media(max-width:900px){
   .grid3{grid-template-columns:1fr 1fr;padding:12px;gap:10px}
-  .g2{grid-column:1/-1}
-  .stat-cards{grid-template-columns:1fr 1fr}
-  .chart-row{grid-template-columns:1fr}
-  .cwrap{max-width:240px;margin:0 auto}
-  .clegend{flex-direction:row;flex-wrap:wrap}
-  .li{flex:1 1 calc(50% - 5px)}
-  .sys-grid{grid-template-columns:1fr 1fr}
-}
+  .g2{grid-column:1/-1}.stat-cards{grid-template-columns:1fr 1fr}
+  .chart-row{grid-template-columns:1fr}.cwrap{max-width:240px;margin:0 auto}
+  .clegend{flex-direction:row;flex-wrap:wrap}.li{flex:1 1 calc(50% - 5px)}}
 @media(max-width:600px){
-  header{padding:11px 14px}
-  .logo{font-size:16px;letter-spacing:3px}
+  header{padding:11px 14px}.logo{font-size:16px;letter-spacing:3px}
   #clk,#date,.hpill:first-child{display:none}
   .hbtn{padding:8px 12px;font-size:10px;letter-spacing:1px}
-  .nav-tabs{flex-wrap:wrap}
-  .ntab{font-size:9px;padding:6px 10px}
-  .grid3,.grid2{grid-template-columns:1fr;padding:10px;gap:10px}
-  .g-full,.g2{grid-column:1}
-  .stat-cards{grid-template-columns:1fr 1fr}
-  .chart-row{grid-template-columns:1fr}
-  .clegend{flex-direction:column}
-  .li{flex:unset}
-  .qa-grid{grid-template-columns:1fr}
-  .sys-grid{grid-template-columns:1fr 1fr}
-  .welcome-strip{flex-direction:column;align-items:flex-start}
-  .wstats{gap:14px}
-  .panel{padding:15px 13px}
-  .bnum{font-size:36px}
-  /* Chat page mobile: full cover, no padding tricks */
-  #chatMsgs{padding:16px}
-  .cinput{padding:12px 16px}
-  .qchips{padding:10px 16px}
-  .ch{padding:14px 16px}
-  .cc{padding:7px 14px;font-size:9px;letter-spacing:2px}
-}
+  .ntab{font-size:9px;padding:6px 10px}.qa-grid{grid-template-columns:1fr}
+  .stat-cards{grid-template-columns:1fr 1fr}.sys-grid{grid-template-columns:1fr}
+  .mood-row{flex-wrap:wrap}.mood-btn{min-width:calc(33% - 7px)}
+  .chart-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- ✅ FIX: cursor divs added here -->
+<!-- ═══ LOADERS ═══ -->
+<div id="loader">
+  <div class="ll">AETHER</div>
+  <div class="lb"><div class="lbf"></div></div>
+  <div class="ls">PERSONAL AI OS</div>
+  <div class="ls2" id="bootMsg">Initializing neural substrate...</div>
+</div>
+
+<!-- ═══ THREE.JS BG ═══ -->
+<canvas id="three-bg"></canvas>
+<!-- ═══ PARTICLE CANVAS ═══ -->
+<canvas id="pcanvas"></canvas>
+<div id="scan-overlay"></div>
+<div id="vignette"></div>
+
+<!-- ═══ CUSTOM CURSOR ═══ -->
 <div id="cur"></div>
 <div id="curd"></div>
 
-<!-- LOADER -->
-<div id="loader">
-  <div class="ll">AETHER</div>
-  <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--g);opacity:.6;letter-spacing:2px;margin-bottom:4px">PERSONAL AI OS v2.0</div>
-  <div class="lb"><div class="lbf"></div></div>
-  <div class="ls">BOOTING NEURAL INTERFACE</div>
-  <div class="ls2" id="bootLog">Initializing core modules...</div>
-</div>
-
-<canvas id="bgc"></canvas>
-<div id="dim"></div>
-
+<!-- ═══ APP ═══ -->
 <div id="app">
-  <!-- HEADER -->
+
   <header>
-    <div class="logo">AETHER <span>OS</span></div>
+    <div class="logo">AE<span>TH</span>ER</div>
     <div class="hright">
+      <div class="hpill"><div class="dot g"></div>ONLINE</div>
+      <div class="hpill"><div class="dot c"></div>WORKER</div>
+      <div id="workerStatus" class="ok"><div class="dot g"></div>API OK</div>
+      <div id="clk">00:00:00</div>
+      <div id="date">2026–01–01</div>
       <div class="nav-tabs">
-        <button class="ntab on" onclick="showView('dash',this)">OVERVIEW</button>
-        <button class="ntab" onclick="showView('learn',this)">LEARNING</button>
-        <button class="ntab" onclick="showView('graph',this)">GRAPH</button>
-        <button class="ntab" onclick="showView('goals',this)">GOALS</button>
-        <button class="ntab" onclick="showView('system',this)">SYSTEM</button>
-        <button class="ntab" onclick="showDocsWithGate(this)">DOCS 🔒</button>
+        <button class="ntab on" onclick="switchView('home',this)">HOME</button>
+        <button class="ntab" onclick="switchView('data',this)">DATA</button>
+        <button class="ntab" onclick="switchView('graph',this)">BRAIN</button>
+        <button class="ntab" onclick="switchView('system',this)">SYSTEM</button>
+        <button class="ntab" onclick="switchView('docs',this)">DOCS</button>
       </div>
-      <div id="workerStatus" class="err"><span>●</span><span>WORKER</span></div>
-      <div class="hpill"><div class="dot g"></div><span>ONLINE</span></div>
-      <div id="clk"></div>
-      <div id="date"></div>
-      <button class="hbtn" onclick="openChat()">◈ ASK AETHER</button>
+      <button class="hbtn" onclick="openChat()">⚡ AETHER CHAT</button>
     </div>
   </header>
 
-  <!-- WELCOME -->
   <div class="welcome-strip">
-    <div class="wname"><span>NEURAL INTERFACE ACTIVE</span>WELCOME BACK, AVI</div>
+    <div class="wname"><span>WELCOME BACK,</span>AVI TALPADE</div>
     <div class="wstats">
-      <div class="wstat"><div class="wstat-n" style="color:var(--c)" id="wScore">0</div><div class="wstat-l">TODAY SCORE</div></div>
-      <div class="wstat"><div class="wstat-n" style="color:var(--g)" id="wStreak">0</div><div class="wstat-l">DAY STREAK</div></div>
-      <div class="wstat"><div class="wstat-n" style="color:var(--p)" id="wHours">0</div><div class="wstat-l">HOURS STUDIED</div></div>
-      <div class="wstat"><div class="wstat-n" style="color:var(--o)" id="wTasks">0</div><div class="wstat-l">TASKS DONE</div></div>
+      <div class="wstat"><div class="wstat-n" style="color:var(--c)" id="wSessions">—</div><div class="wstat-l">SESSIONS</div></div>
+      <div class="wstat"><div class="wstat-n" style="color:var(--g)" id="wGoals">—</div><div class="wstat-l">GOALS DONE</div></div>
+      <div class="wstat"><div class="wstat-n" style="color:var(--o)" id="wStreak">—</div><div class="wstat-l">DAY STREAK</div></div>
+      <div class="wstat"><div class="wstat-n" style="color:var(--p)" id="wScore">—</div><div class="wstat-l">AI SCORE</div></div>
     </div>
   </div>
 
-  <!-- OVERVIEW -->
-  <div class="view on" id="view-dash">
+  <!-- ═══ HOME VIEW ═══ -->
+  <div class="view on" id="view-home">
     <div class="grid3">
 
-      <!-- LIVE STAT CARDS -->
-      <div class="panel-static g-full" style="padding:12px 20px">
-        <div class="stat-cards">
-          <div class="sc"><div class="sc-n" id="sc-energy" style="color:var(--c)">—</div><div class="sc-l">ENERGY</div></div>
-          <div class="sc"><div class="sc-n" id="sc-focus"  style="color:var(--g)">—</div><div class="sc-l">FOCUS</div></div>
-          <div class="sc"><div class="sc-n" id="sc-stress" style="color:var(--o)">—</div><div class="sc-l">STRESS</div></div>
-          <div class="sc"><div class="sc-n" id="sc-events" style="color:var(--p)">—</div><div class="sc-l">TODAY EVENTS</div></div>
-          <div class="sc"><div class="sc-n" id="sc-streak" style="color:var(--g)">—</div><div class="sc-l">STREAK</div></div>
-          <div class="sc"><div class="sc-n" id="sc-flow"   style="color:var(--c)">—</div><div class="sc-l">FLOW STATE</div></div>
+      <!-- Energy metrics -->
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Energy Index <span>LIVE</span></div>
+        <div class="big-stat">
+          <div class="bnum" id="energyNum">7.4</div>
+          <div class="blbl">TODAY / 10</div>
+        </div>
+        <div class="mrow"><div class="ml"><span>Focus</span><span class="mv c" id="focusPct">82%</span></div><div class="btrack"><div class="bfill bf-c" id="focusBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Mood</span><span class="mv p" id="moodPct">68%</span></div><div class="btrack"><div class="bfill bf-p" id="moodBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Sleep Quality</span><span class="mv g" id="sleepPct">74%</span></div><div class="btrack"><div class="bfill bf-g" id="sleepBar"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Productivity</span><span class="mv o" id="prodPct">91%</span></div><div class="btrack"><div class="bfill bf-o" id="prodBar"></div></div></div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="panel g2">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Recent Activity <span>LIVE FEED</span></div>
+        <div id="actFeed">
+          <div class="aitem"><div><div class="atop">Neural Networks — Chapter 4 <span class="abadge ab-l">LEARN</span></div><div class="asub">DEEP LEARNING · STUDY SESSION</div></div><div class="amins">47 min</div></div>
+          <div class="aitem"><div><div class="atop">ML Pipeline Build <span class="abadge ab-c">CODE</span></div><div class="asub">GITHUB ACTIONS · DATA OPS</div></div><div class="amins">2.1h</div></div>
+          <div class="aitem"><div><div class="atop">Cloudflare Worker v2 Deploy</div><div class="asub">API · 9 ROUTES LIVE</div></div><div class="amins">38 min</div></div>
+          <div class="aitem"><div><div class="atop">Feature Extraction Script <span class="abadge ab-c">CODE</span></div><div class="asub">PYTHON · ML PIPELINE</div></div><div class="amins">1.3h</div></div>
+          <div class="aitem"><div><div class="atop">AI Insight Review</div><div class="asub">AETHER ANALYSIS · MORNING BRIEF</div></div><div class="amins">22 min</div></div>
         </div>
       </div>
 
-      <!-- 7-DAY ENERGY TREND -->
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">7-Day Energy Trend <span>FROM YOUR EVENTS</span></div>
-        <div style="position:relative;height:170px"><canvas id="energyTrendChart"></canvas></div>
-      </div>
-
-      <!-- INPUT TYPE BAR -->
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Input Sources <span>HOW YOU LOG</span></div>
-        <div style="position:relative;height:170px"><canvas id="inputTypeChart"></canvas></div>
-      </div>
-
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">System Metrics <span>LIVE</span></div>
-        <div class="big-stat"><div class="bnum" id="bigNum">0</div><div class="blbl">EFFICIENCY SCORE</div></div>
-        <div class="mrow"><div class="ml"><span>FOCUS</span><span class="mv c" id="focusVal">0%</span></div><div class="btrack"><div class="bfill bf-c" id="focusBar"></div></div></div>
-        <div class="mrow"><div class="ml"><span>LEARNING</span><span class="mv p" id="learningVal">0%</span></div><div class="btrack"><div class="bfill bf-p" id="learningBar"></div></div></div>
-        <div class="mrow"><div class="ml"><span>PRODUCTIVITY</span><span class="mv g" id="productivityVal">0%</span></div><div class="btrack"><div class="bfill bf-g" id="productivityBar"></div></div></div>
-        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>MOOD</span><span class="mv o" id="moodVal">0%</span></div><div class="btrack"><div class="bfill bf-o" id="moodBar"></div></div></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Today's Activity <span>LOG</span></div>
-        <div id="activity"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Timeline <span>TODAY</span></div>
-        <div class="tlist" id="timeline"></div>
-      </div>
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">AI Insights <span>AETHER ANALYSIS</span></div>
-        <div class="insights" id="insights"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">System Pipeline <span>STATUS</span></div>
-        <div class="pipeline" id="pipeline"></div>
-      </div>
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Topic Distribution <span>CHART</span></div>
-        <div class="chart-row">
-          <div><div class="chart-wrap"><canvas id="donutChart"></canvas></div></div>
-          <div class="clegend" id="donutLegend"></div>
-        </div>
-      </div>
-
-      <!-- HOURLY HEATMAP -->
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Activity by Hour <span>IST HEATMAP</span></div>
-        <div id="heatmap-wrap" style="display:flex;gap:3px;align-items:flex-end;height:100px;padding-top:8px"></div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px;font-family:Share Tech Mono,monospace;font-size:9px;opacity:.3">
-          <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- LEARNING -->
-  <div class="view" id="view-learn">
-    <div class="grid3">
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Weekly Study Hours <span>7 DAYS</span></div>
-        <div class="week-wrap"><canvas id="weekChart"></canvas></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Weekly Stats</div>
-        <div class="stat-cards" style="grid-template-columns:1fr 1fr">
-          <div class="sc"><div class="sc-n" style="color:var(--c)">12.4h</div><div class="sc-l">TOTAL STUDY</div><div class="sc-sub" style="color:var(--g)">↑ +2.1h vs last week</div></div>
-          <div class="sc"><div class="sc-n" style="color:var(--p)">94%</div><div class="sc-l">CONSISTENCY</div><div class="sc-sub" style="color:var(--g)">↑ 6 of 7 days</div></div>
-          <div class="sc"><div class="sc-n" style="color:var(--g)">4</div><div class="sc-l">TOPICS</div><div class="sc-sub" style="color:var(--o)">2 in progress</div></div>
-          <div class="sc"><div class="sc-n" style="color:var(--o)">87</div><div class="sc-l">AVG SCORE</div><div class="sc-sub" style="color:var(--g)">↑ +5 pts</div></div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">ML Prediction <span>MODEL</span></div>
-        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Predicted Productivity</span><span class="mv g">91%</span></div><div class="btrack"><div class="bfill bf-g" style="width:91%"></div></div></div>
-        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Sleep Impact</span><span class="mv c">+8pts</span></div><div class="btrack"><div class="bfill bf-c" style="width:75%"></div></div></div>
-        <div style="margin-bottom:14px"><div class="ml" style="font-size:14px"><span>Exercise Bonus</span><span class="mv p">+5pts</span></div><div class="btrack"><div class="bfill bf-p" style="width:60%"></div></div></div>
-        <div style="padding:12px;border:1px solid var(--border);background:rgba(0,255,136,.03);margin-top:8px">
-          <div style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;color:var(--g);opacity:.6;margin-bottom:6px">MODEL OUTPUT</div>
-          <div style="font-size:13px;line-height:1.6;opacity:.8">RandomForest model predicts <strong style="color:var(--g)">high productivity day</strong>. Optimal study window: 10:00–13:00.</div>
-        </div>
-      </div>
-      <div class="panel g2">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Topic Breakdown <span>DEEP DIVE</span></div>
-        <div id="topicDetail"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">AETHER Memory <span>CONTEXT</span></div>
-        <div id="memory"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GOALS -->
-  <div class="view" id="view-goals">
-    <div class="grid2" style="max-width:900px;margin:0 auto">
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Today's Goals <span>DAILY</span></div>
-        <div id="goalsToday"></div>
-      </div>
-      <div class="panel">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Weekly Goals <span>WEEK</span></div>
-        <div id="goalsWeek"></div>
-      </div>
+      <!-- Stats row -->
       <div class="panel g-full">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">How are you feeling? <span>MOOD CHECK</span></div>
+        <div class="pt">Today's Stats <span>SNAPSHOT</span></div>
+        <div class="stat-cards">
+          <div class="sc"><div class="sc-n" style="color:var(--c)">6.2h</div><div class="sc-l">DEEP WORK</div><div class="sc-sub" style="color:var(--g)">+0.8h vs avg</div></div>
+          <div class="sc"><div class="sc-n" style="color:var(--g)">12</div><div class="sc-l">TASKS DONE</div><div class="sc-sub" style="color:var(--g)">↑ 87% complete</div></div>
+          <div class="sc"><div class="sc-n" style="color:var(--o)">4</div><div class="sc-l">GH COMMITS</div><div class="sc-sub" style="color:var(--o)">main + dev</div></div>
+          <div class="sc"><div class="sc-n" style="color:var(--p)">94</div><div class="sc-l">AI SCORE</div><div class="sc-sub" style="color:var(--p)">PEAK ZONE</div></div>
+        </div>
+      </div>
+
+      <!-- Mood -->
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">How are you feeling? <span>MOOD</span></div>
         <div class="mood-row">
           <button class="mood-btn sel" onclick="setMood(this)"><div class="mood-emoji">😤</div><div class="mood-label">FOCUSED</div></button>
           <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😊</div><div class="mood-label">GOOD</div></button>
@@ -600,7 +547,9 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
           <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">🔥</div><div class="mood-label">HYPER</div></button>
         </div>
       </div>
-      <div class="panel g-full">
+
+      <!-- Quick Actions -->
+      <div class="panel g2">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Quick Actions <span>AETHER</span></div>
         <div class="qa-grid">
@@ -610,21 +559,117 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
           <div class="qa" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')"><div class="qa-icon">⚡</div><div><div class="qa-label">Motivate Me</div><div class="qa-sub">NEURAL BOOST</div></div></div>
         </div>
       </div>
+
+      <!-- Goals -->
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Today's Goals <span>TRACKER</span></div>
+        <div id="goalList">
+          <div class="goal-item"><div class="goal-check done" onclick="toggleGoal(this)"></div><div class="goal-txt done">Complete ML feature extractor</div><div class="goal-cat" style="background:rgba(0,255,136,.1);color:var(--g);border:1px solid rgba(0,255,136,.2)">CODE</div></div>
+          <div class="goal-item"><div class="goal-check done" onclick="toggleGoal(this)"></div><div class="goal-txt done">Study Chapter 4 deep learning</div><div class="goal-cat" style="background:rgba(0,255,255,.1);color:var(--c);border:1px solid rgba(0,255,255,.2)">LEARN</div></div>
+          <div class="goal-item"><div class="goal-check" onclick="toggleGoal(this)"></div><div class="goal-txt">Add GITHUB_TOKEN to CF Worker</div><div class="goal-cat" style="background:rgba(255,170,0,.1);color:var(--o);border:1px solid rgba(255,170,0,.2)">OPS</div></div>
+          <div class="goal-item"><div class="goal-check" onclick="toggleGoal(this)"></div><div class="goal-txt">Log 30+ clean training events</div><div class="goal-cat" style="background:rgba(255,0,170,.1);color:var(--p);border:1px solid rgba(255,0,170,.2)">DATA</div></div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="panel g2">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">AI Insights <span>NEURAL ANALYSIS</span></div>
+        <div class="insights">
+          <div class="insight"><div class="ins-icon">🧠</div><div><div class="ins-title">Peak Focus Window Detected</div><div class="ins-body">Your deep work sessions between 10AM–2PM show 34% higher output. Schedule complex ML tasks in this window.</div><span class="ins-tag tag-ok">HIGH VALUE</span></div></div>
+          <div class="insight"><div class="ins-icon">⚡</div><div><div class="ins-title">Streak at Risk</div><div class="ins-body">You've coded 11 days straight. Missing today would reset your 11-day streak and lower your AI score by 12 points.</div><span class="ins-tag tag-hi">CRITICAL</span></div></div>
+          <div class="insight"><div class="ins-icon">📈</div><div><div class="ins-title">ML Pipeline Ready for Real Data</div><div class="ins-body">Infrastructure 100% done. The model needs 30+ clean events to produce reliable predictions.</div><span class="ins-tag tag-med">ACTION NEEDED</span></div></div>
+        </div>
+      </div>
+
+      <!-- AI Memory -->
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">AI Memory <span>CONTEXT</span></div>
+        <div class="mem-item"><div class="mem-dot" style="background:var(--c)"></div><div><div class="mem-txt">Worker v2 live with 9 routes — Llama 3, Whisper, LLaVA</div><div class="mem-time">2 DAYS AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot" style="background:var(--g)"></div><div><div class="mem-txt">ML pipeline complete — pull → clean → train → predict → push</div><div class="mem-time">3 DAYS AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot" style="background:var(--o)"></div><div><div class="mem-txt">Dashboard PWA live at learning-bot.pages.dev</div><div class="mem-time">1 WEEK AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot" style="background:var(--p)"></div><div><div class="mem-txt">12 bot commands + 4 daily briefings automated</div><div class="mem-time">1 WEEK AGO</div></div></div>
+      </div>
+
+      <!-- Next steps timeline -->
+      <div class="panel g2">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Next Steps <span>IN ORDER</span></div>
+        <div class="tlist">
+          <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent">Send 10+ clean messages to bot — mix energy levels, topics, goals</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent">Add GITHUB_TOKEN to Cloudflare Worker variables (workflow scope)</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">Add /exercise /sleep /food /spend /job commands to worker</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">Set up dev branch + wrangler.toml env.dev + separate KV</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">CF Vectorize semantic memory + AES-256 data encryption</div></div>
+          <div class="titem"><div class="ttime" style="color:var(--text2)">MONTH 2</div><div class="tevent">MLflow on DagsHub + Colab training + native APK + Calendar</div></div>
+        </div>
+      </div>
+
     </div>
   </div>
-  
 
-  <!-- SYSTEM BRAIN GRAPH -->
+  <!-- ═══ DATA VIEW ═══ -->
+  <div class="view" id="view-data">
+    <div class="grid3">
+
+      <div class="panel g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Neural Activity Waveform <span>LIVE 2D</span></div>
+        <canvas id="waveCanvas" height="80"></canvas>
+      </div>
+
+      <div class="panel g2">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Weekly Deep Work <span>HOURS</span></div>
+        <div class="week-wrap"><canvas id="weekChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">Time Distribution <span>THIS WEEK</span></div>
+        <div class="chart-row" style="grid-template-columns:1fr">
+          <div class="cwrap" style="max-width:200px;margin:0 auto"><canvas id="donutChart"></canvas></div>
+        </div>
+        <div class="clegend" style="margin-top:12px">
+          <div class="li"><div class="ldot" style="background:var(--c)"></div><div class="lname">Coding</div><div class="lpct" style="color:var(--c)">42%</div></div>
+          <div class="li"><div class="ldot" style="background:var(--g)"></div><div class="lname">Learning</div><div class="lpct" style="color:var(--g)">28%</div></div>
+          <div class="li"><div class="ldot" style="background:var(--o)"></div><div class="lname">Research</div><div class="lpct" style="color:var(--o)">18%</div></div>
+          <div class="li"><div class="ldot" style="background:var(--p)"></div><div class="lname">Other</div><div class="lpct" style="color:var(--p)">12%</div></div>
+        </div>
+      </div>
+
+      <div class="panel g-full">
+        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+        <div class="pt">ML Pipeline Progress <span>COMPLETION</span></div>
+        <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv g">100%</span></div><div class="btrack"><div class="bfill bf-g" id="infra-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Data Ingestion</span><span class="mv c">90%</span></div><div class="btrack"><div class="bfill bf-c" id="ingest-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv c">85%</span></div><div class="btrack"><div class="bfill bf-c" id="ui-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>ML Pipeline</span><span class="mv o">70%</span></div><div class="btrack"><div class="bfill bf-o" id="ml-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>AI Intelligence</span><span class="mv o">50%</span></div><div class="btrack"><div class="bfill bf-o" id="ai-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Security / Encryption</span><span class="mv p">10%</span></div><div class="btrack"><div class="bfill bf-p" id="sec-bar"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Mobile APK</span><span class="mv" style="color:var(--r)">20%</span></div><div class="btrack"><div class="bfill" id="apk-bar" style="background:var(--r)"></div></div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ BRAIN GRAPH VIEW ═══ -->
   <div class="view" id="view-graph">
-
     <div style="padding:20px">
-      <div class="pt">System Brain <span>CODE GRAPH</span></div>
-      <div id="network" style="height:80vh;border:1px solid rgba(0,255,255,.15)"></div>
+      <div class="pt">System Brain <span>CODE GRAPH · INTERACTIVE</span></div>
+      <div class="graph-controls">
+        <button class="gc-btn on" onclick="setGraphMode('neural')">NEURAL</button>
+        <button class="gc-btn" onclick="setGraphMode('cluster')">CLUSTER</button>
+        <button class="gc-btn" onclick="setGraphMode('flow')">FLOW</button>
+        <button class="gc-btn" onclick="resetGraph()">RESET VIEW</button>
+      </div>
+      <canvas id="graphCanvas" style="width:100%;height:75vh;border:1px solid rgba(0,255,255,.15);border-radius:3px;display:block;cursor:crosshair"></canvas>
     </div>
-
   </div>
 
-  <!-- SYSTEM -->
+  <!-- ═══ SYSTEM VIEW ═══ -->
   <div class="view" id="view-system">
     <div class="grid3">
       <div class="panel g2">
@@ -644,12 +689,19 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
       <div class="panel">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
         <div class="pt">Live Pipeline <span>STATUS</span></div>
-        <div class="pipeline" id="sysPipeline"></div>
+        <div class="pipeline">
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Worker v2 — 9 routes live</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">ML pipeline — 5 scripts built</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">GITHUB_TOKEN in Cloudflare</div><div class="pipe-sub">Add to enable auto ML trigger</div></div><div class="pipe-status ps-warn">NOW</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">Log 30+ clean events</div><div class="pipe-sub">Need for real ML predictions</div></div><div class="pipe-status ps-warn">NOW</div></div>
+          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Data encryption + password login</div><div class="pipe-sub">AES-256 + CF Access</div></div><div class="pipe-status ps-off">NEXT</div></div>
+        </div>
       </div>
       <div class="panel g-full">
         <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Data Flow Diagram <span>SYSTEM</span></div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2;color:var(--text);opacity:.8;overflow-x:auto;padding:10px 0">
+        <div class="pt">Data Flow <span>SYSTEM DIAGRAM</span></div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2.2;overflow-x:auto;padding:10px 0">
 <pre style="color:var(--c)">Telegram Message</pre>
 <pre style="color:var(--text2)">      │</pre>
 <pre style="color:var(--text2)">      ▼</pre>
@@ -670,14 +722,122 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
       </div>
     </div>
   </div>
+
+  <!-- ═══ DOCS VIEW ═══ -->
+  <div class="view" id="view-docs">
+    <div style="display:flex;gap:2px;background:rgba(0,255,255,.04);border:1px solid var(--border);padding:2px;margin:12px 20px 0;width:fit-content">
+      <button class="ntab on" onclick="showDoc('plan',this)">MASTER PLAN</button>
+      <button class="ntab" onclick="showDoc('arch',this)">ARCHITECTURE</button>
+      <button class="ntab" onclick="showDoc('progress',this)">PROGRESS</button>
+    </div>
+    <div id="doc-plan" class="doc-frame on">
+      <div class="grid1" style="padding-top:12px">
+        <div class="panel-static g-full">
+          <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+          <div class="pt">AETHER OS — Full Documentation</div>
+          <p style="font-size:14px;line-height:1.9;margin-bottom:14px">Open the full plan pages for detailed architecture, security, ML pipeline, cost breakdown and roadmap.</p>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a href="/aether-plan.html" target="_blank" style="border:1px solid rgba(0,255,255,.3);padding:12px 16px;color:var(--c);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;transition:all .2s" onmouseover="this.style.background='rgba(0,255,255,.06)'" onmouseout="this.style.background=''">MASTER PLAN — Architecture, Security, MLflow, Roadmap <span>↗</span></a>
+            <a href="/aether-architecture.html" target="_blank" style="border:1px solid rgba(0,255,136,.2);padding:12px 16px;color:var(--g);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;transition:all .2s" onmouseover="this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.background=''">ARCHITECTURE — Full system map with all components <span>↗</span></a>
+            <a href="/aether-progress.html" target="_blank" style="border:1px solid rgba(255,170,0,.2);padding:12px 16px;color:var(--o);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;transition:all .2s" onmouseover="this.style.background='rgba(255,170,0,.06)'" onmouseout="this.style.background=''">PROGRESS — Changes made, version history, completion % <span>↗</span></a>
+            <a href="/aether-vision.html" target="_blank" style="border:1px solid rgba(255,0,170,.2);padding:12px 16px;color:var(--p);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;transition:all .2s" onmouseover="this.style.background='rgba(255,0,170,.06)'" onmouseout="this.style.background=''">VISION — Datasets, cost, prod/dev, full roadmap <span>↗</span></a>
+          </div>
+          <div style="margin-top:22px">
+            <div class="pt">Status Tracker</div>
+            <div class="pipeline">
+              <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Worker v2 — 9 routes live</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">DONE</div></div>
+              <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
+              <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">ML pipeline — 5 scripts built</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">DONE</div></div>
+              <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Dashboard live data + PWA</div><div class="pipe-sub">Energy trend, heatmap, stat cards all live</div></div><div class="pipe-status ps-ok">DONE</div></div>
+              <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">12 bot commands + 4 daily briefings</div><div class="pipe-sub">All automated</div></div><div class="pipe-status ps-ok">DONE</div></div>
+              <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">GITHUB_TOKEN in Cloudflare</div><div class="pipe-sub">Add to enable auto ML trigger</div></div><div class="pipe-status ps-warn">NOW</div></div>
+              <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">Log 30+ clean events</div><div class="pipe-sub">Need for real ML predictions</div></div><div class="pipe-status ps-warn">NOW</div></div>
+              <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Data encryption + password login</div><div class="pipe-sub">AES-256 + CF Access</div></div><div class="pipe-status ps-off">NEXT</div></div>
+              <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Health + finance commands</div><div class="pipe-sub">/exercise /sleep /food /spend</div></div><div class="pipe-status ps-off">NEXT</div></div>
+              <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">MLflow + Colab pipeline</div><div class="pipe-sub">DagsHub free experiment tracking</div></div><div class="pipe-status ps-off">MONTH 2</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="doc-arch" class="doc-frame">
+      <div class="grid1" style="padding-top:12px">
+        <div class="panel-static g-full">
+          <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+          <div class="pt">Architecture <span>SYSTEM MAP</span></div>
+          <a href="/aether-architecture.html" target="_blank" style="border:1px solid rgba(0,255,136,.2);padding:14px 20px;color:var(--g);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">OPEN FULL ARCHITECTURE MAP ↗</a>
+          <div class="pipeline">
+            <div class="pipe-item"><div class="pipe-icon">💬</div><div><div class="pipe-name">Text / Voice / Image / Check-in / GitHub</div><div class="pipe-sub">All input types live and auto-logging</div></div><div class="pipe-status ps-ok">INPUT</div></div>
+            <div class="pipe-item"><div class="pipe-icon">⚙️</div><div><div class="pipe-name">Cloudflare Worker — 9 routes</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">BRAIN</div></div>
+            <div class="pipe-item"><div class="pipe-icon">🦙</div><div><div class="pipe-name">Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All on CF Workers AI — completely free</div></div><div class="pipe-status ps-ok">FREE AI</div></div>
+            <div class="pipe-item"><div class="pipe-icon">🗄</div><div><div class="pipe-name">Cloudflare KV</div><div class="pipe-sub">events · state · dashboard · goals</div></div><div class="pipe-status ps-ok">STORAGE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">🔬</div><div><div class="pipe-name">ML Pipeline — GitHub Actions</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">NIGHTLY</div></div>
+            <div class="pipe-item"><div class="pipe-icon">📱</div><div><div class="pipe-name">Dashboard PWA + Telegram Bot</div><div class="pipe-sub">learning-bot.pages.dev · installable</div></div><div class="pipe-status ps-ok">OUTPUT</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="doc-progress" class="doc-frame">
+      <div class="grid1" style="padding-top:12px">
+        <div class="panel-static g-full">
+          <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+          <div class="pt">Progress <span>COMPLETION TRACKER</span></div>
+          <a href="/aether-progress.html" target="_blank" style="border:1px solid rgba(255,170,0,.2);padding:14px 20px;color:var(--o);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">OPEN FULL PROGRESS TRACKER ↗</a>
+          <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv g">100%</span></div><div class="btrack"><div class="bfill bf-g" style="width:100%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>Data ingestion</span><span class="mv c">90%</span></div><div class="btrack"><div class="bfill bf-c" style="width:90%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv c">85%</span></div><div class="btrack"><div class="bfill bf-c" style="width:85%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>ML Pipeline</span><span class="mv o">70%</span></div><div class="btrack"><div class="bfill bf-o" style="width:70%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>AI Intelligence</span><span class="mv o">50%</span></div><div class="btrack"><div class="bfill bf-o" style="width:50%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>Security</span><span class="mv p">10%</span></div><div class="btrack"><div class="bfill bf-p" style="width:10%;transition:none"></div></div></div>
+          <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Mobile APK</span><span class="mv" style="color:var(--r)">20%</span></div><div class="btrack"><div class="bfill" style="width:20%;background:var(--r);transition:none"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footline">AETHER OS · PERSONAL AI · ZERO SERVER · v2.0</div>
 </div>
 
-<!-- ── FULL-SCREEN AETHER CHAT PAGE ── -->
-<!-- ── DOCS VIEW ── -->
-<!-- Password gate for docs/personal data -->
-<div id="pw-gate" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,6,14,.97);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px">
-  <div style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:6px;color:var(--c);opacity:.6;margin-bottom:8px">AETHER SECURE ACCESS</div>
-  <div style="font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;color:var(--text);letter-spacing:4px">🔒 ENTER PASSWORD</div>
+<!-- ═══ CHAT PAGE ═══ -->
+<div id="chatPage">
+  <div id="chatBg" style="position:absolute;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 70% 60% at 30% 50%,rgba(0,255,255,.04) 0%,transparent 70%),
+               radial-gradient(ellipse 50% 80% at 80% 20%,rgba(255,0,170,.04) 0%,transparent 70%)"></div>
+  <div class="ch">
+    <div class="ct"><div class="od"></div>AETHER <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">NEURAL INTERFACE</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <select id="aiEngine" style="background:rgba(0,255,255,.06);border:1px solid var(--border);color:var(--c);padding:7px 12px;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;cursor:pointer;outline:none">
+        <option value="hybrid">HYBRID ENGINE</option>
+        <option value="ml">ML ENGINE</option>
+        <option value="worker">WORKER ONLY</option>
+      </select>
+      <button class="cc" onclick="closeChat()">✕ CLOSE</button>
+    </div>
+  </div>
+  <div id="chatMsgs">
+    <div class="msg ai"><div class="mlbl">AETHER</div>Neural substrate online. I have full context of your AETHER OS — Worker v2, ML pipeline, 12 bot commands, 4 daily briefings. What do you need?</div>
+  </div>
+  <div id="thinking" class="hidden">
+    <span style="font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px">PROCESSING</span>
+    <div class="tdots"><span></span><span></span><span></span></div>
+  </div>
+  <div class="qchips">
+    <button class="chip" onclick="quickSend('What should I focus on right now?')">⚡ Focus now</button>
+    <button class="chip" onclick="quickSend('Give me my daily briefing')">📋 Daily brief</button>
+    <button class="chip" onclick="quickSend('Start a 25min Pomodoro')">⏱ Pomodoro</button>
+    <button class="chip" onclick="quickSend('Analyze my productivity this week')">📊 Analyze week</button>
+    <button class="chip" onclick="quickSend('What are my biggest bottlenecks?')">🔍 Bottlenecks</button>
+  </div>
+  <div class="cinput">
+    <input id="chatIn" placeholder="Ask AETHER anything..." autocomplete="off">
+    <button id="sendBtn" onclick="sendChat()">SEND ▶</button>
+  </div>
+</div>
+
+<!-- Password gate -->
+<div id="pw-gate">
+  <div style="font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:6px;color:var(--c);opacity:.55;margin-bottom:8px">AETHER SECURE ACCESS</div>
+  <div style="font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;letter-spacing:4px">🔒 ENTER PASSWORD</div>
   <div style="font-size:13px;opacity:.4;text-align:center;max-width:300px">Personal diary data is encrypted.<br>Enter your password to decrypt and view.</div>
   <input id="pw-input" type="password" placeholder="password" style="background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.25);color:var(--c);font-family:'Share Tech Mono',monospace;font-size:16px;padding:12px 20px;width:260px;outline:none;letter-spacing:4px;text-align:center">
   <div style="display:flex;gap:10px">
@@ -687,694 +847,481 @@ header{display:flex;justify-content:space-between;align-items:center;padding:13p
   <div id="pw-error" style="color:var(--r);font-size:12px;letter-spacing:2px;opacity:0">INCORRECT PASSWORD</div>
 </div>
 
-<div class="view" id="view-docs">
-  <!-- sub-tabs -->
-  <div style="display:flex;gap:2px;background:rgba(0,255,255,.04);border:1px solid var(--border);padding:2px;margin:12px 20px 0 20px;width:fit-content">
-    <button class="ntab on" id="dtab-plan" onclick="showDoc('plan',this)">MASTER PLAN</button>
-    <button class="ntab" id="dtab-arch" onclick="showDoc('arch',this)">ARCHITECTURE</button>
-    <button class="ntab" id="dtab-progress" onclick="showDoc('progress',this)">PROGRESS</button>
-  </div>
-
-  <!-- PLAN doc -->
-  <div id="doc-plan" class="doc-frame">
-    <div class="grid1" style="padding-top:12px">
-      <div class="panel-static g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">AETHER OS — Full Documentation</div>
-        <p style="font-size:14px;line-height:1.9;margin-bottom:14px">Open the full plan pages for detailed architecture, security, ML pipeline, cost breakdown and roadmap.</p>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <a href="/aether-plan.html" target="_blank" style="border:1px solid rgba(0,255,255,.3);padding:12px 16px;color:var(--c);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">MASTER PLAN — Architecture, Security, MLflow, Roadmap <span>↗</span></a>
-          <a href="/aether-architecture.html" target="_blank" style="border:1px solid rgba(0,255,136,.2);padding:12px 16px;color:var(--g);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">ARCHITECTURE — Full system map with all components <span>↗</span></a>
-          <a href="/aether-progress.html" target="_blank" style="border:1px solid rgba(255,170,0,.2);padding:12px 16px;color:var(--o);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">PROGRESS — Changes made, version history, completion % <span>↗</span></a>
-          <a href="/aether-vision.html" target="_blank" style="border:1px solid rgba(255,0,170,.2);padding:12px 16px;color:var(--p);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center">VISION — Datasets, cost, prod/dev, full roadmap <span>↗</span></a>
-        </div>
-      </div>
-      <div class="panel-static g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Status Tracker</div>
-        <div class="pipeline">
-          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Worker v2 — 9 routes live</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">DONE</div></div>
-          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
-          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">ML pipeline — 5 scripts built</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">DONE</div></div>
-          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Dashboard live data + PWA</div><div class="pipe-sub">Energy trend, heatmap, stat cards all live</div></div><div class="pipe-status ps-ok">DONE</div></div>
-          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">12 bot commands + 4 daily briefings</div><div class="pipe-sub">All automated</div></div><div class="pipe-status ps-ok">DONE</div></div>
-          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">GITHUB_TOKEN in Cloudflare</div><div class="pipe-sub">Add to enable auto ML trigger</div></div><div class="pipe-status ps-warn">NOW</div></div>
-          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">Log 30+ clean events</div><div class="pipe-sub">Need for real ML predictions</div></div><div class="pipe-status ps-warn">NOW</div></div>
-          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Data encryption + password login</div><div class="pipe-sub">AES-256 + CF Access</div></div><div class="pipe-status ps-off">NEXT</div></div>
-          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Health + finance commands</div><div class="pipe-sub">/exercise /sleep /food /spend</div></div><div class="pipe-status ps-off">NEXT</div></div>
-          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">MLflow + Colab pipeline</div><div class="pipe-sub">DagsHub free experiment tracking</div></div><div class="pipe-status ps-off">MONTH 2</div></div>
-        </div>
-      </div>
-      <div class="panel-static g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Next Steps — In Order</div>
-        <div class="tlist">
-          <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent">Send 10+ clean messages to bot — mix energy levels, topics, goals</div></div>
-          <div class="titem"><div class="ttime" style="color:var(--r)">TODAY</div><div class="tevent">Add GITHUB_TOKEN to Cloudflare Worker variables (workflow scope)</div></div>
-          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">Add /exercise /sleep /food /spend /job commands to worker</div></div>
-          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">Set up dev branch + wrangler.toml env.dev + separate KV</div></div>
-          <div class="titem"><div class="ttime" style="color:var(--o)">THIS WEEK</div><div class="tevent">CF Vectorize semantic memory + AES-256 data encryption</div></div>
-          <div class="titem"><div class="ttime" style="color:var(--text2)">MONTH 2</div><div class="tevent">MLflow on DagsHub + Colab training + native APK + Calendar</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ARCH doc -->
-  <div id="doc-arch" class="doc-frame" style="display:none">
-    <div class="grid1" style="padding-top:12px">
-      <div class="panel-static g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Architecture <span>OPEN FULL PAGE FOR INTERACTIVE MAP</span></div>
-        <a href="/aether-architecture.html" target="_blank" style="border:1px solid rgba(0,255,136,.2);padding:14px 20px;color:var(--g);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">OPEN FULL ARCHITECTURE MAP ↗</a>
-        <div class="pipeline">
-          <div class="pipe-item"><div class="pipe-icon">💬</div><div><div class="pipe-name">Text / Voice / Image / Check-in / GitHub</div><div class="pipe-sub">All input types live and auto-logging</div></div><div class="pipe-status ps-ok">INPUT</div></div>
-          <div class="pipe-item"><div class="pipe-icon">⚙️</div><div><div class="pipe-name">Cloudflare Worker — 9 routes</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">BRAIN</div></div>
-          <div class="pipe-item"><div class="pipe-icon">🦙</div><div><div class="pipe-name">Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All on CF Workers AI — completely free</div></div><div class="pipe-status ps-ok">FREE AI</div></div>
-          <div class="pipe-item"><div class="pipe-icon">🗄</div><div><div class="pipe-name">Cloudflare KV</div><div class="pipe-sub">events · state · dashboard · goals</div></div><div class="pipe-status ps-ok">STORAGE</div></div>
-          <div class="pipe-item"><div class="pipe-icon">🔬</div><div><div class="pipe-name">ML Pipeline — GitHub Actions</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">NIGHTLY</div></div>
-          <div class="pipe-item"><div class="pipe-icon">📱</div><div><div class="pipe-name">Dashboard PWA + Telegram Bot</div><div class="pipe-sub">learning-bot.pages.dev · installable</div></div><div class="pipe-status ps-ok">OUTPUT</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROGRESS doc -->
-  <div id="doc-progress" class="doc-frame" style="display:none">
-    <div class="grid1" style="padding-top:12px">
-      <div class="panel-static g-full">
-        <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
-        <div class="pt">Progress <span>OPEN FULL PAGE FOR CHARTS</span></div>
-        <a href="/aether-progress.html" target="_blank" style="border:1px solid rgba(255,170,0,.2);padding:14px 20px;color:var(--o);text-decoration:none;font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">OPEN FULL PROGRESS TRACKER ↗</a>
-        <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv g">100%</span></div><div class="btrack"><div class="bfill bf-g" style="width:100%;transition:none"></div></div></div>
-        <div class="mrow"><div class="ml"><span>Data ingestion</span><span class="mv c">90%</span></div><div class="btrack"><div class="bfill bf-c" style="width:90%;transition:none"></div></div></div>
-        <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv c">85%</span></div><div class="btrack"><div class="bfill bf-c" style="width:85%;transition:none"></div></div></div>
-        <div class="mrow"><div class="ml"><span>ML Pipeline</span><span class="mv o">70%</span></div><div class="btrack"><div class="bfill bf-o" style="width:70%;transition:none"></div></div></div>
-        <div class="mrow"><div class="ml"><span>AI Intelligence</span><span class="mv o">50%</span></div><div class="btrack"><div class="bfill bf-o" style="width:50%;transition:none"></div></div></div>
-        <div class="mrow"><div class="ml"><span>Security / Encryption</span><span class="mv p">10%</span></div><div class="btrack"><div class="bfill bf-p" style="width:10%;transition:none"></div></div></div>
-        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Mobile APK</span><span class="mv" style="color:var(--r)">20%</span></div><div class="btrack"><div class="bfill" style="width:20%;background:var(--r);transition:none"></div></div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div id="chatPage">
-  <!-- Animated background canvas (shared) -->
-  <div id="chatBg" style="position:absolute;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(ellipse 70% 60% at 30% 50%,rgba(0,255,255,.03) 0%,transparent 70%),
-               radial-gradient(ellipse 50% 80% at 80% 20%,rgba(255,0,170,.03) 0%,transparent 70%)"></div>
-
-  <!-- Header -->
-  <div class="ch" style="display:flex;justify-content:space-between;align-items:center">
-
-  <!-- LEFT -->
-  <div class="ct" style="display:flex;align-items:center;gap:8px">
-    <div class="od"></div>
-    AETHER
-    <span style="font-size:9px;letter-spacing:3px;color:var(--text2);font-weight:400">
-      NEURAL INTERFACE
-    </span>
-  </div>
-
-  <!-- RIGHT -->
-  <div style="display:flex;align-items:center;gap:12px">
-
-    <span style="
-      font-family:'Orbitron',sans-serif;
-      font-size:9px;
-      letter-spacing:2px;
-      opacity:.6;
-      color:var(--text2);
-    ">
-      ENGINE
-    </span>
-
-    <select id="aiEngine"
-      style="
-      background:rgba(0,255,255,.06);
-      border:1px solid rgba(0,255,255,.25);
-      color:var(--c);
-      font-family:'Orbitron',sans-serif;
-      font-size:9px;
-      letter-spacing:2px;
-      padding:3px 8px;
-      outline:none;
-      max-width:120px;
-    ">
-
-      <option value="hybrid">HYBRID</option>
-      <option value="ml">AETHER ML</option>
-      <option value="worker">WORKERS AI</option>
-
-    </select>
-
-    <button class="cc" onclick="closeChat()">
-      ← BACK
-    </button>
-
-  </div>
-
-</div>
-
-  <!-- Messages -->
-  <div id="chatMsgs">
-    <div class="msg ai">
-      <div class="mlbl">AETHER</div>
-      Neural OS online. Full-screen interface active — I have complete context of your metrics, learning patterns, goals and pipeline. What can I help you with?
-    </div>
-  </div>
-
-  <!-- Thinking indicator -->
-  <div id="thinking" class="hidden">
-    <span>Processing</span>
-    <div class="tdots"><span></span><span></span><span></span></div>
-  </div>
-
-  <!-- Quick chips -->
-  <div class="qchips">
-    <button class="chip" onclick="quickSend('Full analysis of my metrics today')">📊 Full Analysis</button>
-    <button class="chip" onclick="quickSend('What should I focus on right now?')">🎯 Focus Now</button>
-    <button class="chip" onclick="quickSend('Explain neural networks in 3 lines')">🧠 Quick Learn</button>
-    <button class="chip" onclick="quickSend('Am I on track with my weekly goals?')">✅ Goals Check</button>
-    <button class="chip" onclick="quickSend('Give me a study schedule for tomorrow')">📅 Plan Tomorrow</button>
-    <button class="chip" onclick="quickSend('How can I improve my productivity score?')">⚡ Level Up</button>
-  </div>
-
-  <!-- Input -->
-  <div class="cinput">
-    <input id="chatIn" placeholder="Ask AETHER anything..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){sendChat();event.preventDefault()}">
-    <button id="sendBtn" onclick="sendChat()">SEND ◈</button>
-  </div>
-</div>
-
 <script>
-// ══════════════════════════════════════
-// YOUR WORKER URL — already set correctly
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
 const WORKER_URL = 'https://learning-bot.talpadeavi0303.workers.dev';
-// ══════════════════════════════════════
 
 const D = {
-  user: { name:"AVI", streak:14, hoursToday:3.2, tasksDone:7 },
-  metrics: { focus:82, learning:68, productivity:91, mood:75 },
-  activity: [
-    { topic:"Neural Networks", minutes:95, cat:"LEARNING" },
-    { topic:"React Development", minutes:72, cat:"CODING" },
-    { topic:"System Design", minutes:48, cat:"LEARNING" },
-    { topic:"Algorithms", minutes:35, cat:"CODING" }
+  metrics:{energy:7.4,focus:82,mood:68,sleep:74,productivity:91},
+  activity:[
+    {label:'Neural Networks Ch4',mins:47,tag:'LEARN'},
+    {label:'ML Pipeline Build',mins:126,tag:'CODE'},
+    {label:'CF Worker v2 Deploy',mins:38,tag:'OPS'}
   ],
-  timeline: [
-    { time:"09:00", event:"Morning boot — Focus mode activated" },
-    { time:"10:30", event:"Deep learning module: 45min session logged" },
-    { time:"12:15", event:"Telegram log: 'studied react hooks for 1h'" },
-    { time:"14:00", event:"ML pipeline ran — dashboard.json updated" },
-    { time:"16:45", event:"Productivity peak detected by AETHER model" }
-  ],
-  insights: [
-    { icon:"🔥", title:"Peak Performance Window", body:"Your focus peaks between 10:00–13:00 based on 14 days of data. Schedule hardest tasks in this window.", tag:"HIGH PRIORITY", tagClass:"tag-hi" },
-    { icon:"📈", title:"Learning Velocity Up 23%", body:"Neural Networks study time increased this week. AETHER recommends adding a spaced repetition review session.", tag:"POSITIVE", tagClass:"tag-ok" },
-    { icon:"⚠️", title:"Sleep Deficit Detected", body:"Predicted 6.2h sleep vs 8h optimal. This will reduce tomorrow's productivity by ~12%. Rest more tonight.", tag:"WARNING", tagClass:"tag-med" }
-  ],
-  pipeline: [
-    { icon:"📱", name:"Telegram Ingestion", sub:"webhook → events.csv", status:"LIVE", cls:"ps-ok" },
-    { icon:"⚙️", name:"NLP Parser", sub:"nlp_parser.py", status:"IDLE", cls:"ps-off" },
-    { icon:"🤖", name:"ML Training", sub:"train_models.py", status:"RUNNING", cls:"ps-run" },
-    { icon:"📊", name:"Dashboard Sync", sub:"predict.py → dashboard.json", status:"OK", cls:"ps-ok" },
-    { icon:"🌐", name:"Cloudflare Worker", sub:"learning-bot.talpadeavi0303.workers.dev", status:"LIVE", cls:"ps-ok" }
-  ],
-  weekData: [1.5, 2.8, 3.1, 2.4, 3.6, 2.9, 3.2],
-  memory: [
-    { text:"User is studying ML engineering and React — Avi's core learning track", col:"#00ffff", time:"TODAY" },
-    { text:"Logged: 'deployed cloudflare worker for aether backend' via Telegram", col:"#ff00aa", time:"2D AGO" },
-    { text:"Model retrained on 847 behavior events — accuracy 89.3%", col:"#00ff88", time:"3D AGO" },
-    { text:"Goal set: finish System Design course by end of month", col:"#ffaa00", time:"5D AGO" }
-  ],
-  goals: {
-    today: [
-      { text:"Complete Neural Networks chapter 4", done:true, cat:"LEARNING" },
-      { text:"Build React todo component with hooks", done:true, cat:"CODING" },
-      { text:"30 min algorithm practice (LeetCode)", done:false, cat:"CODING" },
-      { text:"Log all activities via Telegram bot", done:true, cat:"SYSTEM" }
-    ],
-    week: [
-      { text:"Study 12+ hours total this week", done:false, cat:"LEARNING" },
-      { text:"Complete AETHER worker.js backend", done:true, cat:"CODING" },
-      { text:"Train ML model on new dataset", done:true, cat:"ML" },
-      { text:"Maintain daily Telegram logging streak", done:false, cat:"SYSTEM" }
-    ]
-  }
+  goals:{today:['complete ML extractor','study chapter 4','add github token','log 30 events']},
+  weekly:[4.2,5.8,6.1,3.9,7.0,6.8,6.2]
 };
-D.hourlyData  = D.hourlyData  || new Array(24).fill(0);
-D.inputCounts = D.inputCounts || {};
-D.todayCount  = D.todayCount  != null ? D.todayCount : D.activity.length;
-D.flowLabel   = D.flowLabel   || 'NOMINAL';
-const COLS=["#00ffff","#ff00aa","#00ff88","#ffaa00"];
 
-/* ══ CURSOR ══ */
-const C = document.getElementById('cur');
-const CD = document.getElementById('curd');
-document.addEventListener('mousemove', e => {
-  C.style.left = e.clientX + 'px';
-  C.style.top = e.clientY + 'px';
-  CD.style.left = e.clientX + 'px';
-  CD.style.top = e.clientY + 'px';
+// ═══════════════════════════════════════════
+// CURSOR
+// ═══════════════════════════════════════════
+const cur=document.getElementById('cur'),curd=document.getElementById('curd');
+let mx=0,my=0,cx=0,cy=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;curd.style.left=mx+'px';curd.style.top=my+'px'});
+function animCursor(){
+  cx+=(mx-cx)*.14;cy+=(my-cy)*.14;
+  cur.style.left=cx+'px';cur.style.top=cy+'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('button,a,.qa,.sc,.insight,.pipe-item,.li,.mood-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('hov'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('hov'));
 });
-document.addEventListener('mousedown', () => C.style.transform = 'translate(-50%,-50%) scale(.7)');
-document.addEventListener('mouseup', () => C.style.transform = 'translate(-50%,-50%) scale(1)');
-// ESC key closes chat
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&chatOpen) closeChat(); });
 
-/* ══ WORKER HEALTH CHECK ══ */
-async function checkWorker() {
-  const badge = document.getElementById('workerStatus');
-  try {
-    const r = await fetch(WORKER_URL, { method: 'GET' });
-    if (r.ok) {
-      badge.className = 'ok';
-      badge.innerHTML = '<span>●</span><span>WORKER OK</span>';
-    } else {
-      throw new Error('not ok');
-    }
-  } catch {
-    badge.className = 'err';
-    badge.innerHTML = '<span>●</span><span>WORKER ERR</span>';
-  }
-}
-
-/* ══ LOAD dashboard.json from Worker ══ */
-async function loadData() {
-  try {
-    const res = await fetch(WORKER_URL + '/dashboard?t=' + Date.now());
-    if (!res.ok) throw new Error('not found');
-    const json = await res.json();
-
-    // Merge every field that the Worker sends
-    if (json.metrics)          D.metrics   = { ...D.metrics,  ...json.metrics };
-    if (json.activity?.length) D.activity  = json.activity;
-    if (json.timeline?.length) D.timeline  = json.timeline;
-    if (json.insights?.length) D.insights  = json.insights;
-    if (json.weekData?.length) D.weekData  = json.weekData;
-    if (json.pipeline?.length) D.pipeline  = json.pipeline;
-    if (json.goals)            D.goals     = { ...D.goals, ...json.goals };
-    if (json.streak   != null) D.user.streak    = json.streak;
-    if (json.todayCount != null) D.todayCount   = json.todayCount;
-    if (json.flowLabel)        D.flowLabel = json.flowLabel;
-    if (json.hourlyData)       D.hourlyData = json.hourlyData;
-    if (json.inputCounts)      D.inputCounts = json.inputCounts;
-
-    // Update welcome strip stats from live data
-    if (json.metrics?.streak   != null) D.user.streak    = json.metrics.streak;
-    if (json.metrics?.hours_today != null) D.user.hoursToday = json.metrics.hours_today;
-    if (json.metrics?.tasks_done  != null) D.user.tasksDone  = json.metrics.tasks_done;
-
-    console.log('[AETHER] Live data loaded ✓ | events:', json.metrics?.total_events);
-  } catch(e) {
-    console.log('[AETHER] Using static fallback data —', e.message);
-  }
-}
-
-/* ══ CLOCK ══ */
+// ═══════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════
 function tick(){
   const n=new Date();
-  const c=document.getElementById('clk'),d=document.getElementById('date');
-  if(c)c.textContent=n.toLocaleTimeString('en-US',{hour12:false});
-  if(d)d.textContent=n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}).toUpperCase();
-  setTimeout(tick,1000);
-}tick();
+  document.getElementById('clk').textContent=n.toTimeString().slice(0,8);
+  document.getElementById('date').textContent=n.toISOString().slice(0,10).replace(/-/g,'–');
+}
+tick();setInterval(tick,1000);
 
-/* ══ PARTICLES ══ */
-const cv=document.getElementById('bgc'),ctx=cv.getContext('2d');
-function rsz(){cv.width=innerWidth;cv.height=innerHeight}rsz();
-window.addEventListener('resize',rsz);
-const mob=()=>innerWidth<600;
-const pts=Array.from({length:50},()=>({
-  x:Math.random()*innerWidth,y:Math.random()*innerHeight,
-  vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
-  r:Math.random()*1.1+.2,a:Math.random()*.5+.15
-}));
-function draw(){
-  ctx.clearRect(0,0,cv.width,cv.height);
-  if(!mob()){
-    ctx.strokeStyle='rgba(0,255,255,0.022)';ctx.lineWidth=1;
-    for(let x=0;x<cv.width;x+=70){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}
-    for(let y=0;y<cv.height;y+=70){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke()}
+// ═══════════════════════════════════════════
+// THREE.JS — 3D STARFIELD + NODES
+// ═══════════════════════════════════════════
+(function(){
+  const canvas=document.getElementById('three-bg');
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(innerWidth,innerHeight);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
+  camera.position.z=60;
+
+  // Floating nodes
+  const nodeMat=new THREE.PointsMaterial({size:1.2,color:0x00ffff,transparent:true,opacity:.6,sizeAttenuation:true});
+  const nodeGeo=new THREE.BufferGeometry();
+  const pos=[];
+  for(let i=0;i<300;i++){
+    pos.push((Math.random()-.5)*200,(Math.random()-.5)*120,(Math.random()-.5)*100);
   }
-  pts.forEach(p=>{
-    p.x+=p.vx;p.y+=p.vy;
-    if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;
-    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(0,255,255,${p.a})`;ctx.fill();
+  nodeGeo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  const nodes=new THREE.Points(nodeGeo,nodeMat);
+  scene.add(nodes);
+
+  // Pink nodes
+  const pinkMat=new THREE.PointsMaterial({size:.8,color:0xff00aa,transparent:true,opacity:.4,sizeAttenuation:true});
+  const pinkGeo=new THREE.BufferGeometry();
+  const pp=[];
+  for(let i=0;i<150;i++){
+    pp.push((Math.random()-.5)*200,(Math.random()-.5)*120,(Math.random()-.5)*100);
+  }
+  pinkGeo.setAttribute('position',new THREE.Float32BufferAttribute(pp,3));
+  scene.add(new THREE.Points(pinkGeo,pinkMat));
+
+  // Grid lines
+  const gridMat=new THREE.LineBasicMaterial({color:0x001a2e,transparent:true,opacity:.3});
+  for(let i=-50;i<=50;i+=10){
+    const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i,-60,0),new THREE.Vector3(i,60,0)]);
+    scene.add(new THREE.Line(g,gridMat));
+    const g2=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-100,i,0),new THREE.Vector3(100,i,0)]);
+    scene.add(new THREE.Line(g2,gridMat));
+  }
+
+  let t=0;
+  function render(){
+    requestAnimationFrame(render);
+    t+=.003;
+    nodes.rotation.y=t*.1;
+    nodes.rotation.x=Math.sin(t*.05)*.05;
+    camera.position.x=Math.sin(t*.08)*3;
+    camera.position.y=Math.cos(t*.06)*2;
+    camera.lookAt(scene.position);
+    renderer.render(scene,camera);
+  }
+  render();
+  window.addEventListener('resize',()=>{
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
   });
-  if(!mob()){
-    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
-      const dist=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);
-      if(dist<100){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-        ctx.strokeStyle=`rgba(0,255,255,${(1-dist/100)*.1})`;ctx.lineWidth=.5;ctx.stroke()}
+})();
+
+// ═══════════════════════════════════════════
+// PARTICLE CANVAS
+// ═══════════════════════════════════════════
+(function(){
+  const c=document.getElementById('pcanvas');
+  const ctx=c.getContext('2d');
+  let W=c.width=innerWidth,H=c.height=innerHeight;
+  window.addEventListener('resize',()=>{W=c.width=innerWidth;H=c.height=innerHeight});
+
+  const particles=Array.from({length:60},()=>({
+    x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    r:Math.random()*1.5+.5,
+    col:Math.random()<.7?'rgba(0,255,255,':'rgba(255,0,170,',
+    a:Math.random()*.5+.1
+  }));
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Connection lines
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<140){
+          ctx.beginPath();
+          ctx.strokeStyle=`rgba(0,255,255,${.08*(1-d/140)})`;
+          ctx.lineWidth=.5;
+          ctx.moveTo(particles[i].x,particles[i].y);
+          ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.stroke();
+        }
+      }
     }
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=p.col+p.a+')';
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
   }
-  requestAnimationFrame(draw);
-}draw();
+  draw();
+})();
 
-/* ══ LOADER ══ */
-const bootMsgs=["Loading behavior dataset...","Connecting to Cloudflare Worker...","Running ML inference...","Syncing dashboard.json...","AETHER neural interface ready."];
-let bIdx=0;
-const bootLog=document.getElementById('bootLog');
-const bInt=setInterval(()=>{
-  if(bIdx<bootMsgs.length)bootLog.textContent=bootMsgs[bIdx++];
-  else clearInterval(bInt);
-},400);
+// ═══════════════════════════════════════════
+// LOADER
+// ═══════════════════════════════════════════
+const msgs=['Initializing neural substrate...','Loading Cloudflare Worker data...','Syncing ML pipeline...','Decrypting memory nodes...','Calibrating AI score...','AETHER OS ready.'];
+let mi=0;
+const bmEl=document.getElementById('bootMsg');
+function bootAnim(){
+  if(mi<msgs.length){bmEl.textContent=msgs[mi++];setTimeout(bootAnim,380);}
+  else{
+    setTimeout(()=>{
+      document.getElementById('loader').classList.add('gone');
+      animateBars();
+      initCharts();
+      initWaveform();
+      initGraphCanvas();
+    },300);
+  }
+}
+bootAnim();
 
-setTimeout(async ()=>{
-  document.getElementById('loader').classList.add('gone');
-  await loadData();
-  await checkWorker();
-  initDash();
-}, 2400);
+// ═══════════════════════════════════════════
+// WELCOME STATS
+// ═══════════════════════════════════════════
+function countUp(id,target,suffix=''){
+  let v=0,step=target/40;
+  const el=document.getElementById(id);
+  const t=setInterval(()=>{
+    v=Math.min(v+step,target);
+    el.textContent=Math.round(v)+(suffix||'');
+    if(v>=target)clearInterval(t);
+  },30);
+}
+setTimeout(()=>{
+  countUp('wSessions',47);countUp('wGoals',8);countUp('wStreak',11);countUp('wScore',94);
+},600);
 
-/* ══ INIT ══ */
-function initDash(){
-  setTimeout(()=>{
-    animN('wScore',0,87,1200);
-    animN('wStreak',0,D.user.streak,800);
-    animN('wHours',0,D.user.hoursToday,1000,'');
-    animN('wTasks',0,D.user.tasksDone,700);
-  },100);
-  setTimeout(()=>{
-    setBar('focusBar','focusVal',D.metrics.focus);
-    setBar('learningBar','learningVal',D.metrics.learning);
-    setBar('productivityBar','productivityVal',D.metrics.productivity);
-    setBar('moodBar','moodVal',D.metrics.mood);
-    animN('bigNum',0,Math.round((D.metrics.focus+D.metrics.learning+D.metrics.productivity)/3),1600);
-  },300);
-
-  const act=document.getElementById('activity');
-  D.activity.forEach((a,i)=>{
-    const el=document.createElement('div');el.className='aitem';
-    el.style.animationDelay=(i*.1+.3)+'s';
-    el.innerHTML=`<div><div class="atop">${a.topic}</div><div class="asub">${a.cat||''}</div></div><div style="display:flex;align-items:center"><span class="amins">${a.minutes}m</span></div>`;
-    act.appendChild(el);
+// ═══════════════════════════════════════════
+// BAR ANIMATION
+// ═══════════════════════════════════════════
+function animateBars(){
+  const bars=[
+    ['focusBar','82'],['moodBar','68'],['sleepBar','74'],['prodBar','91'],
+    ['infra-bar','100'],['ingest-bar','90'],['ui-bar','85'],['ml-bar','70'],
+    ['ai-bar','50'],['sec-bar','10'],['apk-bar','20']
+  ];
+  bars.forEach(([id,w])=>{
+    const el=document.getElementById(id);
+    if(el)setTimeout(()=>{el.style.width=w+'%'},200);
   });
+}
 
-  const tl=document.getElementById('timeline');
-  D.timeline.forEach((t,i)=>{
-    const el=document.createElement('div');el.className='titem';
-    el.style.animationDelay=(i*.12+.4)+'s';
-    el.innerHTML=`<span class="ttime">${t.time}</span><span class="tevent">${t.event}</span>`;
-    tl.appendChild(el);
-  });
-
-  const ins=document.getElementById('insights');
-  D.insights.forEach((n,i)=>{
-    const el=document.createElement('div');el.className='insight';
-    el.style.animationDelay=(i*.1+.2)+'s';
-    el.innerHTML=`<div class="ins-icon">${n.icon}</div><div><div class="ins-title">${n.title}</div><div class="ins-body">${n.body}</div><span class="ins-tag ${n.tagClass}">${n.tag}</span></div>`;
-    ins.appendChild(el);
-  });
-
-  renderPipeline('pipeline');
-  renderPipeline('sysPipeline');
-
-  // ── Stat cards from live data ───────────────────────────────
-  function sc(id, val){ var el=document.getElementById(id); if(el) el.textContent=val; }
-  sc('sc-energy',  (D.metrics.focus||0)+'%');
-  sc('sc-focus',   (D.metrics.learning||0)+'%');
-  sc('sc-stress',  (D.metrics.productivity||0)+'%');
-  sc('sc-events',  D.todayCount!=null ? D.todayCount : D.activity.length);
-  sc('sc-streak',  (D.user.streak||0)+'d');
-  sc('sc-flow',    D.flowLabel||'NOMINAL');
-
-  // ── 7-day energy trend line chart ───────────────────────────
-  (function(){
-    var ctx = document.getElementById('energyTrendChart');
-    if(!ctx) return;
-    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    var today = new Date().getDay();
-    var labels = [];
-    for(var i=6;i>=0;i--) labels.push(days[(today-i+7)%7]);
-    new Chart(ctx,{
-      type:'line',
+// ═══════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════
+function initCharts(){
+  // Weekly bar chart
+  const wc=document.getElementById('weekChart');
+  if(wc){
+    new Chart(wc,{
+      type:'bar',
       data:{
-        labels: labels,
+        labels:['MON','TUE','WED','THU','FRI','SAT','SUN'],
         datasets:[{
-          label:'Energy %',
-          data: (D.weekData||[0,0,0,0,0,0,0]).map(function(v){return Math.round(v*100);}),
-          borderColor:'rgba(0,255,255,.85)',
-          backgroundColor:'rgba(0,255,255,.07)',
-          pointBackgroundColor:'rgba(0,255,255,1)',
-          pointRadius:4,pointHoverRadius:6,
-          borderWidth:2,fill:true,tension:.4
+          data:D.weekly,
+          backgroundColor:D.weekly.map(v=>v>6?'rgba(0,255,136,.7)':v>5?'rgba(0,255,255,.5)':'rgba(0,255,255,.2)'),
+          borderColor:D.weekly.map(v=>v>6?'#00ff88':v>5?'#00ffff':'rgba(0,255,255,.4)'),
+          borderWidth:1,borderRadius:2
         }]
       },
       options:{
         responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{
-          backgroundColor:'rgba(0,8,18,.95)',borderColor:'rgba(0,255,255,.2)',borderWidth:1,padding:10,
-          bodyFont:{family:'Rajdhani',size:13},titleFont:{family:'Orbitron',size:10}
+          backgroundColor:'rgba(0,16,26,.9)',
+          titleColor:'#00ffff',bodyColor:'#bde0ea',
+          borderColor:'rgba(0,255,255,.3)',borderWidth:1,
+          callbacks:{label:c=>c.parsed.y+'h deep work'}
         }},
         scales:{
-          x:{grid:{color:'rgba(0,255,255,.05)'},ticks:{color:'rgba(0,255,255,.45)',font:{family:'Orbitron',size:9}}},
-          y:{min:0,max:100,grid:{color:'rgba(0,255,255,.05)'},ticks:{color:'rgba(0,255,255,.4)',font:{family:'Orbitron',size:9},callback:function(v){return v+'%';}}}
+          x:{ticks:{color:'rgba(189,224,234,.5)',font:{family:'Orbitron',size:9}},grid:{color:'rgba(0,255,255,.05)'}},
+          y:{ticks:{color:'rgba(189,224,234,.5)',font:{family:'Orbitron',size:9}},grid:{color:'rgba(0,255,255,.05)'},max:8}
         }
       }
     });
-  })();
-
-  // ── Input type bar chart ─────────────────────────────────────
-  (function(){
-    var ctx = document.getElementById('inputTypeChart');
-    if(!ctx) return;
-    var counts = D.inputCounts || {};
-    var types  = ['text','voice','image','github','goal','checkin'];
-    var labels = ['Text','Voice','Image','GitHub','Goal','Check-in'];
-    var vals   = types.map(function(t){return counts[t]||0;});
-    var cols   = ['rgba(0,255,255,.7)','rgba(255,0,170,.7)','rgba(0,255,136,.7)','rgba(255,170,0,.7)','rgba(255,51,85,.7)','rgba(100,180,255,.7)'];
-    new Chart(ctx,{
-      type:'bar',
-      data:{labels:labels,datasets:[{data:vals,backgroundColor:cols,borderColor:cols,borderWidth:1,borderRadius:3}]},
+  }
+  // Donut
+  const dc=document.getElementById('donutChart');
+  if(dc){
+    new Chart(dc,{
+      type:'doughnut',
+      data:{
+        datasets:[{
+          data:[42,28,18,12],
+          backgroundColor:['rgba(0,255,255,.5)','rgba(0,255,136,.5)','rgba(255,170,0,.5)','rgba(255,0,170,.5)'],
+          borderColor:['#00ffff','#00ff88','#ffaa00','#ff00aa'],
+          borderWidth:1.5
+        }]
+      },
       options:{
-        responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(0,8,18,.95)',borderColor:'rgba(0,255,255,.2)',borderWidth:1,padding:10}},
-        scales:{
-          x:{grid:{display:false},ticks:{color:'rgba(0,255,255,.45)',font:{family:'Orbitron',size:8}}},
-          y:{grid:{color:'rgba(0,255,255,.04)'},ticks:{color:'rgba(0,255,255,.4)',font:{family:'Orbitron',size:9}}}
-        }
+        responsive:true,cutout:'72%',
+        plugins:{legend:{display:false},tooltip:{
+          backgroundColor:'rgba(0,16,26,.9)',
+          titleColor:'#00ffff',bodyColor:'#bde0ea',
+          borderColor:'rgba(0,255,255,.3)',borderWidth:1
+        }}
       }
     });
-  })();
+  }
+}
 
-  // ── Hourly heatmap ───────────────────────────────────────────
-  (function(){
-    var hw = document.getElementById('heatmap-wrap');
-    if(!hw) return;
-    var hourly = D.hourlyData || new Array(24).fill(0);
-    var maxH   = Math.max.apply(null, hourly.concat([1]));
-    hw.innerHTML = '';
-    hourly.forEach(function(count, hour){
-      var pct = count/maxH;
-      var istH = (hour+5)%24;
-      var bar  = document.createElement('div');
-      bar.style.cssText = 'flex:1;background:rgba(0,255,255,'+(0.06+pct*0.72)+');border-radius:2px 2px 0 0;min-height:4px;height:'+Math.max(4,pct*92)+'px;transition:height 1s ease';
-      bar.title = istH+':00 IST — '+count+' event'+(count!==1?'s':'');
-      hw.appendChild(bar);
+// ═══════════════════════════════════════════
+// 2D WAVEFORM
+// ═══════════════════════════════════════════
+function initWaveform(){
+  const c=document.getElementById('waveCanvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  let W=c.offsetWidth,H=80;
+  c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  let t=0;
+  function drawWave(){
+    ctx.clearRect(0,0,W,H);
+    // Draw 3 waves
+    [
+      {color:'rgba(0,255,255,.6)',amp:12,freq:.04,speed:.06,phase:0},
+      {color:'rgba(255,0,170,.4)',amp:8,freq:.06,speed:.08,phase:2},
+      {color:'rgba(0,255,136,.3)',amp:5,freq:.09,speed:.05,phase:4}
+    ].forEach(wave=>{
+      ctx.beginPath();
+      for(let x=0;x<W;x++){
+        const y=H/2+Math.sin(x*wave.freq+t*wave.speed+wave.phase)*wave.amp
+          +Math.sin(x*.02+t*.04)*6;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=wave.color;
+      ctx.lineWidth=1.5;
+      ctx.stroke();
     });
-  })();
+    t++;
+    requestAnimationFrame(drawWave);
+  }
+  drawWave();
+}
 
-  const tot=D.activity.reduce((s,a)=>s+a.minutes,0);
-  new Chart(document.getElementById('donutChart'),{
-    type:'doughnut',
-    data:{labels:D.activity.map(a=>a.topic),datasets:[{data:D.activity.map(a=>a.minutes),
-      backgroundColor:COLS.map(c=>c+'28'),borderColor:COLS,borderWidth:2,hoverBackgroundColor:COLS.map(c=>c+'55')}]},
-    options:{cutout:'68%',plugins:{legend:{display:false},tooltip:{
-      bodyFont:{family:'Rajdhani',size:14,weight:'600'},titleFont:{family:'Orbitron',size:10},
-      backgroundColor:'rgba(0,8,18,.95)',borderColor:'rgba(0,255,255,.25)',borderWidth:1,padding:12}},
-      animation:{animateRotate:true,duration:1800,easing:'easeInOutQuart'}}
+// ═══════════════════════════════════════════
+// GRAPH CANVAS (2D Neural Graph)
+// ═══════════════════════════════════════════
+let graphMode='neural';
+const graphNodes=[
+  {id:0,x:.5,y:.5,label:'WORKER',col:'#00ffff',r:20},
+  {id:1,x:.2,y:.2,label:'TELEGRAM',col:'#00ff88',r:14},
+  {id:2,x:.8,y:.2,label:'GITHUB',col:'#ffaa00',r:14},
+  {id:3,x:.15,y:.6,label:'LLAMA 3',col:'#ff00aa',r:16},
+  {id:4,x:.85,y:.6,label:'ML MODEL',col:'#00ffff',r:14},
+  {id:5,x:.5,y:.15,label:'WHISPER',col:'#ff00aa',r:12},
+  {id:6,x:.3,y:.85,label:'KV STORE',col:'#00ff88',r:14},
+  {id:7,x:.7,y:.85,label:'DASHBOARD',col:'#ffaa00',r:16},
+  {id:8,x:.5,y:.75,label:'LLAVA',col:'#ff3355',r:12},
+  {id:9,x:.1,y:.4,label:'BOT CMD',col:'#00ffff',r:10},
+  {id:10,x:.9,y:.4,label:'ACTIONS',col:'#00ff88',r:10},
+];
+const graphEdges=[
+  [0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],
+  [1,9],[2,10],[4,7],[3,6],[10,4],[6,7]
+];
+
+let gCanvas,gCtx,gW,gH,gT=0,hovNode=null,gVelX=[],gVelY=[];
+graphNodes.forEach(()=>{gVelX.push((Math.random()-.5)*.2);gVelY.push((Math.random()-.5)*.2)});
+
+function initGraphCanvas(){
+  gCanvas=document.getElementById('graphCanvas');
+  if(!gCanvas)return;
+  gCtx=gCanvas.getContext('2d');
+  resizeGraph();
+  window.addEventListener('resize',resizeGraph);
+  gCanvas.addEventListener('mousemove',e=>{
+    const rect=gCanvas.getBoundingClientRect();
+    const mx=(e.clientX-rect.left)/rect.width,my=(e.clientY-rect.top)/rect.height;
+    hovNode=null;
+    graphNodes.forEach(n=>{
+      const dx=(n.x-mx)*gW/gH,dy=n.y-my;
+      if(Math.sqrt(dx*dx+dy*dy)*gH<n.r+8)hovNode=n.id;
+    });
   });
-  const dl=document.getElementById('donutLegend');
-  D.activity.forEach((a,i)=>{
-    const p=Math.round(a.minutes/tot*100);
-    const d=document.createElement('div');d.className='li';
-    d.innerHTML=`<div class="ldot" style="background:${COLS[i]};box-shadow:0 0 8px ${COLS[i]}"></div><span class="lname">${a.topic}</span><span class="lpct" style="color:${COLS[i]}">${p}%</span>`;
-    dl.appendChild(d);
-  });
-
-  new Chart(document.getElementById('weekChart'),{
-    type:'bar',
-    data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{
-      label:'Study Hours',data:D.weekData,
-      backgroundColor:COLS[0]+'33',borderColor:COLS[0],borderWidth:2,borderRadius:2,
-      hoverBackgroundColor:COLS[0]+'66'}]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{bodyFont:{family:'Rajdhani',size:14},
-        titleFont:{family:'Orbitron',size:10},backgroundColor:'rgba(0,8,18,.95)',
-        borderColor:'rgba(0,255,255,.25)',borderWidth:1,padding:12}},
-      scales:{x:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10}}},
-        y:{grid:{color:'rgba(0,255,255,.06)'},ticks:{color:'rgba(0,255,255,.5)',font:{family:'Orbitron',size:10}}}}}
-  });
-
-  const td=document.getElementById('topicDetail');
-  D.activity.forEach((a,i)=>{
-    const pct=Math.round(a.minutes/tot*100);
-    td.innerHTML+=`<div class="mrow"><div class="ml" style="font-size:14px"><span>${a.topic}</span><span class="mv" style="color:${COLS[i]}">${a.minutes}m · ${pct}%</span></div><div class="btrack"><div class="bfill" style="width:${pct}%;background:linear-gradient(90deg,${COLS[i]},${COLS[i]}66);box-shadow:0 0 10px ${COLS[i]}88;transition:width 1.8s cubic-bezier(.4,0,.2,1)"></div></div></div>`;
-  });
-
-  const mem=document.getElementById('memory');
-  D.memory.forEach((m,i)=>{
-    const el=document.createElement('div');el.className='mem-item';
-    el.style.animationDelay=(i*.1)+'s';
-    el.innerHTML=`<div class="mem-dot" style="background:${m.col};box-shadow:0 0 6px ${m.col}"></div><div class="mem-txt">${m.text}</div><div class="mem-time">${m.time}</div>`;
-    mem.appendChild(el);
-  });
-
-  renderGoals('goalsToday',D.goals.today);
-  renderGoals('goalsWeek',D.goals.week);
+  drawGraph();
 }
 
-function renderPipeline(id){
-  const el=document.getElementById(id);if(!el)return;el.innerHTML='';
-  D.pipeline.forEach(p=>{
-    const d=document.createElement('div');d.className='pipe-item';
-    d.innerHTML=`<div class="pipe-icon">${p.icon}</div><div><div class="pipe-name">${p.name}</div><div class="pipe-sub">${p.sub}</div></div><div class="pipe-status ${p.cls}">${p.status}</div>`;
-    el.appendChild(d);
-  });
+function resizeGraph(){
+  if(!gCanvas)return;
+  gW=gCanvas.offsetWidth;gH=gCanvas.offsetHeight;
+  gCanvas.width=gW*devicePixelRatio;gCanvas.height=gH*devicePixelRatio;
+  gCtx.scale(devicePixelRatio,devicePixelRatio);
 }
-function renderGoals(id,goals){
-  const el=document.getElementById(id);
-  goals.forEach(g=>{
-    const d=document.createElement('div');d.className='goal-item';
-    d.innerHTML=`<div class="goal-check ${g.done?'done':''}" onclick="toggleGoal(this)"></div>
-      <div class="goal-txt ${g.done?'done':''}">${g.text}</div>
-      <span class="goal-cat abadge ab-c">${g.cat}</span>`;
-    el.appendChild(d);
-  });
-}
-function toggleGoal(el){
-  el.classList.toggle('done');
-  el.nextElementSibling.classList.toggle('done');
-}
-function setMood(el){
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');
-}
-function setBar(bId,vId,val){
-  document.getElementById(bId).style.width=val+'%';
-  animN(vId,0,val,1600,'%');
-}
-function animN(id,from,to,dur,sfx=''){
-  const el=document.getElementById(id);const s=performance.now();
-  function step(now){const t=Math.min((now-s)/dur,1),e=1-Math.pow(1-t,4);
-    el.textContent=Math.round(from+(to-from)*e)+sfx;if(t<1)requestAnimationFrame(step)}
-  requestAnimationFrame(step);
-}
-function showDoc(id,btn){
-  document.querySelectorAll('.doc-frame').forEach(function(f){f.style.display='none';});
-  document.querySelectorAll('#view-docs .ntab').forEach(function(b){b.classList.remove('on');});
-  document.getElementById('doc-'+id).style.display='block';
-  btn.classList.add('on');
-}
-function showView(v, btn){
 
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'))
-  document.getElementById('view-'+v).classList.add('on')
+function drawGraph(){
+  if(!gCtx)return;
+  gCtx.clearRect(0,0,gW,gH);
+  gT+=.008;
 
-  document.querySelectorAll('.ntab').forEach(x=>x.classList.remove('on'))
-  btn.classList.add('on')
-
-  // load system brain when graph tab opens
-  if(v === "graph"){
-      loadSystemBrain();
+  // Floating animation
+  if(graphMode==='neural'){
+    graphNodes.forEach((n,i)=>{
+      n.x+=gVelX[i]*.001;n.y+=gVelY[i]*.001;
+      if(n.x<.08||n.x>.92)gVelX[i]*=-1;
+      if(n.y<.08||n.y>.92)gVelY[i]*=-1;
+    });
   }
 
-}
-
-/* ══ PASSWORD GATE ══ */
-// Simple password for viewing personal/encrypted data
-// In production this will derive an AES key from the password
-const AETHER_PW_HASH = localStorage.getItem('aether_pw_hash') || '';
-let docsUnlocked = false;
-
-function showDocsWithGate(btn) {
-  if (docsUnlocked) {
-    showView('docs', btn);
-    return;
-  }
-  // Show password gate
-  const gate = document.getElementById('pw-gate');
-  if (gate) {
-    gate.style.display = 'flex';
-    setTimeout(() => document.getElementById('pw-input').focus(), 100);
-    gate._pendingBtn = btn;
-  }
-}
-
-function checkPassword() {
-  const pw = document.getElementById('pw-input').value;
-  // Simple hash check — in production use PBKDF2
-  const hash = btoa(pw + 'AETHER_SALT_2026');
-  const stored = localStorage.getItem('aether_pw_hash');
-  if (!stored) {
-    // First time — set password
-    localStorage.setItem('aether_pw_hash', hash);
-    unlockDocs();
-  } else if (hash === stored) {
-    unlockDocs();
-  } else {
-    const err = document.getElementById('pw-error');
-    if (err) { err.style.opacity='1'; setTimeout(()=>err.style.opacity='0', 2000); }
-  }
-}
-
-function unlockDocs() {
-  docsUnlocked = true;
-  const gate = document.getElementById('pw-gate');
-  if (gate) {
-    const btn = gate._pendingBtn;
-    gate.style.display = 'none';
-    document.getElementById('pw-input').value = '';
-    if (btn) showView('docs', btn);
-  }
-}
-
-function closeGate() {
-  const gate = document.getElementById('pw-gate');
-  if (gate) gate.style.display = 'none';
-}
-
-// Allow Enter key in password input
-document.addEventListener('DOMContentLoaded', function() {
-  const input = document.getElementById('pw-input');
-  if (input) input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') checkPassword();
+  // Edges
+  graphEdges.forEach(([a,b])=>{
+    const na=graphNodes[a],nb=graphNodes[b];
+    const ax=na.x*gW,ay=na.y*gH,bx=nb.x*gW,by=nb.y*gH;
+    const grad=gCtx.createLinearGradient(ax,ay,bx,by);
+    grad.addColorStop(0,na.col+'88');
+    grad.addColorStop(1,nb.col+'44');
+    gCtx.beginPath();
+    gCtx.moveTo(ax,ay);
+    gCtx.lineTo(bx,by);
+    gCtx.strokeStyle=grad;
+    gCtx.lineWidth=hovNode===a||hovNode===b?1.5:.8;
+    gCtx.stroke();
+    // Traveling dot
+    const tp=(gT*.8+a*.3+b*.2)%1;
+    const tx=ax+(bx-ax)*tp,ty=ay+(by-ay)*tp;
+    gCtx.beginPath();gCtx.arc(tx,ty,2,0,Math.PI*2);
+    gCtx.fillStyle=na.col;gCtx.fill();
   });
+
+  // Nodes
+  graphNodes.forEach(n=>{
+    const x=n.x*gW,y=n.y*gH,r=n.r+(hovNode===n.id?6:0);
+    const pulse=graphMode==='neural'?Math.sin(gT*2+n.id*.7)*3:0;
+    // Glow
+    const grd=gCtx.createRadialGradient(x,y,0,x,y,r+pulse+16);
+    grd.addColorStop(0,n.col+'44');grd.addColorStop(1,'transparent');
+    gCtx.beginPath();gCtx.arc(x,y,r+pulse+16,0,Math.PI*2);
+    gCtx.fillStyle=grd;gCtx.fill();
+    // Node
+    gCtx.beginPath();gCtx.arc(x,y,r+pulse,0,Math.PI*2);
+    gCtx.fillStyle=n.col+'22';
+    gCtx.strokeStyle=n.col;
+    gCtx.lineWidth=hovNode===n.id?2:1.5;
+    gCtx.fill();gCtx.stroke();
+    // Label
+    gCtx.fillStyle=n.col;
+    gCtx.font=`700 ${hovNode===n.id?11:9}px Orbitron`;
+    gCtx.textAlign='center';gCtx.textBaseline='middle';
+    gCtx.fillText(n.label,x,y);
+  });
+
+  requestAnimationFrame(drawGraph);
+}
+
+function setGraphMode(m){
+  graphMode=m;
+  document.querySelectorAll('.gc-btn').forEach(b=>b.classList.remove('on'));
+  event.target.classList.add('on');
+}
+function resetGraph(){
+  graphNodes.forEach((n,i)=>{
+    n.x=[.5,.2,.8,.15,.85,.5,.3,.7,.5,.1,.9][i];
+    n.y=[.5,.2,.2,.6,.6,.15,.85,.85,.75,.4,.4][i];
+  });
+}
+
+// ═══════════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════════
+function switchView(name,tab){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('view-'+name).classList.add('on');
+  tab.classList.add('on');
+  if(name==='data'){setTimeout(()=>{animateBars();initCharts();initWaveform();},50)}
+  if(name==='graph'){setTimeout(initGraphCanvas,50)}
+}
+
+// ═══════════════════════════════════════════
+// DOC TABS
+// ═══════════════════════════════════════════
+function showDoc(name,tab){
+  document.querySelectorAll('.doc-frame').forEach(d=>d.classList.remove('on'));
+  document.getElementById('doc-'+name).classList.add('on');
+  document.querySelectorAll('.ntab').forEach(t=>{if(t.id&&t.id.startsWith('dtab'))t.classList.remove('on')});
+  tab.classList.add('on');
+}
+
+// ═══════════════════════════════════════════
+// INTERACTIVE
+// ═══════════════════════════════════════════
+function setMood(btn){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel')}
+function toggleGoal(check){
+  check.classList.toggle('done');
+  const txt=check.nextElementSibling;
+  if(txt)txt.classList.toggle('done');
+}
+
+// ═══════════════════════════════════════════
+// PASSWORD
+// ═══════════════════════════════════════════
+function openGate(){document.getElementById('pw-gate').classList.add('show')}
+function closeGate(){document.getElementById('pw-gate').classList.remove('show')}
+function checkPassword(){
+  const v=document.getElementById('pw-input').value;
+  const err=document.getElementById('pw-error');
+  if(v==='aether2024'){closeGate();switchView('docs',document.querySelector('.ntab:last-child'))}
+  else{err.style.opacity='1';setTimeout(()=>err.style.opacity='0',2000)}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('pw-input');
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword()});
 });
 
-/* ══ CHAT — full-screen slide page ══ */
+// ═══════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════
 let chatOpen=false;
+function openChat(){if(chatOpen)return;chatOpen=true;document.getElementById('chatPage').classList.add('open');document.getElementById('app').classList.add('shifted');setTimeout(()=>document.getElementById('chatIn').focus(),560)}
+function closeChat(){if(!chatOpen)return;chatOpen=false;document.getElementById('chatPage').classList.remove('open');document.getElementById('app').classList.remove('shifted')}
+function toggleChat(){chatOpen?closeChat():openChat()}
+function quickSend(t){openChat();setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat()},chatOpen?0:600)}
 
-function openChat(){
-  if(chatOpen)return;
-  chatOpen=true;
-  document.getElementById('chatPage').classList.add('open');
-  document.getElementById('app').classList.add('shifted');
-  // Focus input after transition
-  setTimeout(()=>document.getElementById('chatIn').focus(),560);
-}
-
-function closeChat(){
-  if(!chatOpen)return;
-  chatOpen=false;
-  document.getElementById('chatPage').classList.remove('open');
-  document.getElementById('app').classList.remove('shifted');
-}
-
-// Keep legacy toggleChat for any other callers
-function toggleChat(){
-  chatOpen ? closeChat() : openChat();
-}
-
-function quickSend(t){
-  openChat();
-  setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat();},chatOpen?0:600);
-}
 const hist=[];
 async function sendChat(){
   const inp=document.getElementById('chatIn');
@@ -1382,34 +1329,23 @@ async function sendChat(){
   inp.value='';addMsg('user',txt);hist.push({role:'user',content:txt});
   document.getElementById('thinking').classList.remove('hidden');
   document.getElementById('sendBtn').disabled=true;
-
-  // Read selected engine from dropdown (hybrid / ml / worker)
-  const engine = (document.getElementById('aiEngine') || {}).value || 'hybrid';
-
+  const engine=(document.getElementById('aiEngine')||{}).value||'hybrid';
   try{
-    const r = await fetch(WORKER_URL + '/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message:  txt,
-        history:  hist,
-        metrics:  D.metrics,
-        activity: D.activity,
-        goals:    D.goals.today,
-        engine:   engine
-      })
+    const r=await fetch(WORKER_URL+'/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:txt,history:hist,metrics:D.metrics,activity:D.activity,goals:D.goals.today,engine})
     });
-    const data = await r.json();
-    const reply = data.reply || data.error || 'Neural pathway disrupted.';
-    hist.push({role:'assistant', content:reply});
+    const data=await r.json();
+    const reply=data.reply||data.error||'Neural pathway disrupted.';
+    hist.push({role:'assistant',content:reply});
     document.getElementById('thinking').classList.add('hidden');
     document.getElementById('sendBtn').disabled=false;
     typeMsg(reply);
-  } catch(err) {
+  }catch(err){
     document.getElementById('thinking').classList.add('hidden');
     document.getElementById('sendBtn').disabled=false;
-    addMsg('ai','Worker connection failed. Check console.');
-    console.error('[AETHER]', err);
+    addMsg('ai','Worker offline. Check console.');
+    console.error('[AETHER]',err);
   }
 }
 function addMsg(role,text){
@@ -1422,107 +1358,30 @@ function typeMsg(text){
   const box=document.getElementById('chatMsgs');
   const el=document.createElement('div');el.className='msg ai';
   const lb=document.createElement('div');lb.className='mlbl';lb.textContent='AETHER';
-  const sp=document.createElement('span');const cur=document.createElement('span');
-  cur.textContent='▋';cur.style.animation='blink .7s infinite';
-  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur);
+  const sp=document.createElement('span');const cur2=document.createElement('span');
+  cur2.textContent='▋';cur2.style.animation='blink .7s infinite';
+  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur2);
   box.appendChild(el);let i=0;
-  function type(){if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;setTimeout(type,15)}else cur.remove()}
+  function type(){if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;setTimeout(type,14)}else cur2.remove()}
   type();
 }
-</script>
 
-<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-
-<script>
-
-async function loadSystemBrain(){
-
-  const res = await fetch("data/code_graph.json")
-  const graph = await res.json()
-
-  const nodes = new vis.DataSet(graph.nodes)
-  const edges = new vis.DataSet(graph.edges)
-
-  const container = document.getElementById("network")
-
-  const data = {
-    nodes: nodes,
-    edges: edges
-  }
-
-  const options = {
-
-    nodes:{
-      shape:"dot",
-      size:14,
-      font:{size:14}
-    },
-
-    edges:{
-      arrows:"to",
-      color:"#999"
-    },
-
-    groups:{
-
-      ui:{ color:{background:"#00ffff"} },
-      api:{ color:{background:"#bb66ff"} },
-      pipeline:{ color:{background:"#ff9933"} },
-      ml:{ color:{background:"#33ff66"} },
-      data:{ color:{background:"#3399ff"} },
-      other:{ color:{background:"#888888"} }
-
-    },
-
-    physics:{
-      stabilization:false,
-      barnesHut:{
-        gravitationalConstant:-3000
-      }
+// ═══════════════════════════════════════════
+// WORKER STATUS CHECK
+// ═══════════════════════════════════════════
+async function checkWorker(){
+  try{
+    const r=await fetch(WORKER_URL+'/health',{signal:AbortSignal.timeout(5000)});
+    if(r.ok){
+      const ws=document.getElementById('workerStatus');
+      ws.classList.add('ok');ws.innerHTML='<div class="dot g"></div>WORKER OK';
     }
-
+  }catch(e){
+    const ws=document.getElementById('workerStatus');
+    ws.className='err';ws.innerHTML='<div class="dot" style="background:var(--r)"></div>OFFLINE';
   }
-
-  new vis.Network(container, data, options)
-
 }
-
+setTimeout(checkWorker,2000);
 </script>
-
-<script>
-
-async function loadSystemBrain(){
-
-  const res = await fetch("data/code_graph.json");
-  const graph = await res.json();
-
-  const nodes = new vis.DataSet(
-    graph.nodes.map(n => ({
-      id: n.id,
-      label: n.label || n.id
-    }))
-  );
-
-  const edges = new vis.DataSet(
-    graph.edges.map(e => ({
-      from: e.source,
-      to: e.target
-    }))
-  );
-
-  const container = document.getElementById("network");
-
-  new vis.Network(container,{nodes,edges},{
-    nodes:{shape:"dot",size:10},
-    edges:{arrows:"to"},
-    physics:{stabilization:false}
-  });
-
-}
-
-</script>
-
-<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-
 </body>
 </html>
