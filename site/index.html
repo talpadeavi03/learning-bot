@@ -1470,6 +1470,40 @@ async function loadSystemBrain(){
 
 </script>
 
+<script>
+
+async function loadSystemBrain(){
+
+  const res = await fetch("data/code_graph.json");
+  const graph = await res.json();
+
+  const nodes = new vis.DataSet(
+    graph.nodes.map(n => ({
+      id: n.id,
+      label: n.label || n.id
+    }))
+  );
+
+  const edges = new vis.DataSet(
+    graph.edges.map(e => ({
+      from: e.source,
+      to: e.target
+    }))
+  );
+
+  const container = document.getElementById("network");
+
+  new vis.Network(container,{nodes,edges},{
+    nodes:{shape:"dot",size:10},
+    edges:{arrows:"to"},
+    physics:{stabilization:false}
+  });
+
+}
+
+</script>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
 </body>
 </html>
