@@ -9,7 +9,9 @@ on:
       - "site/**"
       - "*.js"
       - "*.py"
-      - ".github/workflow/*.yml"
+
+permissions:
+  contents: write
 
 jobs:
   build_graph:
