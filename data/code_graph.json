@@ -1,13 +1,1 @@
-{
-  "nodes":[
-    {"id":"site","label":"site"},
-    {"id":"api","label":"api"},
-    {"id":"scripts","label":"scripts"},
-    {"id":"data","label":"data"}
-  ],
-  "edges":[
-    {"from":"site","to":"api"},
-    {"from":"api","to":"scripts"},
-    {"from":"scripts","to":"data"}
-  ]
-}
+{"nodes":[],"edges":[]}
