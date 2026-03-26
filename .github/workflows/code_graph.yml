@@ -9,7 +9,7 @@ on:
       - "site/**"
       - "*.js"
       - "*.py"
-      - ".github/workflow/*.yml" 
+      - ".github/workflow/*.yml"
 
 jobs:
   build_graph:
