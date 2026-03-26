@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '30 19 * * *'   # 01:00 IST
   workflow_dispatch:
+  repository_dispatch:
+    types: [telegram_batch]
 
 jobs:
   ml_pipeline:

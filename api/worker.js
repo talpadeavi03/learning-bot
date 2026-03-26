@@ -32,11 +32,11 @@ async function handleCommand(text, chatId, env) {
         await sendTelegram(chatId, '📊 No data yet. Send some messages first!', env);
         return true;
       }
-      const avgEnergy = events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length;
-      const avgStress = events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length;
+      const avgEnergy     = events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length;
+      const avgStress     = events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length;
       const studySessions = events.filter(e => e.is_study_session).length;
-      const topics = [...new Set(events.map(e => e.topic).filter(Boolean))].slice(0, 5);
-      const checkins = events.filter(e => e.input_type === 'checkin').length;
+      const topics        = [...new Set(events.map(e => e.topic).filter(Boolean))].slice(0, 5);
+      const checkins      = events.filter(e => e.input_type === 'checkin').length;
       await sendTelegram(chatId,
         `📊 *AETHER Weekly Stats*\n\n` +
         `Events logged: ${events.length}\n` +
@@ -50,23 +50,21 @@ async function handleCommand(text, chatId, env) {
     }
 
     case '/flow': {
-      const state = await getLatestState(env);
-      const events = await getRecentEvents(5, env);
+      const state       = await getLatestState(env);
+      const events      = await getRecentEvents(5, env);
       const recentEnergy = events.length > 0
-        ? events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length
-        : 0.5;
+        ? events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length : 0.5;
       const recentStress = events.length > 0
-        ? events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length
-        : 0.2;
+        ? events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length : 0.2;
 
       let flowStatus, advice;
       if (state) {
         flowStatus = state.flow_class || 'UNKNOWN';
-        if (flowStatus === 'FLOW') advice = 'You are in flow. Protect this time — no distractions.';
+        if (flowStatus === 'FLOW')       advice = 'You are in flow. Protect this time — no distractions.';
         else if (flowStatus === 'PRE_FLOW') advice = 'Almost there. One focused task to enter flow.';
-        else if (flowStatus === 'ANXIETY') advice = 'Challenge too high. Break the task into smaller pieces.';
+        else if (flowStatus === 'ANXIETY')  advice = 'Challenge too high. Break the task into smaller pieces.';
         else if (flowStatus === 'RECOVERY') advice = 'Rest mode. Light tasks only.';
-        else advice = 'Log your state with the check-in to get a flow reading.';
+        else                                advice = 'Log your state with the check-in to get a flow reading.';
       } else if (recentEnergy > 0.7 && recentStress < 0.3) {
         flowStatus = 'FLOW';
         advice = 'Recent messages suggest flow. Stay focused!';
@@ -136,7 +134,7 @@ async function handleCommand(text, chatId, env) {
 
     case '/week': {
       const events = await getRecentEvents(100, env);
-      const days = {};
+      const days   = {};
       events.forEach(e => {
         const day = e.timestamp?.split('T')[0];
         if (day) {
@@ -180,10 +178,10 @@ async function handleCommand(text, chatId, env) {
       }
       const subAction = args.split(' ')[0];
       const actionMap = {
-        'notion':   'notion_log',
-        'spotify':  'spotify_flow',
-        'nudge':    'smart_nudge',
-        'checkin':  'checkin_reminder',
+        'notion':  'notion_log',
+        'spotify': 'spotify_flow',
+        'nudge':   'smart_nudge',
+        'checkin': 'checkin_reminder',
       };
       if (subAction === 'webhook') {
         const webhookUrl = args.split(' ')[1];
@@ -191,12 +189,10 @@ async function handleCommand(text, chatId, env) {
           await sendTelegram(chatId, '⚠️ Usage: /automate webhook https://yoururl.com', env);
           return true;
         }
-        await handleTrigger(
-          new Request('https://x/trigger', {
-            method: 'POST',
-            body: JSON.stringify({ action: 'webhook', data: { url: webhookUrl } }),
-          }), env
-        );
+        await handleTrigger(new Request('https://x/trigger', {
+          method: 'POST',
+          body: JSON.stringify({ action: 'webhook', data: { url: webhookUrl } }),
+        }), env);
         await sendTelegram(chatId, '✅ Webhook triggered!', env);
         return true;
       }
@@ -205,12 +201,10 @@ async function handleCommand(text, chatId, env) {
         await sendTelegram(chatId, `⚠️ Unknown automation: ${subAction}. Try /automate for list.`, env);
         return true;
       }
-      await handleTrigger(
-        new Request('https://x/trigger', {
-          method: 'POST',
-          body: JSON.stringify({ action: mappedAction }),
-        }), env
-      );
+      await handleTrigger(new Request('https://x/trigger', {
+        method: 'POST',
+        body: JSON.stringify({ action: mappedAction }),
+      }), env);
       return true;
     }
 
@@ -227,43 +221,49 @@ async function handleCommand(text, chatId, env) {
 
     case '/exercise':
     case '/workout': {
-      const actType = args.replace(/[0-9]+/g,'').trim() || 'workout';
-      const mins = parseInt(args.match(/[0-9]+/)?.[0]) || 30;
-      await saveEvent({ input_type:'health', raw_text:text, topic:'Exercise',
-        topics:['health','fitness'], energy_signal:0.75, stress_signal:0.1,
-        focus_signal:0.6, motivation_signal:0.8, dominant_emotion:'energized',
-        is_study_session:false, is_goal_mention:false, estimated_minutes:mins,
-        health_type:'exercise', activity:actType, duration_mins:mins,
-        summary:`Exercise: ${actType} ${mins}min` }, env);
+      const actType = args.replace(/[0-9]+/g, '').trim() || 'workout';
+      const mins    = parseInt(args.match(/[0-9]+/)?.[0]) || 30;
+      await saveEvent({
+        input_type: 'health', raw_text: text, topic: 'Exercise',
+        topics: ['health', 'fitness'], energy_signal: 0.75, stress_signal: 0.1,
+        focus_signal: 0.6, motivation_signal: 0.8, dominant_emotion: 'energized',
+        is_study_session: false, is_goal_mention: false, estimated_minutes: mins,
+        health_type: 'exercise', activity: actType, duration_mins: mins,
+        summary: `Exercise: ${actType} ${mins}min`,
+      }, env);
       await sendTelegram(chatId, `💪 *Exercise logged*\n\n${actType} — ${mins} min\nEnergy: +0.75 recorded 🔥`, env);
       return true;
     }
 
     case '/sleep': {
-      const hrs = parseFloat(args) || 7;
+      const hrs     = parseFloat(args) || 7;
       const quality = hrs >= 8 ? 'great' : hrs >= 6 ? 'ok' : 'poor';
-      const energy  = hrs >= 8 ? 0.85 : hrs >= 6 ? 0.6 : 0.35;
-      await saveEvent({ input_type:'health', raw_text:text, topic:'Sleep',
-        topics:['health','sleep','recovery'], energy_signal:energy,
-        stress_signal:hrs < 6 ? 0.5 : 0.1, focus_signal:energy,
-        motivation_signal:energy, dominant_emotion:hrs < 6 ? 'tired' : 'rested',
-        is_study_session:false, is_goal_mention:false,
-        health_type:'sleep', sleep_hours:hrs, sleep_quality:quality,
-        summary:`Sleep: ${hrs}h (${quality})` }, env);
+      const energy  = hrs >= 8 ? 0.85    : hrs >= 6 ? 0.6  : 0.35;
+      await saveEvent({
+        input_type: 'health', raw_text: text, topic: 'Sleep',
+        topics: ['health', 'sleep', 'recovery'], energy_signal: energy,
+        stress_signal: hrs < 6 ? 0.5 : 0.1, focus_signal: energy,
+        motivation_signal: energy, dominant_emotion: hrs < 6 ? 'tired' : 'rested',
+        is_study_session: false, is_goal_mention: false,
+        health_type: 'sleep', sleep_hours: hrs, sleep_quality: quality,
+        summary: `Sleep: ${hrs}h (${quality})`,
+      }, env);
       await sendTelegram(chatId,
-        `😴 *Sleep logged*\n\n${hrs}h — ${quality.toUpperCase()}\nEnergy forecast: ${Math.round(energy*100)}%\n\n${hrs < 6 ? '⚠️ Low sleep — take it easy.' : hrs >= 8 ? '✅ Well rested!' : '👍 Decent sleep.'}`, env);
+        `😴 *Sleep logged*\n\n${hrs}h — ${quality.toUpperCase()}\nEnergy forecast: ${Math.round(energy*100)}%\n\n` +
+        `${hrs < 6 ? '⚠️ Low sleep — take it easy.' : hrs >= 8 ? '✅ Well rested!' : '👍 Decent sleep.'}`, env);
       return true;
     }
 
     case '/food':
     case '/meal': {
       const meal = args || 'meal';
-      await saveEvent({ input_type:'health', raw_text:text, topic:'Food',
-        topics:['health','nutrition'], energy_signal:0.5, stress_signal:0.05,
-        focus_signal:0.4, motivation_signal:0.5, dominant_emotion:'neutral',
-        is_study_session:false, is_goal_mention:false,
-        health_type:'food', meal_description:meal,
-        summary:`Meal: ${meal}` }, env);
+      await saveEvent({
+        input_type: 'health', raw_text: text, topic: 'Food',
+        topics: ['health', 'nutrition'], energy_signal: 0.5, stress_signal: 0.05,
+        focus_signal: 0.4, motivation_signal: 0.5, dominant_emotion: 'neutral',
+        is_study_session: false, is_goal_mention: false,
+        health_type: 'food', meal_description: meal, summary: `Meal: ${meal}`,
+      }, env);
       await sendTelegram(chatId, `🍽️ *Meal logged*\n\n${meal}\n\nFuel in the tank! 💪`, env);
       return true;
     }
@@ -271,11 +271,12 @@ async function handleCommand(text, chatId, env) {
     case '/water':
     case '/hydrate': {
       const litres = parseFloat(args) || 0.5;
-      await saveEvent({ input_type:'health', raw_text:text, topic:'Hydration',
-        topics:['health','water'], energy_signal:0.55, stress_signal:0.05,
-        focus_signal:0.5, motivation_signal:0.55, dominant_emotion:'neutral',
-        health_type:'water', litres,
-        summary:`Water: ${litres}L` }, env);
+      await saveEvent({
+        input_type: 'health', raw_text: text, topic: 'Hydration',
+        topics: ['health', 'water'], energy_signal: 0.55, stress_signal: 0.05,
+        focus_signal: 0.5, motivation_signal: 0.55, dominant_emotion: 'neutral',
+        health_type: 'water', litres, summary: `Water: ${litres}L`,
+      }, env);
       await sendTelegram(chatId, `💧 *Water logged*\n\n${litres}L\n\nBrain runs on water 🧠`, env);
       return true;
     }
@@ -286,11 +287,12 @@ async function handleCommand(text, chatId, env) {
         await sendTelegram(chatId, '⚖️ Usage: /weight 72.5', env);
         return true;
       }
-      await saveEvent({ input_type:'health', raw_text:text, topic:'Weight',
-        topics:['health','fitness'], energy_signal:0.5, stress_signal:0.1,
-        focus_signal:0.5, motivation_signal:0.6, dominant_emotion:'neutral',
-        health_type:'weight', weight_kg:kg,
-        summary:`Weight: ${kg}kg` }, env);
+      await saveEvent({
+        input_type: 'health', raw_text: text, topic: 'Weight',
+        topics: ['health', 'fitness'], energy_signal: 0.5, stress_signal: 0.1,
+        focus_signal: 0.5, motivation_signal: 0.6, dominant_emotion: 'neutral',
+        health_type: 'weight', weight_kg: kg, summary: `Weight: ${kg}kg`,
+      }, env);
       await sendTelegram(chatId, `⚖️ *Weight logged*\n\n${kg} kg\n\nTracking → trending → improving 📈`, env);
       return true;
     }
@@ -299,13 +301,15 @@ async function handleCommand(text, chatId, env) {
     case '/expense': {
       if (!args) { await sendTelegram(chatId, '💸 Usage: /spend 200 food', env); return true; }
       const spendParts = args.split(' ');
-      const amount = parseFloat(spendParts[0]) || 0;
-      const cat = spendParts.slice(1).join(' ') || 'general';
-      await saveEvent({ input_type:'finance', raw_text:text, topic:'Expense',
-        topics:['money','spending',cat], energy_signal:0.5, stress_signal:0.15,
-        focus_signal:0.4, motivation_signal:0.5, dominant_emotion:'neutral',
-        finance_type:'expense', amount_inr:amount, category:cat,
-        summary:`Spent Rs${amount} on ${cat}` }, env);
+      const amount     = parseFloat(spendParts[0]) || 0;
+      const cat        = spendParts.slice(1).join(' ') || 'general';
+      await saveEvent({
+        input_type: 'finance', raw_text: text, topic: 'Expense',
+        topics: ['money', 'spending', cat], energy_signal: 0.5, stress_signal: 0.15,
+        focus_signal: 0.4, motivation_signal: 0.5, dominant_emotion: 'neutral',
+        finance_type: 'expense', amount_inr: amount, category: cat,
+        summary: `Spent Rs${amount} on ${cat}`,
+      }, env);
       await sendTelegram(chatId, `💸 *Expense logged*\n\nRs${amount} — ${cat}\n\nEvery rupee tracked 💰`, env);
       return true;
     }
@@ -314,13 +318,15 @@ async function handleCommand(text, chatId, env) {
     case '/earn': {
       if (!args) { await sendTelegram(chatId, '💰 Usage: /income 5000 freelance', env); return true; }
       const earnParts = args.split(' ');
-      const earned = parseFloat(earnParts[0]) || 0;
-      const src = earnParts.slice(1).join(' ') || 'income';
-      await saveEvent({ input_type:'finance', raw_text:text, topic:'Income',
-        topics:['money','income',src], energy_signal:0.85, stress_signal:0.05,
-        focus_signal:0.7, motivation_signal:0.9, dominant_emotion:'joy',
-        finance_type:'income', amount_inr:earned, source:src,
-        summary:`Income: Rs${earned} from ${src}` }, env);
+      const earned    = parseFloat(earnParts[0]) || 0;
+      const src       = earnParts.slice(1).join(' ') || 'income';
+      await saveEvent({
+        input_type: 'finance', raw_text: text, topic: 'Income',
+        topics: ['money', 'income', src], energy_signal: 0.85, stress_signal: 0.05,
+        focus_signal: 0.7, motivation_signal: 0.9, dominant_emotion: 'joy',
+        finance_type: 'income', amount_inr: earned, source: src,
+        summary: `Income: Rs${earned} from ${src}`,
+      }, env);
       await sendTelegram(chatId, `💰 *Income logged*\n\nRs${earned} from ${src}\n\nMoney flowing in! Keep building 🚀`, env);
       return true;
     }
@@ -328,28 +334,31 @@ async function handleCommand(text, chatId, env) {
     case '/job':
     case '/apply': {
       const company = args || 'company';
-      await saveEvent({ input_type:'career', raw_text:text, topic:'Job Application',
-        topics:['career','jobs'], energy_signal:0.7, stress_signal:0.3,
-        focus_signal:0.6, motivation_signal:0.75, dominant_emotion:'determined',
-        career_type:'application', company,
-        summary:`Applied: ${company}` }, env);
+      await saveEvent({
+        input_type: 'career', raw_text: text, topic: 'Job Application',
+        topics: ['career', 'jobs'], energy_signal: 0.7, stress_signal: 0.3,
+        focus_signal: 0.6, motivation_signal: 0.75, dominant_emotion: 'determined',
+        career_type: 'application', company, summary: `Applied: ${company}`,
+      }, env);
       await sendTelegram(chatId, `📋 *Job application logged*\n\nCompany: ${company}\n\nConsistency wins. Keep applying! 🎯`, env);
       return true;
     }
 
     case '/interview': {
       const co = args || 'company';
-      await saveEvent({ input_type:'career', raw_text:text, topic:'Interview',
-        topics:['career','interview'], energy_signal:0.8, stress_signal:0.5,
-        focus_signal:0.8, motivation_signal:0.85, dominant_emotion:'focused',
-        career_type:'interview', company:co,
-        summary:`Interview: ${co}` }, env);
+      await saveEvent({
+        input_type: 'career', raw_text: text, topic: 'Interview',
+        topics: ['career', 'interview'], energy_signal: 0.8, stress_signal: 0.5,
+        focus_signal: 0.8, motivation_signal: 0.85, dominant_emotion: 'focused',
+        career_type: 'interview', company: co, summary: `Interview: ${co}`,
+      }, env);
       await sendTelegram(chatId, `🎯 *Interview logged*\n\n${co}\n\nYou got this! 💪`, env);
       return true;
     }
 
     case '/commands': {
-      await sendTelegram(chatId, `*AETHER Commands* 🤖\n\n` +
+      await sendTelegram(chatId,
+        `*AETHER Commands* 🤖\n\n` +
         `*📊 CORE*\n/goal [text] — set today goal\n/mood [1-5] — quick mood log\n/stats — weekly summary\n/flow — current flow state\n\n` +
         `*💪 HEALTH*\n/exercise [mins] [type]\n/sleep [hours]\n/food [description]\n/water [litres]\n/weight [kg]\n\n` +
         `*💰 MONEY*\n/spend [amount] [category]\n/income [amount] [source]\n\n` +
@@ -376,16 +385,8 @@ async function handleCommand(text, chatId, env) {
 // ║  GET  /health         ← Status check                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-// ─────────────────────────────────────────────────────────────────
-// CONSTANTS
-// ─────────────────────────────────────────────────────────────────
-
 const MAX_EVENTS  = 500;
 const MAX_HISTORY = 20;
-
-// ─────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin':  '*',
@@ -407,19 +408,15 @@ function textResp(text, status = 200) {
   });
 }
 
-// ─────────────────────────────────────────────────────────────────
-// MAIN ENTRY
-// ─────────────────────────────────────────────────────────────────
-
 export default {
 
   async scheduled(event, env, ctx) {
-    const hour = new Date().getUTCHours();
-    if (hour === 3)  ctx.waitUntil(sendMorningBriefing(env));
-    if (hour === 15) ctx.waitUntil(sendEveningSummary(env));
-    if (hour === 7)  ctx.waitUntil(middayNudge(env));
+    const hour      = new Date().getUTCHours();
     const dayOfWeek = new Date().getUTCDay();
-    if (hour === 15 && dayOfWeek === 0) ctx.waitUntil(sendWeeklyReport(env));
+    if (hour === 3)                      ctx.waitUntil(sendMorningBriefing(env));
+    if (hour === 15)                     ctx.waitUntil(sendEveningSummary(env));
+    if (hour === 7)                      ctx.waitUntil(middayNudge(env));
+    if (hour === 15 && dayOfWeek === 0)  ctx.waitUntil(sendWeeklyReport(env));
   },
 
   async fetch(request, env) {
@@ -460,11 +457,8 @@ export default {
 
 async function handleWebhook(request, env) {
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return textResp('Bad JSON', 400);
-  }
+  try { body = await request.json(); }
+  catch { return textResp('Bad JSON', 400); }
 
   const msg = body?.message || body?.edited_message;
   if (!msg) return textResp('No message', 200);
@@ -566,13 +560,13 @@ async function handleWebhook(request, env) {
 
   const parsed = await nlpParse(rawText, inputType, env);
 
-  const hour      = new Date(timestamp).getUTCHours();
-  const dayOfWeek = new Date(timestamp).getUTCDay();
-  const wordCount = rawText.trim().split(/\s+/).length;
-  const complexity = Math.min(1, wordCount / 50);
-  const questionCount = (rawText.match(/\?/g) || []).length;
-  const questionRatio = Math.min(1, questionCount / Math.max(1, wordCount / 10));
-  const exclamations = (rawText.match(/!/g) || []).length;
+  const hour           = new Date(timestamp).getUTCHours();
+  const dayOfWeek      = new Date(timestamp).getUTCDay();
+  const wordCount      = rawText.trim().split(/\s+/).length;
+  const complexity     = Math.min(1, wordCount / 50);
+  const questionCount  = (rawText.match(/\?/g) || []).length;
+  const questionRatio  = Math.min(1, questionCount / Math.max(1, wordCount / 10));
+  const exclamations   = (rawText.match(/!/g) || []).length;
 
   const event = {
     timestamp,
@@ -601,25 +595,22 @@ async function handleWebhook(request, env) {
 
 // ═════════════════════════════════════════════════════════════════
 // 2. CHAT ENDPOINT — ENGINE SWITCHER
-//    engine = "ml"     → runAetherML()     (rule-based signals)
-//    engine = "worker" → runWorkersAI()    (pure Llama-3)
-//    engine = "hybrid" → runHybrid()       (ML context + Llama-3)
+//    engine = "ml"     → runAetherML()  (live signals from events)
+//    engine = "worker" → runWorkersAI() (pure Llama-3)
+//    engine = "hybrid" → runHybrid()    (ML context + Llama-3)
 // ═════════════════════════════════════════════════════════════════
 
 async function handleChat(request, env) {
   let body;
-  try {
-    body = await request.json();
-  } catch {
-    return jsonResp({ error: 'Bad JSON' }, 400);
-  }
+  try { body = await request.json(); }
+  catch { return jsonResp({ error: 'Bad JSON' }, 400); }
 
   const {
     history  = [],
     metrics  = {},
     activity = [],
     goals    = [],
-    engine   = "hybrid",
+    engine   = 'hybrid',
   } = body;
 
   const recentEvents   = await getRecentEvents(10, env);
@@ -629,8 +620,8 @@ async function handleChat(request, env) {
 
   let reply;
   try {
-    if (engine === "ml")          reply = await runAetherML(env);
-    else if (engine === "worker") reply = await runWorkersAI(systemPrompt, trimmedHistory, env);
+    if (engine === 'ml')          reply = await runAetherML(env);
+    else if (engine === 'worker') reply = await runWorkersAI(systemPrompt, trimmedHistory, env);
     else                          reply = await runHybrid(systemPrompt, trimmedHistory, env);
   } catch (e) {
     console.error('[AETHER] Chat engine error:', e);
@@ -646,11 +637,8 @@ async function handleChat(request, env) {
 
 async function handleLogState(request, env) {
   let stateVector;
-  try {
-    stateVector = await request.json();
-  } catch {
-    return jsonResp({ error: 'Bad JSON' }, 400);
-  }
+  try { stateVector = await request.json(); }
+  catch { return jsonResp({ error: 'Bad JSON' }, 400); }
 
   if (!stateVector.state_label || stateVector.energy === undefined) {
     return jsonResp({ error: 'Missing required fields: state_label, energy' }, 400);
@@ -709,10 +697,10 @@ async function handleDashboard(request, env) {
     const hoursToday    = Math.round(studySessions * 0.5 * 10) / 10;
 
     let flowProb = 0;
-    if (latestState?.flow_prob)                     flowProb = Math.round(latestState.flow_prob * 100);
-    else if (avgEnergy > 75 && avgStress < 25)      flowProb = 85;
-    else if (avgEnergy > 55 && avgStress < 45)      flowProb = 55;
-    else                                             flowProb = 20;
+    if (latestState?.flow_prob)               flowProb = Math.round(latestState.flow_prob * 100);
+    else if (avgEnergy > 75 && avgStress < 25) flowProb = 85;
+    else if (avgEnergy > 55 && avgStress < 45) flowProb = 55;
+    else                                        flowProb = 20;
 
     const topicCounts = {};
     todayEv.forEach(e => {
@@ -721,20 +709,19 @@ async function handleDashboard(request, env) {
       }
     });
     const activity = Object.entries(topicCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
+      .sort((a, b) => b[1] - a[1]).slice(0, 5)
       .map(([topic, count]) => ({ topic, minutes: count * 25, cat: 'LOGGED' }));
 
     const timeline = todayEv.slice(0, 8).map(e => ({
       time: new Date(e.timestamp).toLocaleTimeString('en-IN', {
-        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata'
+        hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata',
       }),
       event: `${e.input_type}: ${e.summary || e.topic || 'logged'}`,
     }));
 
     const weekData = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d  = new Date();
       d.setDate(d.getDate() - i);
       const ds = d.toISOString().split('T')[0];
       const dayEv = events.filter(e => e.timestamp?.startsWith(ds));
@@ -766,10 +753,10 @@ async function handleDashboard(request, env) {
 
     let flowLabel = 'NOMINAL';
     if (latestState?.flow_class)               flowLabel = latestState.flow_class;
-    else if (avgEnergy > 75 && avgStress < 25) flowLabel = 'FLOW';
-    else if (avgEnergy > 60 && avgStress < 35) flowLabel = 'PRE-FLOW';
-    else if (avgStress > 60)                   flowLabel = 'ANXIETY';
-    else if (avgEnergy < 35)                   flowLabel = 'RECOVERY';
+    else if (avgEnergy > 75 && avgStress < 25)  flowLabel = 'FLOW';
+    else if (avgEnergy > 60 && avgStress < 35)  flowLabel = 'PRE-FLOW';
+    else if (avgStress > 60)                    flowLabel = 'ANXIETY';
+    else if (avgEnergy < 35)                    flowLabel = 'RECOVERY';
 
     const dash = {
       metrics: {
@@ -823,13 +810,13 @@ function generateInsights(events, todayEv, avgEnergy, avgStress, streak) {
     hourEnergy[h].push(e.energy_signal || 0.5);
   });
   const peakHour = Object.entries(hourEnergy)
-    .map(([h, vals]) => ({ h: parseInt(h), avg: vals.reduce((s,v)=>s+v,0)/vals.length }))
-    .sort((a,b) => b.avg - a.avg)[0];
+    .map(([h, vals]) => ({ h: parseInt(h), avg: vals.reduce((s,v) => s+v, 0) / vals.length }))
+    .sort((a, b) => b.avg - a.avg)[0];
 
   if (peakHour) {
     const istHour = (peakHour.h + 5) % 24;
-    const ampm = istHour >= 12 ? 'pm' : 'am';
-    const h12 = istHour % 12 || 12;
+    const ampm    = istHour >= 12 ? 'pm' : 'am';
+    const h12     = istHour % 12 || 12;
     insights.push({
       icon: '⚡', title: 'Peak Performance Window',
       body: `Your energy peaks around ${h12}${ampm} IST based on ${events.length} logged events. Schedule your hardest tasks then.`,
@@ -926,12 +913,12 @@ async function handleTrigger(request, env) {
       case 'smart_nudge': {
         const state  = await getLatestState(env);
         const events = await getRecentEvents(5, env);
-        const avgE   = events.reduce((s,e) => s+(e.energy_signal||0.5),0) / Math.max(events.length,1);
+        const avgE   = events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / Math.max(events.length, 1);
         let msg;
-        if (!state && events.length === 0)  msg = '👋 AETHER here. No data logged today yet. What are you working on?';
-        else if (avgE > 0.75)               msg = `⚡ You're in high energy mode. What's the hardest thing on your list right now?`;
-        else if (avgE < 0.35)               msg = `😴 Low energy detected. Small task or rest? Reply to log your state.`;
-        else                                msg = `🎯 Mid-day check: still on track with your goal? Reply to update AETHER.`;
+        if (!state && events.length === 0) msg = '👋 AETHER here. No data logged today yet. What are you working on?';
+        else if (avgE > 0.75)              msg = `⚡ You're in high energy mode. What's the hardest thing on your list right now?`;
+        else if (avgE < 0.35)              msg = `😴 Low energy detected. Small task or rest? Reply to log your state.`;
+        else                               msg = `🎯 Mid-day check: still on track with your goal? Reply to update AETHER.`;
         await sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
         return jsonResp({ ok: true, action, sent: msg });
       }
@@ -944,9 +931,9 @@ async function handleTrigger(request, env) {
         const today   = new Date().toISOString().split('T')[0];
         const todayEv = events.filter(e => e.timestamp?.startsWith(today));
         const avgE    = todayEv.length > 0
-          ? Math.round(todayEv.reduce((s,e)=>s+(e.energy_signal||0.5),0)/todayEv.length*100) : 0;
-        const topics  = [...new Set(todayEv.map(e=>e.topic).filter(Boolean))].slice(0,5).join(', ');
-        const resp = await fetch('https://api.notion.com/v1/pages', {
+          ? Math.round(todayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / todayEv.length * 100) : 0;
+        const topics  = [...new Set(todayEv.map(e => e.topic).filter(Boolean))].slice(0, 5).join(', ');
+        const resp    = await fetch('https://api.notion.com/v1/pages', {
           method: 'POST',
           headers: {
             'Authorization':  `Bearer ${env.NOTION_TOKEN}`,
@@ -970,12 +957,12 @@ async function handleTrigger(request, env) {
 
       case 'webhook': {
         if (!data.url) return jsonResp({ error: 'data.url required' }, 400);
-        const state  = await getLatestState(env);
-        const events = await getRecentEvents(5, env);
+        const state   = await getLatestState(env);
+        const events  = await getRecentEvents(5, env);
         const payload = {
           timestamp:     new Date().toISOString(),
           state,
-          recent_events: events.slice(0,3),
+          recent_events: events.slice(0, 3),
           ...data.extra,
         };
         const resp = await fetch(data.url, {
@@ -1045,7 +1032,7 @@ async function handleGitHubLog(request, env) {
     await saveEvent(event, env);
     if ((body.files_changed || 0) >= 5 && env.TELEGRAM_CHAT_ID) {
       await sendTelegram(env.TELEGRAM_CHAT_ID,
-        `⚡ *Code logged*\n${body.commit_message?.slice(0,60)}\n${body.files_changed} files · +${body.additions || 0} −${body.deletions || 0}`, env);
+        `⚡ *Code logged*\n${body.commit_message?.slice(0, 60)}\n${body.files_changed} files · +${body.additions || 0} −${body.deletions || 0}`, env);
     }
     console.log('[AETHER] GitHub push logged:', body.commit_message?.slice(0, 50));
     return jsonResp({ ok: true, message: 'GitHub activity logged to AETHER' });
@@ -1063,9 +1050,9 @@ async function handleResetData(request, env) {
     await env.AETHER_KV.put('events:list',  JSON.stringify([]));
     await env.AETHER_KV.put('events:count', '0');
     await env.AETHER_KV.put('dashboard:latest', JSON.stringify({
-      metrics: { focus:0, learning:0, productivity:0, mood:0, last_updated: new Date().toISOString() },
+      metrics: { focus: 0, learning: 0, productivity: 0, mood: 0, last_updated: new Date().toISOString() },
       state: null, activity: [], timeline: [], weekData: [0,0,0,0,0,0,0],
-      insights: [{ icon:'🌱', title:'Fresh start', body:'Clean data logging begins now.', tag:'RESET', tagClass:'tag-ok' }],
+      insights: [{ icon: '🌱', title: 'Fresh start', body: 'Clean data logging begins now.', tag: 'RESET', tagClass: 'tag-ok' }],
       goals: { today: [], week: [] }, streak: 0,
     }));
     console.log('[AETHER] Data reset completed');
@@ -1107,24 +1094,19 @@ Return ONLY this JSON, no other text:
 
   try {
     if (!env.AI) throw new Error('No AI binding');
-
     const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
-      messages: [{ role: 'user', content: prompt }],
+      messages:   [{ role: 'user', content: prompt }],
       max_tokens: 400,
     });
-
-    const raw = result?.response || '{}';
-    let parsed = null;
-    const jsonMatch = raw.match(/\{[\s\S]*?\}/);
-    if (jsonMatch) {
-      try { parsed = JSON.parse(jsonMatch[0]); } catch {}
-    }
+    const raw   = result?.response || '{}';
+    let parsed  = null;
+    const match = raw.match(/\{[\s\S]*?\}/);
+    if (match) { try { parsed = JSON.parse(match[0]); } catch {} }
     if (!parsed || typeof parsed.energy_signal !== 'number') {
       console.warn('[AETHER] Llama JSON invalid, using fallback');
       return fallbackNLP(text);
     }
     return parsed;
-
   } catch (e) {
     console.warn('[AETHER] NLP parse failed, using fallback:', e.message);
     return fallbackNLP(text);
@@ -1132,29 +1114,23 @@ Return ONLY this JSON, no other text:
 }
 
 function fallbackNLP(text) {
-  const lower = text.toLowerCase();
+  const lower       = text.toLowerCase();
   const energyWords = ['excited', 'great', 'amazing', 'productive', 'focused', 'motivated', 'energy'];
   const stressWords = ['stressed', 'tired', 'overwhelmed', 'anxious', 'worried', 'stuck', 'confused'];
   const studyWords  = ['learned', 'studied', 'reading', 'course', 'practice', 'revision', 'chapter'];
-
   const energyScore = energyWords.filter(w => lower.includes(w)).length / energyWords.length;
   const stressScore = stressWords.filter(w => lower.includes(w)).length / stressWords.length;
   const isStudy     = studyWords.some(w => lower.includes(w));
-
   return {
-    topic:             'general',
-    topics:            [],
+    topic:             'general', topics: [],
     sentiment:         stressScore > 0.2 ? 'negative' : energyScore > 0.2 ? 'positive' : 'neutral',
     energy_signal:     Math.min(1, 0.5 + energyScore - stressScore),
     stress_signal:     Math.min(1, stressScore * 2),
-    focus_signal:      0.5,
-    motivation_signal: 0.5,
-    dominant_emotion:  'neutral',
+    focus_signal:      0.5, motivation_signal: 0.5, dominant_emotion: 'neutral',
     is_study_session:  isStudy,
     is_goal_mention:   lower.includes('goal') || lower.includes('target') || lower.includes('plan'),
     is_complaint:      stressScore > 0.3,
-    estimated_minutes: null,
-    summary:           text.slice(0, 80),
+    estimated_minutes: null, summary: text.slice(0, 80),
   };
 }
 
@@ -1165,22 +1141,12 @@ function fallbackNLP(text) {
 async function openaiVisionExtract(imageUrl, caption, env) {
   const imgResp = await fetch(imageUrl);
   if (!imgResp.ok) throw new Error('Could not download image');
-
-  const imgBuffer = await imgResp.arrayBuffer();
-  const imgArray  = [...new Uint8Array(imgBuffer)];
-
-  if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
-
+  const imgArray = [...new Uint8Array(await imgResp.arrayBuffer())];
+  if (!env.AI)    throw new Error('AI binding missing — add [ai] to wrangler.toml');
   const prompt = caption
     ? `Image caption: "${caption}". Describe what you see in this image in English. Extract any visible text, topics, tasks or key information.`
     : 'Describe what you see in this image in English only. List any visible text, objects, activities, or key information.';
-
-  const result = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', {
-    image:      imgArray,
-    prompt:     prompt,
-    max_tokens: 512,
-  });
-
+  const result = await env.AI.run('@cf/llava-hf/llava-1.5-7b-hf', { image: imgArray, prompt, max_tokens: 512 });
   if (!result?.description) throw new Error('Vision model returned empty result');
   return result.description;
 }
@@ -1192,18 +1158,10 @@ async function openaiVisionExtract(imageUrl, caption, env) {
 async function whisperTranscribe(audioUrl, env) {
   const audioResponse = await fetch(audioUrl);
   if (!audioResponse.ok) throw new Error('Could not download audio file');
-
   const audioBuffer = await audioResponse.arrayBuffer();
   if (!env.AI) throw new Error('AI binding missing — add [ai] to wrangler.toml');
-
-  if (audioBuffer.byteLength > 25 * 1024 * 1024) {
-    throw new Error('Audio file too large (max 25MB).');
-  }
-
-  const result = await env.AI.run('@cf/openai/whisper', {
-    audio: [...new Uint8Array(audioBuffer)],
-  });
-
+  if (audioBuffer.byteLength > 25 * 1024 * 1024) throw new Error('Audio file too large (max 25MB).');
+  const result     = await env.AI.run('@cf/openai/whisper', { audio: [...new Uint8Array(audioBuffer)] });
   const transcript = result?.text || result?.transcription || '';
   if (!transcript.trim()) throw new Error('Could not transcribe — try speaking more clearly.');
   return transcript.trim();
@@ -1214,9 +1172,7 @@ async function whisperTranscribe(audioUrl, env) {
 // ═════════════════════════════════════════════════════════════════
 
 async function getTelegramFileUrl(fileId, env) {
-  const resp = await fetch(
-    `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${fileId}`
-  );
+  const resp = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${fileId}`);
   const data = await resp.json();
   if (!data.ok) throw new Error('Telegram getFile failed: ' + JSON.stringify(data));
   return `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${data.result.file_path}`;
@@ -1227,7 +1183,7 @@ async function sendTelegram(chatId, text, env) {
     await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
+      body:    JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
     });
   } catch (e) {
     console.warn('[AETHER] sendTelegram failed:', e.message);
@@ -1235,7 +1191,7 @@ async function sendTelegram(chatId, text, env) {
 }
 
 function buildTelegramReply(parsed, inputType, rawText) {
-  const icons = { text:'📝', voice:'🎙', video_note:'🎥', image:'🖼', document:'📄', goal:'🎯', mood:'😊', checkin:'✅' };
+  const icons     = { text: '📝', voice: '🎙', video_note: '🎥', image: '🖼', document: '📄', goal: '🎯', mood: '😊', checkin: '✅' };
   const icon      = icons[inputType] || '📨';
   const energy    = Math.round((parsed.energy_signal || 0.5) * 100);
   const stress    = Math.round((parsed.stress_signal || 0.2) * 100);
@@ -1263,7 +1219,7 @@ function buildTelegramReply(parsed, inputType, rawText) {
 }
 
 // ═════════════════════════════════════════════════════════════════
-// CHAT AI — SYSTEM PROMPT + ENGINE FUNCTIONS
+// SYSTEM PROMPT
 // ═════════════════════════════════════════════════════════════════
 
 function buildSystemPrompt(metrics, activity, goals, recentEvents, latestState) {
@@ -1274,7 +1230,7 @@ function buildSystemPrompt(metrics, activity, goals, recentEvents, latestState) 
   const eventsContext = recentEvents.length > 0
     ? `\nRecent activity (last ${recentEvents.length} events):\n` +
       recentEvents.map(e =>
-        `- [${e.timestamp?.split('T')[0]}] ${e.input_type}: ${e.topic || e.summary || 'logged'} | energy:${((e.energy_signal||0.5)*100).toFixed(0)}%`
+        `- [${e.timestamp?.split('T')[0]}] ${e.input_type}: ${e.topic || e.summary || 'logged'} | energy:${((e.energy_signal || 0.5) * 100).toFixed(0)}%`
       ).join('\n')
     : '';
 
@@ -1296,7 +1252,7 @@ STRICT RULES:
 6. Be direct, occasionally blunt. You know Avi well.`;
 }
 
-// ── Legacy wrapper (kept for safety, not called by handleChat anymore) ──
+// ── Legacy wrapper (kept for safety, no longer called by handleChat) ──
 async function callOpenAI(systemPrompt, history, env) {
   if (!env.AI) throw new Error('AI binding missing');
   const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
@@ -1306,28 +1262,63 @@ async function callOpenAI(systemPrompt, history, env) {
   return result?.response || 'No response from AI.';
 }
 
-// ── Engine: AETHER ML (rule-based, no AI call, instant) ──────────
+// ═════════════════════════════════════════════════════════════════
+// ENGINE: AETHER ML
+// Reads live from events — no AI call, instant, always accurate
+// ═════════════════════════════════════════════════════════════════
+
 async function runAetherML(env) {
-  const dash = await env.AETHER_KV.get("dashboard:latest", { type: "json" }) || {};
+  const events  = await getRecentEvents(20, env);
+  const today   = new Date().toISOString().split('T')[0];
+  const todayEv = events.filter(e => e.timestamp?.startsWith(today));
 
-  const focus        = Math.round(dash.metrics?.focus        || 0);
-  const energy       = Math.round(dash.metrics?.learning     || 0);
-  const productivity = Math.round(dash.metrics?.productivity || 0);
-  const mood         = Math.round(dash.metrics?.mood         || 0);
+  // Use today's events if available, else fall back to last 10 events
+  const allEv = todayEv.length > 0 ? todayEv : events.slice(0, 10);
 
-  let insights = [];
-  if (focus > 70)        insights.push("Focus is strong. Good time for deep work.");
-  else if (focus < 40)   insights.push("Focus is low. Consider a short break.");
-  if (energy > 70)       insights.push("Energy levels are high.");
-  else if (energy < 40)  insights.push("Energy seems low.");
-  if (productivity < 50) insights.push("Productivity signals are moderate.");
-  if (mood > 80)         insights.push("Mood is very positive.");
-  if (insights.length === 0) insights.push("All signals nominal. Keep logging for better insights.");
+  if (allEv.length === 0) {
+    return `[ML]\nNo data yet. Send messages to your Telegram bot to train AETHER.\n\nFocus: 0%  Energy: 0%  Productivity: 0%  Mood: 0%`;
+  }
 
-  return `[ML]\nFocus: ${focus}%\nEnergy: ${energy}%\nProductivity: ${productivity}%\nMood: ${mood}%\n\n${insights.join(" ")}`;
+  const focus      = Math.round(allEv.reduce((s, e) => s + (e.focus_signal    || 0.5), 0) / allEv.length * 100);
+  const energy     = Math.round(allEv.reduce((s, e) => s + (e.energy_signal   || 0.5), 0) / allEv.length * 100);
+  const stress     = Math.round(allEv.reduce((s, e) => s + (e.stress_signal   || 0.2), 0) / allEv.length * 100);
+  const motivation = Math.round(allEv.reduce((s, e) => s + (e.motivation_signal || 0.5), 0) / allEv.length * 100);
+
+  // Derived scores
+  const productivity = stress < 40 && energy > 60
+    ? Math.round((energy + focus) / 2)
+    : Math.round(energy * 0.7);
+  const mood = Math.round((100 - stress) * 0.7 + motivation * 0.3);
+
+  // Flow label
+  const latestState = await getLatestState(env);
+  const flowLabel   = latestState?.flow_class ||
+    (energy > 75 && stress < 25 ? 'FLOW' :
+     energy > 60 && stress < 40 ? 'PRE-FLOW' :
+     stress > 60                ? 'ANXIETY'  : 'NOMINAL');
+
+  // Insights
+  const insights = [];
+  if (focus > 70)        insights.push('Focus is strong — good time for deep work.');
+  else if (focus < 40)   insights.push('Focus is low. Remove distractions or take a break.');
+  if (energy > 70)       insights.push('Energy is high — use it.');
+  else if (energy < 40)  insights.push('Energy seems low — consider rest or food.');
+  if (stress > 60)       insights.push('Stress elevated. Break tasks into smaller steps.');
+  if (motivation > 70)   insights.push('Motivation is high.');
+  if (productivity < 50) insights.push('Productivity moderate. One focused task at a time.');
+  if (insights.length === 0) insights.push('All signals nominal. Keep logging for better accuracy.');
+
+  const src = todayEv.length > 0
+    ? `${todayEv.length} events today`
+    : `${allEv.length} recent events`;
+
+  return `[ML] — ${src}\nFocus: ${focus}%  Energy: ${energy}%\nProductivity: ${productivity}%  Mood: ${mood}%\nStress: ${stress}%  Flow: ${flowLabel}\n\n${insights.join(' ')}`;
 }
 
-// ── Engine: Workers AI (pure Llama-3, no ML context) ─────────────
+// ═════════════════════════════════════════════════════════════════
+// ENGINE: WORKERS AI (pure Llama-3)
+// ═════════════════════════════════════════════════════════════════
+
 async function runWorkersAI(systemPrompt, history, env) {
   if (!env.AI) throw new Error('AI binding missing');
   const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
@@ -1337,14 +1328,29 @@ async function runWorkersAI(systemPrompt, history, env) {
   return `[Workers AI]\n` + (result?.response || 'No response.');
 }
 
-// ── Engine: Hybrid (ML state injected into Llama-3 context) ──────
+// ═════════════════════════════════════════════════════════════════
+// ENGINE: HYBRID (ML state injected into Llama-3 context)
+// ═════════════════════════════════════════════════════════════════
+
 async function runHybrid(systemPrompt, history, env) {
   if (!env.AI) throw new Error('AI binding missing');
 
-  const state = await getLatestState(env);
-  const mlContext = state
-    ? `\n[ML STATE] energy:${state.energy} stress:${state.stress} flow:${state.flow_class}`
-    : '';
+  // Pull live signals to inject as extra context
+  const events  = await getRecentEvents(10, env);
+  const today   = new Date().toISOString().split('T')[0];
+  const todayEv = events.filter(e => e.timestamp?.startsWith(today));
+  const allEv   = todayEv.length > 0 ? todayEv : events.slice(0, 5);
+
+  let mlContext = '';
+  if (allEv.length > 0) {
+    const energy = Math.round(allEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / allEv.length * 100);
+    const stress = Math.round(allEv.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / allEv.length * 100);
+    const focus  = Math.round(allEv.reduce((s, e) => s + (e.focus_signal  || 0.5), 0) / allEv.length * 100);
+    const state  = await getLatestState(env);
+    const flow   = state?.flow_class ||
+      (energy > 75 && stress < 25 ? 'FLOW' : energy > 60 && stress < 40 ? 'PRE-FLOW' : 'NOMINAL');
+    mlContext = `\n\n[LIVE ML SIGNALS — ${allEv.length} events] energy:${energy}% focus:${focus}% stress:${stress}% flow:${flow}`;
+  }
 
   const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
     messages:   [{ role: 'system', content: systemPrompt + mlContext }, ...history],
@@ -1361,20 +1367,20 @@ async function sendMorningBriefing(env) {
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!chatId) return;
 
-  const today      = new Date().toISOString().split('T')[0];
-  const events     = await getRecentEvents(50, env);
-  const todayGoal  = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
+  const today     = new Date().toISOString().split('T')[0];
+  const events    = await getRecentEvents(50, env);
+  const todayGoal = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
 
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const ydStr    = yesterday.toISOString().split('T')[0];
-  const ydEvents = events.filter(e => e.timestamp?.startsWith(ydStr));
+  const ydStr     = yesterday.toISOString().split('T')[0];
+  const ydEvents  = events.filter(e => e.timestamp?.startsWith(ydStr));
   const avgEnergy = ydEvents.length > 0
     ? Math.round(ydEvents.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / ydEvents.length * 100)
     : null;
 
   const streak  = await calculateStreak(events);
-  const days    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const days    = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const dayName = days[new Date().getDay()];
 
   let msg = `🌅 *Good morning, Avi!*\n\n📅 ${dayName} · ${today}\n🔥 Streak: ${streak} day${streak !== 1 ? 's' : ''}\n\n`;
@@ -1382,11 +1388,11 @@ async function sendMorningBriefing(env) {
   if (todayGoal)          msg += `🎯 *Today's goal:* ${todayGoal}\n\n`;
   else                    msg += `💡 Set your goal: /goal [what you want to achieve today]\n\n`;
 
-  if (streak === 0)     msg += `_Start your streak today — just send one message._`;
-  else if (streak < 3)  msg += `_${streak} days in. Keep the momentum going._`;
-  else if (streak < 7)  msg += `_${streak} days strong. You're building a habit._`;
-  else if (streak < 30) msg += `_${streak} day streak. AETHER is learning your patterns._`;
-  else                  msg += `_${streak} days. The model knows you well now._`;
+  if (streak === 0)      msg += `_Start your streak today — just send one message._`;
+  else if (streak < 3)   msg += `_${streak} days in. Keep the momentum going._`;
+  else if (streak < 7)   msg += `_${streak} days strong. You're building a habit._`;
+  else if (streak < 30)  msg += `_${streak} day streak. AETHER is learning your patterns._`;
+  else                   msg += `_${streak} days. The model knows you well now._`;
 
   await sendTelegram(chatId, msg, env);
 }
@@ -1452,39 +1458,41 @@ async function sendWeeklyReport(env) {
       return sendTelegram(env.TELEGRAM_CHAT_ID, '📊 Weekly report: No events logged this week. Start logging!', env);
     }
 
-    const avgEnergy = weekEv.reduce((s,e) => s + (e.energy_signal||0.5), 0) / weekEv.length;
-    const avgStress = weekEv.reduce((s,e) => s + (e.stress_signal||0.2), 0) / weekEv.length;
+    const avgEnergy = weekEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / weekEv.length;
+    const avgStress = weekEv.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / weekEv.length;
 
-    const byDay = {};
+    const byDay    = {};
     weekEv.forEach(e => {
       const d = e.timestamp?.split('T')[0];
       if (!byDay[d]) byDay[d] = [];
       byDay[d].push(e.energy_signal || 0.5);
     });
-    const dayAvgs  = Object.entries(byDay).map(([d, vals]) => ({ d, avg: vals.reduce((s,v)=>s+v,0)/vals.length }));
-    const bestDay  = dayAvgs.sort((a,b)=>b.avg-a.avg)[0];
-    const worstDay = dayAvgs[dayAvgs.length-1];
+    const dayAvgs  = Object.entries(byDay).map(([d, vals]) => ({ d, avg: vals.reduce((s,v) => s+v, 0) / vals.length }));
+    const bestDay  = dayAvgs.sort((a, b) => b.avg - a.avg)[0];
+    const worstDay = dayAvgs[dayAvgs.length - 1];
 
     const topicCount = {};
-    weekEv.forEach(e => { if(e.topic) topicCount[e.topic] = (topicCount[e.topic]||0)+1; });
-    const topTopics = Object.entries(topicCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t])=>t).join(', ') || 'none';
+    weekEv.forEach(e => { if (e.topic) topicCount[e.topic] = (topicCount[e.topic] || 0) + 1; });
+    const topTopics = Object.entries(topicCount).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t]) => t).join(', ') || 'none';
 
-    const githubCount  = weekEv.filter(e=>e.input_type==='github').length;
-    const healthCount  = weekEv.filter(e=>e.input_type==='health').length;
-    const financeCount = weekEv.filter(e=>e.input_type==='finance').length;
-    const careerCount  = weekEv.filter(e=>e.input_type==='career').length;
+    const githubCount  = weekEv.filter(e => e.input_type === 'github').length;
+    const healthCount  = weekEv.filter(e => e.input_type === 'health').length;
+    const financeCount = weekEv.filter(e => e.input_type === 'finance').length;
+    const careerCount  = weekEv.filter(e => e.input_type === 'career').length;
     const streak       = await calculateStreak(events);
 
-    const energyBar = '█'.repeat(Math.round(avgEnergy*10)) + '░'.repeat(10-Math.round(avgEnergy*10));
-    const stressBar = '█'.repeat(Math.round(avgStress*10)) + '░'.repeat(10-Math.round(avgStress*10));
+    const energyBar = '█'.repeat(Math.round(avgEnergy * 10)) + '░'.repeat(10 - Math.round(avgEnergy * 10));
+    const stressBar = '█'.repeat(Math.round(avgStress * 10)) + '░'.repeat(10 - Math.round(avgStress * 10));
 
-    const msg = `📊 *AETHER Weekly Report*\nWeek of ${weekAgo.toLocaleDateString('en-IN')}\n\n` +
+    const msg =
+      `📊 *AETHER Weekly Report*\nWeek of ${weekAgo.toLocaleDateString('en-IN')}\n\n` +
       `*Overview*\nEvents logged: ${weekEv.length}\nCurrent streak: ${streak} days\n\n` +
-      `*Energy*\n${energyBar} ${Math.round(avgEnergy*100)}%\nBest day: ${bestDay?.d || 'n/a'}\nWorst day: ${worstDay?.d || 'n/a'}\n\n` +
-      `*Stress*\n${stressBar} ${Math.round(avgStress*100)}%\n\n` +
+      `*Energy*\n${energyBar} ${Math.round(avgEnergy * 100)}%\nBest day: ${bestDay?.d || 'n/a'}\nWorst day: ${worstDay?.d || 'n/a'}\n\n` +
+      `*Stress*\n${stressBar} ${Math.round(avgStress * 100)}%\n\n` +
       `*Top topics*\n${topTopics}\n\n` +
       `*Activity breakdown*\n💻 Code pushes: ${githubCount}\n💪 Health logs: ${healthCount}\n💰 Finance logs: ${financeCount}\n💼 Career logs: ${careerCount}\n\n` +
-      `*Next week focus*\n${avgEnergy < 0.5 ? '⚡ Energy is low — prioritise sleep and exercise' : avgStress > 0.5 ? '🧘 Stress is high — schedule recovery time' : '🚀 Good baseline — push harder on goals'}\n\nKeep logging. AETHER learns from every entry. 🤖`;
+      `*Next week focus*\n${avgEnergy < 0.5 ? '⚡ Energy is low — prioritise sleep and exercise' : avgStress > 0.5 ? '🧘 Stress is high — schedule recovery time' : '🚀 Good baseline — push harder on goals'}\n\n` +
+      `Keep logging. AETHER learns from every entry. 🤖`;
 
     return sendTelegram(env.TELEGRAM_CHAT_ID, msg, env);
   } catch (e) {
@@ -1516,11 +1524,11 @@ async function calculateStreak(events) {
   const days = new Set(events.map(e => e.timestamp?.split('T')[0]).filter(Boolean));
   let streak = 0;
   for (let i = 0; i < 365; i++) {
-    const d = new Date();
+    const d  = new Date();
     d.setDate(d.getDate() - i);
     const ds = d.toISOString().split('T')[0];
     if (days.has(ds)) streak++;
-    else if (i > 0) break;
+    else if (i > 0)   break;
   }
   return streak;
 }
@@ -1532,11 +1540,11 @@ async function calculateStreak(events) {
 async function encryptText(text, env) {
   const keyMaterial = env.ENCRYPT_KEY || 'AETHER_DEFAULT_KEY_CHANGE_IN_PROD';
   try {
-    const keyData = new TextEncoder().encode(keyMaterial.padEnd(32, '0').slice(0, 32));
-    const key     = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
-    const iv      = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(text);
-    const cipher  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+    const keyData  = new TextEncoder().encode(keyMaterial.padEnd(32, '0').slice(0, 32));
+    const key      = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
+    const iv       = crypto.getRandomValues(new Uint8Array(12));
+    const encoded  = new TextEncoder().encode(text);
+    const cipher   = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
     const combined = new Uint8Array(iv.length + cipher.byteLength);
     combined.set(iv, 0);
     combined.set(new Uint8Array(cipher), iv.length);
@@ -1557,7 +1565,7 @@ async function saveEvent(event, env) {
 
     const eventToStore = { ...event };
     if (eventToStore.raw_text && eventToStore.raw_text.length > 3) {
-      eventToStore.raw_text = await encryptText(eventToStore.raw_text, env);
+      eventToStore.raw_text  = await encryptText(eventToStore.raw_text, env);
       eventToStore.encrypted = true;
     }
 
@@ -1567,10 +1575,11 @@ async function saveEvent(event, env) {
     await env.AETHER_KV.put('events:list',  JSON.stringify(events));
     await env.AETHER_KV.put('events:count', String(events.length));
 
+    // ── Trigger ML pipeline every 3 real messages ─────────────────
     const realTypes = ['text', 'voice', 'image', 'document', 'video_note'];
     if (realTypes.includes(event.input_type)) {
       const realCount = events.filter(e => realTypes.includes(e.input_type)).length;
-      if (realCount >= 10 && realCount % 5 === 0 && env.GITHUB_TOKEN) {
+      if (realCount >= 3 && realCount % 3 === 0 && env.GITHUB_TOKEN) {
         triggerMLPipeline(env).catch(e =>
           console.warn('[AETHER] ML trigger failed:', e.message)
         );
@@ -1587,7 +1596,7 @@ async function triggerMLPipeline(env) {
   const resp = await fetch(
     'https://api.github.com/repos/talpadeavi03/learning-bot/actions/workflows/ml_pipeline.yml/dispatches',
     {
-      method: 'POST',
+      method:  'POST',
       headers: {
         'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
         'Accept':        'application/vnd.github.v3+json',
@@ -1636,13 +1645,11 @@ async function refreshDashboardFromState(stateVector, env) {
   try {
     const existing = await env.AETHER_KV.get('dashboard:latest');
     const dash     = existing ? JSON.parse(existing) : defaultDashboard();
-
-    dash.metrics.focus        = Math.round((stateVector.energy || 0.5) * 100);
+    dash.metrics.focus        = Math.round((stateVector.energy   || 0.5) * 100);
     dash.metrics.mood         = Math.round((1 - (stateVector.stress || 0.2)) * 100);
     dash.metrics.productivity = Math.round((stateVector.flow_prob || 0.3) * 100);
     dash.metrics.last_updated = new Date().toISOString();
     dash.state                = stateVector;
-
     await env.AETHER_KV.put('dashboard:latest', JSON.stringify(dash));
   } catch (e) {
     console.warn('[AETHER] refreshDashboard failed:', e.message);
@@ -1651,28 +1658,24 @@ async function refreshDashboardFromState(stateVector, env) {
 
 function defaultDashboard() {
   return {
-    metrics: { focus:0, learning:0, productivity:0, mood:0, last_updated: null },
+    metrics:     { focus: 0, learning: 0, productivity: 0, mood: 0, last_updated: null },
     state:       null,
     activity:    [],
     timeline:    [],
     goals:       { today: [], week: [] },
-    insights:    [{
-      icon: '🌱', title: 'Fresh Start',
-      body: 'Send messages to your Telegram bot to start logging. Every message trains your model.',
-      tag: 'START', tagClass: 'tag-ok'
-    }],
+    insights:    [{ icon: '🌱', title: 'Fresh Start', body: 'Send messages to your Telegram bot to start logging. Every message trains your model.', tag: 'START', tagClass: 'tag-ok' }],
     streak:      0,
-    weekData:    [0,0,0,0,0,0,0],
+    weekData:    [0, 0, 0, 0, 0, 0, 0],
     inputCounts: {},
     hourlyData:  new Array(24).fill(0),
     todayCount:  0,
     flowLabel:   'NOMINAL',
     pipeline: [
-      { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',    status: 'READY',   cls: 'ps-ok' },
-      { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',  status: 'READY',   cls: 'ps-ok' },
-      { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM', status: 'WAITING', cls: 'ps-warn' },
-      { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',   status: 'WAITING', cls: 'ps-warn' },
-      { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',   status: 'READY',   cls: 'ps-ok' },
+      { icon: '📥', name: 'pull_events.py',    sub: 'KV → events.csv',    status: 'READY',   cls: 'ps-ok'  },
+      { icon: '🧹', name: 'data_cleaner.py',   sub: 'Remove bad events',  status: 'READY',   cls: 'ps-ok'  },
+      { icon: '🏋', name: 'train_models.py',   sub: 'RandomForest + GBM', status: 'WAITING', cls: 'ps-warn'},
+      { icon: '🔮', name: 'predict.py',        sub: 'Flow + peak hour',   status: 'WAITING', cls: 'ps-warn'},
+      { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV',   status: 'READY',   cls: 'ps-ok'  },
     ],
   };
 }
