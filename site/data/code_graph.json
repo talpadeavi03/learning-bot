@@ -1,1 +1,51 @@
-{"nodes":[],"edges":[]}
+{
+  "nodes": [
+    {"id":"ui","label":"Frontend UI","group":"ui"},
+    {"id":"dashboard","label":"Dashboard","group":"ui"},
+    {"id":"graph","label":"System Brain Graph","group":"ui"},
+    {"id":"chat","label":"Aether Chat","group":"ui"},
+
+    {"id":"worker","label":"Cloudflare Worker API","group":"api"},
+    {"id":"routes","label":"API Routes","group":"api"},
+    {"id":"auth","label":"Auth Layer","group":"api"},
+
+    {"id":"telegram","label":"Telegram Bot","group":"pipeline"},
+    {"id":"github","label":"GitHub Actions","group":"pipeline"},
+    {"id":"parser","label":"NLP Parser","group":"pipeline"},
+    {"id":"features","label":"Feature Extractor","group":"pipeline"},
+
+    {"id":"train","label":"ML Trainer","group":"ml"},
+    {"id":"model","label":"Productivity Model","group":"ml"},
+    {"id":"predict","label":"Prediction Engine","group":"ml"},
+
+    {"id":"events","label":"events.csv","group":"data"},
+    {"id":"featuresdata","label":"features.parquet","group":"data"},
+    {"id":"dashboarddata","label":"dashboard.json","group":"data"}
+  ],
+
+  "edges": [
+    {"from":"ui","to":"dashboard"},
+    {"from":"ui","to":"graph"},
+    {"from":"ui","to":"chat"},
+
+    {"from":"dashboard","to":"worker"},
+    {"from":"chat","to":"worker"},
+
+    {"from":"worker","to":"routes"},
+    {"from":"worker","to":"auth"},
+
+    {"from":"telegram","to":"github"},
+    {"from":"github","to":"parser"},
+    {"from":"parser","to":"events"},
+
+    {"from":"events","to":"features"},
+    {"from":"features","to":"featuresdata"},
+
+    {"from":"featuresdata","to":"train"},
+    {"from":"train","to":"model"},
+    {"from":"model","to":"predict"},
+
+    {"from":"predict","to":"dashboarddata"},
+    {"from":"dashboarddata","to":"dashboard"}
+  ]
+}

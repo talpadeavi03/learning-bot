@@ -63,17 +63,22 @@ jobs:
         npx gitnexus analyze $GITHUB_WORKSPACE --format json > tmp_graph.json || true
 
         if [ -s tmp_graph.json ]; then
-          echo "Valid graph generated"
+          echo "Graph generated"
           mv tmp_graph.json $GITHUB_WORKSPACE/data/code_graph.json
         else
           echo "Graph empty — keeping previous graph"
         fi
 
+    - name: Copy graph to site
+      run: |
+        mkdir -p site/data
+        cp data/code_graph.json site/data/code_graph.json
+
     # Ensure graph file always exists
     - name: Validate graph
       run: |
         if [ ! -f data/code_graph.json ]; then
-          echo '{"nodes":[],"edges":[]}' > data/code_graph.json
+          echo '{"nodes":[{"id":"init","label":"init"}],"edges":[]}' > data/code_graph.json
         fi
 
     # Copy graph to site for frontend
