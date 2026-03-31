@@ -508,6 +508,19 @@ export default {
       if (url.pathname === '/log-github'       && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger'          && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health'           && request.method === 'GET')  return handleHealth(request, env);
+      if (url.pathname === '/knowledge' && request.method === 'GET') {
+        const data = await env.AETHER_KV.get("knowledge_graph");
+
+        if (!data) {
+          return new Response(JSON.stringify({ nodes: [] }), {
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+
+        return new Response(data, {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
      
       if (url.pathname === '/update-code-graph' && request.method === 'POST') {
 
