@@ -496,8 +496,28 @@ export default {
     }
 
     const url = new URL(request.url);
+    console.log("PATH:", url.pathname);
 
     try {
+      if (url.pathname === '/knowledge') {
+        const data = await env.AETHER_KV.get("knowledge_graph");
+
+        if (!data) {
+          return new Response(JSON.stringify({
+            nodes: [
+              { id: "learning", type: "concept", mentions: 5 },
+              { id: "coding", type: "activity", mentions: 8 },
+              { id: "github", type: "tool", mentions: 6 }
+            ]
+          }), {
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+
+        return new Response(data, {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
       if (url.pathname === '/webhook'          && request.method === 'POST') return handleWebhook(request, env);
       if (url.pathname === '/chat'             && request.method === 'POST') return handleChat(request, env);
       if (url.pathname === '/log-state'        && request.method === 'POST') return handleLogState(request, env);
