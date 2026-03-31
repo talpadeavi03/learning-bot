@@ -608,6 +608,21 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
       </div>
 
     </div>
+    <div class="panel">
+  <div class="co tl"></div><div class="co tr"></div><div class="co bl"></div><div class="co br"></div>
+  
+  <div class="pt">Knowledge Graph <span>AI MEMORY</span></div>
+
+  <div id="knowledgeList">
+    <div class="aitem">
+      <div>
+        <div class="atop">Initializing...</div>
+        <div class="asub">AETHER learning</div>
+      </div>
+      <div class="amins">--</div>
+    </div>
+  </div>
+</div>
   </div>
 
   <!-- ═══ DATA VIEW ═══ -->
@@ -1466,16 +1481,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="pipe-status ${p.cls}">${p.status}</div>
         </div>
       `).join("");
-    }
-
-  } catch (err) {
-    console.error("UI ERROR:", err);
-
-    document.body.innerHTML = `
-      <h1 style="color:red">AETHER UI ERROR</h1>
-      <pre>${err}</pre>
-    `;
+    } else if (kgEl) {
+    kgEl.innerHTML = `<div class="asub">No knowledge yet</div>`;
   }
+
+} catch (e) {
+  console.log("Knowledge graph not ready yet");
+
+  const kgEl = document.getElementById("knowledgeList");
+  if (kgEl) {
+    kgEl.innerHTML = `<div class="asub">Knowledge building...</div>`;
+  }
+}
+
 });
 </script>
 
