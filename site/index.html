@@ -2478,6 +2478,78 @@
         display: none
       }
     }
+
+    /* ═══════════════════════════════════
+       JARVIS ENHANCED — HUD + EFFECTS
+    ═══════════════════════════════════ */
+
+    /* Chat Galaxy BG Canvas */
+    #chat-galaxy{position:absolute;inset:0;z-index:0;pointer-events:none}
+
+    /* HUD OVERLAY */
+    .hud-overlay{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+    .hud-corner{position:absolute;width:60px;height:60px;border-style:solid;border-color:rgba(0,212,255,.2)}
+    .hud-corner.tl{top:12px;left:12px;border-width:2px 0 0 2px}
+    .hud-corner.tr{top:12px;right:12px;border-width:2px 2px 0 0}
+    .hud-corner.bl{bottom:12px;left:12px;border-width:0 0 2px 2px}
+    .hud-corner.br{bottom:12px;right:12px;border-width:0 2px 2px 0}
+    .hud-corner::before{content:'';position:absolute;width:8px;height:8px;background:var(--c);border-radius:50%;opacity:.4}
+    .hud-corner.tl::before{top:-4px;left:-4px}
+    .hud-corner.tr::before{top:-4px;right:-4px}
+    .hud-corner.bl::before{bottom:-4px;left:-4px}
+    .hud-corner.br::before{bottom:-4px;right:-4px}
+
+    /* HUD side readouts */
+    .hud-readout{position:absolute;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(0,212,255,.2);writing-mode:vertical-rl;text-orientation:mixed}
+    .hud-readout.left{left:18px;top:50%;transform:translateY(-50%)}
+    .hud-readout.right{right:18px;top:50%;transform:translateY(-50%) rotate(180deg)}
+    .hud-readout span{display:block;margin:8px 0;opacity:.5;animation:hudFlicker 4s ease infinite}
+    @keyframes hudFlicker{0%,90%,100%{opacity:.5}92%{opacity:.1}94%{opacity:.6}96%{opacity:.2}}
+
+    /* HUD horizontal scanline */
+    .hud-scanline{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.15),transparent);z-index:2;pointer-events:none;animation:hudScan 4s linear infinite}
+    @keyframes hudScan{from{top:-1px}to{top:100%}}
+
+    /* HUD targeting reticle */
+    .hud-reticle{position:absolute;width:100px;height:100px;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;pointer-events:none}
+    .hud-reticle::before,.hud-reticle::after{content:'';position:absolute;border:1px solid rgba(255,215,0,.12);border-radius:50%;animation:reticleRot 12s linear infinite}
+    .hud-reticle::before{inset:0}
+    .hud-reticle::after{inset:10px;animation-direction:reverse;animation-duration:8s;border-color:rgba(0,212,255,.1)}
+    @keyframes reticleRot{to{transform:rotate(360deg)}}
+
+    /* Circular waveform canvas */
+    #circular-wave{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1;pointer-events:none;width:min(85vw,85vh);height:min(85vw,85vh);max-width:750px;max-height:750px}
+
+    /* Floating orbit stats */
+    .orbit-stats{position:absolute;inset:0;z-index:3;pointer-events:none}
+    .orbit-widget{position:absolute;background:rgba(4,8,20,.85);border:1px solid rgba(0,212,255,.2);padding:6px 10px;font-family:'Orbitron',sans-serif;min-width:90px;backdrop-filter:blur(10px);transition:all .3s}
+    .orbit-widget::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:.6}
+    .ow-label{font-size:7px;letter-spacing:3px;color:var(--text2);opacity:.6}
+    .ow-value{font-size:12px;font-weight:700;color:var(--c);margin-top:2px}
+    .ow-bar{height:2px;background:rgba(255,255,255,.05);margin-top:3px;overflow:hidden;border-radius:1px}
+    .ow-fill{height:100%;border-radius:1px;transition:width 1s ease}
+
+    /* Glassmorphic chat bubbles */
+    .msg.ai{background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.18);backdrop-filter:blur(16px);box-shadow:0 4px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,215,0,.08)}
+    .msg.user{background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.22);backdrop-filter:blur(16px);box-shadow:0 4px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(0,212,255,.08)}
+    .msg.ai:hover{border-color:rgba(255,215,0,.35);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 30px rgba(255,215,0,.06)}
+    .msg.user:hover{border-color:rgba(0,212,255,.4);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 30px rgba(0,212,255,.06)}
+
+    /* Holographic shimmer on new messages */
+    @keyframes holoShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .msg.holo-shimmer::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,215,0,.06) 20%,rgba(0,212,255,.08) 40%,rgba(255,215,0,.06) 60%,transparent 100%);background-size:200% 100%;animation:holoShimmer 2s ease forwards;pointer-events:none;z-index:1}
+
+    /* Message particles canvas */
+    #msg-particles{position:absolute;inset:0;z-index:4;pointer-events:none}
+
+    /* Typing hologram glow */
+    .holo-char{display:inline;text-shadow:0 0 8px var(--gold),0 0 16px rgba(255,215,0,.3);animation:charGlow .3s ease forwards}
+    @keyframes charGlow{from{opacity:.3;text-shadow:0 0 20px var(--c),0 0 40px rgba(0,212,255,.5)}to{opacity:1;text-shadow:none}}
+
+    /* Chip glow enhancement */
+    .chip{transition:all .25s;position:relative;overflow:hidden}
+    .chip::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(255,215,0,.05));opacity:0;transition:opacity .2s}
+    .chip:hover::before{opacity:1}
   </style>
 </head>
 
@@ -3424,10 +3496,60 @@
 
   <!-- ═══ JARVIS CHAT PAGE ═══ -->
   <div id="chatPage">
+    <!-- 3D GALAXY BACKGROUND -->
+    <canvas id="chat-galaxy"></canvas>
     <!-- ARC REACTOR BACKGROUND -->
     <div id="arc-bg">
       <canvas id="arc-canvas"></canvas>
     </div>
+    <!-- CIRCULAR VOICE WAVEFORM -->
+    <canvas id="circular-wave"></canvas>
+    <!-- HUD OVERLAY -->
+    <div class="hud-overlay">
+      <div class="hud-corner tl"></div>
+      <div class="hud-corner tr"></div>
+      <div class="hud-corner bl"></div>
+      <div class="hud-corner br"></div>
+      <div class="hud-readout left">
+        <span>NEURAL-LINK:ACTIVE</span>
+        <span>FREQ:847.3MHz</span>
+        <span>CORE-TEMP:36.7°C</span>
+        <span>QUANTUM-STATE:STABLE</span>
+      </div>
+      <div class="hud-readout right">
+        <span>MULTIVERSE:CONNECTED</span>
+        <span>ENTROPY:0.042</span>
+        <span>SYNC:99.8%</span>
+        <span>PROTOCOL:AETHER-V3</span>
+      </div>
+      <div class="hud-scanline"></div>
+      <div class="hud-reticle"></div>
+    </div>
+    <!-- FLOATING ORBIT STATS -->
+    <div class="orbit-stats" id="orbit-stats">
+      <div class="orbit-widget" id="ow-cpu" style="opacity:0">
+        <div class="ow-label">CPU CORE</div>
+        <div class="ow-value" id="ow-cpu-val">87%</div>
+        <div class="ow-bar"><div class="ow-fill" style="width:87%;background:var(--c)"></div></div>
+      </div>
+      <div class="orbit-widget" id="ow-mem" style="opacity:0">
+        <div class="ow-label">MEMORY</div>
+        <div class="ow-value" id="ow-mem-val">4.2 GB</div>
+        <div class="ow-bar"><div class="ow-fill" style="width:62%;background:var(--g)"></div></div>
+      </div>
+      <div class="orbit-widget" id="ow-reactor" style="opacity:0">
+        <div class="ow-label">REACTOR</div>
+        <div class="ow-value" id="ow-reactor-val">98.6%</div>
+        <div class="ow-bar"><div class="ow-fill" style="width:98%;background:var(--gold)"></div></div>
+      </div>
+      <div class="orbit-widget" id="ow-neural" style="opacity:0">
+        <div class="ow-label">NEURAL NET</div>
+        <div class="ow-value" id="ow-neural-val">ACTIVE</div>
+        <div class="ow-bar"><div class="ow-fill" style="width:100%;background:var(--p)"></div></div>
+      </div>
+    </div>
+    <!-- MESSAGE PARTICLES -->
+    <canvas id="msg-particles"></canvas>
     <!-- AUDIO VISUALIZATION BARS -->
     <div id="audio-bars"></div>
 
@@ -3435,8 +3557,7 @@
       <div class="ct">
         <div class="od"></div>
         J.A.R.V.I.S
-        <span style="font-size:8px;letter-spacing:4px;color:var(--text2);font-weight:400">JUST A RATHER VERY INTELLIGENT
-          SYSTEM</span>
+        <span style="font-size:8px;letter-spacing:4px;color:var(--text2);font-weight:400">JUST A RATHER VERY INTELLIGENT SYSTEM</span>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <select id="aiEngine">
@@ -3455,8 +3576,7 @@
       </div>
     </div>
     <div id="thinking" class="hidden">
-      <span style="font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:4px">PROCESSING · MULTIVERSE
-        SCAN</span>
+      <span style="font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:4px">PROCESSING · MULTIVERSE SCAN</span>
       <div class="tdots"><span></span><span></span><span></span></div>
     </div>
     <div class="qchips">
@@ -3465,8 +3585,7 @@
       <button class="chip" onclick="quickSend('Start a 25min Pomodoro')">⏱ Pomodoro</button>
       <button class="chip" onclick="quickSend('Analyze my productivity this week')">📊 Analyze week</button>
       <button class="chip" onclick="quickSend('What are my biggest bottlenecks?')">🔍 Bottlenecks</button>
-      <button class="chip" onclick="quickSend('Avengers assemble — give me a heroic motivation speech')">🦸 Avengers
-        Mode</button>
+      <button class="chip" onclick="quickSend('Avengers assemble — give me a heroic motivation speech')">🦸 Avengers Mode</button>
     </div>
     <div class="cinput">
       <input id="chatIn" placeholder="Speak to J.A.R.V.I.S..." autocomplete="off">
@@ -3824,6 +3943,11 @@
       arcCtx.scale(devicePixelRatio, devicePixelRatio);
       arcSize = size;
       drawArc();
+      // Init all enhanced systems
+      initChatGalaxy();
+      initCircularWave();
+      initOrbitStats();
+      initMsgParticles();
     }
 
     function drawArc() {
@@ -3831,8 +3955,6 @@
       arcT += .008;
       const s = arcSize, cx = s / 2, cy = s / 2;
       arcCtx.clearRect(0, 0, s, s);
-
-      // Audio reactive boost
       const boost = arcSpeaking ? arcAudioLevel * 30 : 0;
       const pulse = Math.sin(arcT * 2) * .5 + .5;
       const brightnessMult = arcSpeaking ? 1 + arcAudioLevel * 2 : 1;
@@ -3924,6 +4046,230 @@
       }
 
       requestAnimationFrame(drawArc);
+    }
+
+    // ═══ ENHANCEMENT 1: CHAT GALAXY BACKGROUND ═══
+    let chatGalaxyInit = false;
+    function initChatGalaxy() {
+      if (chatGalaxyInit) return; chatGalaxyInit = true;
+      const canvas = document.getElementById('chat-galaxy');
+      if (!canvas) return;
+      const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:false});
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+      renderer.setSize(innerWidth, innerHeight);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, .1, 1500);
+      camera.position.z = 80;
+      // Nebula particles
+      const count = 1500;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const palette = [[0,.83,1],[1,.84,0],[.7,.31,1],[0,1,.62],[1,.18,.47]];
+      for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        positions[i3] = (Math.random()-.5) * 300;
+        positions[i3+1] = (Math.random()-.5) * 200;
+        positions[i3+2] = (Math.random()-.5) * 200;
+        const c = palette[Math.floor(Math.random()*palette.length)];
+        colors[i3]=c[0]; colors[i3+1]=c[1]; colors[i3+2]=c[2];
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      const stars = new THREE.Points(geo, new THREE.PointsMaterial({
+        size: 1.2, vertexColors: true, transparent: true, opacity: .5,
+        sizeAttenuation: true, blending: THREE.AdditiveBlending
+      }));
+      scene.add(stars);
+      // Wireframe sphere
+      const sphere = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(25, 2),
+        new THREE.MeshBasicMaterial({color:0x00d4ff, wireframe:true, transparent:true, opacity:.04})
+      );
+      scene.add(sphere);
+      let t = 0;
+      function renderGalaxy() {
+        if (!chatOpen) { requestAnimationFrame(renderGalaxy); return; }
+        t += .003;
+        stars.rotation.y = t * .05;
+        stars.rotation.x = Math.sin(t * .2) * .03;
+        sphere.rotation.y = t * .1;
+        sphere.rotation.x = t * .05;
+        camera.position.z = 80 + Math.sin(t) * 5;
+        renderer.render(scene, camera);
+        requestAnimationFrame(renderGalaxy);
+      }
+      renderGalaxy();
+      window.addEventListener('resize', () => {
+        renderer.setSize(innerWidth, innerHeight);
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+      });
+    }
+
+    // ═══ ENHANCEMENT 4: CIRCULAR VOICE WAVEFORM ═══
+    let cwCtx, cwSize, cwInit = false;
+    function initCircularWave() {
+      if (cwInit) return; cwInit = true;
+      const c = document.getElementById('circular-wave');
+      if (!c) return;
+      const size = Math.min(c.offsetWidth, c.offsetHeight) || Math.min(innerWidth * .85, 750);
+      c.width = size * devicePixelRatio;
+      c.height = size * devicePixelRatio;
+      c.style.width = size + 'px';
+      c.style.height = size + 'px';
+      cwCtx = c.getContext('2d');
+      cwCtx.scale(devicePixelRatio, devicePixelRatio);
+      cwSize = size;
+      drawCircularWave();
+    }
+    function drawCircularWave() {
+      if (!cwCtx) return;
+      const s = cwSize, cx = s/2, cy = s/2;
+      cwCtx.clearRect(0, 0, s, s);
+      const t = arcT;
+      const level = arcSpeaking ? arcAudioLevel : .05;
+      // Draw circular waveform rings
+      const waveRings = [
+        {r: s*.38, col:'rgba(0,212,255,', baseOp:.08, amp: 15, freq: 8, speed: 3, lw: 1.5},
+        {r: s*.42, col:'rgba(255,215,0,', baseOp:.06, amp: 10, freq: 12, speed: -4, lw: 1},
+        {r: s*.46, col:'rgba(180,79,255,', baseOp:.05, amp: 8, freq: 16, speed: 5, lw: .8},
+      ];
+      waveRings.forEach(w => {
+        const op = w.baseOp + level * .2;
+        cwCtx.beginPath();
+        for (let a = 0; a <= Math.PI * 2; a += .02) {
+          const wave = Math.sin(a * w.freq + t * w.speed) * w.amp * level;
+          const r = w.r + wave;
+          const x = cx + Math.cos(a) * r;
+          const y = cy + Math.sin(a) * r;
+          a === 0 ? cwCtx.moveTo(x, y) : cwCtx.lineTo(x, y);
+        }
+        cwCtx.closePath();
+        cwCtx.strokeStyle = w.col + op + ')';
+        cwCtx.lineWidth = w.lw + level * 2;
+        cwCtx.stroke();
+      });
+      // Frequency dots around outer ring
+      if (arcSpeaking) {
+        const dotCount = 36;
+        for (let i = 0; i < dotCount; i++) {
+          const a = i * Math.PI * 2 / dotCount + t * .5;
+          const wave = Math.sin(a * 6 + t * 8) * arcAudioLevel * 12;
+          const r = s * .48 + wave;
+          const x = cx + Math.cos(a) * r;
+          const y = cy + Math.sin(a) * r;
+          const dotSize = 1 + arcAudioLevel * 3;
+          cwCtx.beginPath();
+          cwCtx.arc(x, y, dotSize, 0, Math.PI * 2);
+          cwCtx.fillStyle = `rgba(0,212,255,${.2 + arcAudioLevel * .5})`;
+          cwCtx.fill();
+        }
+      }
+      requestAnimationFrame(drawCircularWave);
+    }
+
+    // ═══ ENHANCEMENT 6: FLOATING ORBIT STATS ═══
+    let orbitInit = false;
+    function initOrbitStats() {
+      if (orbitInit) return; orbitInit = true;
+      const widgets = ['ow-cpu','ow-mem','ow-reactor','ow-neural'];
+      // Fade in with delay
+      widgets.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (el) el.style.opacity = '1';
+        }, 600 + i * 200);
+      });
+      // Animate orbit positions
+      let ot = 0;
+      function orbitTick() {
+        if (!chatOpen) { requestAnimationFrame(orbitTick); return; }
+        ot += .004;
+        const cx = innerWidth / 2, cy = innerHeight / 2;
+        const orbitR = Math.min(innerWidth, innerHeight) * .38;
+        widgets.forEach((id, i) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const angle = ot + i * Math.PI / 2;
+          const x = cx + Math.cos(angle) * orbitR - 50;
+          const y = cy + Math.sin(angle) * orbitR * .6 - 20;
+          el.style.left = x + 'px';
+          el.style.top = y + 'px';
+        });
+        // Update fake values
+        if (Math.random() < .02) {
+          const cpu = 75 + Math.floor(Math.random() * 20);
+          const cpuEl = document.getElementById('ow-cpu-val');
+          if (cpuEl) cpuEl.textContent = cpu + '%';
+          const cpuFill = document.querySelector('#ow-cpu .ow-fill');
+          if (cpuFill) cpuFill.style.width = cpu + '%';
+        }
+        requestAnimationFrame(orbitTick);
+      }
+      orbitTick();
+    }
+
+    // ═══ ENHANCEMENT 3: MESSAGE PARTICLE EFFECTS ═══
+    let mpCtx, mpCanvas, msgParticles = [];
+    function initMsgParticles() {
+      mpCanvas = document.getElementById('msg-particles');
+      if (!mpCanvas) return;
+      mpCanvas.width = innerWidth * devicePixelRatio;
+      mpCanvas.height = innerHeight * devicePixelRatio;
+      mpCanvas.style.width = innerWidth + 'px';
+      mpCanvas.style.height = innerHeight + 'px';
+      mpCtx = mpCanvas.getContext('2d');
+      mpCtx.scale(devicePixelRatio, devicePixelRatio);
+      drawMsgParticles();
+      window.addEventListener('resize', () => {
+        if (!mpCanvas) return;
+        mpCanvas.width = innerWidth * devicePixelRatio;
+        mpCanvas.height = innerHeight * devicePixelRatio;
+        mpCanvas.style.width = innerWidth + 'px';
+        mpCanvas.style.height = innerHeight + 'px';
+        mpCtx = mpCanvas.getContext('2d');
+        mpCtx.scale(devicePixelRatio, devicePixelRatio);
+      });
+    }
+    function spawnMsgParticles(targetY) {
+      const cx = innerWidth / 2, cy = innerHeight / 2;
+      for (let i = 0; i < 25; i++) {
+        msgParticles.push({
+          x: cx + (Math.random()-.5) * 60,
+          y: cy + (Math.random()-.5) * 60,
+          tx: 100 + Math.random() * 200,
+          ty: targetY || innerHeight * .3,
+          vx: (Math.random()-.5) * 4,
+          vy: (Math.random()-.5) * 4 - 2,
+          life: 1,
+          decay: .01 + Math.random() * .02,
+          size: 1 + Math.random() * 3,
+          col: ['0,212,255','255,215,0','180,79,255','0,255,157'][Math.floor(Math.random()*4)]
+        });
+      }
+    }
+    function drawMsgParticles() {
+      if (!mpCtx) { requestAnimationFrame(drawMsgParticles); return; }
+      mpCtx.clearRect(0, 0, innerWidth, innerHeight);
+      msgParticles.forEach((p, i) => {
+        p.x += (p.tx - p.x) * .03 + p.vx;
+        p.y += (p.ty - p.y) * .03 + p.vy;
+        p.vx *= .96; p.vy *= .96;
+        p.life -= p.decay;
+        if (p.life <= 0) return;
+        mpCtx.beginPath();
+        mpCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+        mpCtx.fillStyle = `rgba(${p.col},${p.life * .8})`;
+        mpCtx.fill();
+        // Glow trail
+        mpCtx.beginPath();
+        mpCtx.arc(p.x, p.y, p.size * p.life * 3, 0, Math.PI * 2);
+        mpCtx.fillStyle = `rgba(${p.col},${p.life * .1})`;
+        mpCtx.fill();
+      });
+      msgParticles = msgParticles.filter(p => p.life > 0);
+      requestAnimationFrame(drawMsgParticles);
     }
 
     // Audio bars animation
@@ -4255,24 +4601,41 @@
     }
     function addMsg(role, text) {
       const box = document.getElementById('chatMsgs');
-      const el = document.createElement('div'); el.className = 'msg ' + role;
+      const el = document.createElement('div'); el.className = 'msg ' + role + ' holo-shimmer';
       el.innerHTML = `<div class="mlbl">${role === 'user' ? 'YOU' : 'J.A.R.V.I.S'}</div>${text}`;
       box.appendChild(el); box.scrollTop = box.scrollHeight;
+      // Remove shimmer after animation
+      setTimeout(() => el.classList.remove('holo-shimmer'), 2100);
     }
     function typeMsg(text) {
       const box = document.getElementById('chatMsgs');
-      const el = document.createElement('div'); el.className = 'msg ai';
+      const el = document.createElement('div'); el.className = 'msg ai holo-shimmer';
       const lb = document.createElement('div'); lb.className = 'mlbl'; lb.textContent = 'J.A.R.V.I.S';
       const sp = document.createElement('span');
       const cur2 = document.createElement('span'); cur2.textContent = '▋'; cur2.style.animation = 'blink .6s infinite';
       el.appendChild(lb); el.appendChild(sp); el.appendChild(cur2);
       box.appendChild(el); let i = 0;
+      // Spawn particle burst from reactor center
+      const msgRect = el.getBoundingClientRect();
+      spawnMsgParticles(msgRect.top);
       function type() {
         if (i < text.length) {
-          sp.textContent += text[i++]; box.scrollTop = box.scrollHeight;
+          // Holographic character effect — each character gets a brief glow
+          const charSpan = document.createElement('span');
+          charSpan.className = 'holo-char';
+          charSpan.textContent = text[i++];
+          sp.appendChild(charSpan);
+          box.scrollTop = box.scrollHeight;
           arcAudioLevel = 0.2 + Math.random() * .6;
+          // Spawn occasional tiny particle bursts during typing
+          if (i % 20 === 0) spawnMsgParticles(msgRect.top + 20);
           setTimeout(type, 13);
-        } else { cur2.remove(); stopSpeaking(); showAchievement('JARVIS Responded', '+20 XP') }
+        } else {
+          cur2.remove();
+          stopSpeaking();
+          el.classList.remove('holo-shimmer');
+          showAchievement('JARVIS Responded', '+20 XP');
+        }
       }
       type();
     }
