@@ -9,9 +9,8 @@ const WORKER_URL    = 'https://learning-bot.talpadeavi0303.workers.dev';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
-  '/site/',
-  '/site/index.html',
-  '/site/checkin.html',
+  '/',
+  '/index.html',
 ];
 
 // ─── Install — cache static assets ───────────────────────────────
@@ -122,8 +121,8 @@ self.addEventListener('push', event => {
 
   const options = {
     body:    data.body || 'AETHER has an update for you.',
-    icon: '/site/icons/icon-192.png',
-    badge: '/site/icons/icon-192.png',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
     vibrate: [100, 50, 100],
     data:    { url: data.url || '/' },
     actions: [

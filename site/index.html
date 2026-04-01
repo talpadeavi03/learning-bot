@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="/site/manifest.json">
+  <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#00ffff">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AETHER OS">
-<link rel="apple-touch-icon" href="/site/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>JARVIS NEXUS</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -638,7 +638,10 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
       </div>
 
       <div class="panel g2">
-        <div class="pt">Live Event Feed <span class="pt-accent" id="feedCount">ACTIVITY LOG</span></div>
+        <div class="pt" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Live Event Feed <span class="pt-accent" id="feedCount">ACTIVITY LOG</span></span>
+          <button id="privToggle" class="dash-chip" style="margin:0;font-size:7px;padding:2px 6px" onclick="togglePrivacy()">🛡️ PRIVACY OFF</button>
+        </div>
         <div id="liveEventFeed"></div>
       </div>
 
@@ -1008,42 +1011,88 @@ async function loadDashboard() {
 function renderDashboard() {
   if (!dashData && !eventsData.length) return;
 
-  const m = dashData?.metrics || { energy:0.5, focus:0.5, stress:0.2, motivation:0.5 };
-  const energy = m.energy;
+  const m = dashData?.metrics || {};
+  const st = dashData?.state || {};
   
-  // Power Index
+  // Energy comes from state (0-1 scale), fallback to metrics.productivity/100
+  const energy = st.energy !== undefined ? st.energy : (m.productivity||50)/100;
+  const stress = st.stress !== undefined ? st.stress : 0.2;
+  // Focus/mood/productivity are already 0-100 from the API
+  const focus = m.focus || 0;
+  const mood = m.mood || 0;
+  const productivity = m.productivity || 0;
+  const motivation = mood; // use mood as motivation proxy
+  
+  // Power Index (energy is 0-1, show as x1000)
   countUp('powerNum', Math.round(energy * 1000));
   
-  // Progress Bars
-  setBar('focusBar', 'focusPct', m.focus * 100);
-  setBar('stressBar', 'stressPct', m.stress * 100);
-  setBar('motBar', 'motPct', m.motivation * 100);
-  setBar('prodBar', 'prodPct', energy * 100);
+  // Progress Bars (values already 0-100, no multiplication needed)
+  setBar('focusBar', 'focusPct', focus);
+  setBar('stressBar', 'stressPct', Math.round(stress * 100));
+  setBar('motBar', 'motPct', motivation);
+  setBar('prodBar', 'prodPct', productivity);
 
-  // Orb & Flow Status
+  // Orb & Flow Status (energy and stress are 0-1)
   let flowLabel='NOMINAL', flowCls='nominal';
-  if (energy > 0.75 && m.stress < 0.25) { flowLabel='FLOW'; flowCls='flow'; }
+  if (energy > 0.75 && stress < 0.25) { flowLabel='FLOW'; flowCls='flow'; }
   else if (energy > 0.6) { flowLabel='PRE FLOW'; flowCls='pre_flow'; }
-  else if (m.stress > 0.65) { flowLabel='ANXIETY'; flowCls='anxiety'; }
+  else if (stress > 0.65) { flowLabel='ANXIETY'; flowCls='anxiety'; }
   else if (energy < 0.3) { flowLabel='RECOVERY'; flowCls='recovery'; }
   
   updateOrb(energy, flowLabel, flowCls);
 
   // Stats
-  document.getElementById('statEvents').textContent = eventsData.filter(e => e.timestamp?.startsWith(new Date().toISOString().split('T')[0])).length;
-  document.getElementById('statStreak').textContent = dashData?.streak || 0;
-  document.getElementById('statPeakHour').textContent = dashData?.peak_hour || '10:00';
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayEvents = eventsData.filter(e => e.timestamp?.startsWith(todayStr));
+  document.getElementById('statEvents').textContent = m.total_events || todayEvents.length;
+  document.getElementById('statStreak').textContent = m.streak || dashData?.streak || 0;
+  document.getElementById('statPeakHour').textContent = dashData?.peak_hour || '—';
   document.getElementById('statScore').textContent = Math.round(energy * 100);
+  document.getElementById('statEventsSub').textContent = todayEvents.length + ' today';
+  document.getElementById('statStreakSub').textContent = (m.streak||0) > 3 ? '🔥 on fire!' : 'keep going';
 
   // Feeds
   renderFeed(eventsData.slice(0, 10), 'liveEventFeed');
-  renderFeed(eventsData.filter(e => e.input_type==='webhook' || e.input_type==='state_change').slice(0, 6), 'neuralMemoryFeed');
+  renderFeed(eventsData.slice(0, 6), 'neuralMemoryFeed');
 
   // Heatmap
   renderHeatmap(eventsData);
 
-  // Infrastructure bars (static for now)
-  [['infra-bar','100'],['ingest-bar','90'],['ui-bar','85'],['ml-bar','70'],['ai-bar','50'],['sec-bar','10'],['apk-bar','20']].forEach(([id,w])=>{const el=document.getElementById(id);if(el)el.style.width=w+'%'});
+  // System Tab Updates
+  const sysVals = document.querySelectorAll('#view-system .sys-val');
+  if(sysVals.length >= 8) {
+    sysVals[1].textContent = WORKER_URL.replace('https://','');
+    sysVals[3].textContent = 'RandomForest (Active)';
+    sysVals[5].textContent = eventsData.length + ' Recorded';
+    sysVals[7].textContent = 'Auto-Sync (' + new Date().getHours() + ':00)';
+  }
+  
+  // Docs Tab Progress Update
+  const completionPct = Math.min(Math.round((eventsData.length / 30) * 100), 100);
+  const statusEls = document.querySelectorAll('#view-docs .pipe-status');
+  if(statusEls.length > 6) {
+    statusEls[6].textContent = completionPct + '%';
+    statusEls[6].className = 'pipe-status ' + (completionPct >= 100 ? 'ps-ok' : 'ps-warn');
+  }
+
+  // Infrastructure bars
+  [['infra-bar','100'],['ingest-bar','90'],['ui-bar','95'],['ml-bar','75'],['ai-bar','60'],['sec-bar','35'],['apk-bar','40']].forEach(([id,w])=>{const el=document.getElementById(id);if(el)el.style.width=w+'%'});
+}
+
+let privacyMode = false;
+function togglePrivacy() {
+  privacyMode = !privacyMode;
+  const btn = document.getElementById('privToggle');
+  btn.textContent = privacyMode ? '🛡️ PRIVACY ON' : '🛡️ PRIVACY OFF';
+  btn.style.borderColor = privacyMode ? 'var(--nv)' : 'var(--border)';
+  btn.style.color = privacyMode ? 'var(--nv)' : 'var(--text3)';
+  renderDashboard();
+  showAchievement(privacyMode ? 'Shield Active' : 'Shield Down', 'Neural data ' + (privacyMode ? 'obfuscated' : 'exposed'));
+}
+
+function obfuscate(text) {
+  if(!privacyMode) return text;
+  return String(text).replace(/[a-zA-Z0-9]/g, () => '•');
 }
 
 function setBar(barId, pctId, val) {
@@ -1519,9 +1568,16 @@ function typeMsg(text){
 }
 function showFollowUpChips(){
   const box=document.getElementById('chatMsgs');
-  const chips=['What should I focus on next?','Analyze my energy patterns','Give me a study plan','How am I doing this week?','Suggest a break activity','Set a goal for today'];
+  const energy = dashData?.state?.energy || 0.5;
+  const mood = dashData?.metrics?.mood || 50;
+  
+  let suggestions = ['What should I focus on next?','Analyze my energy patterns','Give me a study plan'];
+  if(energy < 0.4) suggestions = ['Suggestions for recovery?', 'How to boost energy?', 'Should I take a break?'];
+  if(mood > 80) suggestions = ['How to maintain this flow?', 'Setting a challenge target', 'Expand my goals'];
+  
+  const chips = suggestions.sort(()=>Math.random()-.5).slice(0,4);
   const wrap=document.createElement('div');wrap.className='qchips';wrap.style.padding='8px 0';
-  chips.sort(()=>Math.random()-.5).slice(0,4).forEach(c=>{
+  chips.forEach(c=>{
     const b=document.createElement('button');b.className='chip';b.textContent=c;
     b.onclick=()=>{wrap.remove();document.getElementById('chatIn').value=c;sendChat();};
     wrap.appendChild(b);
@@ -1550,8 +1606,8 @@ window.addEventListener('resize',()=>{if(chatOpen)initArcReactor()});
 
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/site/sw.js', {
-      scope: '/site/'
+    navigator.serviceWorker.register('/sw.js', {
+      scope: '/'
     })
     .then(() => console.log('✅ Service Worker registered'))
     .catch(err => console.error('❌ SW registration failed:', err));

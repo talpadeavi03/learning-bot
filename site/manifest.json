@@ -14,13 +14,13 @@
 
   "icons": [
     {
-      "src": "/site/icons/icon-192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/site/icons/icon-512.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -34,10 +34,10 @@
       "name": "Log State",
       "short_name": "Check-in",
       "description": "One-tap state check-in",
-      "url": "/site/checkin.html",
+      "url": "/",
       "icons": [
         {
-          "src": "/site/icons/icon-192.png",
+          "src": "/icons/icon-192.png",
           "sizes": "192x192"
         }
       ]
@@ -46,10 +46,10 @@
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "Open AETHER dashboard",
-      "url": "/site/index.html",
+      "url": "/",
       "icons": [
         {
-          "src": "/site/icons/icon-192.png",
+          "src": "/icons/icon-192.png",
           "sizes": "192x192"
         }
       ]
