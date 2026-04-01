@@ -404,87 +404,6 @@ header{display:flex;align-items:center;gap:12px;
 pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
   overflow-x:auto;padding:10px 0;color:var(--nv)}
 
-/* ─── ENERGY ORB ─── */
-.orb-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:18px}
-.orb{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle at 38% 35%,rgba(255,255,255,.18),var(--nv3));border:1.5px solid var(--nv2);display:flex;align-items:center;justify-content:center;position:relative;transition:box-shadow .6s}
-.orb.flow{box-shadow:0 0 30px rgba(118,185,0,.5),0 0 60px rgba(118,185,0,.2),inset 0 0 20px rgba(118,185,0,.15)}
-.orb.nominal{box-shadow:0 0 14px rgba(118,185,0,.2)}
-.orb.anxiety{box-shadow:0 0 20px rgba(255,160,0,.4),0 0 40px rgba(255,160,0,.15)}
-.orb.recovery{box-shadow:0 0 14px rgba(80,160,255,.25)}
-.orb-num{font-family:var(--font);font-size:28px;font-weight:800;color:var(--nv);line-height:1;transition:color .6s}
-.orb-pulse{position:absolute;inset:-1px;border-radius:50%;border:1px solid var(--nv2);animation:orbPulse 2.4s ease-in-out infinite;opacity:0}
-@keyframes orbPulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.55);opacity:0}}
-.orb-lbl{font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--text3);margin-top:8px}
-
-/* ─── FLOW BADGE ─── */
-.flow-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-family:var(--mono);font-size:9px;letter-spacing:2px;border:1px solid var(--nv2);color:var(--nv);margin-top:8px;transition:all .5s}
-.flow-badge.flow{border-color:var(--nv);animation:badgePulse 2s infinite}
-.flow-badge.anxiety{border-color:rgba(255,160,0,.6);color:rgba(255,160,0,.9)}
-.flow-badge.recovery{border-color:rgba(80,160,255,.4);color:rgba(80,160,255,.9)}
-.flow-badge.pre_flow{border-color:rgba(0,220,255,.5);color:rgba(0,220,255,.9)}
-@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(118,185,0,.3)}50%{box-shadow:0 0 0 4px rgba(118,185,0,0)}}
-.fbdot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite}
-
-/* ─── TREND ARROWS ─── */
-.trend-up{color:#76b900;font-size:10px}
-.trend-dn{color:rgba(255,100,100,.8);font-size:10px}
-.trend-eq{color:var(--text3);font-size:10px}
-
-/* ─── CHECK-IN WIDGET ─── */
-.checkin-wrap{background:linear-gradient(135deg,rgba(118,185,0,.05),rgba(118,185,0,.02));border:1px solid var(--border2);padding:16px;margin-bottom:1px}
-.ci-label{font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--nv2);margin-bottom:10px}
-.ci-btns{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px}
-.ci-btn{background:var(--surface);border:1px solid var(--border);padding:8px 4px;cursor:pointer;transition:all .2s;text-align:center;font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3)}
-.ci-btn:hover,.ci-btn.sel{background:var(--nv4);border-color:var(--border2);color:var(--nv)}
-.ci-btn .ci-icon{font-size:16px;display:block;margin-bottom:3px}
-.ci-submit{width:100%;background:var(--nv);color:#000;border:none;padding:9px;font-family:var(--mono);font-size:9px;letter-spacing:2px;cursor:pointer;transition:filter .2s;font-weight:600}
-.ci-submit:hover{filter:brightness(1.1)}
-.ci-submit:disabled{opacity:.4;cursor:not-allowed}
-.ci-success{text-align:center;font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--nv);padding:6px 0;display:none}
-
-/* ─── LIVE EVENT FEED ─── */
-.feed-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);animation:feedIn .35s ease}
-@keyframes feedIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
-.feed-item:last-child{border-bottom:none}
-.feed-icon{font-size:15px;flex-shrink:0;margin-top:1px}
-.feed-txt{font-family:var(--font);font-size:13px;color:var(--text2);line-height:1.4;flex:1}
-.feed-meta{display:flex;gap:6px;align-items:center;margin-top:2px;flex-wrap:wrap}
-.feed-tag{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:1px 5px;border:1px solid}
-.feed-time{font-family:var(--mono);font-size:8px;color:var(--text3)}
-.feed-energy{font-family:var(--mono);font-size:8px;color:var(--nv2)}
-.empty-state{text-align:center;padding:28px 16px}
-.empty-icon{font-size:28px;margin-bottom:8px;opacity:.5}
-.empty-title{font-family:var(--font);font-size:14px;font-weight:700;color:var(--text3);margin-bottom:4px}
-.empty-sub{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);opacity:.6}
-
-/* ─── HEATMAP ─── */
-.heatmap-grid{display:flex;flex-direction:column;gap:2px;overflow-x:auto;padding:4px 0 8px}
-.heatmap-row{display:flex;gap:2px}
-.heatmap-cell{width:11px;height:11px;flex-shrink:0;border-radius:1px;transition:opacity .2s;cursor:default}
-.heatmap-cell:hover{outline:1px solid var(--nv);outline-offset:1px}
-.hm0{background:rgba(118,185,0,.07)}
-.hm1{background:rgba(118,185,0,.2)}
-.hm2{background:rgba(118,185,0,.4)}
-.hm3{background:rgba(118,185,0,.65)}
-.hm4{background:rgba(118,185,0,.9)}
-.heatmap-labels{display:flex;gap:2px;margin-top:4px}
-.hm-lbl{font-family:var(--mono);font-size:7px;color:var(--text3);width:11px;text-align:center;flex-shrink:0}
-.hm-legend{display:flex;align-items:center;gap:5px;margin-top:8px}
-.hm-legend span{font-family:var(--mono);font-size:7px;color:var(--text3)}
-.hm-box{width:9px;height:9px;border-radius:1px}
-
-/* ─── DAILY SCORE ─── */
-.score-ring{position:relative;width:72px;height:72px;flex-shrink:0}
-.score-ring svg{transform:rotate(-90deg)}
-.score-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font);font-size:20px;font-weight:800;color:var(--nv)}
-.score-ring-lbl{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:7px;letter-spacing:1px;color:var(--text3);white-space:nowrap}
-
-/* ─── MOBILE NAV ─── */
-#mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 calc(8px + env(safe-area-inset-bottom));justify-content:space-around}
-.mn-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:4px 12px;font-family:var(--mono);font-size:7px;letter-spacing:1px;color:var(--text3);transition:color .2s}
-.mn-btn.on{color:var(--nv)}
-.mn-icon{font-size:18px}
-
 /* ─── RESPONSIVE ─── */
 @media(max-width:1024px){
   .grid3{grid-template-columns:1fr 1fr}
@@ -500,8 +419,6 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
   header{height:auto;padding:10px 14px}
   #jarvis-panel{display:none}
   .h-date{display:none}
-  #mob-nav{display:flex}
-  body{padding-bottom:70px}
 }
 @media(max-width:480px){
   .stat-cards{grid-template-columns:1fr 1fr}
@@ -601,46 +518,33 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
     <div class="grid3">
 
       <div class="panel">
-        <div class="pt">Energy Core <span class="pt-accent" id="flowBadgeSmall">LIVE</span></div>
-        <div class="orb-wrap">
-          <div class="orb nominal" id="energyOrb">
-            <div class="orb-pulse"></div>
-            <div class="orb-num" id="energyNum">—</div>
-          </div>
-          <div class="orb-lbl">POWER INDEX</div>
-          <div class="flow-badge nominal" id="flowBadge"><div class="fbdot"></div><span id="flowLabel">LOADING</span></div>
+        <div class="pt">Energy Core <span class="pt-accent">LIVE</span></div>
+        <div class="big-stat">
+          <div class="bnum" id="energyNum">7.4</div>
+          <div class="blbl">POWER INDEX / 10</div>
         </div>
-        <div class="mrow"><div class="ml"><span>Focus</span><span class="mv" id="focusPct">—%</span></div><div class="btrack"><div class="bfill" id="focusBar"></div></div></div>
-        <div class="mrow"><div class="ml"><span>Stress</span><span class="mv dim" id="stressPct">—%</span></div><div class="btrack"><div class="bfill dim" id="stressBar" style="background:rgba(255,120,60,.5)"></div></div></div>
-        <div class="mrow"><div class="ml"><span>Motivation</span><span class="mv dim" id="motPct">—%</span></div><div class="btrack"><div class="bfill dim" id="motBar"></div></div></div>
-        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Productivity</span><span class="mv" id="prodPct">—%</span></div><div class="btrack"><div class="bfill" id="prodBar"></div></div></div>
-        <!-- ONE-TAP CHECK-IN -->
-        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
-          <div class="ci-label">QUICK CHECK-IN</div>
-          <div class="ci-btns">
-            <button class="ci-btn" data-e="0.15" data-s="0.6" onclick="selectCI(this)"><span class="ci-icon">😴</span>DRAINED</button>
-            <button class="ci-btn" data-e="0.35" data-s="0.4" onclick="selectCI(this)"><span class="ci-icon">😐</span>LOW</button>
-            <button class="ci-btn" data-e="0.55" data-s="0.25" onclick="selectCI(this)"><span class="ci-icon">🙂</span>OK</button>
-            <button class="ci-btn" data-e="0.75" data-s="0.12" onclick="selectCI(this)"><span class="ci-icon">😤</span>FOCUSED</button>
-            <button class="ci-btn" data-e="0.92" data-s="0.05" onclick="selectCI(this)"><span class="ci-icon">🔥</span>FLOW</button>
-          </div>
-          <button class="ci-submit" id="ciSubmitBtn" onclick="submitCheckin()" disabled>LOG STATE</button>
-          <div class="ci-success" id="ciSuccess">✓ STATE LOGGED · +25 XP</div>
-        </div>
+        <div class="mrow"><div class="ml"><span>Focus</span><span class="mv" id="focusPct">82%</span></div><div class="btrack"><div class="bfill" id="focusBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Mood</span><span class="mv dim" id="moodPct">68%</span></div><div class="btrack"><div class="bfill dim" id="moodBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Sleep</span><span class="mv dim" id="sleepPct">74%</span></div><div class="btrack"><div class="bfill dim" id="sleepBar"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Productivity</span><span class="mv" id="prodPct">91%</span></div><div class="btrack"><div class="bfill" id="prodBar"></div></div></div>
       </div>
 
       <div class="panel g2">
-        <div class="pt">Live Event Feed <span class="pt-accent" id="feedCount">ACTIVITY LOG</span></div>
-        <div id="liveEventFeed"></div>
+        <div class="pt">Recent Missions <span class="pt-accent">ACTIVITY LOG</span></div>
+        <div class="aitem"><div><div class="atop">Neural Networks — Chapter 4 <span class="abadge ab-l">LEARN</span></div><div class="asub">DEEP LEARNING · STUDY SESSION</div></div><div class="amins">47 min</div></div>
+        <div class="aitem"><div><div class="atop">ML Pipeline Build <span class="abadge ab-c">CODE</span></div><div class="asub">GITHUB ACTIONS · DATA OPS</div></div><div class="amins">2.1h</div></div>
+        <div class="aitem"><div><div class="atop">Cloudflare Worker v2 Deploy <span class="abadge ab-g">OPS</span></div><div class="asub">API · 9 ROUTES LIVE</div></div><div class="amins">38 min</div></div>
+        <div class="aitem"><div><div class="atop">Feature Extraction Script <span class="abadge ab-c">CODE</span></div><div class="asub">PYTHON · ML PIPELINE</div></div><div class="amins">1.3h</div></div>
+        <div class="aitem" style="border-bottom:none"><div><div class="atop">AI Insight Review</div><div class="asub">AETHER ANALYSIS · MORNING BRIEF</div></div><div class="amins">22 min</div></div>
       </div>
 
       <div class="panel g-full">
-        <div class="pt">Character Stats <span class="pt-accent">TODAY · LIVE</span></div>
+        <div class="pt">Character Stats <span class="pt-accent">TODAY</span></div>
         <div class="stat-cards">
-          <div class="sc"><div class="sc-n" id="statEvents">—</div><div class="sc-l">EVENTS TODAY</div><div class="sc-sub" id="statEventsSub">loading...</div></div>
-          <div class="sc"><div class="sc-n" id="statStreak">—</div><div class="sc-l">DAY STREAK</div><div class="sc-sub" id="statStreakSub">keep going</div></div>
-          <div class="sc"><div class="sc-n" id="statPeakHour">—</div><div class="sc-l">PEAK HOUR</div><div class="sc-sub" id="statPeakSub">from ml model</div></div>
-          <div class="sc"><div class="sc-n" id="statScore">—</div><div class="sc-l">DAILY SCORE</div><div class="sc-sub" id="statScoreSub">events + goals</div></div>
+          <div class="sc"><div class="sc-n">6.2h</div><div class="sc-l">DEEP WORK</div><div class="sc-sub">+0.8h vs avg ↑</div></div>
+          <div class="sc"><div class="sc-n">12</div><div class="sc-l">TASKS DONE</div><div class="sc-sub">87% complete</div></div>
+          <div class="sc"><div class="sc-n">4</div><div class="sc-l">GH COMMITS</div><div class="sc-sub">main + dev</div></div>
+          <div class="sc"><div class="sc-n">94</div><div class="sc-l">AI SCORE</div><div class="sc-sub">PEAK ZONE</div></div>
         </div>
       </div>
 
@@ -699,8 +603,11 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
       </div>
 
       <div class="panel">
-        <div class="pt">Neural Memory <span class="pt-accent">LIVE LOG</span></div>
-        <div id="neuralMemoryFeed"></div>
+        <div class="pt">Neural Memory <span class="pt-accent">LOG</span></div>
+        <div class="mem-item"><div class="mem-dot"></div><div><div class="mem-txt">Worker v2 live — 9 routes, Llama 3 + Whisper + LLaVA</div><div class="mem-time">2 DAYS AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot"></div><div><div class="mem-txt">ML pipeline complete — pull → clean → train → predict</div><div class="mem-time">3 DAYS AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot"></div><div><div class="mem-txt">AES-256 encryption module drafted</div><div class="mem-time">4 DAYS AGO</div></div></div>
+        <div class="mem-item" style="border-bottom:none"><div class="mem-dot"></div><div><div class="mem-txt">MLflow tracking on DagsHub configured</div><div class="mem-time">5 DAYS AGO</div></div></div>
       </div>
 
       <div class="panel g2">
@@ -740,18 +647,7 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
         </div>
       </div>
       <div class="panel g-full">
-        <div class="pt">Activity Heatmap <span class="pt-accent">LAST 90 DAYS</span></div>
-        <div id="heatmapContainer"></div>
-        <div class="hm-legend">
-          <span>Less</span>
-          <div class="hm-box hm0"></div>
-          <div class="hm-box hm1"></div>
-          <div class="hm-box hm2"></div>
-          <div class="hm-box hm3"></div>
-          <div class="hm-box hm4"></div>
-          <span>More</span>
-        </div>
-      </div>
+        <div class="pt">Build Progress <span class="pt-accent">COMPLETION</span></div>
         <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv">100%</span></div><div class="btrack"><div class="bfill" id="infra-bar"></div></div></div>
         <div class="mrow"><div class="ml"><span>Data Ingestion</span><span class="mv">90%</span></div><div class="btrack"><div class="bfill" id="ingest-bar"></div></div></div>
         <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv">85%</span></div><div class="btrack"><div class="bfill" id="ui-bar"></div></div></div>
@@ -890,15 +786,6 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
     <span>CLOUDFLARE · ANTHROPIC · GITHUB</span>
   </div>
 
-<!-- MOBILE NAV -->
-<nav id="mob-nav">
-  <button class="mn-btn on" id="mn-home" onclick="switchViewMob('home',this)"><span class="mn-icon">🏠</span>HOME</button>
-  <button class="mn-btn" id="mn-data" onclick="switchViewMob('data',this)"><span class="mn-icon">📊</span>DATA</button>
-  <button class="mn-btn" id="mn-graph" onclick="switchViewMob('graph',this)"><span class="mn-icon">🧠</span>BRAIN</button>
-  <button class="mn-btn" id="mn-system" onclick="switchViewMob('system',this)"><span class="mn-icon">⚙️</span>SYSTEM</button>
-  <button class="mn-btn" onclick="openChat()"><span class="mn-icon">💬</span>JARVIS</button>
-</nav>
-
 </div><!-- /app -->
 
 <!-- JARVIS CHAT PAGE -->
@@ -967,235 +854,133 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
 // CONSTANTS
 // ═══════════════════════════════════
 const WORKER_URL='https://learning-bot.talpadeavi0303.workers.dev';
-let dashData=null, eventsData=[];
+const D={
+  metrics:{energy:7.4,focus:82,mood:68,sleep:74,productivity:91},
+  activity:[{label:'Neural Networks Ch4',mins:47,tag:'LEARN'},{label:'ML Pipeline Build',mins:126,tag:'CODE'},{label:'CF Worker v2 Deploy',mins:38,tag:'OPS'}],
+  goals:{today:['complete ML extractor','study chapter 4','add github token','log 30 events']},
+  weekly:[4.2,5.8,6.1,3.9,7.0,6.8,6.2]
+};
+
+// Universe themes (functional only, minimal visual change)
+const UNIVERSES={
+  aether:{c:'#76b900',dark:'#000000',name:'UNIVERSE-616'},
+  iron:{c:'#76b900',dark:'#000000',name:'IRON MAN VERSE'},
+  anime:{c:'#76b900',dark:'#000000',name:'ANIME NEXUS'},
+  cyber:{c:'#76b900',dark:'#000000',name:'CYBERPUNK-7'}
+};
+function changeUniverse(id){
+  showAchievement('Universe Shifted',(UNIVERSES[id]||UNIVERSES.aether).name+' · +150 XP');
+}
 
 // ═══════════════════════════════════
-// LIVE DATA ENGINE
+// CURSOR
 // ═══════════════════════════════════
-async function loadDashboard() {
-  try {
-    const [resDash, resEvents] = await Promise.all([
-      fetch(WORKER_URL+'/dashboard'),
-      fetch(WORKER_URL+'/events')
-    ]);
-    if (resDash.ok) dashData = await resDash.json();
-    if (resEvents.ok) {
-      const eData = await resEvents.json();
-      eventsData = eData.events || [];
-    }
-
-    renderDashboard();
-  } catch(e) { console.error('Failed to load live data', e); }
-}
-
-function renderDashboard() {
-  if (!dashData && !eventsData.length) return;
-
-  const m = dashData?.metrics || { energy:0.5, focus:0.5, stress:0.2, motivation:0.5 };
-  const energy = m.energy;
-  
-  // Power Index
-  countUp('powerNum', Math.round(energy * 1000));
-  
-  // Progress Bars
-  setBar('focusBar', 'focusPct', m.focus * 100);
-  setBar('stressBar', 'stressPct', m.stress * 100);
-  setBar('motBar', 'motPct', m.motivation * 100);
-  setBar('prodBar', 'prodPct', energy * 100);
-
-  // Orb & Flow Status
-  let flowLabel='NOMINAL', flowCls='nominal';
-  if (energy > 0.75 && m.stress < 0.25) { flowLabel='FLOW'; flowCls='flow'; }
-  else if (energy > 0.6) { flowLabel='PRE FLOW'; flowCls='pre_flow'; }
-  else if (m.stress > 0.65) { flowLabel='ANXIETY'; flowCls='anxiety'; }
-  else if (energy < 0.3) { flowLabel='RECOVERY'; flowCls='recovery'; }
-  
-  updateOrb(energy, flowLabel, flowCls);
-
-  // Stats
-  document.getElementById('statEvents').textContent = eventsData.filter(e => e.timestamp?.startsWith(new Date().toISOString().split('T')[0])).length;
-  document.getElementById('statStreak').textContent = dashData?.streak || 0;
-  document.getElementById('statPeakHour').textContent = dashData?.peak_hour || '10:00';
-  document.getElementById('statScore').textContent = Math.round(energy * 100);
-
-  // Feeds
-  renderFeed(eventsData.slice(0, 10), 'liveEventFeed');
-  renderFeed(eventsData.filter(e => e.input_type==='webhook' || e.input_type==='state_change').slice(0, 6), 'neuralMemoryFeed');
-
-  // Heatmap
-  renderHeatmap(eventsData);
-
-  // Infrastructure bars (static for now)
-  [['infra-bar','100'],['ingest-bar','90'],['ui-bar','85'],['ml-bar','70'],['ai-bar','50'],['sec-bar','10'],['apk-bar','20']].forEach(([id,w])=>{const el=document.getElementById(id);if(el)el.style.width=w+'%'});
-}
-
-function setBar(barId, pctId, val) {
-  const el = document.getElementById(barId);
-  const pb = document.getElementById(pctId);
-  if (el) el.style.width = Math.round(val) + '%';
-  if (pb) pb.textContent = Math.round(val) + '%';
-}
-
-function updateOrb(energy, lbl, cls) {
-  const eNum = document.getElementById('energyNum');
-  const orb = document.getElementById('energyOrb');
-  const fBadge = document.getElementById('flowBadge');
-  const fLbl = document.getElementById('flowLabel');
-  const sfBadge = document.getElementById('flowBadgeSmall');
-  
-  let val = 0;
-  const target = energy * 10;
-  const t = setInterval(()=>{
-    val = Math.min(val + 0.1, target);
-    if(eNum) eNum.textContent = val.toFixed(1);
-    if(val >= target) clearInterval(t);
-  }, 20);
-
-  if (orb) { orb.className='orb ' + cls; }
-  if (fBadge) { fBadge.className='flow-badge ' + cls; }
-  if (fLbl) { fLbl.textContent = lbl; }
-  if (sfBadge) { sfBadge.textContent = lbl; sfBadge.style.color = getComputedStyle(fBadge).color; }
-}
-
-function renderFeed(events, containerId) {
-  const cont = document.getElementById(containerId);
-  if (!cont) return;
-  if (!events || !events.length) {
-    cont.innerHTML = `<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">AWAITING SIGNAL</div><div class="empty-sub">NO EVENTS DETECTED YET</div></div>`;
-    return;
-  }
-  cont.innerHTML = events.map(e => `
-    <div class="feed-item">
-      <div class="feed-icon">${e.is_study_session ? '📚' : e.topics?.includes('Code') ? '💻' : e.input_type==='voice' ? '🎤' : '🔹'}</div>
-      <div class="feed-txt">
-        ${e.summary || e.raw_text || 'System event'}
-        <div class="feed-meta">
-          <span class="feed-time">${new Date(e.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-          ${e.energy !== undefined ? `<span class="feed-energy">ENG ${e.energy.toFixed(2)}</span>` : ''}
-          ${(e.topics||[]).map(t => `<span class="feed-tag">${t.toUpperCase()}</span>`).join('')}
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderHeatmap(events) {
-  const cont = document.getElementById('heatmapContainer');
-  if (!cont) return;
-  if (!events || !events.length) {
-    cont.innerHTML = `<div class="empty-state" style="padding:10px"><div class="empty-sub">NO DATA</div></div>`;
-    return;
-  }
-  const counts = {};
-  events.forEach(e => {
-    if (!e.timestamp) return;
-    const d = e.timestamp.split('T')[0];
-    counts[d] = (counts[d] || 0) + 1;
-  });
-
-  const now = new Date();
-  const arr = [];
-  for (let i=90; i>=0; i--) {
-    const d = new Date(now); d.setDate(d.getDate() - i);
-    const ds = d.toISOString().split('T')[0];
-    arr.push({ date: ds, count: counts[ds] || 0 });
-  }
-
-  let html='<div class="heatmap-grid"><div class="heatmap-row">';
-  arr.forEach((d, i) => {
-    if(i>0 && i%30===0) html += '</div><div class="heatmap-row">';
-    const c = d.count > 5 ? 4 : d.count > 3 ? 3 : d.count > 1 ? 2 : d.count === 1 ? 1 : 0;
-    html += `<div class="heatmap-cell hm${c}" title="${d.date}: ${d.count} events"></div>`;
-  });
-  html += '</div></div>';
-  cont.innerHTML = html;
-}
-
-// ── ONE-TAP CHECK-IN ──
-let ciState = null;
-function selectCI(btn) {
-  document.querySelectorAll('.ci-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  ciState = { energy: parseFloat(btn.dataset.e) || 0.5, stress: parseFloat(btn.dataset.s) || 0.2, state_label: btn.textContent.trim() };
-  document.getElementById('ciSubmitBtn').disabled = false;
-}
-async function submitCheckin() {
-  if (!ciState) return;
-  const btn = document.getElementById('ciSubmitBtn');
-  btn.disabled = true; btn.textContent = 'LOGGING...';
-  try {
-    const res = await fetch(WORKER_URL+'/log-state', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(ciState) });
-    if(res.ok) {
-      document.getElementById('ciSuccess').style.display = 'block';
-      setTimeout(() => { document.getElementById('ciSuccess').style.display = 'none'; btn.textContent = 'LOG STATE'; ciState=null; document.querySelectorAll('.ci-btn').forEach(b => b.classList.remove('sel')); }, 3000);
-      loadDashboard();
-      showAchievement('Neural Link Synced', '+25 XP');
-    } else throw new Error('API Error');
-  } catch(e) { btn.textContent = 'ERROR'; setTimeout(()=>btn.textContent='LOG STATE', 2000); }
-}
-
-// Mobile Nav Helper
-function switchViewMob(name, btn) {
-  document.querySelectorAll('.mn-btn').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  switchView(name, document.getElementById('tab-'+name)||document.body);
-}
-
-// Universe themes
-const UNIVERSES={ aether:{c:'#76b900',dark:'#000000',name:'UNIVERSE-616'} };
-function changeUniverse(id){ showAchievement('Universe Shifted', UNIVERSES.aether.name); }
-
-// Cursor
-const curEl=document.getElementById('cur'), curDot=document.getElementById('cur-dot');
+const curEl=document.getElementById('cur');
+const curDot=document.getElementById('cur-dot');
 const isTouch=()=>window.matchMedia('(hover:none)').matches||window.matchMedia('(pointer:coarse)').matches;
-let mx=innerWidth/2, my=innerHeight/2, cx=mx, cy=my;
+let mx=innerWidth/2,my=innerHeight/2,cx=mx,cy=my;
 if(!isTouch()){
-  document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; curDot.style.left=mx+'px'; curDot.style.top=my+'px'; });
-  (function animCur(){ cx+=(mx-cx)*.12; cy+=(my-cy)*.12; curEl.style.left=cx+'px'; curEl.style.top=cy+'px'; requestAnimationFrame(animCur); })();
-  setInterval(()=>{
-    document.querySelectorAll('button,a,.qa,.sc,.insight,.feed-item,.ci-btn,.heatmap-cell').forEach(el=>{
-      if(!el.dataset.hovFix){ el.dataset.hovFix="1"; el.addEventListener('mouseenter',()=>curEl.classList.add('hov')); el.addEventListener('mouseleave',()=>curEl.classList.remove('hov')); }
-    });
-  }, 1000);
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    curDot.style.left=mx+'px';curDot.style.top=my+'px';
+  });
+  (function animCur(){
+    cx+=(mx-cx)*.12;cy+=(my-cy)*.12;
+    curEl.style.left=cx+'px';curEl.style.top=cy+'px';
+    requestAnimationFrame(animCur);
+  })();
+  document.querySelectorAll('button,a,.qa,.sc,.insight,.pipe-item,.mood-btn,.ntab,.chip,.goal-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>curEl.classList.add('hov'));
+    el.addEventListener('mouseleave',()=>curEl.classList.remove('hov'));
+  });
 }
 
-// Clock
+// ═══════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════
 const startTime=Date.now();
 function tick(){
   const n=new Date();
   document.getElementById('clk').textContent=n.toTimeString().slice(0,8);
   document.getElementById('date').textContent=n.toISOString().slice(0,10).replace(/-/g,'–');
   const up=Math.floor((Date.now()-startTime)/1000);
-  const el=document.getElementById('jp-uptime'); if(el) el.textContent=`${String(Math.floor(up/3600)).padStart(2,'0')}:${String(Math.floor(up%3600/60)).padStart(2,'0')}:${String(up%60).padStart(2,'0')}`;
+  const h=String(Math.floor(up/3600)).padStart(2,'0');
+  const m=String(Math.floor(up%3600/60)).padStart(2,'0');
+  const s=String(up%60).padStart(2,'0');
+  const el=document.getElementById('jp-uptime');if(el)el.textContent=`${h}:${m}:${s}`;
 }
-tick(); setInterval(tick,1000);
+tick();setInterval(tick,1000);
 
-// Loader
+// ═══════════════════════════════════
+// LOADER
+// ═══════════════════════════════════
 const bootMsgs=['Connecting to worker...','Loading ML pipeline...','Syncing KV store...','Calibrating JARVIS core...','System ready.'];
 let mi=0;
+const bmEl=document.getElementById('bootMsg');
 function bootAnim(){
-  if(mi<bootMsgs.length){ document.getElementById('bootMsg').textContent=bootMsgs[mi++]; setTimeout(bootAnim,420); }
+  if(mi<bootMsgs.length){bmEl.textContent=bootMsgs[mi++];setTimeout(bootAnim,420)}
   else setTimeout(()=>{
     document.getElementById('loader').classList.add('gone');
-    initWaveform(); initGraphCanvas(); loadDashboard();
+    animateBars();initCharts();initWaveform();initGraphCanvas();
     setTimeout(()=>showAchievement('System Boot Complete','+500 XP'),1000);
-  }, 300);
+  },300);
 }
 bootAnim();
-setInterval(loadDashboard, 60000); // 60s auto-refresh
 
+// ═══════════════════════════════════
+// ACHIEVEMENT
+// ═══════════════════════════════════
 let achT=null;
 function showAchievement(name,pts){
   const el=document.getElementById('achievement');
   document.getElementById('ach-name').textContent=name;
   document.getElementById('ach-pts').textContent=pts;
-  el.classList.add('show'); clearTimeout(achT);
+  el.classList.add('show');clearTimeout(achT);
   achT=setTimeout(()=>el.classList.remove('show'),3500);
 }
 
+// ═══════════════════════════════════
+// COUNT-UP
+// ═══════════════════════════════════
 function countUp(id,target){
-  let v=0; const el=document.getElementById(id); if(!el) return;
-  const t=setInterval(()=>{v=Math.min(v+Math.ceil(target/40),target); el.textContent=v.toLocaleString(); if(v>=target) clearInterval(t);},28);
+  let v=0;const el=document.getElementById(id);
+  const t=setInterval(()=>{v=Math.min(v+Math.ceil(target/40),target);el.textContent=v;if(v>=target)clearInterval(t)},28);
+}
+setTimeout(()=>{countUp('wSessions',47);countUp('wGoals',8);countUp('wStreak',11);countUp('wScore',94)},700);
+let pv=0;const pEl=document.getElementById('powerNum');
+const pt=setInterval(()=>{pv=Math.min(pv+Math.ceil(9400/60),9400);pEl.textContent=pv.toLocaleString();if(pv>=9400)clearInterval(pt)},25);
+
+// ═══════════════════════════════════
+// BAR ANIMATION
+// ═══════════════════════════════════
+function animateBars(){
+  [['focusBar','82'],['moodBar','68'],['sleepBar','74'],['prodBar','91'],
+   ['infra-bar','100'],['ingest-bar','90'],['ui-bar','85'],['ml-bar','70'],
+   ['ai-bar','50'],['sec-bar','10'],['apk-bar','20']
+  ].forEach(([id,w])=>{const el=document.getElementById(id);if(el)setTimeout(()=>el.style.width=w+'%',200)});
+}
+
+// ═══════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════
+let chartsInit=false;
+function initCharts(){
+  if(chartsInit)return;chartsInit=true;
+  const wc=document.getElementById('weekChart');
+  if(wc)new Chart(wc,{type:'bar',data:{
+    labels:['MON','TUE','WED','THU','FRI','SAT','SUN'],
+    datasets:[{data:D.weekly,
+      backgroundColor:D.weekly.map(v=>v>6?'rgba(118,185,0,.7)':v>5?'rgba(118,185,0,.4)':'rgba(118,185,0,.18)'),
+      borderColor:'rgba(118,185,0,.5)',borderWidth:1,borderRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#111',titleColor:'#76b900',bodyColor:'#d4d4d4',borderColor:'rgba(118,185,0,.3)',borderWidth:1,callbacks:{label:c=>c.parsed.y+'h deep work'}}},
+      scales:{x:{ticks:{color:'rgba(212,212,212,.35)',font:{family:'IBM Plex Mono',size:8}},grid:{color:'rgba(255,255,255,.04)'}},
+              y:{ticks:{color:'rgba(212,212,212,.35)',font:{family:'IBM Plex Mono',size:8}},grid:{color:'rgba(255,255,255,.04)'},max:8}}}});
+  const dc=document.getElementById('donutChart');
+  if(dc)new Chart(dc,{type:'doughnut',data:{datasets:[{data:[42,28,18,12],
+    backgroundColor:['rgba(118,185,0,.65)','rgba(118,185,0,.45)','rgba(118,185,0,.28)','rgba(118,185,0,.14)'],
+    borderColor:['#76b900','rgba(118,185,0,.5)','rgba(118,185,0,.3)','rgba(118,185,0,.15)'],borderWidth:1}]},
+    options:{responsive:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#111',bodyColor:'#d4d4d4',borderColor:'rgba(118,185,0,.3)',borderWidth:1}}}});
 }
 
 // ═══════════════════════════════════
