@@ -187,6 +187,81 @@ Check your training_stats.json after the nightly pipeline.
     Pro Tip: If your rf_accuracy is 100%, you are failing. It means your data is too predictable. Aim for 80-90% accuracy with a 75%+ Cross-Validation (CV) score. This indicates a model that can handle the messiness of real life.
 
 
+⚙️ AETHER MLOps & DevOps Guide
+
+    The Automation Engine > Continuous Integration · Nightly Model Training · Edge Synchronization
+
+🏎️ 1. The Automated Workflow Map
+
+AETHER OS is a living system. It uses GitHub Actions as a "distributed brain" to handle heavy computation that shouldn't happen on the edge (Cloudflare).
+Workflow	Trigger	Responsibility
+deploy.yml	Git Push	Updates the Cloudflare Worker API & PWA Frontend.
+github_activity.yml	Git Commit	Converts code metadata into "Productivity Events."
+ml_pipeline.yml	Nightly (1 AM)	The core MLOps loop: Data → Training → Inference.
+code_graph.yml	Weekly	Maps the repository structure for the UI's Neural Nexus.
+🧠 2. The MLOps Lifecycle (Nightly Loop)
+
+Every night at 1:00 AM IST, the system performs a full Intelligence Refresh.
+Phase A: The Data Harvest
+
+The pipeline reaches out to the Cloudflare Edge via scripts/pipeline/pull_events.py to download the day's logs from KV storage into a local events.csv.
+Phase B: The Refinery (data_cleaner.py)
+
+Raw text is messy. The refinery:
+
+    Filters Noise: Drops bot-spam and "keyboard mash" inputs.
+
+    Standardizes: Normalizes timestamps to IST.
+
+    Imputes: If a message is missing an energy signal, the NLP engine estimates it based on text sentiment.
+
+Phase C: Training & Experiment Tracking
+
+The system uses Scikit-learn to build two specific brains:
+
+    The Classifier (RandomForest): Categorizes your state (e.g., FLOW vs. ANXIETY).
+
+    The Regressor (GBM): Predicts the numerical "Energy Trend" for the next hour.
+
+    📊 Observability: All training metrics (Accuracy, RMSE, Feature Importance) are beamed to DagsHub (MLflow). This allows you to look back at how your productivity models have evolved over months.
+
+🛠️ 3. DevOps: Passive Telemetry
+
+AETHER OS captures data even when you aren't talking to the bot.
+The GitHub Activity Logger
+
+Whenever you push code, github_activity.yml acts as a silent observer:
+
+    Regex Analysis: It looks for keywords like feat, fix, or docs.
+
+    Energy Scoring: A feat (new feature) is weighted as High Energy (0.8), while a chore or docs update is Medium Energy (0.5).
+
+    Edge Injection: This data is POSTed to the /log-github endpoint, ensuring your coding sessions are factored into your flow-state predictions.
+
+🔄 4. Edge Synchronization
+
+The final—and most critical—step of the pipeline is the Sync-Back.
+
+Once the ML models have finished their "thinking" in GitHub Actions, the script push_dashboard.py takes the calculated insights (Peak Hours, Productivity Scores, Habit Streaks) and pushes them back to Cloudflare KV.
+
+Result: When you open your PWA Dashboard in the morning, the data you see isn't being calculated on your phone; it’s a pre-computed ML insight waiting for you on the edge.
+🚨 Troubleshooting the Pipeline
+
+If the Dashboard isn't updating:
+
+    Check Actions: Go to the GitHub "Actions" tab and look for ml_pipeline.
+
+    Verify Secrets: Ensure DAGSHUB_TOKEN and CLOUDFLARE_API_TOKEN haven't expired.
+
+    Manual Trigger: You can manually run the ml_pipeline via the "Run workflow" button in GitHub to force an immediate update.
+
+Status: All Systems Nominal
+
+ML Engine: Scikit-learn / MLflow
+
+Edge Provider: Cloudflare Workers
+
+
 Author: Avi Talpade
 
 License: MIT | Production Ready
