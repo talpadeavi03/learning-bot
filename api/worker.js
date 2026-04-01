@@ -719,7 +719,7 @@ export default {
       }
       if (url.pathname === '/log-state'        && request.method === 'POST') return handleLogState(request, env);
       if (url.pathname === '/dashboard'        && request.method === 'GET')  return handleDashboard(request, env);
-      if (url.pathname === '/events'           && request.method === 'GET')  return handleEvents(request, env);
+      if (url.pathname === "/events") {return new Response("EVENT ROUTE HIT");}
       if (url.pathname === '/update-dashboard' && request.method === 'POST') return handleUpdateDashboard(request, env);
       if (url.pathname === '/reset-data'       && request.method === 'POST') return handleResetData(request, env);
       if (url.pathname === '/log-github'       && request.method === 'POST') return handleGitHubLog(request, env);
@@ -1319,10 +1319,34 @@ function generateInsights(events, todayEv, avgEnergy, avgStress, streak) {
 // ═════════════════════════════════════════════════════════════════
 
 async function handleEvents(request, env) {
-  const url    = new URL(request.url);
-  const limit  = parseInt(url.searchParams.get('limit') || '100');
-  const events = await getRecentEvents(Math.min(limit, MAX_EVENTS), env);
-  return jsonResp({ count: events.length, events });
+  try {
+    let events = await env.AETHER_KV.get("events:list", { type: "json" });
+
+    // ✅ FIX: handle null safely
+    if (!events || !Array.isArray(events)) {
+      events = [];
+    }
+
+    return new Response(JSON.stringify({
+      events: events.slice(-50)
+    }), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+
+  } catch (err) {
+    console.log("EVENTS ERROR:", err);
+
+    return new Response(JSON.stringify({
+      error: "Failed to load events",
+      details: err.message
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 }
 
 // ═════════════════════════════════════════════════════════════════
