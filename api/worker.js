@@ -7,6 +7,36 @@
 // /help   — list commands
 // ═════════════════════════════════════════════════════════════════
 
+async function sendJarvisAlert(env, chatId, type, message) {
+  const lastAlert = await env.AETHER_KV.get("last_alert");
+
+  // ❌ prevent spam (same alert)
+  if (lastAlert === type) return;
+
+  // ✅ Telegram (primary)
+  await sendTelegram(chatId, message, env);
+
+  // 📱 Push (secondary)
+  const sub = await env.AETHER_KV.get("push:sub", { type: "json" });
+
+  if (sub) {
+    try {
+      await fetch(sub.endpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          title: "AETHER",
+          body: message
+        })
+      });
+    } catch (e) {
+      console.log("Push failed:", e.message);
+    }
+  }
+
+  // 🧠 remember last alert
+  await env.AETHER_KV.put("last_alert", type);
+}
+
 function analyzePatterns(events) {
   if (events.length < 10) {
     return {
@@ -969,19 +999,38 @@ async function handleWebhook(request, env) {
 
 const lastAlert = await env.AETHER_KV.get("last_alert");
 
-if (analysis.state === "flow_ready" && lastAlert !== "flow") {
-  await sendTelegram(chatId, "🚀 FLOW DETECTED — Start deep work NOW", env);
-  await env.AETHER_KV.put("last_alert", "flow");
+// 🚀 FLOW
+if (analysis.state === "flow_ready") {
+  await sendJarvisAlert(
+    env,
+    chatId,
+    "flow",
+    "🚀 FLOW DETECTED — Start deep work NOW"
+  );
 }
 
-if (analysis.state === "low_focus" && lastAlert !== "focus") {
-  await sendTelegram(chatId, "⚠️ Focus dropping — take 5 min reset", env);
-  await env.AETHER_KV.put("last_alert", "focus");
+// ⚠️ LOW FOCUS
+if (analysis.state === "low_focus") {
+  await sendJarvisAlert(
+    env,
+    chatId,
+    "focus",
+    "⚠️ Focus dropping — take 5 min reset"
+  );
 }
 
-if (analysis.state === "burnout" && lastAlert !== "burnout") {
-  await sendTelegram(chatId, "🧠 Burnout detected — stop and rest", env);
-  await env.AETHER_KV.put("last_alert", "burnout");
+// 🧠 BURNOUT
+if (analysis.state === "burnout") {
+  await sendJarvisAlert(
+    env,
+    chatId,
+    "burnout",
+    "🧠 Burnout detected — stop and rest"
+  );
+}
+
+if (analysis.state === "moderate") {
+  await env.AETHER_KV.put("last_alert", "none");
 }
 
   // original logging reply
