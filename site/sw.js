@@ -9,10 +9,9 @@ const WORKER_URL    = 'https://learning-bot.talpadeavi0303.workers.dev';
 
 // Files to cache for offline use
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/checkin.html',
-  'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap',
+  '/site/',
+  '/site/index.html',
+  '/site/checkin.html',
 ];
 
 // ─── Install — cache static assets ───────────────────────────────
@@ -72,7 +71,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Offline fallback — return cached index.html
         if (event.request.destination === 'document') {
-          return caches.match('/index.html');
+          return caches.match('/site/index.html');
         }
       });
     })
@@ -123,8 +122,8 @@ self.addEventListener('push', event => {
 
   const options = {
     body:    data.body || 'AETHER has an update for you.',
-    icon:    '/icons/icon-192.png',
-    badge:   '/icons/icon-192.png',
+    icon: '/site/icons/icon-192.png',
+    badge: '/site/icons/icon-192.png',
     vibrate: [100, 50, 100],
     data:    { url: data.url || '/' },
     actions: [
