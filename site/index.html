@@ -15,6 +15,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+
+  /* 🔥 AI FEED STYLING */
+
+.feed-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border-bottom: 1px solid #1a1a1a;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.feed-icon {
+  font-size: 18px;
+}
+
+.feed-txt {
+  flex: 1;
+  font-size: 13px;
+}
+
+.feed-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.7;
+  display: flex;
+  gap: 10px;
+}
+
+/* 🎨 ENERGY COLORS */
+.energy-high { color: #00ff88; }   /* green */
+.energy-mid  { color: #ffaa00; }   /* yellow */
+.energy-low  { color: #ff4444; }   /* red */
+
+/* 📈 TREND COLORS */
+.trend-up { color: #00ff88; }
+.trend-down { color: #ff4444; }
+.trend-flat { color: #888; }
+
+/* ✨ animation */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 :root{
   --nv:#76b900;
   --nv2:rgba(118,185,0,.55);
@@ -784,18 +831,36 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
   </div>
 
   <!-- ═══ BRAIN ═══ -->
-  <div class="view" id="view-graph">
-    <div style="padding:16px">
-      <div class="pt">Neural Nexus <span class="pt-accent">SYSTEM BRAIN · INTERACTIVE</span></div>
-      <div class="graph-controls">
-        <button class="gc-btn on" onclick="setGraphMode('neural',this)">NEURAL</button>
-        <button class="gc-btn" onclick="setGraphMode('cluster',this)">CLUSTER</button>
-        <button class="gc-btn" onclick="setGraphMode('flow',this)">FLOW</button>
-        <button class="gc-btn" onclick="resetGraph()">RESET</button>
-      </div>
-      <canvas id="graphCanvas" style="width:100%;height:68vh;border:1px solid var(--border);display:block;cursor:crosshair;background:var(--surface)"></canvas>
+  <<div class="view" id="view-graph">
+  <div style="padding:8px 12px"> <!-- 🔥 reduced padding -->
+    
+    <div class="pt">
+      Neural Nexus 
+      <span class="pt-accent">SYSTEM BRAIN · INTERACTIVE</span>
     </div>
+
+    <div class="graph-controls">
+      <button class="gc-btn on" onclick="setGraphMode('neural',this)">NEURAL</button>
+      <button class="gc-btn" onclick="setGraphMode('cluster',this)">CLUSTER</button>
+      <button class="gc-btn" onclick="setGraphMode('flow',this)">FLOW</button>
+      <button class="gc-btn" onclick="resetGraph()">RESET</button>
+    </div>
+
+    <!-- 🔥 FIXED CANVAS -->
+    <canvas id="graphCanvas"
+      style="
+        width:100%;
+        height:55vh;   /* 🔥 reduced from 68vh */
+        border:1px solid var(--border);
+        display:block;
+        cursor:crosshair;
+        background:var(--surface);
+        margin-top:6px; /* 🔥 tight spacing */
+      ">
+    </canvas>
+
   </div>
+</div>
 
   <!-- ═══ SYSTEM ═══ -->
   <div class="view" id="view-system">
@@ -1667,19 +1732,38 @@ async function loadEvents() {
 function renderEvents(events) {
   const container = document.getElementById("liveEventFeed");
 
-  if (!container) {
-    console.error("❌ liveEventFeed not found");
-    return;
-  }
+  if (!container) return;
 
-  if (events.length === 0) {
-    renderEmptyState();
+  if (!events.length) {
+    container.innerHTML = "<div style='opacity:0.6'>No events yet...</div>";
     return;
   }
 
   container.innerHTML = "";
 
-  events.slice(-20).reverse().forEach(e => {
+  events.slice(-20).reverse().forEach((e, i) => {
+
+    // 🎨 ENERGY COLOR
+    let energyClass = "energy-mid";
+    if (e.energy > 0.7) energyClass = "energy-high";
+    else if (e.energy < 0.4) energyClass = "energy-low";
+
+    // 📈 TREND
+    let trend = "→";
+    let trendClass = "trend-flat";
+
+    if (i < events.length - 1) {
+      const prev = events[events.length - i - 2]?.energy;
+
+      if (e.energy > prev) {
+        trend = "↑";
+        trendClass = "trend-up";
+      } else if (e.energy < prev) {
+        trend = "↓";
+        trendClass = "trend-down";
+      }
+    }
+
     const div = document.createElement("div");
     div.className = "feed-item";
 
@@ -1688,9 +1772,10 @@ function renderEvents(events) {
       <div class="feed-txt">
         ${e.summary || "No summary"}
         <div class="feed-meta">
-          <span class="feed-tag">${e.type}</span>
-          <span class="feed-energy">⚡ ${e.energy ?? "-"}</span>
-          <span class="feed-time">${new Date(e.time).toLocaleTimeString()}</span>
+          <span>${e.type}</span>
+          <span class="${energyClass}">⚡ ${e.energy ?? "-"}</span>
+          <span class="${trendClass}">${trend}</span>
+          <span>${new Date(e.time).toLocaleTimeString()}</span>
         </div>
       </div>
     `;
