@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="manifest" href="/site/manifest.json">
+<meta name="theme-color" content="#00ffff">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
 <title>JARVIS NEXUS</title>
@@ -1277,5 +1279,14 @@ async function checkWorker(){
 setTimeout(checkWorker,2500);
 window.addEventListener('resize',()=>{if(chatOpen)initArcReactor()});
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/site/sw.js')
+    .then(() => console.log('Service Worker Registered'))
+    .catch(err => console.error('SW failed:', err));
+}
+</script>
+
 </body>
 </html>

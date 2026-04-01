@@ -2,40 +2,57 @@
   "name": "AETHER OS",
   "short_name": "AETHER",
   "description": "Personal AI Operating System — behavior tracking, flow state, productivity intelligence",
-  "start_url": "/",
+
+  "start_url": "/site/index.html",
+  "scope": "/site/",
+
   "display": "standalone",
   "orientation": "portrait",
+
   "background_color": "#010b12",
   "theme_color": "#00ffff",
+
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/site/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/site/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
+
   "categories": ["productivity", "health", "utilities"],
+
   "shortcuts": [
     {
       "name": "Log State",
       "short_name": "Check-in",
       "description": "One-tap state check-in",
-      "url": "/checkin.html",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "/site/checkin.html",
+      "icons": [
+        {
+          "src": "/site/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "Open AETHER dashboard",
-      "url": "/",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+      "url": "/site/index.html",
+      "icons": [
+        {
+          "src": "/site/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
