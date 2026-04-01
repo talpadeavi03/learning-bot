@@ -1623,5 +1623,100 @@ window.addEventListener('resize',()=>{if(chatOpen)initArcReactor()});
 
 </script>
 
+<script>
+async function loadEvents() {
+  try {
+    const res = await fetch("/events");
+
+    // ✅ check response
+    if (!res.ok) {
+      console.error("❌ API ERROR:", res.status);
+      return;
+    }
+
+    const data = await res.json();
+
+    // ✅ check structure
+    if (!data || !data.events) {
+      console.warn("⚠️ No events found");
+      renderEmptyState();
+      return;
+    }
+
+    const events = data.events;
+
+    console.log("RAW EVENTS:", events);
+
+    const formattedEvents = events.map(e => ({
+      time: e.timestamp,
+      type: e.input_type,
+      summary: e.summary,
+      energy: e.energy_signal,
+      focus: e.focus_signal
+    }));
+
+    console.log("FORMATTED:", formattedEvents);
+
+    renderEvents(formattedEvents);
+
+  } catch (err) {
+    console.error("🔥 LOAD ERROR:", err);
+  }
+}
+
+function renderEvents(events) {
+  const container = document.getElementById("liveEventFeed");
+
+  if (!container) {
+    console.error("❌ liveEventFeed not found");
+    return;
+  }
+
+  if (events.length === 0) {
+    renderEmptyState();
+    return;
+  }
+
+  container.innerHTML = "";
+
+  events.slice(-20).reverse().forEach(e => {
+    const div = document.createElement("div");
+    div.className = "feed-item";
+
+    div.innerHTML = `
+      <div class="feed-icon">⚡</div>
+      <div class="feed-txt">
+        ${e.summary || "No summary"}
+        <div class="feed-meta">
+          <span class="feed-tag">${e.type}</span>
+          <span class="feed-energy">⚡ ${e.energy ?? "-"}</span>
+          <span class="feed-time">${new Date(e.time).toLocaleTimeString()}</span>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function renderEmptyState() {
+  const container = document.getElementById("liveEventFeed");
+
+  container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">📭</div>
+      <div class="empty-title">No Events Yet</div>
+      <div class="empty-sub">Start logging activity</div>
+    </div>
+  `;
+}
+
+// 🚀 run once
+loadEvents();
+
+// 🔄 auto refresh
+setInterval(loadEvents, 5000);
+</script>
+
 </body>
 </html>
