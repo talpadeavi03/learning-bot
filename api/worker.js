@@ -7,6 +7,96 @@
 // /help   — list commands
 // ═════════════════════════════════════════════════════════════════
 
+function analyzePatterns(events) {
+  if (events.length < 10) {
+    return {
+      bestHour: "--",
+      trend: "collecting data"
+    };
+  }
+
+  // 🕒 Hourly energy pattern
+  const hourMap = {};
+  events.forEach(e => {
+    const h = new Date(e.timestamp).getUTCHours();
+    if (!hourMap[h]) hourMap[h] = [];
+    hourMap[h].push(e.energy_signal || 0.5);
+  });
+
+  let bestHour = 0;
+  let bestEnergy = 0;
+
+  for (const h in hourMap) {
+    const avg = hourMap[h].reduce((s,v)=>s+v,0)/hourMap[h].length;
+    if (avg > bestEnergy) {
+      bestEnergy = avg;
+      bestHour = h;
+    }
+  }
+
+  // 📉 Energy trend (last 2 days)
+  const recent = events.slice(-10).map(e => e.energy_signal || 0.5);
+  const trendDiff = recent[recent.length - 1] - recent[0];
+
+  let trend = "stable";
+  if (trendDiff > 0.1) trend = "improving";
+  if (trendDiff < -0.1) trend = "declining";
+
+  return {
+    bestHour,
+    bestEnergy,
+    trend
+  };
+}
+
+async function getRecentEvents(env, limit = 20) {
+  const events = await env.AETHER_KV.get("events:list", { type: "json" }) || [];
+  return events.slice(-limit);
+}
+
+async function getDashboard(env) {
+  return await env.AETHER_KV.get("dashboard:latest", { type: "json" }) || {};
+}
+
+function analyzeState(events, dashboard) {
+  if (!events.length) return { state: "unknown" };
+
+  const last = events[events.length - 1];
+
+  const energy = last.energy_signal ?? dashboard.avg_energy ?? 0.5;
+  const stress = last.stress_signal ?? dashboard.avg_stress ?? 0.3;
+  const focus = last.focus_signal ?? 0.5;
+
+  let state = "neutral";
+  let advice = "";
+
+  // 🧠 CORE DECISION LOGIC
+  if (energy < 0.3 && stress > 0.6) {
+    state = "burnout";
+    advice = "You’re mentally drained. Take a full break. No heavy tasks.";
+  } 
+  else if (focus < 0.4) {
+    state = "low_focus";
+    advice = "Your focus is low. Do small tasks or reset (walk, water, no screens).";
+  } 
+  else if (energy > 0.7 && focus > 0.6) {
+    state = "flow_ready";
+    advice = "You are in peak state. Start deep work NOW.";
+  } 
+  else {
+    state = "moderate";
+    advice = "Maintain momentum. Avoid distractions and continue current work.";
+  }
+
+  return {
+    state,
+    energy,
+    stress,
+    focus,
+    advice
+  };
+}
+
 async function handleCommand(text, chatId, env) {
   const parts   = text.trim().split(' ');
   const command = parts[0].toLowerCase();
@@ -27,7 +117,7 @@ async function handleCommand(text, chatId, env) {
     }
 
     case '/stats': {
-      const events = await getRecentEvents(50, env);
+      const events = await getRecentEvents(env, 50);
       if (events.length === 0) {
         await sendTelegram(chatId, '📊 No data yet. Send some messages first!', env);
         return true;
@@ -519,7 +609,84 @@ export default {
         });
       }
       if (url.pathname === '/webhook'          && request.method === 'POST') return handleWebhook(request, env);
-      if (url.pathname === '/chat'             && request.method === 'POST') return handleChat(request, env);
+      if (url.pathname === "/chat" && request.method === "POST") {
+        console.log("✅ NEW JARVIS CORE HIT");
+
+        const body = await request.json();
+        const userMessage = body.message?.toLowerCase() || "";
+
+        // 🔹 Get data FIRST
+        const events = await getRecentEvents(env);
+        const dashboard = await getDashboard(env);
+
+        const analysis = analyzeState(events, dashboard);
+
+        // 🔹 Pattern engine (AFTER events)
+        const patterns = analyzePatterns(events);
+
+        const patternText = `
+      📊 Pattern Insight:
+      Best hour: ${patterns.bestHour}:00
+      Trend: ${patterns.trend}
+      `;
+
+        // 🔹 Helpers
+        function energyLabel(e) {
+          if (e > 0.7) return "high";
+          if (e > 0.4) return "moderate";
+          return "low";
+        }
+
+        function getTrend(events) {
+          if (events.length < 5) return "stable";
+
+          const recent = events.slice(-5).map(e => e.energy_signal || 0.5);
+          const diff = recent[recent.length - 1] - recent[0];
+
+          if (diff > 0.1) return "increasing";
+          if (diff < -0.1) return "decreasing";
+          return "stable";
+        }
+
+        const energyText = energyLabel(analysis.energy);
+        const trend = getTrend(events);
+
+        let response = "";
+
+        // 🎯 INTENT HANDLING
+        if (userMessage.includes("what should i do")) {
+          response = analysis.advice;
+        } 
+        else if (userMessage.includes("status")) {
+          response = `🧠 JARVIS STATUS
+
+      ⚡ Energy: ${energyText} (${analysis.energy.toFixed(2)})
+      🔥 State: ${analysis.state}
+      😤 Stress: ${analysis.stress.toFixed(2)}
+      🎯 Focus: ${analysis.focus.toFixed(2)}
+      📈 Trend: ${trend}`;
+        } 
+        else {
+          response = analysis.advice;
+        }
+
+        // 🔥 FINAL OUTPUT (NOW WITH PATTERNS)
+        const finalResponse = `🧠 JARVIS CORE
+
+      ⚡ Energy: ${energyText}
+      🔥 State: ${analysis.state}
+      📈 Trend: ${trend}
+
+      📌 Recommendation:
+      ${response}
+
+      ${patternText}
+      `;
+        console.log("PATTERN:", patternText);
+        return new Response(JSON.stringify({ reply: finalResponse }), {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
       if (url.pathname === '/log-state'        && request.method === 'POST') return handleLogState(request, env);
       if (url.pathname === '/dashboard'        && request.method === 'GET')  return handleDashboard(request, env);
       if (url.pathname === '/events'           && request.method === 'GET')  return handleEvents(request, env);
@@ -660,6 +827,9 @@ export default {
 
 async function handleWebhook(request, env) {
   let body;
+
+  // 🔥 REAL-TIME JARVIS ALERTS
+
   try { body = await request.json(); }
   catch { return textResp('Bad JSON', 400); }
 
@@ -790,11 +960,45 @@ async function handleWebhook(request, env) {
   };
   await saveEvent(event, env);
 
-  const reply = buildTelegramReply(parsed, inputType, rawText);
-  await sendTelegram(chatId, reply, env);
+  // 🔥 JARVIS INTELLIGENCE
+  const events = await getRecentEvents(env);
+  const dashboard = await getDashboard(env);
+  const analysis = analyzeState(events, dashboard);
 
-  return textResp('OK', 200);
+  // 🔥 REAL-TIME JARVIS ALERTS (FIXED POSITION)
+
+const lastAlert = await env.AETHER_KV.get("last_alert");
+
+if (analysis.state === "flow_ready" && lastAlert !== "flow") {
+  await sendTelegram(chatId, "🚀 FLOW DETECTED — Start deep work NOW", env);
+  await env.AETHER_KV.put("last_alert", "flow");
 }
+
+if (analysis.state === "low_focus" && lastAlert !== "focus") {
+  await sendTelegram(chatId, "⚠️ Focus dropping — take 5 min reset", env);
+  await env.AETHER_KV.put("last_alert", "focus");
+}
+
+if (analysis.state === "burnout" && lastAlert !== "burnout") {
+  await sendTelegram(chatId, "🧠 Burnout detected — stop and rest", env);
+  await env.AETHER_KV.put("last_alert", "burnout");
+}
+
+  // original logging reply
+  const baseReply = buildTelegramReply(parsed, inputType, rawText);
+
+  const jarvisReply = `
+
+  🧠 *JARVIS*
+  ⚡ Energy: ${analysis.energy.toFixed(2)}
+  🔥 State: ${analysis.state}
+
+  ${analysis.advice}
+  `;
+
+  // send combined response
+  await sendTelegram(chatId, baseReply + jarvisReply, env);
+  }
 
 // ═════════════════════════════════════════════════════════════════
 // 2. CHAT ENDPOINT — ENGINE SWITCHER
@@ -1115,7 +1319,7 @@ async function handleTrigger(request, env) {
 
       case 'smart_nudge': {
         const state  = await getLatestState(env);
-        const events = await getRecentEvents(5, env);
+        const events = await getRecentEvents(env, 5);
         const avgE   = events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / Math.max(events.length, 1);
         let msg;
         if (!state && events.length === 0) msg = '👋 AETHER here. No data logged today yet. What are you working on?';
@@ -1608,7 +1812,7 @@ async function sendMorningBriefing(env) {
   if (!chatId) return;
 
   const today     = new Date().toISOString().split('T')[0];
-  const events    = await getRecentEvents(50, env);
+  const events    = await getRecentEvents(env, 50);
   const todayGoal = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
 
   const yesterday = new Date();
@@ -1830,16 +2034,6 @@ async function saveEvent(event, env) {
   }
 }
 
-async function getRecentEvents(limit, env) {
-  if (!env.AETHER_KV) return [];
-  try {
-    const raw = await env.AETHER_KV.get('events:list');
-    if (!raw) return [];
-    return JSON.parse(raw).slice(0, limit);
-  } catch {
-    return [];
-  }
-}
 
 async function getEventCount(env) {
   if (!env.AETHER_KV) return 0;

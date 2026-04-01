@@ -1283,6 +1283,14 @@ function countUp(id,target){
   const t=setInterval(()=>{v=Math.min(v+Math.ceil(target/40),target); el.textContent=v.toLocaleString(); if(v>=target) clearInterval(t);},28);
 }
 
+async function enableNotifications() {
+  const permission = await Notification.requestPermission();
+  if (permission === "granted") {
+    console.log("Notifications enabled");
+  }
+}
+
+
 // ═══════════════════════════════════
 // WAVEFORM
 // ═══════════════════════════════════
