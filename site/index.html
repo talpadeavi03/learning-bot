@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>JARVIS NEXUS</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --nv:#76b900;
+  --nv2:rgba(118,185,0,.55);
+  --nv3:rgba(118,185,0,.18);
+  --nv4:rgba(118,185,0,.07);
+  --bg:#000;
+  --surface:#0d0d0d;
+  --surface2:#111;
+  --border:rgba(255,255,255,.07);
+  --border2:rgba(118,185,0,.22);
+  --text:#e8e8e8;
+  --text2:rgba(212,212,212,.78);
+  --text3:rgba(212,212,212,.52);
+  --font:'Barlow Condensed',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-weight:500;min-height:100vh;overflow-x:hidden;cursor:none}
+
+/* ─── CURSOR ─── */
+#cur{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);will-change:transform}
+#cur-dot{width:4px;height:4px;background:var(--nv);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);will-change:left,top}
+#cur-ring{width:24px;height:24px;border:1px solid rgba(118,185,0,.5);border-radius:50%;transition:width .15s,height .15s,border-color .15s}
+#cur.hov #cur-ring{width:32px;height:32px;border-color:var(--nv)}
+@media(hover:none),(pointer:coarse){#cur,#cur-dot{display:none!important}body{cursor:auto!important}}
+
+/* ─── LOADER ─── */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+  transition:opacity .8s .2s}
+#loader.gone{opacity:0;pointer-events:none}
+.load-logo{font-family:var(--font);font-size:48px;font-weight:800;letter-spacing:8px;color:var(--text);line-height:1}
+.load-logo span{color:var(--nv)}
+.load-sub{font-family:var(--mono);font-size:11px;letter-spacing:4px;color:var(--text3);text-transform:uppercase}
+.load-bar{width:240px;height:1px;background:rgba(255,255,255,.08)}
+.load-fill{height:100%;background:var(--nv);width:0;animation:lfill 2.8s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes lfill{to{width:100%}}
+.load-msg{font-family:var(--mono);font-size:10px;color:var(--nv2);letter-spacing:2px;min-height:14px}
+
+/* ─── APP SHELL ─── */
+#app{position:relative;z-index:2;display:flex;flex-direction:column;min-height:100vh;
+  transition:transform .5s cubic-bezier(.77,0,.18,1)}
+#app.shifted{transform:translateX(-5%) scale(.97)}
+
+/* ─── TOP STATUS BAR ─── */
+#status-bar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:4px 20px;display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:200;height:30px}
+#sb-brand{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--text3);flex-shrink:0}
+#sb-sep{flex:1}
+.sb-item{font-family:var(--mono);font-size:9px;letter-spacing:1px;color:var(--text3);
+  display:flex;align-items:center;gap:5px;flex-shrink:0}
+.sb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sb-dot.on{background:var(--nv);box-shadow:0 0 5px var(--nv)}
+.sb-dot.off{background:rgba(255,255,255,.2)}
+#xp-wrap{display:flex;align-items:center;gap:7px;flex-shrink:0}
+#xp-track{width:80px;height:2px;background:var(--border);overflow:hidden}
+#xp-fill{height:100%;background:var(--nv);width:73%;transition:width 1.5s}
+#xp-label{font-family:var(--mono);font-size:8px;color:var(--text3);white-space:nowrap}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ─── HEADER ─── */
+header{display:flex;align-items:center;gap:12px;
+  padding:0 20px;border-bottom:1px solid var(--border);
+  background:var(--surface);height:52px;
+  position:sticky;top:30px;z-index:199;flex-wrap:wrap}
+.logo{font-family:var(--font);font-weight:800;font-size:20px;letter-spacing:3px;
+  color:var(--text);flex-shrink:0;line-height:1}
+.logo span{color:var(--nv)}
+.logo-sub{font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--text3);
+  display:block;margin-top:1px;font-weight:400}
+.h-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.h-fill{flex:1}
+.h-clock{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:1px;flex-shrink:0}
+.h-date{font-family:var(--mono);font-size:10px;color:var(--text3);flex-shrink:0}
+#workerStatus{font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  display:flex;align-items:center;gap:5px;color:var(--text3);flex-shrink:0}
+#workerStatus.ok{color:var(--nv)}
+.h-btn{font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:2px;
+  padding:7px 16px;border:1px solid var(--nv);background:transparent;color:var(--nv);
+  cursor:pointer;transition:background .2s,color .2s;flex-shrink:0;white-space:nowrap}
+.h-btn:hover{background:var(--nv);color:#000}
+#uni-select{font-family:var(--mono);font-size:8px;letter-spacing:1px;
+  background:transparent;border:1px solid var(--border);color:var(--text2);
+  padding:4px 6px;cursor:pointer;outline:none;flex-shrink:0}
+
+/* ─── NAV TABS (sticky, below header) ─── */
+#nav-bar{position:sticky;top:82px;z-index:198;background:var(--surface);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;
+  padding:0 20px;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+#nav-bar::-webkit-scrollbar{display:none}
+.ntab{font-family:var(--mono);font-size:10px;letter-spacing:2px;
+  padding:14px 18px;cursor:pointer;color:var(--text2);transition:color .2s;
+  border:none;background:transparent;border-bottom:2px solid transparent;
+  margin-bottom:-1px;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.ntab:hover{color:var(--text)}
+.ntab.on{color:var(--nv);border-bottom-color:var(--nv)}
+
+/* ─── WELCOME BAR ─── */
+.welcome{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:14px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.w-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.w-label{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--text3)}
+.w-name{font-family:var(--font);font-size:23px;font-weight:800;letter-spacing:3px;color:var(--text)}
+.w-stats{display:flex;gap:24px;flex-wrap:wrap}
+.wstat{text-align:center}
+.wstat-n{font-family:var(--font);font-size:19px;font-weight:700;line-height:1;color:var(--nv)}
+.wstat-l{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);margin-top:2px}
+.w-power{display:flex;align-items:baseline;gap:6px;flex-shrink:0}
+.w-power-n{font-family:var(--font);font-size:38px;font-weight:800;color:var(--nv);line-height:1}
+.w-power-l{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3)}
+
+/* ─── VIEWS ─── */
+.view{display:none}
+.view.on{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ─── GRID ─── */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);padding:0}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);padding:0}
+.g-full{grid-column:1/-1}
+.g2{grid-column:span 2}
+
+/* ─── PANEL ─── */
+.panel{background:var(--surface);padding:20px;position:relative;
+  animation:pIn .4s ease forwards;opacity:0;
+  transition:background .2s}
+.panel:hover{background:var(--surface2)}
+.panel-static{background:var(--surface);padding:20px}
+@keyframes pIn{to{opacity:1}}
+.panel:nth-child(1){animation-delay:.04s}.panel:nth-child(2){animation-delay:.08s}
+.panel:nth-child(3){animation-delay:.12s}.panel:nth-child(4){animation-delay:.16s}
+.panel:nth-child(5){animation-delay:.2s}.panel:nth-child(6){animation-delay:.24s}
+.panel:nth-child(7){animation-delay:.28s}.panel:nth-child(8){animation-delay:.32s}
+
+/* ─── PANEL TITLE ─── */
+.pt{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--text3);
+  text-transform:uppercase;margin-bottom:18px;
+  display:flex;align-items:center;gap:10px}
+.pt::after{content:'';flex:1;height:1px;background:var(--border)}
+.pt-accent{color:var(--nv2)}
+
+/* ─── BIG STAT ─── */
+.big-stat{padding:16px 0 18px;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);margin-bottom:18px;text-align:center}
+.bnum{font-family:var(--font);font-size:46px;font-weight:800;color:var(--nv);line-height:1}
+.blbl{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--text3);margin-top:4px}
+
+/* ─── METRICS BARS ─── */
+.mrow{margin-bottom:12px}
+.ml{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.ml span:first-child{font-family:var(--font);font-size:14px;font-weight:600;letter-spacing:.5px;color:var(--text2)}
+.mv{font-family:var(--mono);font-size:10px;color:var(--nv)}
+.mv.dim{color:var(--text3)}
+.btrack{height:2px;background:var(--border);overflow:hidden}
+.bfill{height:100%;width:0;transition:width 1.6s cubic-bezier(.4,0,.2,1);background:var(--nv)}
+.bfill.dim{background:rgba(118,185,0,.35)}
+
+/* ─── ACTIVITY ITEMS ─── */
+.aitem{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--border)}
+.aitem:last-child{border-bottom:none}
+.atop{font-family:var(--font);font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.asub{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);margin-top:2px}
+.amins{font-family:var(--mono);font-size:10px;color:var(--text2);flex-shrink:0}
+.abadge{font-family:var(--mono);font-size:7px;letter-spacing:1px;
+  padding:1px 5px;border:1px solid;flex-shrink:0}
+.ab-l{border-color:var(--border2);color:var(--nv2)}
+.ab-c{border-color:rgba(255,255,255,.15);color:var(--text2)}
+.ab-g{border-color:rgba(255,255,255,.1);color:var(--text3)}
+
+/* ─── STAT CARDS ─── */
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.sc{background:var(--surface);padding:16px;text-align:center;transition:background .2s}
+.sc:hover{background:var(--surface2)}
+.sc-n{font-family:var(--font);font-size:27px;font-weight:800;color:var(--nv);line-height:1}
+.sc-l{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);margin-top:4px}
+.sc-sub{font-family:var(--mono);font-size:8px;color:var(--nv2);margin-top:3px}
+
+/* ─── MOOD ─── */
+.mood-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border)}
+.mood-btn{background:var(--surface);border:none;padding:12px 6px;cursor:pointer;
+  text-align:center;transition:background .2s}
+.mood-btn:hover,.mood-btn.sel{background:var(--nv4)}
+.mood-emoji{font-size:18px;line-height:1;margin-bottom:4px}
+.mood-label{font-family:var(--mono);font-size:7px;letter-spacing:1px;color:var(--text3)}
+.mood-btn.sel .mood-label{color:var(--nv)}
+
+/* ─── QUICK ACTIONS (QA) ─── */
+.qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border)}
+.qa{background:var(--surface);padding:14px;cursor:pointer;transition:background .2s;
+  display:flex;flex-direction:column;gap:4px}
+.qa:hover{background:var(--nv4)}
+.qa-icon{font-size:18px;line-height:1;margin-bottom:4px}
+.qa-label{font-family:var(--font);font-size:14px;font-weight:700;letter-spacing:.5px;color:var(--text)}
+.qa-sub{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3)}
+.qa-badge{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--nv2)}
+.qa-cost{font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:2px}
+
+/* ─── GOALS ─── */
+.goal-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.goal-item:last-child{border-bottom:none}
+.goal-check{width:14px;height:14px;border:1px solid var(--text3);cursor:pointer;
+  flex-shrink:0;transition:all .2s;position:relative}
+.goal-check.done{background:var(--nv);border-color:var(--nv)}
+.goal-check.done::after{content:'';position:absolute;left:3px;top:1px;
+  width:5px;height:8px;border:1.5px solid #000;border-left:none;border-top:none;transform:rotate(45deg)}
+.goal-txt{font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);flex:1}
+.goal-txt.done{text-decoration:line-through;color:var(--text3)}
+.goal-cat{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 5px;
+  border:1px solid var(--border);color:var(--text3);flex-shrink:0}
+
+/* ─── INSIGHTS ─── */
+.insights{display:flex;flex-direction:column;gap:1px;background:var(--border)}
+.insight{background:var(--surface);padding:14px;display:flex;gap:12px;transition:background .2s}
+.insight:hover{background:var(--surface2)}
+.ins-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.ins-title{font-family:var(--font);font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.ins-body{font-family:var(--font);font-size:13px;color:var(--text2);line-height:1.5}
+.ins-tag{font-family:var(--mono);font-size:7px;letter-spacing:1px;padding:2px 5px;
+  border:1px solid var(--border2);color:var(--nv2);display:inline-block;margin-top:5px}
+.tag-hi{border-color:rgba(255,255,255,.2);color:var(--text2)}
+.tag-med{border-color:rgba(255,255,255,.1);color:var(--text3)}
+
+/* ─── MEMORY / TIMELINE ─── */
+.mem-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.mem-item:last-child{border-bottom:none}
+.mem-dot{width:4px;height:4px;border-radius:50%;background:var(--nv);margin-top:5px;flex-shrink:0}
+.mem-txt{font-family:var(--font);font-size:13px;color:var(--text2);line-height:1.4}
+.mem-time{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3);margin-top:2px}
+
+/* ─── TASK LIST ─── */
+.tlist{display:flex;flex-direction:column;gap:0}
+.titem{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border)}
+.titem:last-child{border-bottom:none}
+.ttime{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3);
+  flex-shrink:0;padding-top:2px;white-space:nowrap}
+.ttime.urgent{color:var(--nv)}
+.ttime.warn{color:rgba(212,212,212,.55)}
+.tevent{font-family:var(--font);font-size:13px;color:var(--text2);line-height:1.4}
+
+/* ─── PIPELINE ─── */
+.pipeline{display:flex;flex-direction:column;gap:1px;background:var(--border)}
+.pipe-item{background:var(--surface);display:flex;align-items:center;gap:10px;padding:11px 14px}
+.pipe-icon{font-size:14px;flex-shrink:0}
+.pipe-name{font-family:var(--font);font-size:14px;font-weight:600;color:var(--text)}
+.pipe-sub{font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3);margin-top:2px}
+.pipe-status{font-family:var(--mono);font-size:8px;letter-spacing:2px;
+  padding:2px 7px;border:1px solid var(--border);color:var(--text3);margin-left:auto;flex-shrink:0}
+.ps-ok{border-color:var(--border2);color:var(--nv2)}
+.ps-warn{border-color:rgba(255,255,255,.15);color:var(--text2)}
+.ps-off{opacity:.4}
+
+/* ─── SYSTEM GRID ─── */
+.sys-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border)}
+.sys-item{background:var(--surface);padding:14px}
+.sys-key{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);margin-bottom:4px}
+.sys-val{font-family:var(--font);font-size:16px;font-weight:700;color:var(--text)}
+.sys-sub{font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:2px}
+
+/* ─── CHART CONTAINERS ─── */
+.week-wrap{height:180px;position:relative}
+.clegend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.li{display:flex;align-items:center;gap:6px}
+.ldot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.lname{font-family:var(--font);font-size:12px;color:var(--text2)}
+.lpct{font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:2px}
+
+/* ─── GRAPH CONTROLS ─── */
+.graph-controls{display:flex;gap:1px;background:var(--border);margin-bottom:1px}
+.gc-btn{font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  padding:8px 14px;background:var(--surface);border:none;color:var(--text2);
+  cursor:pointer;transition:all .2s}
+.gc-btn:hover{color:var(--text)}
+.gc-btn.on{background:var(--nv4);color:var(--nv)}
+
+/* ─── DOCS ─── */
+.doc-tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.doc-frame{display:none}
+.doc-frame.on{display:block;animation:fadeIn .3s ease}
+
+/* ─── ACHIEVEMENT TOAST ─── */
+#achievement{position:fixed;top:100px;right:16px;z-index:9000;
+  background:var(--surface);border:1px solid var(--border2);
+  padding:14px 18px;min-width:220px;max-width:85vw;
+  transform:translateX(120%);transition:transform .4s cubic-bezier(.2,1,.3,1)}
+#achievement.show{transform:translateX(0)}
+.ach-top{font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--text3);margin-bottom:4px}
+.ach-name{font-family:var(--font);font-size:16px;font-weight:700;color:var(--text)}
+.ach-pts{font-family:var(--mono);font-size:10px;color:var(--nv);margin-top:3px}
+
+/* ─── CHAT PAGE ─── */
+#chatPage{position:fixed;inset:0;background:var(--bg);z-index:500;
+  display:flex;flex-direction:column;transform:translateX(100%);
+  transition:transform .5s cubic-bezier(.77,0,.18,1)}
+#chatPage.open{transform:translateX(0)}
+#arc-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  pointer-events:none;opacity:.12}
+#arc-bg canvas{width:min(500px,80vw);height:min(500px,80vw)}
+.ch{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--border);
+  background:var(--surface);flex-shrink:0;gap:10px;flex-wrap:wrap;position:relative;z-index:5}
+.ch-left{display:flex;align-items:center;gap:10px}
+.od{width:6px;height:6px;background:var(--nv);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
+.ct{font-family:var(--font);font-size:18px;font-weight:700;letter-spacing:2px;color:var(--text)}
+.ct-sub{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3)}
+.cc{font-family:var(--mono);font-size:9px;letter-spacing:2px;background:transparent;
+  border:1px solid var(--border);color:var(--text2);padding:6px 12px;cursor:pointer;transition:all .2s}
+.cc:hover{border-color:var(--text2);color:var(--text)}
+#chatMsgs{flex:1;overflow-y:auto;padding:24px clamp(16px,5vw,80px);
+  display:flex;flex-direction:column;gap:12px;position:relative;z-index:5;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#chatMsgs::-webkit-scrollbar{width:2px}
+#chatMsgs::-webkit-scrollbar-thumb{background:var(--border)}
+.msg{max-width:min(640px,88%);padding:12px 16px;font-family:var(--font);font-size:13px;
+  font-weight:500;line-height:1.6;animation:msgIn .3s ease;position:relative}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.user{align-self:flex-end;background:var(--nv4);border:1px solid var(--border2);color:var(--text)}
+.msg.ai{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text2)}
+.mlbl{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3);margin-bottom:5px}
+.msg.ai .mlbl{color:var(--nv2)}
+#thinking{display:flex;align-items:center;gap:10px;padding:8px clamp(16px,5vw,80px);
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text3);flex-shrink:0;z-index:5}
+#thinking.hidden{display:none}
+.tdots{display:flex;gap:4px}
+.tdots span{width:4px;height:4px;background:var(--nv);border-radius:50%;animation:tdot 1s infinite}
+.tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,80%,100%{opacity:.2;transform:scale(1)}40%{opacity:1;transform:scale(1.4)}}
+.qchips{display:flex;flex-wrap:wrap;gap:6px;padding:10px clamp(16px,5vw,80px);
+  flex-shrink:0;border-top:1px solid var(--border);position:relative;z-index:5}
+.chip{font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  padding:5px 10px;border:1px solid var(--border);color:var(--text3);
+  cursor:pointer;background:transparent;transition:all .2s}
+.chip:hover{border-color:var(--border2);color:var(--nv2)}
+.cinput{display:flex;gap:0;padding:12px clamp(16px,5vw,80px);
+  border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;z-index:5}
+#chatIn{flex:1;background:var(--bg);border:1px solid var(--border);border-right:none;
+  color:var(--text);padding:10px 14px;font-family:var(--font);font-size:13px;
+  outline:none;transition:border-color .2s;min-width:0}
+#chatIn:focus{border-color:var(--border2)}
+#chatIn::placeholder{color:var(--text3)}
+#sendBtn{font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  background:var(--nv);color:#000;border:none;padding:10px 20px;
+  cursor:pointer;transition:filter .2s;white-space:nowrap;flex-shrink:0;font-weight:500}
+#sendBtn:hover{filter:brightness(1.15)}
+#sendBtn:disabled{opacity:.3;cursor:not-allowed}
+#aiEngine{font-family:var(--mono);font-size:8px;letter-spacing:1px;
+  background:var(--surface);border:1px solid var(--border);color:var(--text2);
+  padding:5px 8px;cursor:pointer;outline:none}
+#audio-bars{display:flex;align-items:flex-end;gap:2px;height:50px;
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);opacity:0;z-index:4}
+.abar{width:3px;background:var(--nv);min-height:4px;transition:height .05s}
+
+/* ─── JARVIS PANEL ─── */
+#jarvis-panel{position:absolute;bottom:140px;right:clamp(16px,5vw,80px);z-index:6;
+  background:var(--surface);border:1px solid var(--border);padding:12px 14px;
+  font-family:var(--mono);min-width:170px;pointer-events:none}
+.jp-line{font-size:9px;color:var(--text3);letter-spacing:1px;margin-bottom:4px;
+  display:flex;justify-content:space-between;gap:10px}
+.jp-line span{color:var(--nv2)}
+
+/* ─── PASSWORD GATE ─── */
+#pw-gate{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.97);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px}
+#pw-gate.show{display:flex}
+#pw-gate h2{font-family:var(--font);font-size:28px;font-weight:800;letter-spacing:4px;color:var(--text)}
+#pw-gate p{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text3);text-align:center}
+#pw-input{background:var(--surface);border:1px solid var(--border2);color:var(--nv);
+  font-family:var(--mono);font-size:20px;padding:12px 18px;
+  width:min(260px,85vw);outline:none;letter-spacing:6px;text-align:center;margin-top:6px}
+.pw-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.pw-btn{font-family:var(--mono);font-size:9px;letter-spacing:2px;
+  padding:9px 20px;background:var(--nv);border:none;color:#000;cursor:pointer}
+.pw-btn.cancel{background:transparent;border:1px solid var(--border);color:var(--text2)}
+#pw-error{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:rgba(200,60,60,1);
+  opacity:0;margin-top:6px}
+
+/* ─── FOOTER ─── */
+.footline{background:var(--surface);border-top:1px solid var(--border);
+  padding:10px 20px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.footline span{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:var(--text3)}
+.footline .sep{color:var(--border2)}
+
+/* ─── DATA FLOW ─── */
+pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
+  overflow-x:auto;padding:10px 0;color:var(--nv)}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1024px){
+  .grid3{grid-template-columns:1fr 1fr}
+  .g2,.g-full{grid-column:1/-1}
+  .stat-cards{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .grid3,.grid2{grid-template-columns:1fr}
+  .g2,.g-full{grid-column:1/-1}
+  .stat-cards{grid-template-columns:repeat(2,1fr)}
+  .qa-grid{grid-template-columns:1fr 1fr}
+  .sys-grid{grid-template-columns:1fr}
+  header{height:auto;padding:10px 14px}
+  #jarvis-panel{display:none}
+  .h-date{display:none}
+}
+@media(max-width:480px){
+  .stat-cards{grid-template-columns:1fr 1fr}
+  .qa-grid{grid-template-columns:1fr}
+  .mood-row{grid-template-columns:repeat(5,1fr)}
+  .clegend{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="load-logo"><span>JAR</span>VIS</div>
+  <div class="load-sub">NEXUS · PERSONAL AI OS</div>
+  <div class="load-bar"><div class="load-fill"></div></div>
+  <div class="load-msg" id="bootMsg">Initializing...</div>
+</div>
+
+<!-- CURSOR -->
+<div id="cur"><div id="cur-ring"></div></div>
+<div id="cur-dot"></div>
+
+<!-- ACHIEVEMENT TOAST -->
+<div id="achievement">
+  <div class="ach-top">ACHIEVEMENT</div>
+  <div class="ach-name" id="ach-name">System Ready</div>
+  <div class="ach-pts" id="ach-pts">+500 XP</div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- STATUS BAR -->
+  <div id="status-bar">
+    <div id="sb-brand">JARVIS NEXUS · v3.0</div>
+    <div class="sb-item"><div class="sb-dot on"></div>WORKER</div>
+    <div class="sb-item"><div class="sb-dot on"></div>ML</div>
+    <div class="sb-item"><div class="sb-dot on"></div>KV</div>
+    <div id="sb-sep"></div>
+    <div id="xp-wrap">
+      <div id="xp-label">LVL 14</div>
+      <div id="xp-track"><div id="xp-fill"></div></div>
+      <div id="xp-label">7300 / 10000</div>
+    </div>
+    <div class="sb-item">
+      <select id="uni-select" onchange="changeUniverse(this.value)">
+        <option value="aether">UNIVERSE-616</option>
+        <option value="iron">IRON VERSE</option>
+        <option value="anime">ANIME NEXUS</option>
+        <option value="cyber">CYBERPUNK-7</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">JARVIS<span>.</span><div class="logo-sub">JUST A RATHER VERY INTELLIGENT SYSTEM</div></div>
+    <div class="h-sep"></div>
+    <div id="workerStatus" class="ok"><div class="sb-dot on"></div>API ONLINE</div>
+    <div class="h-fill"></div>
+    <div class="h-clock" id="clk">00:00:00</div>
+    <div class="h-date" id="date">2026–01–01</div>
+    <div class="h-sep"></div>
+    <button class="h-btn" onclick="openChat()">OPEN JARVIS</button>
+  </header>
+
+  <!-- NAV TABS -->
+  <div id="nav-bar">
+    <button class="ntab on" onclick="switchView('home',this)">HOME</button>
+    <button class="ntab" onclick="switchView('data',this)">DATA</button>
+    <button class="ntab" onclick="switchView('graph',this)">BRAIN</button>
+    <button class="ntab" onclick="switchView('system',this)">SYSTEM</button>
+    <button class="ntab" onclick="switchView('docs',this)">DOCS</button>
+  </div>
+
+  <!-- WELCOME BAR -->
+  <div class="welcome">
+    <div class="w-left">
+      <div class="w-label">WELCOME BACK</div>
+      <div class="w-name">AVI TALPADE</div>
+    </div>
+    <div class="w-stats">
+      <div class="wstat"><div class="wstat-n" id="wSessions">—</div><div class="wstat-l">SESSIONS</div></div>
+      <div class="wstat"><div class="wstat-n" id="wGoals">—</div><div class="wstat-l">QUESTS</div></div>
+      <div class="wstat"><div class="wstat-n" id="wStreak">—</div><div class="wstat-l">STREAK</div></div>
+      <div class="wstat"><div class="wstat-n" id="wScore">—</div><div class="wstat-l">AI SCORE</div></div>
+    </div>
+    <div class="w-power">
+      <div class="w-power-n" id="powerNum">0</div>
+      <div class="w-power-l">POWER<br>LEVEL</div>
+    </div>
+  </div>
+
+  <!-- ═══ HOME ═══ -->
+  <div class="view on" id="view-home">
+    <div class="grid3">
+
+      <div class="panel">
+        <div class="pt">Energy Core <span class="pt-accent">LIVE</span></div>
+        <div class="big-stat">
+          <div class="bnum" id="energyNum">7.4</div>
+          <div class="blbl">POWER INDEX / 10</div>
+        </div>
+        <div class="mrow"><div class="ml"><span>Focus</span><span class="mv" id="focusPct">82%</span></div><div class="btrack"><div class="bfill" id="focusBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Mood</span><span class="mv dim" id="moodPct">68%</span></div><div class="btrack"><div class="bfill dim" id="moodBar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Sleep</span><span class="mv dim" id="sleepPct">74%</span></div><div class="btrack"><div class="bfill dim" id="sleepBar"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Productivity</span><span class="mv" id="prodPct">91%</span></div><div class="btrack"><div class="bfill" id="prodBar"></div></div></div>
+      </div>
+
+      <div class="panel g2">
+        <div class="pt">Recent Missions <span class="pt-accent">ACTIVITY LOG</span></div>
+        <div class="aitem"><div><div class="atop">Neural Networks — Chapter 4 <span class="abadge ab-l">LEARN</span></div><div class="asub">DEEP LEARNING · STUDY SESSION</div></div><div class="amins">47 min</div></div>
+        <div class="aitem"><div><div class="atop">ML Pipeline Build <span class="abadge ab-c">CODE</span></div><div class="asub">GITHUB ACTIONS · DATA OPS</div></div><div class="amins">2.1h</div></div>
+        <div class="aitem"><div><div class="atop">Cloudflare Worker v2 Deploy <span class="abadge ab-g">OPS</span></div><div class="asub">API · 9 ROUTES LIVE</div></div><div class="amins">38 min</div></div>
+        <div class="aitem"><div><div class="atop">Feature Extraction Script <span class="abadge ab-c">CODE</span></div><div class="asub">PYTHON · ML PIPELINE</div></div><div class="amins">1.3h</div></div>
+        <div class="aitem" style="border-bottom:none"><div><div class="atop">AI Insight Review</div><div class="asub">AETHER ANALYSIS · MORNING BRIEF</div></div><div class="amins">22 min</div></div>
+      </div>
+
+      <div class="panel g-full">
+        <div class="pt">Character Stats <span class="pt-accent">TODAY</span></div>
+        <div class="stat-cards">
+          <div class="sc"><div class="sc-n">6.2h</div><div class="sc-l">DEEP WORK</div><div class="sc-sub">+0.8h vs avg ↑</div></div>
+          <div class="sc"><div class="sc-n">12</div><div class="sc-l">TASKS DONE</div><div class="sc-sub">87% complete</div></div>
+          <div class="sc"><div class="sc-n">4</div><div class="sc-l">GH COMMITS</div><div class="sc-sub">main + dev</div></div>
+          <div class="sc"><div class="sc-n">94</div><div class="sc-l">AI SCORE</div><div class="sc-sub">PEAK ZONE</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Mood <span class="pt-accent">STATUS</span></div>
+        <div class="mood-row">
+          <button class="mood-btn sel" onclick="setMood(this)"><div class="mood-emoji">😤</div><div class="mood-label">FOCUSED</div></button>
+          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😊</div><div class="mood-label">GOOD</div></button>
+          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😐</div><div class="mood-label">NEUTRAL</div></button>
+          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😴</div><div class="mood-label">TIRED</div></button>
+          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">🔥</div><div class="mood-label">HYPER</div></button>
+        </div>
+      </div>
+
+      <div class="panel g2">
+        <div class="pt">Quick Actions <span class="pt-accent">DEPLOY</span></div>
+        <div class="qa-grid">
+          <div class="qa" onclick="quickSend('Give me a 25-minute Pomodoro study plan for neural networks')">
+            <div class="qa-badge">50 MP</div><div class="qa-icon">⏱️</div>
+            <div><div class="qa-label">Pomodoro Strike</div><div class="qa-sub">25-MIN FOCUS BURST</div></div>
+            <div class="qa-cost">SKILL: TIME MASTERY</div>
+          </div>
+          <div class="qa" onclick="quickSend('Analyze my week and give me a detailed insight report')">
+            <div class="qa-badge">80 MP</div><div class="qa-icon">🔍</div>
+            <div><div class="qa-label">Intel Scan</div><div class="qa-sub">WEEKLY ANALYSIS</div></div>
+            <div class="qa-cost">SKILL: PERCEPTION</div>
+          </div>
+          <div class="qa" onclick="quickSend('What should I study tomorrow based on my current progress?')">
+            <div class="qa-badge">60 MP</div><div class="qa-icon">🗺️</div>
+            <div><div class="qa-label">Mission Planner</div><div class="qa-sub">AI SCHEDULE</div></div>
+            <div class="qa-cost">SKILL: STRATEGY</div>
+          </div>
+          <div class="qa" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')">
+            <div class="qa-badge">100 MP</div><div class="qa-icon">💥</div>
+            <div><div class="qa-label">Power Surge</div><div class="qa-sub">NEURAL BOOST</div></div>
+            <div class="qa-cost">SKILL: WILLPOWER</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Active Quests <span class="pt-accent">TODAY</span></div>
+        <div class="goal-item"><div class="goal-check done" onclick="toggleGoal(this)"></div><div class="goal-txt done">Complete ML feature extractor</div><div class="goal-cat">CODE</div></div>
+        <div class="goal-item"><div class="goal-check done" onclick="toggleGoal(this)"></div><div class="goal-txt done">Study Chapter 4 deep learning</div><div class="goal-cat">LEARN</div></div>
+        <div class="goal-item"><div class="goal-check" onclick="toggleGoal(this)"></div><div class="goal-txt">Add GITHUB_TOKEN to CF Worker</div><div class="goal-cat">OPS</div></div>
+        <div class="goal-item" style="border-bottom:none"><div class="goal-check" onclick="toggleGoal(this)"></div><div class="goal-txt">Log 30+ clean training events</div><div class="goal-cat">DATA</div></div>
+      </div>
+
+      <div class="panel g2">
+        <div class="pt">JARVIS Insights <span class="pt-accent">AI ANALYSIS</span></div>
+        <div class="insights">
+          <div class="insight"><div class="ins-icon">🧠</div><div><div class="ins-title">Peak Focus Window Detected</div><div class="ins-body">Your deep work sessions between 10AM–2PM show 34% higher output. Schedule complex ML tasks in this window.</div><span class="ins-tag">HIGH VALUE</span></div></div>
+          <div class="insight"><div class="ins-icon">⚡</div><div><div class="ins-title">Streak at Risk</div><div class="ins-body">You've coded 11 days straight. Missing today would reset your streak and lower AI score by 12 points.</div><span class="ins-tag tag-hi">CRITICAL</span></div></div>
+          <div class="insight"><div class="ins-icon">📈</div><div><div class="ins-title">ML Pipeline Ready for Real Data</div><div class="ins-body">Infrastructure 100% done. The model needs 30+ clean events for reliable predictions.</div><span class="ins-tag tag-med">ACTION NEEDED</span></div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="pt">Neural Memory <span class="pt-accent">LOG</span></div>
+        <div class="mem-item"><div class="mem-dot"></div><div><div class="mem-txt">Worker v2 live — 9 routes, Llama 3 + Whisper + LLaVA</div><div class="mem-time">2 DAYS AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot"></div><div><div class="mem-txt">ML pipeline complete — pull → clean → train → predict</div><div class="mem-time">3 DAYS AGO</div></div></div>
+        <div class="mem-item"><div class="mem-dot"></div><div><div class="mem-txt">AES-256 encryption module drafted</div><div class="mem-time">4 DAYS AGO</div></div></div>
+        <div class="mem-item" style="border-bottom:none"><div class="mem-dot"></div><div><div class="mem-txt">MLflow tracking on DagsHub configured</div><div class="mem-time">5 DAYS AGO</div></div></div>
+      </div>
+
+      <div class="panel g2">
+        <div class="pt">Mission Queue <span class="pt-accent">NEXT STEPS</span></div>
+        <div class="tlist">
+          <div class="titem"><div class="ttime urgent">URGENT</div><div class="tevent">Send 10+ clean messages to bot — mix energy levels, topics, goals</div></div>
+          <div class="titem"><div class="ttime urgent">URGENT</div><div class="tevent">Add GITHUB_TOKEN to Cloudflare Worker variables (workflow scope)</div></div>
+          <div class="titem"><div class="ttime warn">THIS WEEK</div><div class="tevent">Add /exercise /sleep /food /spend /job commands to worker</div></div>
+          <div class="titem"><div class="ttime warn">THIS WEEK</div><div class="tevent">Set up dev branch + wrangler.toml env.dev + separate KV</div></div>
+          <div class="titem"><div class="ttime warn">THIS WEEK</div><div class="tevent">CF Vectorize semantic memory + AES-256 data encryption</div></div>
+          <div class="titem" style="border-bottom:none"><div class="ttime">SEASON 2</div><div class="tevent">MLflow on DagsHub + Colab training + native APK + Calendar</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ DATA ═══ -->
+  <div class="view" id="view-data">
+    <div class="grid3">
+      <div class="panel g-full">
+        <div class="pt">Neural Waveform <span class="pt-accent">LIVE SIGNAL</span></div>
+        <canvas id="waveCanvas" height="80" style="width:100%"></canvas>
+      </div>
+      <div class="panel g2">
+        <div class="pt">Weekly Deep Work <span class="pt-accent">HOURS</span></div>
+        <div class="week-wrap"><canvas id="weekChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="pt">Time Split <span class="pt-accent">THIS WEEK</span></div>
+        <div style="max-width:160px;margin:0 auto"><canvas id="donutChart"></canvas></div>
+        <div class="clegend" style="margin-top:10px">
+          <div class="li"><div class="ldot" style="background:var(--nv)"></div><div class="lname">Coding</div><div class="lpct">42%</div></div>
+          <div class="li"><div class="ldot" style="background:rgba(118,185,0,.55)"></div><div class="lname">Learning</div><div class="lpct">28%</div></div>
+          <div class="li"><div class="ldot" style="background:rgba(118,185,0,.35)"></div><div class="lname">Research</div><div class="lpct">18%</div></div>
+          <div class="li"><div class="ldot" style="background:rgba(118,185,0,.2)"></div><div class="lname">Other</div><div class="lpct">12%</div></div>
+        </div>
+      </div>
+      <div class="panel g-full">
+        <div class="pt">Build Progress <span class="pt-accent">COMPLETION</span></div>
+        <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv">100%</span></div><div class="btrack"><div class="bfill" id="infra-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Data Ingestion</span><span class="mv">90%</span></div><div class="btrack"><div class="bfill" id="ingest-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv">85%</span></div><div class="btrack"><div class="bfill" id="ui-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>ML Pipeline</span><span class="mv dim">70%</span></div><div class="btrack"><div class="bfill dim" id="ml-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>AI Intelligence</span><span class="mv dim">50%</span></div><div class="btrack"><div class="bfill dim" id="ai-bar"></div></div></div>
+        <div class="mrow"><div class="ml"><span>Security</span><span class="mv dim">10%</span></div><div class="btrack"><div class="bfill dim" id="sec-bar"></div></div></div>
+        <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Mobile APK</span><span class="mv dim">20%</span></div><div class="btrack"><div class="bfill dim" id="apk-bar"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BRAIN ═══ -->
+  <div class="view" id="view-graph">
+    <div style="padding:16px">
+      <div class="pt">Neural Nexus <span class="pt-accent">SYSTEM BRAIN · INTERACTIVE</span></div>
+      <div class="graph-controls">
+        <button class="gc-btn on" onclick="setGraphMode('neural',this)">NEURAL</button>
+        <button class="gc-btn" onclick="setGraphMode('cluster',this)">CLUSTER</button>
+        <button class="gc-btn" onclick="setGraphMode('flow',this)">FLOW</button>
+        <button class="gc-btn" onclick="resetGraph()">RESET</button>
+      </div>
+      <canvas id="graphCanvas" style="width:100%;height:68vh;border:1px solid var(--border);display:block;cursor:crosshair;background:var(--surface)"></canvas>
+    </div>
+  </div>
+
+  <!-- ═══ SYSTEM ═══ -->
+  <div class="view" id="view-system">
+    <div class="grid3">
+      <div class="panel g2">
+        <div class="pt">System Architecture <span class="pt-accent">AETHER OS</span></div>
+        <div class="sys-grid">
+          <div class="sys-item"><div class="sys-key">FRONTEND</div><div class="sys-val">Cloudflare Pages</div><div class="sys-sub">site/index.html</div></div>
+          <div class="sys-item"><div class="sys-key">API LAYER</div><div class="sys-val">CF Worker</div><div class="sys-sub">learning-bot.talpadeavi0303</div></div>
+          <div class="sys-item"><div class="sys-key">AI MODEL</div><div class="sys-val">Claude Sonnet</div><div class="sys-sub">via Anthropic API</div></div>
+          <div class="sys-item"><div class="sys-key">ML MODEL</div><div class="sys-val">RandomForest</div><div class="sys-sub">productivity_model.pkl</div></div>
+          <div class="sys-item"><div class="sys-key">DATA INGESTION</div><div class="sys-val">Telegram Bot</div><div class="sys-sub">→ GitHub Actions pipeline</div></div>
+          <div class="sys-item"><div class="sys-key">DATA STORE</div><div class="sys-val">CSV / Parquet</div><div class="sys-sub">data/raw/events.csv</div></div>
+          <div class="sys-item"><div class="sys-key">PIPELINES</div><div class="sys-val">GitHub Actions</div><div class="sys-sub">ingest.yml, daily.yml</div></div>
+          <div class="sys-item"><div class="sys-key">DASHBOARD DATA</div><div class="sys-val">dashboard.json</div><div class="sys-sub">site/data/ — auto-generated</div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="pt">Pipeline Status</div>
+        <div class="pipeline">
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Worker v2 — 9 routes</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div><div class="pipe-sub">All free, zero cost</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">ML pipeline — 5 scripts</div><div class="pipe-sub">pull → clean → train → predict</div></div><div class="pipe-status ps-ok">DONE</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">GITHUB_TOKEN in Cloudflare</div><div class="pipe-sub">Add to enable auto ML trigger</div></div><div class="pipe-status ps-warn">NOW</div></div>
+          <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">Log 30+ clean events</div><div class="pipe-sub">Need for real ML predictions</div></div><div class="pipe-status ps-warn">NOW</div></div>
+          <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">AES-256 encryption + login</div><div class="pipe-sub">Data encryption + CF Access</div></div><div class="pipe-status ps-off">NEXT</div></div>
+        </div>
+      </div>
+      <div class="panel g-full">
+        <div class="pt">Data Flow</div>
+        <pre class="dflow" style="color:var(--text2)">Telegram Message  →  CF Worker Webhook  →  GitHub dispatch  →  nlp_parser.py  →  events.csv
+                                                    ↓
+                              feature_extractor.py  →  behavior_features.parquet
+                                                    ↓
+                              train_models.py  →  productivity_model.pkl
+                                                    ↓
+                              predict.py  →  dashboard.json  →  Frontend UI</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DOCS ═══ -->
+  <div class="view" id="view-docs">
+    <div class="doc-tabs">
+      <button class="ntab on" onclick="showDoc('plan',this)">MASTER PLAN</button>
+      <button class="ntab" onclick="showDoc('arch',this)">ARCHITECTURE</button>
+      <button class="ntab" onclick="showDoc('progress',this)">PROGRESS</button>
+    </div>
+    <div id="doc-plan" class="doc-frame on">
+      <div style="padding:16px">
+        <div class="panel-static">
+          <div class="pt">AETHER OS — Mission Documentation</div>
+          <p style="font-family:var(--font);font-size:14px;line-height:1.8;margin-bottom:14px;color:var(--text2)">Open the full plan pages for detailed architecture, security, ML pipeline, cost breakdown and roadmap.</p>
+          <div style="display:flex;flex-direction:column;gap:1px;background:var(--border);margin-bottom:20px">
+            <a href="/aether-plan.html" target="_blank" style="background:var(--surface);padding:12px 14px;color:var(--text2);text-decoration:none;font-family:var(--mono);font-size:9px;letter-spacing:2px;display:flex;justify-content:space-between;align-items:center;transition:background .2s" onmouseover="this.style.background='var(--nv4)'" onmouseout="this.style.background='var(--surface)'">MASTER PLAN — Architecture, Security, MLflow, Roadmap <span>↗</span></a>
+            <a href="/aether-architecture.html" target="_blank" style="background:var(--surface);padding:12px 14px;color:var(--text2);text-decoration:none;font-family:var(--mono);font-size:9px;letter-spacing:2px;display:flex;justify-content:space-between;align-items:center;transition:background .2s" onmouseover="this.style.background='var(--nv4)'" onmouseout="this.style.background='var(--surface)'">ARCHITECTURE — Full system map with all components <span>↗</span></a>
+            <a href="/aether-progress.html" target="_blank" style="background:var(--surface);padding:12px 14px;color:var(--text2);text-decoration:none;font-family:var(--mono);font-size:9px;letter-spacing:2px;display:flex;justify-content:space-between;align-items:center;transition:background .2s" onmouseover="this.style.background='var(--nv4)'" onmouseout="this.style.background='var(--surface)'">PROGRESS — Changes made, version history, completion % <span>↗</span></a>
+            <a href="/aether-vision.html" target="_blank" style="background:var(--surface);padding:12px 14px;color:var(--text2);text-decoration:none;font-family:var(--mono);font-size:9px;letter-spacing:2px;display:flex;justify-content:space-between;align-items:center;transition:background .2s" onmouseover="this.style.background='var(--nv4)'" onmouseout="this.style.background='var(--surface)'">VISION — Datasets, cost, prod/dev, full roadmap <span>↗</span></a>
+          </div>
+          <div class="pt">Status Tracker</div>
+          <div class="pipeline">
+            <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Worker v2 — 9 routes live</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">DONE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">CF AI — Llama 3 + Whisper + LLaVA</div></div><div class="pipe-status ps-ok">DONE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">ML pipeline — 5 scripts built</div><div class="pipe-sub">pull → clean → train → predict → push</div></div><div class="pipe-status ps-ok">DONE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">Dashboard live data + PWA</div></div><div class="pipe-status ps-ok">DONE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">✅</div><div><div class="pipe-name">12 bot commands + 4 daily briefings</div></div><div class="pipe-status ps-ok">DONE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">GITHUB_TOKEN in Cloudflare</div></div><div class="pipe-status ps-warn">NOW</div></div>
+            <div class="pipe-item"><div class="pipe-icon">⏳</div><div><div class="pipe-name">Log 30+ clean events</div></div><div class="pipe-status ps-warn">NOW</div></div>
+            <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Data encryption + password login</div></div><div class="pipe-status ps-off">NEXT</div></div>
+            <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">Health + finance commands</div><div class="pipe-sub">/exercise /sleep /food /spend</div></div><div class="pipe-status ps-off">NEXT</div></div>
+            <div class="pipe-item"><div class="pipe-icon">❌</div><div><div class="pipe-name">MLflow + Colab pipeline</div><div class="pipe-sub">DagsHub free experiment tracking</div></div><div class="pipe-status ps-off">MONTH 2</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="doc-arch" class="doc-frame">
+      <div style="padding:16px">
+        <div class="panel-static">
+          <div class="pt">Architecture</div>
+          <div class="pipeline">
+            <div class="pipe-item"><div class="pipe-icon">💬</div><div><div class="pipe-name">Text / Voice / Image / Check-in / GitHub</div></div><div class="pipe-status ps-ok">INPUT</div></div>
+            <div class="pipe-item"><div class="pipe-icon">⚙️</div><div><div class="pipe-name">Cloudflare Worker — 9 routes</div><div class="pipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="pipe-status ps-ok">BRAIN</div></div>
+            <div class="pipe-item"><div class="pipe-icon">🦙</div><div><div class="pipe-name">Llama 3 + Whisper + LLaVA</div></div><div class="pipe-status ps-ok">FREE AI</div></div>
+            <div class="pipe-item"><div class="pipe-icon">🗄</div><div><div class="pipe-name">Cloudflare KV</div><div class="pipe-sub">events · state · dashboard · goals</div></div><div class="pipe-status ps-ok">STORAGE</div></div>
+            <div class="pipe-item"><div class="pipe-icon">🔬</div><div><div class="pipe-name">ML Pipeline — GitHub Actions</div></div><div class="pipe-status ps-ok">NIGHTLY</div></div>
+            <div class="pipe-item"><div class="pipe-icon">📱</div><div><div class="pipe-name">Dashboard PWA + Telegram Bot</div></div><div class="pipe-status ps-ok">OUTPUT</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="doc-progress" class="doc-frame">
+      <div style="padding:16px">
+        <div class="panel-static">
+          <div class="pt">Progress Tracker</div>
+          <div class="mrow"><div class="ml"><span>Infrastructure</span><span class="mv">100%</span></div><div class="btrack"><div class="bfill" style="width:100%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>Data Ingestion</span><span class="mv">90%</span></div><div class="btrack"><div class="bfill" style="width:90%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>Dashboard UI</span><span class="mv">85%</span></div><div class="btrack"><div class="bfill" style="width:85%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>ML Pipeline</span><span class="mv dim">70%</span></div><div class="btrack"><div class="bfill dim" style="width:70%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>AI Intelligence</span><span class="mv dim">50%</span></div><div class="btrack"><div class="bfill dim" style="width:50%;transition:none"></div></div></div>
+          <div class="mrow"><div class="ml"><span>Security</span><span class="mv dim">10%</span></div><div class="btrack"><div class="bfill dim" style="width:10%;transition:none"></div></div></div>
+          <div class="mrow" style="margin-bottom:0"><div class="ml"><span>Mobile APK</span><span class="mv dim">20%</span></div><div class="btrack"><div class="bfill dim" style="width:20%;transition:none"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footline">
+    <span>JARVIS NEXUS</span><span class="sep">·</span>
+    <span>UNIVERSE-616</span><span class="sep">·</span>
+    <span>v3.0</span><span class="sep">·</span>
+    <span>CLOUDFLARE · ANTHROPIC · GITHUB</span>
+  </div>
+
+</div><!-- /app -->
+
+<!-- JARVIS CHAT PAGE -->
+<div id="chatPage">
+  <div id="arc-bg"><canvas id="arc-canvas"></canvas></div>
+  <div id="audio-bars"></div>
+  <div class="ch">
+    <div class="ch-left">
+      <div class="od"></div>
+      <div>
+        <div class="ct">J.A.R.V.I.S</div>
+        <div class="ct-sub">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <select id="aiEngine">
+        <option value="hybrid">HYBRID ENGINE</option>
+        <option value="ml">ML ENGINE</option>
+        <option value="worker">WORKER ONLY</option>
+      </select>
+      <button class="cc" onclick="closeChat()">✕ CLOSE</button>
+    </div>
+  </div>
+  <div id="chatMsgs">
+    <div class="msg ai"><div class="mlbl">J.A.R.V.I.S</div>Good day. I am online and operational. AETHER OS running — Worker v2, ML pipeline active, 12 bot commands live. How may I assist you today, sir?</div>
+  </div>
+  <div id="thinking" class="hidden">
+    <span style="font-family:var(--mono);font-size:9px;letter-spacing:3px">PROCESSING</span>
+    <div class="tdots"><span></span><span></span><span></span></div>
+  </div>
+  <div class="qchips">
+    <button class="chip" onclick="quickSend('What should I focus on right now?')">Focus now</button>
+    <button class="chip" onclick="quickSend('Give me my daily briefing')">Daily brief</button>
+    <button class="chip" onclick="quickSend('Start a 25min Pomodoro')">Pomodoro</button>
+    <button class="chip" onclick="quickSend('Analyze my productivity this week')">Analyze week</button>
+    <button class="chip" onclick="quickSend('What are my biggest bottlenecks?')">Bottlenecks</button>
+    <button class="chip" onclick="quickSend('Avengers assemble — give me a heroic motivation speech')">Avengers Mode</button>
+  </div>
+  <div class="cinput">
+    <input id="chatIn" placeholder="Speak to J.A.R.V.I.S..." autocomplete="off">
+    <button id="sendBtn" onclick="sendChat()">TRANSMIT</button>
+  </div>
+  <div id="jarvis-panel">
+    <div class="jp-line">REACTOR CORE <span id="jp-power">98.6%</span></div>
+    <div class="jp-line">SYSTEM LINK <span style="color:var(--nv)">STABLE</span></div>
+    <div class="jp-line">AI ENGINE <span id="jp-engine">HYBRID</span></div>
+    <div class="jp-line">UPTIME <span id="jp-uptime">00:00:00</span></div>
+  </div>
+</div>
+
+<!-- PASSWORD GATE -->
+<div id="pw-gate">
+  <div style="font-family:var(--mono);font-size:9px;letter-spacing:4px;color:var(--text3);margin-bottom:8px">SECURE ACCESS</div>
+  <h2>ENTER PASSKEY</h2>
+  <p>Neural data encrypted with AES-256.<br>Enter your passkey to decrypt.</p>
+  <input id="pw-input" type="password" placeholder="••••••••">
+  <div class="pw-btns">
+    <button onclick="checkPassword()" class="pw-btn">UNLOCK</button>
+    <button onclick="closeGate()" class="pw-btn cancel">CANCEL</button>
+  </div>
+  <div id="pw-error">ACCESS DENIED</div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════
+const WORKER_URL='https://learning-bot.talpadeavi0303.workers.dev';
+const D={
+  metrics:{energy:7.4,focus:82,mood:68,sleep:74,productivity:91},
+  activity:[{label:'Neural Networks Ch4',mins:47,tag:'LEARN'},{label:'ML Pipeline Build',mins:126,tag:'CODE'},{label:'CF Worker v2 Deploy',mins:38,tag:'OPS'}],
+  goals:{today:['complete ML extractor','study chapter 4','add github token','log 30 events']},
+  weekly:[4.2,5.8,6.1,3.9,7.0,6.8,6.2]
+};
+
+// Universe themes (functional only, minimal visual change)
+const UNIVERSES={
+  aether:{c:'#76b900',dark:'#000000',name:'UNIVERSE-616'},
+  iron:{c:'#76b900',dark:'#000000',name:'IRON MAN VERSE'},
+  anime:{c:'#76b900',dark:'#000000',name:'ANIME NEXUS'},
+  cyber:{c:'#76b900',dark:'#000000',name:'CYBERPUNK-7'}
+};
+function changeUniverse(id){
+  showAchievement('Universe Shifted',(UNIVERSES[id]||UNIVERSES.aether).name+' · +150 XP');
+}
+
+// ═══════════════════════════════════
+// CURSOR
+// ═══════════════════════════════════
+const curEl=document.getElementById('cur');
+const curDot=document.getElementById('cur-dot');
+const isTouch=()=>window.matchMedia('(hover:none)').matches||window.matchMedia('(pointer:coarse)').matches;
+let mx=innerWidth/2,my=innerHeight/2,cx=mx,cy=my;
+if(!isTouch()){
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    curDot.style.left=mx+'px';curDot.style.top=my+'px';
+  });
+  (function animCur(){
+    cx+=(mx-cx)*.12;cy+=(my-cy)*.12;
+    curEl.style.left=cx+'px';curEl.style.top=cy+'px';
+    requestAnimationFrame(animCur);
+  })();
+  document.querySelectorAll('button,a,.qa,.sc,.insight,.pipe-item,.mood-btn,.ntab,.chip,.goal-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>curEl.classList.add('hov'));
+    el.addEventListener('mouseleave',()=>curEl.classList.remove('hov'));
+  });
+}
+
+// ═══════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════
+const startTime=Date.now();
+function tick(){
+  const n=new Date();
+  document.getElementById('clk').textContent=n.toTimeString().slice(0,8);
+  document.getElementById('date').textContent=n.toISOString().slice(0,10).replace(/-/g,'–');
+  const up=Math.floor((Date.now()-startTime)/1000);
+  const h=String(Math.floor(up/3600)).padStart(2,'0');
+  const m=String(Math.floor(up%3600/60)).padStart(2,'0');
+  const s=String(up%60).padStart(2,'0');
+  const el=document.getElementById('jp-uptime');if(el)el.textContent=`${h}:${m}:${s}`;
+}
+tick();setInterval(tick,1000);
+
+// ═══════════════════════════════════
+// LOADER
+// ═══════════════════════════════════
+const bootMsgs=['Connecting to worker...','Loading ML pipeline...','Syncing KV store...','Calibrating JARVIS core...','System ready.'];
+let mi=0;
+const bmEl=document.getElementById('bootMsg');
+function bootAnim(){
+  if(mi<bootMsgs.length){bmEl.textContent=bootMsgs[mi++];setTimeout(bootAnim,420)}
+  else setTimeout(()=>{
+    document.getElementById('loader').classList.add('gone');
+    animateBars();initCharts();initWaveform();initGraphCanvas();
+    setTimeout(()=>showAchievement('System Boot Complete','+500 XP'),1000);
+  },300);
+}
+bootAnim();
+
+// ═══════════════════════════════════
+// ACHIEVEMENT
+// ═══════════════════════════════════
+let achT=null;
+function showAchievement(name,pts){
+  const el=document.getElementById('achievement');
+  document.getElementById('ach-name').textContent=name;
+  document.getElementById('ach-pts').textContent=pts;
+  el.classList.add('show');clearTimeout(achT);
+  achT=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+// ═══════════════════════════════════
+// COUNT-UP
+// ═══════════════════════════════════
+function countUp(id,target){
+  let v=0;const el=document.getElementById(id);
+  const t=setInterval(()=>{v=Math.min(v+Math.ceil(target/40),target);el.textContent=v;if(v>=target)clearInterval(t)},28);
+}
+setTimeout(()=>{countUp('wSessions',47);countUp('wGoals',8);countUp('wStreak',11);countUp('wScore',94)},700);
+let pv=0;const pEl=document.getElementById('powerNum');
+const pt=setInterval(()=>{pv=Math.min(pv+Math.ceil(9400/60),9400);pEl.textContent=pv.toLocaleString();if(pv>=9400)clearInterval(pt)},25);
+
+// ═══════════════════════════════════
+// BAR ANIMATION
+// ═══════════════════════════════════
+function animateBars(){
+  [['focusBar','82'],['moodBar','68'],['sleepBar','74'],['prodBar','91'],
+   ['infra-bar','100'],['ingest-bar','90'],['ui-bar','85'],['ml-bar','70'],
+   ['ai-bar','50'],['sec-bar','10'],['apk-bar','20']
+  ].forEach(([id,w])=>{const el=document.getElementById(id);if(el)setTimeout(()=>el.style.width=w+'%',200)});
+}
+
+// ═══════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════
+let chartsInit=false;
+function initCharts(){
+  if(chartsInit)return;chartsInit=true;
+  const wc=document.getElementById('weekChart');
+  if(wc)new Chart(wc,{type:'bar',data:{
+    labels:['MON','TUE','WED','THU','FRI','SAT','SUN'],
+    datasets:[{data:D.weekly,
+      backgroundColor:D.weekly.map(v=>v>6?'rgba(118,185,0,.7)':v>5?'rgba(118,185,0,.4)':'rgba(118,185,0,.18)'),
+      borderColor:'rgba(118,185,0,.5)',borderWidth:1,borderRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#111',titleColor:'#76b900',bodyColor:'#d4d4d4',borderColor:'rgba(118,185,0,.3)',borderWidth:1,callbacks:{label:c=>c.parsed.y+'h deep work'}}},
+      scales:{x:{ticks:{color:'rgba(212,212,212,.35)',font:{family:'IBM Plex Mono',size:8}},grid:{color:'rgba(255,255,255,.04)'}},
+              y:{ticks:{color:'rgba(212,212,212,.35)',font:{family:'IBM Plex Mono',size:8}},grid:{color:'rgba(255,255,255,.04)'},max:8}}}});
+  const dc=document.getElementById('donutChart');
+  if(dc)new Chart(dc,{type:'doughnut',data:{datasets:[{data:[42,28,18,12],
+    backgroundColor:['rgba(118,185,0,.65)','rgba(118,185,0,.45)','rgba(118,185,0,.28)','rgba(118,185,0,.14)'],
+    borderColor:['#76b900','rgba(118,185,0,.5)','rgba(118,185,0,.3)','rgba(118,185,0,.15)'],borderWidth:1}]},
+    options:{responsive:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#111',bodyColor:'#d4d4d4',borderColor:'rgba(118,185,0,.3)',borderWidth:1}}}});
+}
+
+// ═══════════════════════════════════
+// WAVEFORM
+// ═══════════════════════════════════
+function initWaveform(){
+  const c=document.getElementById('waveCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  let W=c.offsetWidth||800,H=80;
+  c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    [{color:'rgba(118,185,0,.7)',amp:12,freq:.04,speed:.05,phase:0},
+     {color:'rgba(118,185,0,.3)',amp:7,freq:.065,speed:.07,phase:2},
+     {color:'rgba(118,185,0,.15)',amp:5,freq:.09,speed:.04,phase:4}
+    ].forEach(w=>{
+      ctx.beginPath();
+      for(let x=0;x<W;x++){const y=H/2+Math.sin(x*w.freq+t*w.speed+w.phase)*w.amp+Math.sin(x*.02+t*.03)*4;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}
+      ctx.strokeStyle=w.color;ctx.lineWidth=1.5;ctx.stroke();
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ═══════════════════════════════════
+// GRAPH CANVAS
+// ═══════════════════════════════════
+let graphMode='neural',gCanvas,gCtx,gW,gH,gT=0,hovNode=null;
+const graphNodes=[
+  {id:0,x:.5,y:.5,label:'WORKER',col:'#76b900',r:22,type:'core'},
+  {id:1,x:.2,y:.22,label:'TELEGRAM',col:'rgba(118,185,0,.75)',r:15},
+  {id:2,x:.8,y:.22,label:'GITHUB',col:'rgba(118,185,0,.75)',r:15},
+  {id:3,x:.14,y:.6,label:'LLAMA 3',col:'rgba(118,185,0,.6)',r:17},
+  {id:4,x:.86,y:.6,label:'ML MODEL',col:'rgba(118,185,0,.65)',r:15},
+  {id:5,x:.5,y:.12,label:'WHISPER',col:'rgba(118,185,0,.5)',r:13},
+  {id:6,x:.3,y:.85,label:'KV STORE',col:'rgba(118,185,0,.55)',r:14},
+  {id:7,x:.7,y:.85,label:'DASHBOARD',col:'rgba(118,185,0,.7)',r:17},
+  {id:8,x:.5,y:.72,label:'LLaVA',col:'rgba(118,185,0,.45)',r:13},
+  {id:9,x:.1,y:.4,label:'BOT CMD',col:'rgba(118,185,0,.5)',r:11},
+  {id:10,x:.9,y:.4,label:'ACTIONS',col:'rgba(118,185,0,.6)',r:11},
+];
+const graphEdges=[[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],[0,8],[1,9],[2,10],[4,7],[3,6],[10,4],[6,7]];
+const gVelX=graphNodes.map(()=>(Math.random()-.5)*.15);
+const gVelY=graphNodes.map(()=>(Math.random()-.5)*.15);
+function initGraphCanvas(){
+  gCanvas=document.getElementById('graphCanvas');if(!gCanvas)return;
+  gCtx=gCanvas.getContext('2d');resizeGraph();
+  window.addEventListener('resize',resizeGraph);
+  gCanvas.addEventListener('mousemove',e=>{
+    const rect=gCanvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    hovNode=null;
+    graphNodes.forEach(n=>{const dx=n.x*gW-mx,dy=n.y*gH-my;if(Math.sqrt(dx*dx+dy*dy)<n.r+10)hovNode=n.id});
+  });
+  drawGraph();
+}
+function resizeGraph(){if(!gCanvas)return;gW=gCanvas.offsetWidth||gCanvas.width;gH=gCanvas.offsetHeight||gCanvas.height;gCanvas.width=gW*devicePixelRatio;gCanvas.height=gH*devicePixelRatio;gCtx.scale(devicePixelRatio,devicePixelRatio)}
+function drawGraph(){
+  if(!gCtx)return;gCtx.clearRect(0,0,gW,gH);gT+=.007;
+  if(graphMode==='neural'){graphNodes.forEach((n,i)=>{n.x+=gVelX[i]*.001;n.y+=gVelY[i]*.001;if(n.x<.06||n.x>.94)gVelX[i]*=-1;if(n.y<.06||n.y>.94)gVelY[i]*=-1})}
+  graphEdges.forEach(([a,b])=>{
+    const na=graphNodes[a],nb=graphNodes[b];
+    const ax=na.x*gW,ay=na.y*gH,bx=nb.x*gW,by=nb.y*gH;
+    gCtx.beginPath();gCtx.moveTo(ax,ay);gCtx.lineTo(bx,by);
+    gCtx.strokeStyle=`rgba(118,185,0,${hovNode===a||hovNode===b?.22:.08})`;
+    gCtx.lineWidth=hovNode===a||hovNode===b?1.5:.8;gCtx.stroke();
+    const tp=(gT*.7+a*.3+b*.2)%1;
+    const tx=ax+(bx-ax)*tp,ty=ay+(by-ay)*tp;
+    gCtx.beginPath();gCtx.arc(tx,ty,2,0,Math.PI*2);
+    gCtx.fillStyle='rgba(118,185,0,.6)';gCtx.fill();
+  });
+  graphNodes.forEach(n=>{
+    const x=n.x*gW,y=n.y*gH;
+    const r=n.r+(hovNode===n.id?6:0)+(n.type==='core'?Math.sin(gT*2)*2:0);
+    gCtx.beginPath();gCtx.arc(x,y,r,0,Math.PI*2);
+    gCtx.fillStyle='rgba(118,185,0,.06)';gCtx.strokeStyle=n.col;
+    gCtx.lineWidth=hovNode===n.id?2:1;gCtx.fill();gCtx.stroke();
+    if(n.type==='core'){
+      gCtx.save();gCtx.translate(x,y);gCtx.rotate(gT);
+      gCtx.beginPath();gCtx.arc(0,0,r*.7,0,Math.PI*2);
+      gCtx.strokeStyle='rgba(118,185,0,.2)';gCtx.lineWidth=1;gCtx.setLineDash([3,5]);gCtx.stroke();gCtx.setLineDash([]);
+      gCtx.restore();
+    }
+    gCtx.fillStyle=n.col;gCtx.font=`500 ${hovNode===n.id?9:8}px 'IBM Plex Mono'`;
+    gCtx.textAlign='center';gCtx.textBaseline='middle';gCtx.fillText(n.label,x,y);
+  });
+  requestAnimationFrame(drawGraph);
+}
+function setGraphMode(m,btn){
+  graphMode=m;document.querySelectorAll('.gc-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+}
+function resetGraph(){graphNodes.forEach((n,i)=>{n.x=[.5,.2,.8,.14,.86,.5,.3,.7,.5,.1,.9][i];n.y=[.5,.22,.22,.6,.6,.12,.85,.85,.72,.4,.4][i]})}
+
+// ═══════════════════════════════════
+// ARC REACTOR (JARVIS ORB)
+// ═══════════════════════════════════
+let arcCtx,arcSize,arcT=0,arcSpeaking=false,arcAudioLevel=0;
+function initArcReactor(){
+  const canvas=document.getElementById('arc-canvas');if(!canvas)return;
+  const size=Math.min(canvas.offsetWidth||innerWidth*.7,500);
+  canvas.width=size*devicePixelRatio;canvas.height=size*devicePixelRatio;
+  canvas.style.width=size+'px';canvas.style.height=size+'px';
+  arcCtx=canvas.getContext('2d');arcCtx.scale(devicePixelRatio,devicePixelRatio);
+  arcSize=size;drawArc();
+}
+function drawArc(){
+  if(!arcCtx)return;arcT+=.008;
+  const s=arcSize,cx=s/2,cy=s/2;
+  arcCtx.clearRect(0,0,s,s);
+  const pulse=Math.sin(arcT*2)*.5+.5;
+  const bm=arcSpeaking?1+arcAudioLevel*1.5:1;
+  const rings=[
+    {r:.44,lw:1,speed:1,a:(.12+pulse*.08)*bm,dash:[]},
+    {r:.38,lw:1.5,speed:-.8,a:(.18+pulse*.12)*bm,dash:[4,8]},
+    {r:.32,lw:1,speed:1.2,a:(.15+pulse*.1)*bm,dash:[]},
+    {r:.25,lw:2,speed:-1.5,a:(.22+pulse*.15)*bm,dash:[]},
+    {r:.17,lw:1.5,speed:.9,a:(.28+pulse*.2)*bm,dash:[3,5]},
+  ];
+  rings.forEach(ring=>{
+    const r=ring.r*s+(arcSpeaking?arcAudioLevel*ring.r*s*.2:0);
+    arcCtx.save();arcCtx.translate(cx,cy);arcCtx.rotate(arcT*ring.speed*(arcSpeaking?1.4:1));
+    arcCtx.beginPath();arcCtx.arc(0,0,r,0,Math.PI*2);
+    arcCtx.strokeStyle=`rgba(118,185,0,${ring.a})`;arcCtx.lineWidth=ring.lw;
+    arcCtx.setLineDash(ring.dash);arcCtx.stroke();arcCtx.setLineDash([]);arcCtx.restore();
+  });
+  const dotR=s*.022+(arcSpeaking?arcAudioLevel*s*.01:0);
+  const dotG=arcCtx.createRadialGradient(cx,cy,0,cx,cy,dotR*2.5);
+  dotG.addColorStop(0,'rgba(255,255,255,.9)');dotG.addColorStop(.4,`rgba(118,185,0,${.7*bm})`);dotG.addColorStop(1,'rgba(118,185,0,0)');
+  arcCtx.beginPath();arcCtx.arc(cx,cy,dotR*2.5,0,Math.PI*2);arcCtx.fillStyle=dotG;arcCtx.fill();
+  const tickCount=24;
+  for(let i=0;i<tickCount;i++){
+    const a=i*Math.PI*2/tickCount+arcT*.2;
+    const r1=s*.44,r2=s*.45+(i%4===0?3:1.5);
+    arcCtx.beginPath();arcCtx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);
+    arcCtx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);
+    arcCtx.strokeStyle=i%4===0?'rgba(118,185,0,.5)':'rgba(118,185,0,.15)';
+    arcCtx.lineWidth=i%4===0?1.5:.5;arcCtx.stroke();
+  }
+  if(arcSpeaking){
+    for(let w=0;w<2;w++){
+      const wR=s*(.50+w*.05)+Math.sin(arcT*8+w*2)*arcAudioLevel*s*.08;
+      arcCtx.beginPath();arcCtx.arc(cx,cy,wR,0,Math.PI*2);
+      arcCtx.strokeStyle=`rgba(118,185,0,${(.12-w*.04)*arcAudioLevel})`;
+      arcCtx.lineWidth=1.5;arcCtx.stroke();
+    }
+  }
+  requestAnimationFrame(drawArc);
+}
+
+// Audio bars
+const audioBarsEl=document.getElementById('audio-bars');
+for(let i=0;i<40;i++){const b=document.createElement('div');b.className='abar';b.style.minHeight='4px';audioBarsEl.appendChild(b)}
+const abars=audioBarsEl.querySelectorAll('.abar');
+function animAudioBars(speaking){
+  if(!speaking){abars.forEach(b=>{b.style.height='4px';audioBarsEl.style.opacity='0'});return}
+  audioBarsEl.style.opacity='1';
+  abars.forEach((b,i)=>{
+    const h=Math.abs(Math.sin(Date.now()*.003+i*.4+Math.random()*.2))*40+4;
+    b.style.height=h+'px';
+  });
+}
+let audioAnim=null;
+function startSpeaking(){
+  arcSpeaking=true;
+  function pulse(){arcAudioLevel=Math.abs(Math.sin(Date.now()*.004))*.8+.2;animAudioBars(true);audioAnim=requestAnimationFrame(pulse)}
+  pulse();
+}
+function stopSpeaking(){arcSpeaking=false;arcAudioLevel=0;animAudioBars(false);if(audioAnim)cancelAnimationFrame(audioAnim)}
+
+// ═══════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════
+function switchView(name,tab){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('#nav-bar .ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('view-'+name).classList.add('on');
+  tab.classList.add('on');
+  if(name==='data'){setTimeout(()=>{animateBars();initCharts();initWaveform()},50)}
+  if(name==='graph'){setTimeout(initGraphCanvas,50)}
+}
+function showDoc(name,tab){
+  document.querySelectorAll('.doc-frame').forEach(d=>d.classList.remove('on'));
+  document.getElementById('doc-'+name).classList.add('on');
+  tab.classList.add('on');
+  document.querySelectorAll('.doc-tabs .ntab').forEach(t=>{if(t!==tab)t.classList.remove('on')});
+}
+
+// ═══════════════════════════════════
+// INTERACTIVE
+// ═══════════════════════════════════
+function setMood(btn){
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  showAchievement('Mood Updated','+10 XP');
+}
+function toggleGoal(check){
+  check.classList.toggle('done');
+  const txt=check.nextElementSibling;if(txt)txt.classList.toggle('done');
+  if(check.classList.contains('done'))showAchievement('Quest Complete','+100 XP');
+}
+
+// ═══════════════════════════════════
+// PASSWORD
+// ═══════════════════════════════════
+function openGate(){document.getElementById('pw-gate').classList.add('show')}
+function closeGate(){document.getElementById('pw-gate').classList.remove('show')}
+function checkPassword(){
+  const v=document.getElementById('pw-input').value;
+  const err=document.getElementById('pw-error');
+  if(v==='aether2024'){closeGate()}
+  else{err.style.opacity='1';setTimeout(()=>err.style.opacity='0',2000)}
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('pw-input');
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword()});
+});
+
+// ═══════════════════════════════════
+// CHAT
+// ═══════════════════════════════════
+let chatOpen=false;
+function openChat(){
+  if(chatOpen)return;chatOpen=true;
+  document.getElementById('chatPage').classList.add('open');
+  document.getElementById('app').classList.add('shifted');
+  setTimeout(()=>{initArcReactor();document.getElementById('chatIn').focus()},100);
+}
+function closeChat(){
+  if(!chatOpen)return;chatOpen=false;stopSpeaking();
+  document.getElementById('chatPage').classList.remove('open');
+  document.getElementById('app').classList.remove('shifted');
+}
+function toggleChat(){chatOpen?closeChat():openChat()}
+function quickSend(t){openChat();setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat()},chatOpen?0:650)}
+
+const hist=[];
+async function sendChat(){
+  const inp=document.getElementById('chatIn');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';addMsg('user',txt);hist.push({role:'user',content:txt});
+  document.getElementById('thinking').classList.remove('hidden');
+  document.getElementById('sendBtn').disabled=true;
+  startSpeaking();
+  const engine=(document.getElementById('aiEngine')||{}).value||'hybrid';
+  const el=document.getElementById('jp-engine');if(el)el.textContent=engine.toUpperCase();
+  try{
+    const r=await fetch(WORKER_URL+'/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:txt,history:hist,metrics:D.metrics,activity:D.activity,goals:D.goals.today,engine})
+    });
+    const data=await r.json();
+    const reply=data.reply||data.error||'Neural pathway disrupted, sir.';
+    hist.push({role:'assistant',content:reply});
+    document.getElementById('thinking').classList.add('hidden');
+    document.getElementById('sendBtn').disabled=false;
+    typeMsg(reply);
+  }catch(err){
+    stopSpeaking();
+    document.getElementById('thinking').classList.add('hidden');
+    document.getElementById('sendBtn').disabled=false;
+    addMsg('ai','Worker offline. Connection disrupted.');
+  }
+}
+function addMsg(role,text){
+  const box=document.getElementById('chatMsgs');
+  const el=document.createElement('div');el.className='msg '+role;
+  el.innerHTML=`<div class="mlbl">${role==='user'?'YOU':'J.A.R.V.I.S'}</div>${text}`;
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
+}
+function typeMsg(text){
+  const box=document.getElementById('chatMsgs');
+  const el=document.createElement('div');el.className='msg ai';
+  const lb=document.createElement('div');lb.className='mlbl';lb.textContent='J.A.R.V.I.S';
+  const sp=document.createElement('span');
+  const cur2=document.createElement('span');cur2.textContent='▌';cur2.style.animation='blink .5s infinite';
+  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur2);
+  box.appendChild(el);let i=0;
+  function type(){
+    if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;arcAudioLevel=0.2+Math.random()*.5;setTimeout(type,12)}
+    else{cur2.remove();stopSpeaking();showAchievement('JARVIS Responded','+20 XP')}
+  }
+  type();
+}
+
+// ═══════════════════════════════════
+// WORKER HEALTH
+// ═══════════════════════════════════
+async function checkWorker(){
+  try{
+    const r=await fetch(WORKER_URL+'/health',{signal:AbortSignal.timeout(5000)});
+    if(r.ok){
+      const ws=document.getElementById('workerStatus');
+      ws.classList.add('ok');ws.innerHTML='<div class="sb-dot on"></div>API ONLINE';
+    }
+  }catch(e){
+    const ws=document.getElementById('workerStatus');
+    ws.className='';ws.innerHTML='<div class="sb-dot off"></div>OFFLINE';
+  }
+}
+setTimeout(checkWorker,2500);
+window.addEventListener('resize',()=>{if(chatOpen)initArcReactor()});
+</script>
+</body>
+</html>
