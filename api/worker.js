@@ -719,7 +719,7 @@ export default {
       }
       if (url.pathname === '/log-state'        && request.method === 'POST') return handleLogState(request, env);
       if (url.pathname === '/dashboard'        && request.method === 'GET')  return handleDashboard(request, env);
-      if (url.pathname === "/events") {return new Response("EVENT ROUTE HIT");}
+      if (url.pathname === '/events'           && request.method === 'GET')  return handleEvents(request, env);
       if (url.pathname === '/update-dashboard' && request.method === 'POST') return handleUpdateDashboard(request, env);
       if (url.pathname === '/reset-data'       && request.method === 'POST') return handleResetData(request, env);
       if (url.pathname === '/log-github'       && request.method === 'POST') return handleGitHubLog(request, env);
