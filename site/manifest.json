@@ -3,8 +3,8 @@
   "short_name": "AETHER",
   "description": "Personal AI Operating System — behavior tracking, flow state, productivity intelligence",
 
-  "start_url": "/site/index.html",
-  "scope": "/site/",
+  "start_url": "/",
+  "scope": "/",
 
   "display": "standalone",
   "orientation": "portrait",

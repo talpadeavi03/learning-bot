@@ -34,14 +34,22 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:19px;scroll-behavior:smooth;overflow-x:hidden}
-body{background:var(--bg);color:var(--text);font-family:var(--font);font-weight:500;min-height:100vh;overflow-x:hidden;cursor:none}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-weight:500;min-height:100vh;overflow-x:hidden}
 
-/* ─── CURSOR ─── */
-#cur{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);will-change:transform}
-#cur-dot{width:4px;height:4px;background:var(--nv);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);will-change:left,top}
-#cur-ring{width:24px;height:24px;border:1px solid rgba(118,185,0,.5);border-radius:50%;transition:width .15s,height .15s,border-color .15s}
-#cur.hov #cur-ring{width:32px;height:32px;border-color:var(--nv)}
-@media(hover:none),(pointer:coarse){#cur,#cur-dot{display:none!important}body{cursor:auto!important}}
+/* ─── CURSOR (disabled) ─── */
+#cur,#cur-dot{display:none!important}
+
+/* ─── DASHBOARD INPUT ─── */
+.dash-input-wrap{background:var(--surface);border:1px solid var(--border2);padding:14px;margin-top:0}
+.dash-input-row{display:flex;gap:6px}
+.dash-input{flex:1;background:var(--bg);border:1px solid var(--border);padding:10px 12px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s}
+.dash-input:focus{border-color:var(--nv2)}
+.dash-input-btn{background:var(--nv);color:#000;border:none;padding:10px 18px;font-family:var(--mono);font-size:9px;letter-spacing:2px;cursor:pointer;font-weight:700;transition:filter .2s}
+.dash-input-btn:hover{filter:brightness(1.15)}
+.dash-input-btn:disabled{opacity:.4;cursor:not-allowed}
+.dash-chips{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.dash-chip{background:var(--nv4);border:1px solid var(--border);padding:4px 10px;font-family:var(--mono);font-size:8px;letter-spacing:1px;color:var(--text3);cursor:pointer;transition:all .2s}
+.dash-chip:hover{background:var(--nv3);color:var(--nv);border-color:var(--border2)}
 
 /* ─── LOADER ─── */
 #loader{position:fixed;inset:0;background:var(--bg);z-index:9999;
@@ -645,13 +653,22 @@ pre.dflow{font-family:var(--mono);font-size:11px;line-height:2.2;
       </div>
 
       <div class="panel">
-        <div class="pt">Mood <span class="pt-accent">STATUS</span></div>
-        <div class="mood-row">
-          <button class="mood-btn sel" onclick="setMood(this)"><div class="mood-emoji">😤</div><div class="mood-label">FOCUSED</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😊</div><div class="mood-label">GOOD</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😐</div><div class="mood-label">NEUTRAL</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">😴</div><div class="mood-label">TIRED</div></button>
-          <button class="mood-btn" onclick="setMood(this)"><div class="mood-emoji">🔥</div><div class="mood-label">HYPER</div></button>
+        <div class="pt">Log Event <span class="pt-accent">DIRECT INPUT</span></div>
+        <div class="dash-input-wrap">
+          <div class="ci-label">TYPE ANYTHING · WILL BE LOGGED AS AN EVENT</div>
+          <div class="dash-input-row">
+            <input class="dash-input" id="dashEventInput" placeholder="e.g. Studying ML chapter 5, feeling focused..." autocomplete="off">
+            <button class="dash-input-btn" id="dashEventBtn" onclick="submitDashEvent()">LOG</button>
+          </div>
+          <div class="dash-chips" id="dashChips">
+            <span class="dash-chip" onclick="fillDashInput('Just started a coding session')">💻 Coding</span>
+            <span class="dash-chip" onclick="fillDashInput('Studying, taking notes')">📚 Study</span>
+            <span class="dash-chip" onclick="fillDashInput('Feeling tired, low energy today')">😴 Tired</span>
+            <span class="dash-chip" onclick="fillDashInput('Feeling great and motivated!')">🔥 Motivated</span>
+            <span class="dash-chip" onclick="fillDashInput('Stressed about deadlines')">😰 Stressed</span>
+            <span class="dash-chip" onclick="fillDashInput('Taking a break, relaxing')">☕ Break</span>
+          </div>
+          <div class="ci-success" id="dashEventSuccess">✓ EVENT LOGGED · DASHBOARD WILL UPDATE</div>
         </div>
       </div>
 
@@ -1134,6 +1151,37 @@ async function submitCheckin() {
   } catch(e) { btn.textContent = 'ERROR'; setTimeout(()=>btn.textContent='LOG STATE', 2000); }
 }
 
+// Dashboard event logger
+function fillDashInput(text) {
+  document.getElementById('dashEventInput').value = text;
+  document.getElementById('dashEventInput').focus();
+}
+async function submitDashEvent() {
+  const inp = document.getElementById('dashEventInput');
+  const btn = document.getElementById('dashEventBtn');
+  const txt = inp.value.trim(); if (!txt) return;
+  btn.disabled = true; btn.textContent = 'SENDING...';
+  try {
+    const res = await fetch(WORKER_URL+'/webhook', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({message:{text:txt,chat:{id:0},from:{first_name:'Dashboard'}}})
+    });
+    if (res.ok) {
+      inp.value = '';
+      document.getElementById('dashEventSuccess').style.display = 'block';
+      setTimeout(() => { document.getElementById('dashEventSuccess').style.display = 'none'; }, 3000);
+      btn.textContent = 'LOG'; btn.disabled = false;
+      loadDashboard();
+      showAchievement('Event Logged', '+15 XP');
+    } else throw new Error('Failed');
+  } catch(e) { btn.textContent = 'ERROR'; setTimeout(()=>{btn.textContent='LOG';btn.disabled=false;}, 2000); }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const dashInp = document.getElementById('dashEventInput');
+  if(dashInp) dashInp.addEventListener('keydown', e => { if(e.key==='Enter') submitDashEvent(); });
+});
+
 // Mobile Nav Helper
 function switchViewMob(name, btn) {
   document.querySelectorAll('.mn-btn').forEach(b => b.classList.remove('on'));
@@ -1145,19 +1193,7 @@ function switchViewMob(name, btn) {
 const UNIVERSES={ aether:{c:'#76b900',dark:'#000000',name:'UNIVERSE-616'} };
 function changeUniverse(id){ showAchievement('Universe Shifted', UNIVERSES.aether.name); }
 
-// Cursor
-const curEl=document.getElementById('cur'), curDot=document.getElementById('cur-dot');
-const isTouch=()=>window.matchMedia('(hover:none)').matches||window.matchMedia('(pointer:coarse)').matches;
-let mx=innerWidth/2, my=innerHeight/2, cx=mx, cy=my;
-if(!isTouch()){
-  document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; curDot.style.left=mx+'px'; curDot.style.top=my+'px'; });
-  (function animCur(){ cx+=(mx-cx)*.12; cy+=(my-cy)*.12; curEl.style.left=cx+'px'; curEl.style.top=cy+'px'; requestAnimationFrame(animCur); })();
-  setInterval(()=>{
-    document.querySelectorAll('button,a,.qa,.sc,.insight,.feed-item,.ci-btn,.heatmap-cell').forEach(el=>{
-      if(!el.dataset.hovFix){ el.dataset.hovFix="1"; el.addEventListener('mouseenter',()=>curEl.classList.add('hov')); el.addEventListener('mouseleave',()=>curEl.classList.remove('hov')); }
-    });
-  }, 1000);
-}
+// Cursor removed (was causing lag)
 
 // Clock
 const startTime=Date.now();
@@ -1375,7 +1411,7 @@ function switchView(name,tab){
   document.querySelectorAll('#nav-bar .ntab').forEach(t=>t.classList.remove('on'));
   document.getElementById('view-'+name).classList.add('on');
   tab.classList.add('on');
-  if(name==='data'){setTimeout(()=>{animateBars();initCharts();initWaveform()},50)}
+  if(name==='data'){setTimeout(()=>{initWaveform()},50)}
   if(name==='graph'){setTimeout(initGraphCanvas,50)}
 }
 function showDoc(name,tab){
@@ -1446,7 +1482,7 @@ async function sendChat(){
   try{
     const r=await fetch(WORKER_URL+'/chat',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:txt,history:hist,metrics:D.metrics,activity:D.activity,goals:D.goals.today,engine})
+      body:JSON.stringify({message:txt,history:hist,metrics:dashData?.metrics||{},activity:eventsData.slice(0,5),goals:dashData?.goals?.today||[],engine})
     });
     const data=await r.json();
     const reply=data.reply||data.error||'Neural pathway disrupted, sir.';
@@ -1477,9 +1513,20 @@ function typeMsg(text){
   box.appendChild(el);let i=0;
   function type(){
     if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;arcAudioLevel=0.2+Math.random()*.5;setTimeout(type,12)}
-    else{cur2.remove();stopSpeaking();showAchievement('JARVIS Responded','+20 XP')}
+    else{cur2.remove();stopSpeaking();showAchievement('JARVIS Responded','+20 XP');showFollowUpChips()}
   }
   type();
+}
+function showFollowUpChips(){
+  const box=document.getElementById('chatMsgs');
+  const chips=['What should I focus on next?','Analyze my energy patterns','Give me a study plan','How am I doing this week?','Suggest a break activity','Set a goal for today'];
+  const wrap=document.createElement('div');wrap.className='qchips';wrap.style.padding='8px 0';
+  chips.sort(()=>Math.random()-.5).slice(0,4).forEach(c=>{
+    const b=document.createElement('button');b.className='chip';b.textContent=c;
+    b.onclick=()=>{wrap.remove();document.getElementById('chatIn').value=c;sendChat();};
+    wrap.appendChild(b);
+  });
+  box.appendChild(wrap);box.scrollTop=box.scrollHeight;
 }
 
 // ═══════════════════════════════════
