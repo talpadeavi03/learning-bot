@@ -2,10 +2,10 @@ var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
 // api/worker.js
-async function sendJarvisAlert(env, chatId, type, message) {
+async function sendJarvisAlert(env, chatId, type, message2) {
   const lastAlert = await env.AETHER_KV.get("last_alert");
   if (lastAlert === type) return;
-  await sendTelegram(chatId, message, env);
+  await sendTelegram(chatId, message2, env);
   const sub = await env.AETHER_KV.get("push:sub", { type: "json" });
   if (sub) {
     try {
@@ -13,7 +13,7 @@ async function sendJarvisAlert(env, chatId, type, message) {
         method: "POST",
         body: JSON.stringify({
           title: "AETHER",
-          body: message
+          body: message2
         })
       });
     } catch (e) {
@@ -167,18 +167,13 @@ Keep logging \u2014 model trains after 30 days!`,
         flowStatus = "NOMINAL";
         advice = "Open the AETHER dashboard and log your state for a precise reading.";
       }
-      await sendTelegram(
-        chatId,
-        `\u{1F3AF} *Flow State*
-
-Status: *${flowStatus}*
-Energy: ${Math.round(recentEnergy * 100)}%
-Stress: ${Math.round(recentStress * 100)}%
-
-${advice}`,
-        env
-      );
-      return true;
+      if (!["flow_ready", "burnout", "low_focus"].includes(analysis.state)) {
+        return;
+      }
+      const canSend = await shouldSendUpdate(env, analysis.state);
+      const allowed = await checkCooldown(env, 300);
+      if (!canSend || !allowed) return;
+      await sendTelegram(chatId, message, env);
     }
     case "/goal": {
       if (!args) {
@@ -388,29 +383,6 @@ Keep logging daily to maintain your streak!`,
     case "/workout": {
       const actType = args.replace(/[0-9]+/g, "").trim() || "workout";
       const mins = parseInt(args.match(/[0-9]+/)?.[0]) || 30;
-      await saveEvent({
-        input_type: "health",
-        raw_text: text,
-        topic: "Exercise",
-        topics: ["health", "fitness"],
-        energy_signal: 0.75,
-        stress_signal: 0.1,
-        focus_signal: 0.6,
-        motivation_signal: 0.8,
-        dominant_emotion: "energized",
-        is_study_session: false,
-        is_goal_mention: false,
-        estimated_minutes: mins,
-        health_type: "exercise",
-        activity: actType,
-        duration_mins: mins,
-        summary: `Exercise: ${actType} ${mins}min`
-      }, env);
-      await sendTelegram(chatId, `\u{1F4AA} *Exercise logged*
-
-${actType} \u2014 ${mins} min
-Energy: +0.75 recorded \u{1F525}`, env);
-      return true;
     }
     case "/sleep": {
       const hrs = parseFloat(args) || 7;
@@ -742,33 +714,33 @@ var worker_default = {
         const userMessage = body.message?.toLowerCase() || "";
         const events = await getRecentEvents(env);
         const dashboard = await getDashboard(env);
-        const analysis = analyzeState(events, dashboard);
+        const analysis2 = analyzeState(events, dashboard);
         const patterns = analyzePatterns(events);
         const patternText = `
       \u{1F4CA} Pattern Insight:
       Best hour: ${patterns.bestHour}:00
       Trend: ${patterns.trend}
       `;
-        const energyText = energyLabel(analysis.energy);
+        const energyText = energyLabel(analysis2.energy);
         const trend = getTrend(events);
         let response = "";
         if (userMessage.includes("what should i do")) {
-          response = analysis.advice;
+          response = analysis2.advice;
         } else if (userMessage.includes("status")) {
           response = `\u{1F9E0} JARVIS STATUS
 
-      \u26A1 Energy: ${energyText} (${analysis.energy.toFixed(2)})
-      \u{1F525} State: ${analysis.state}
-      \u{1F624} Stress: ${analysis.stress.toFixed(2)}
-      \u{1F3AF} Focus: ${analysis.focus.toFixed(2)}
+      \u26A1 Energy: ${energyText} (${analysis2.energy.toFixed(2)})
+      \u{1F525} State: ${analysis2.state}
+      \u{1F624} Stress: ${analysis2.stress.toFixed(2)}
+      \u{1F3AF} Focus: ${analysis2.focus.toFixed(2)}
       \u{1F4C8} Trend: ${trend}`;
         } else {
-          response = analysis.advice;
+          response = analysis2.advice;
         }
         const finalResponse = `\u{1F9E0} JARVIS CORE
 
       \u26A1 Energy: ${energyText}
-      \u{1F525} State: ${analysis.state}
+      \u{1F525} State: ${analysis2.state}
       \u{1F4C8} Trend: ${trend}
 
       \u{1F4CC} Recommendation:
@@ -789,6 +761,12 @@ var worker_default = {
       if (url.pathname === "/log-github" && request.method === "POST") return handleGitHubLog(request, env);
       if (url.pathname === "/trigger" && request.method === "POST") return handleTrigger(request, env);
       if (url.pathname === "/health" && request.method === "GET") return handleHealth(request, env);
+      if (url.pathname === "/tabs" && request.method === "GET") {
+        const tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
+        return new Response(JSON.stringify({ tabs }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
       if (url.pathname === "/knowledge" && request.method === "GET") {
         const data = await env.AETHER_KV.get("knowledge_graph");
         if (!data) {
@@ -985,10 +963,14 @@ async function handleWebhook(request, env) {
   };
   await saveEvent(event, env);
   const events = await getRecentEvents(env);
+  const decision = floatingBrain(events);
+  if (decision) {
+    await updateTabs(env, decision);
+  }
   const dashboard = await getDashboard(env);
-  const analysis = analyzeState(events, dashboard);
+  const analysis2 = analyzeState(events, dashboard);
   const lastAlert = await env.AETHER_KV.get("last_alert");
-  if (analysis.state === "flow_ready") {
+  if (analysis2.state === "flow_ready") {
     await sendJarvisAlert(
       env,
       chatId,
@@ -996,7 +978,7 @@ async function handleWebhook(request, env) {
       "\u{1F680} FLOW DETECTED \u2014 Start deep work NOW"
     );
   }
-  if (analysis.state === "low_focus") {
+  if (analysis2.state === "low_focus") {
     await sendJarvisAlert(
       env,
       chatId,
@@ -1004,7 +986,7 @@ async function handleWebhook(request, env) {
       "\u26A0\uFE0F Focus dropping \u2014 take 5 min reset"
     );
   }
-  if (analysis.state === "burnout") {
+  if (analysis2.state === "burnout") {
     await sendJarvisAlert(
       env,
       chatId,
@@ -1012,19 +994,20 @@ async function handleWebhook(request, env) {
       "\u{1F9E0} Burnout detected \u2014 stop and rest"
     );
   }
-  if (analysis.state === "moderate") {
+  if (analysis2.state === "moderate") {
     await env.AETHER_KV.put("last_alert", "none");
   }
   const baseReply = buildTelegramReply(parsed, inputType, rawText);
   const jarvisReply = `
 
   \u{1F9E0} *JARVIS*
-  \u26A1 Energy: ${analysis.energy.toFixed(2)}
-  \u{1F525} State: ${analysis.state}
+  \u26A1 Energy: ${analysis2.energy.toFixed(2)}
+  \u{1F525} State: ${analysis2.state}
 
-  ${analysis.advice}
+  ${analysis2.advice}
   `;
   await sendTelegram(chatId, baseReply + jarvisReply, env);
+  return textResp("OK", 200);
 }
 __name(handleWebhook, "handleWebhook");
 async function handleLogState(request, env) {
@@ -1574,6 +1557,23 @@ async function getTelegramFileUrl(fileId, env) {
   return `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${data.result.file_path}`;
 }
 __name(getTelegramFileUrl, "getTelegramFileUrl");
+async function shouldSendUpdate(env, currentState) {
+  const lastState = await env.AETHER_KV.get("last_state");
+  if (lastState === currentState) return false;
+  await env.AETHER_KV.put("last_state", currentState);
+  return true;
+}
+__name(shouldSendUpdate, "shouldSendUpdate");
+async function checkCooldown(env, seconds = 300) {
+  const lastTime = await env.AETHER_KV.get("last_sent_time");
+  const now = Date.now();
+  if (lastTime && now - Number(lastTime) < seconds * 1e3) {
+    return false;
+  }
+  await env.AETHER_KV.put("last_sent_time", now.toString());
+  return true;
+}
+__name(checkCooldown, "checkCooldown");
 async function sendTelegram(chatId, text, env) {
   try {
     await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
@@ -1904,6 +1904,35 @@ async function refreshDashboardFromState(stateVector, env) {
   }
 }
 __name(refreshDashboardFromState, "refreshDashboardFromState");
+function floatingBrain(events) {
+  const latest = events[events.length - 1] || {};
+  if (latest.energy_signal > 0.7 && latest.focus_signal > 0.7) {
+    return { type: "flow", title: "Deep Work", priority: 1 };
+  }
+  if (latest.focus_signal < 0.4) {
+    return { type: "distraction", title: "Refocus", priority: 2 };
+  }
+  return null;
+}
+__name(floatingBrain, "floatingBrain");
+async function updateTabs(env, newTab) {
+  let tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
+  const exists = tabs.find((t) => t.type === newTab.type);
+  if (exists) return tabs;
+  tabs.push({
+    ...newTab,
+    created_at: (/* @__PURE__ */ new Date()).toISOString()
+  });
+  tabs.sort((a, b) => a.priority - b.priority);
+  tabs = tabs.filter((t) => {
+    const age = Date.now() - new Date(t.created_at).getTime();
+    return age < 2 * 60 * 60 * 1e3;
+  });
+  tabs = tabs.slice(0, 5);
+  await env.AETHER_KV.put("tabs:active", JSON.stringify(tabs));
+  return tabs;
+}
+__name(updateTabs, "updateTabs");
 function defaultDashboard() {
   return {
     metrics: { focus: 0, learning: 0, productivity: 0, mood: 0, last_updated: null },

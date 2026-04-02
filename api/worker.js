@@ -720,6 +720,12 @@ export default {
       if (url.pathname === '/log-github' && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger' && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health' && request.method === 'GET') return handleHealth(request, env);
+      if (url.pathname === '/tabs' && request.method === 'GET') {
+        const tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
+        return new Response(JSON.stringify({ tabs }), {
+          headers: { "Content-Type": "application/json", 'Access-Control-Allow-Origin': '*' }
+        });
+      }
       if (url.pathname === '/knowledge' && request.method === 'GET') {
         const data = await env.AETHER_KV.get("knowledge_graph");
 
@@ -987,6 +993,12 @@ async function handleWebhook(request, env) {
 
   // 🔥 JARVIS INTELLIGENCE
   const events = await getRecentEvents(env);
+
+  const decision = floatingBrain(events);
+  if (decision) {
+    await updateTabs(env, decision);
+  }
+
   const dashboard = await getDashboard(env);
   const analysis = analyzeState(events, dashboard);
 
@@ -1042,6 +1054,8 @@ async function handleWebhook(request, env) {
 
   // send combined response
   await sendTelegram(chatId, baseReply + jarvisReply, env);
+
+  return textResp('OK', 200);
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -2165,6 +2179,55 @@ async function refreshDashboardFromState(stateVector, env) {
   } catch (e) {
     console.warn('[AETHER] refreshDashboard failed:', e.message);
   }
+}
+
+// ═════════════════════════════════════════════════════════════════
+// FLOATING BRAIN (COGNITIVE UI)
+// ═════════════════════════════════════════════════════════════════
+
+function floatingBrain(events) {
+  const latest = events[events.length - 1] || {};
+
+  // 🔥 Flow detected
+  if (latest.energy_signal > 0.7 && latest.focus_signal > 0.7) {
+    return { type: "flow", title: "Deep Work", priority: 1 };
+  }
+
+  // ⚠️ Distraction
+  if (latest.focus_signal < 0.4) {
+    return { type: "distraction", title: "Refocus", priority: 2 };
+  }
+
+  return null;
+}
+
+async function updateTabs(env, newTab) {
+  let tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
+
+  // ❌ prevent duplicates
+  const exists = tabs.find(t => t.type === newTab.type);
+  if (exists) return tabs;
+
+  tabs.push({
+    ...newTab,
+    created_at: new Date().toISOString()
+  });
+
+  // 👇 PRIORITY SORT
+  tabs.sort((a, b) => a.priority - b.priority);
+
+  // 👇 ADD TAB EXPIRY (2 hours)
+  tabs = tabs.filter(t => {
+    const age = Date.now() - new Date(t.created_at).getTime();
+    return age < 2 * 60 * 60 * 1000; // 2 hours
+  });
+
+  // 👇 LIMIT TABS
+  tabs = tabs.slice(0, 5);
+
+  await env.AETHER_KV.put("tabs:active", JSON.stringify(tabs));
+
+  return tabs;
 }
 
 function defaultDashboard() {
