@@ -193,13 +193,17 @@ async function handleCommand(text, chatId, env) {
         advice = 'Open the AETHER dashboard and log your state for a precise reading.';
       }
 
-      await sendTelegram(chatId,
-        `🎯 *Flow State*\n\n` +
-        `Status: *${flowStatus}*\n` +
-        `Energy: ${Math.round(recentEnergy * 100)}%\n` +
-        `Stress: ${Math.round(recentStress * 100)}%\n\n` +
-        `${advice}`, env);
-      return true;
+      // 🎯 only important states
+if (!["flow_ready", "burnout", "low_focus"].includes(analysis.state)) {
+  return;
+}
+
+const canSend = await shouldSendUpdate(env, analysis.state);
+const allowed = await checkCooldown(env, 300);
+
+if (!canSend || !allowed) return;
+
+await sendTelegram(chatId, message, env);
     }
 
     case '/goal': {
@@ -1693,6 +1697,29 @@ async function getTelegramFileUrl(fileId, env) {
   const data = await resp.json();
   if (!data.ok) throw new Error('Telegram getFile failed: ' + JSON.stringify(data));
   return `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${data.result.file_path}`;
+}
+
+// 🔽 ADD HERE (helper section)
+
+async function shouldSendUpdate(env, currentState) {
+  const lastState = await env.AETHER_KV.get("last_state");
+
+  if (lastState === currentState) return false;
+
+  await env.AETHER_KV.put("last_state", currentState);
+  return true;
+}
+
+async function checkCooldown(env, seconds = 300) {
+  const lastTime = await env.AETHER_KV.get("last_sent_time");
+  const now = Date.now();
+
+  if (lastTime && now - Number(lastTime) < seconds * 1000) {
+    return false;
+  }
+
+  await env.AETHER_KV.put("last_sent_time", now.toString());
+  return true;
 }
 
 async function sendTelegram(chatId, text, env) {
