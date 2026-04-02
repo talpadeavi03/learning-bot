@@ -23,30 +23,21 @@ OUTPUT = "data/processed/events_clean.csv"
 # ------------------------------------------------
 
 def is_gibberish(text):
-
-    if not isinstance(text, str):
-        return True
-
+    if not isinstance(text, str): return True
     text = text.strip()
+    if len(text) < 3: return True
 
-    if len(text) < 3:
-        return True
+    # ── ENCRYPTED BLOB DETECTION ──────────────────────────────────
+    # Encrypted data looks like gibberish but should be preserved.
+    if len(text) > 20 and ("==" in text or (len(text) > 40 and " " not in text)):
+        return False 
 
     # repeated characters
-    if len(set(text)) < 4 and len(text) > 10:
-        return True
-
+    if len(set(text)) < 4 and len(text) > 10: return True
     # foreign noise
-    non_ascii = sum(1 for c in text if ord(c) > 127)
-
-    if non_ascii / max(len(text), 1) > 0.4:
-        return True
-
+    if sum(1 for c in text if ord(c) > 127) / max(len(text), 1) > 0.4: return True
     # single short word
-    words = text.split()
-
-    if len(words) == 1 and len(text) < 5:
-        return True
+    if len(text.split()) == 1 and len(text) < 5: return True
 
     return False
 

@@ -2102,6 +2102,10 @@ async function saveEvent(event, env) {
       eventToStore.raw_text  = await encryptText(eventToStore.raw_text, env);
       eventToStore.encrypted = true;
     }
+    if (eventToStore.summary && eventToStore.summary.length > 3) {
+      eventToStore.summary = await encryptText(eventToStore.summary, env);
+      eventToStore.encrypted = true;
+    }
 
     events.unshift(eventToStore);
     if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
