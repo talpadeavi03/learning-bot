@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<title>Avi Talpade — AETHER OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#ffffff;
+  --sb:#f7f6f3;
+  --text:#37352f;
+  --text2:#787774;
+  --text3:rgba(55,53,47,.4);
+  --border:rgba(55,53,47,.09);
+  --hover:rgba(55,53,47,.06);
+  --sel:rgba(55,53,47,.10);
+  --green:#2d9f3d;
+  --green-bg:#edf3ec;
+  --green-dim:rgba(45,159,61,.12);
+  --yellow:#cb912f;
+  --yellow-bg:#fdf3dc;
+  --red:#d44c47;
+  --red-bg:#fbe8e8;
+  --blue:#2383e2;
+  --blue-bg:#e8f2fe;
+  --sbw:240px;
+  --font:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;overflow-x:hidden}
+
+/* ─── LOADER ─── */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  transition:opacity .5s}
+#loader.gone{opacity:0;pointer-events:none}
+.ld-logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+.ld-logo .em{font-size:26px}
+.ld-sub{font-size:12px;color:var(--text2)}
+.ld-bar{width:200px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
+.ld-fill{height:100%;background:var(--green);width:0;animation:lfill 2.8s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes lfill{to{width:100%}}
+.ld-msg{font-size:11px;color:var(--text2);min-height:16px}
+
+/* ─── SIDEBAR ─── */
+#sb{width:var(--sbw);background:var(--sb);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;
+  overflow-y:auto;transition:transform .2s;flex-shrink:0}
+.sb-ws{padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;
+  border-radius:4px;margin:4px 8px;transition:background .1s}
+.sb-ws:hover{background:var(--hover)}
+.sb-ws-ic{width:26px;height:26px;background:linear-gradient(135deg,#2d9f3d,#1d7530);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sb-ws-nm{font-size:13.5px;font-weight:700;color:var(--text);flex:1}
+.sb-ws-dot{font-size:11px;color:var(--text2)}
+.sb-div{height:1px;background:var(--border);margin:6px 12px}
+.sb-lbl{font-size:10.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:6px 20px 2px}
+.sbi{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 20px;
+  cursor:pointer;border-radius:4px;margin:1px 8px;font-size:13.5px;color:var(--text);
+  transition:background .1s;user-select:none}
+.sbi:hover{background:var(--hover)}
+.sbi.act{background:var(--sel);font-weight:600}
+.sbi-ic{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sb-btm{padding:8px;margin-top:auto;border-top:1px solid var(--border)}
+.sb-jarvis{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;
+  background:transparent;border:1px solid var(--border);border-radius:7px;cursor:pointer;
+  font-family:var(--font);font-size:13px;color:var(--text);transition:all .15s}
+.sb-jarvis:hover{background:var(--hover);border-color:rgba(55,53,47,.2)}
+.jdot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* ─── MAIN ─── */
+#main{margin-left:var(--sbw);flex:1;min-height:100vh;display:flex;flex-direction:column}
+
+/* ─── TOPBAR ─── */
+#topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;padding:0 24px;height:44px;flex-shrink:0}
+.breadcrumb{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2)}
+.breadcrumb .sep{color:var(--text3)}
+.breadcrumb .cur{color:var(--text);font-weight:600}
+.tbfill{flex:1}
+#workerStatus{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text2)}
+.wsdot{width:6px;height:6px;border-radius:50%;background:rgba(55,53,47,.2)}
+.wsdot.on{background:var(--green)}
+#tbclk{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tb-btn{font-size:12px;font-weight:500;padding:4px 10px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;color:var(--text2);cursor:pointer;transition:all .1s;font-family:var(--font)}
+.tb-btn:hover{background:var(--hover);color:var(--text)}
+.tb-btn.pri{background:var(--text);color:var(--bg);border-color:var(--text)}
+.tb-btn.pri:hover{opacity:.82}
+#uni-select{font-family:var(--font);font-size:11.5px;border:1px solid var(--border);
+  background:transparent;padding:3px 7px;border-radius:5px;color:var(--text2);cursor:pointer;outline:none}
+
+/* ─── PAGE COVER ─── */
+.pg-cover{height:200px;flex-shrink:0;position:relative;overflow:hidden;
+  background:linear-gradient(125deg,#e8f5e9 0%,#c8e6c9 35%,#a5d6a7 65%,#81c784 100%)}
+.pg-cover::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 70% 80% at 20% 50%,rgba(255,255,255,.4) 0%,transparent 60%)}
+.pg-cover::after{content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/%3E%3C/svg%3E");
+  background-size:256px;mix-blend-mode:overlay}
+
+/* ─── PAGE HEADER ─── */
+.pg-head{padding:0 80px;margin-top:-32px;position:relative;z-index:1}
+.pg-icon{font-size:60px;line-height:1;margin-bottom:6px}
+.pg-title{font-size:38px;font-weight:800;color:var(--text);line-height:1.1;margin-bottom:3px}
+.pg-sub{font-size:14px;color:var(--text2);margin-bottom:20px;font-weight:400}
+
+/* ─── PAGE PROPERTIES ─── */
+.pg-props{padding:6px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:28px}
+.prop-row{display:flex;align-items:center;min-height:30px;border-radius:4px;transition:background .1s}
+.prop-row:hover{background:var(--hover)}
+.prop-k{font-size:13px;color:var(--text2);width:160px;flex-shrink:0;display:flex;align-items:center;gap:6px;padding:3px 8px}
+.prop-v{font-size:13px;color:var(--text);padding:3px 8px;flex:1}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.tg{background:var(--green-bg);color:var(--green)}
+.ty{background:var(--yellow-bg);color:var(--yellow)}
+.tr{background:var(--red-bg);color:var(--red)}
+.tb{background:var(--blue-bg);color:var(--blue)}
+.tgr{background:rgba(55,53,47,.06);color:var(--text2)}
+
+/* ─── CONTENT ─── */
+.pg-content{padding:0 80px 80px}
+.view{display:none}
+.view.on{display:block;animation:fsld .22s ease}
+@keyframes fsld{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ─── NOTION HEADINGS ─── */
+.nh1{font-size:26px;font-weight:700;margin:28px 0 8px}
+.nh2{font-size:18px;font-weight:700;margin:22px 0 4px}
+.nh3{font-size:14px;font-weight:600;margin:14px 0 4px}
+.ndiv{height:1px;background:var(--border);margin:14px 0}
+
+/* ─── CALLOUT ─── */
+.callout{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:5px;margin:8px 0}
+.cg{background:var(--green-bg)}.cy{background:var(--yellow-bg)}.cr{background:var(--red-bg)}.cb{background:var(--blue-bg)}.cgr{background:rgba(55,53,47,.04)}
+.c-ic{font-size:17px;flex-shrink:0;margin-top:1px}
+.c-ttl{font-size:13.5px;font-weight:700;margin-bottom:3px}
+.c-bod{font-size:13px;color:var(--text2);line-height:1.65}
+.c-tag{font-size:11px;font-weight:700;margin-top:5px;display:inline-block}
+.cg .c-tag{color:var(--green)}.cy .c-tag{color:var(--yellow)}.cr .c-tag{color:var(--red)}.cb .c-tag{color:var(--blue)}
+
+/* ─── STAT ROW ─── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:7px;overflow:hidden;margin:12px 0}
+.sc{background:var(--bg);padding:16px}
+.sc-n{font-size:28px;font-weight:800;color:var(--text);line-height:1}
+.sc-l{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.sc-s{font-size:11px;color:var(--green);font-weight:600;margin-top:3px}
+
+/* ─── PROGRESS ─── */
+.npr{margin:9px 0}
+.nprh{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.nprl{font-size:13px;color:var(--text)}
+.nprv{font-size:12px;color:var(--text2);font-weight:500}
+.nprt{height:6px;background:rgba(55,53,47,.07);border-radius:3px;overflow:hidden}
+.nprf{height:100%;border-radius:3px;width:0;transition:width 1.5s cubic-bezier(.4,0,.2,1);background:var(--green)}
+.nprf.dim{background:rgba(45,159,61,.35)}
+
+/* ─── TABLE ─── */
+.ntbl{width:100%;border-collapse:collapse;margin:10px 0}
+.ntbl th{text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;padding:8px 12px;border-bottom:1px solid var(--border)}
+.ntbl td{padding:9px 12px;font-size:13px;color:var(--text);border-bottom:1px solid var(--border)}
+.ntbl tr:last-child td{border-bottom:none}
+.ntbl tr:hover td{background:var(--hover)}
+
+/* ─── CHECKLIST ─── */
+.ncheck-item{display:flex;align-items:center;gap:10px;padding:6px 5px;border-radius:4px;transition:background .1s}
+.ncheck-item:hover{background:var(--hover)}
+.nchk{width:16px;height:16px;border:1.5px solid rgba(55,53,47,.3);border-radius:3px;cursor:pointer;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+.nchk.done{background:var(--green);border-color:var(--green);color:#fff}
+.ncht{font-size:13.5px;color:var(--text);flex:1}
+.ncht.done{text-decoration:line-through;color:var(--text2)}
+
+/* ─── TIMELINE ─── */
+.ntl-item{display:flex;gap:12px;align-items:flex-start;padding:7px 5px;border-radius:4px;transition:background .1s}
+.ntl-item:hover{background:var(--hover)}
+.ntl-dot{width:7px;height:7px;border-radius:50%;background:var(--green);margin-top:6px;flex-shrink:0}
+.ntl-txt{font-size:13.5px;color:var(--text);line-height:1.45}
+.ntl-time{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* ─── PIPELINE ─── */
+.npipe-item{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:4px;transition:background .1s}
+.npipe-item:hover{background:var(--hover)}
+.npipe-ic{font-size:16px;flex-shrink:0}
+.npipe-nm{font-size:13.5px;font-weight:600;color:var(--text)}
+.npipe-sub{font-size:11px;color:var(--text2)}
+.npfill{flex:1}
+
+/* ─── QUICK ACTIONS ─── */
+.qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.qa{padding:14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;
+  transition:all .15s;display:flex;flex-direction:column;gap:4px}
+.qa:hover{background:var(--hover);border-color:rgba(55,53,47,.2);box-shadow:0 2px 10px rgba(55,53,47,.07)}
+.qa-ic{font-size:18px;margin-bottom:4px}
+.qa-ttl{font-size:13.5px;font-weight:700}
+.qa-sub{font-size:12px;color:var(--text2)}
+.qa-tag{font-size:11px;color:var(--green);font-weight:600}
+
+/* ─── MOOD ─── */
+.mood-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+.mood-btn{padding:10px 6px;border-radius:7px;border:1.5px solid var(--border);background:transparent;
+  cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
+.mood-btn:hover{background:var(--hover);border-color:rgba(55,53,47,.18)}
+.mood-btn.sel{border-color:var(--green);background:var(--green-bg)}
+.mood-em{font-size:20px;line-height:1}
+.mood-lbl{font-size:10px;color:var(--text2);margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.02em}
+.mood-btn.sel .mood-lbl{color:var(--green)}
+
+/* ─── SYS GRID ─── */
+.sys-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}
+.sysc{padding:12px 14px;border-radius:7px;border:1px solid var(--border)}
+.sysc-k{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.sysc-v{font-size:14px;font-weight:700;color:var(--text)}
+.sysc-s{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* ─── TWO/THREE COL ─── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+
+/* ─── CHARTS ─── */
+.week-wrap{height:180px;position:relative}
+.clegend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.li{display:flex;align-items:center;gap:6px}
+.ldot{width:8px;height:8px;border-radius:50%}
+.lname{font-size:12px;color:var(--text2)}
+.lpct{font-size:12px;color:var(--text3)}
+
+/* ─── GRAPH ─── */
+.gc-row{display:flex;gap:6px;margin-bottom:14px}
+.gcb{padding:6px 13px;border-radius:6px;border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-size:12px;color:var(--text2);font-family:var(--font);font-weight:500;transition:all .1s}
+.gcb:hover{background:var(--hover);color:var(--text)}
+.gcb.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+
+/* ─── PAGE TABS (main nav) ─── */
+#page-tabs{position:sticky;top:44px;z-index:49;background:rgba(255,255,255,.95);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 80px;gap:0;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none}
+#page-tabs::-webkit-scrollbar{display:none}
+.ptab{display:flex;align-items:center;gap:6px;padding:10px 16px;font-size:13px;font-weight:500;
+  color:var(--text2);cursor:pointer;border:none;background:transparent;
+  border-bottom:2px solid transparent;margin-bottom:-1px;font-family:var(--font);
+  transition:color .12s;white-space:nowrap;flex-shrink:0}
+.ptab:hover{color:var(--text);background:var(--hover)}
+.ptab.on{color:var(--text);border-bottom-color:var(--text);font-weight:600}
+.ptab-ic{font-size:14px}
+
+/* ─── DOCS ─── */
+.dtabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px}
+.dtab{padding:8px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;
+  border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;
+  font-family:var(--font);transition:color .1s}
+.dtab:hover{color:var(--text)}
+.dtab.on{color:var(--text);border-bottom-color:var(--text);font-weight:600}
+.doc-frame{display:none}.doc-frame.on{display:block}
+.nlink{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;
+  border-radius:6px;border:1px solid var(--border);color:var(--text);text-decoration:none;
+  font-size:13.5px;margin:4px 0;transition:all .1s}
+.nlink:hover{background:var(--hover);border-color:rgba(55,53,47,.18)}
+.nlink-arr{color:var(--text2)}
+.dflow{font-family:'Courier New',monospace;font-size:12px;color:var(--text2);line-height:1.85;
+  background:rgba(55,53,47,.03);padding:16px;border-radius:7px;overflow-x:auto}
+
+/* ─── ACHIEVEMENT ─── */
+#achievement{position:fixed;top:58px;right:16px;z-index:9000;background:var(--bg);
+  border:1px solid var(--border);border-radius:9px;padding:12px 16px;min-width:240px;
+  box-shadow:0 8px 28px rgba(55,53,47,.12);transform:translateX(130%);
+  transition:transform .35s cubic-bezier(.2,1,.3,1)}
+#achievement.show{transform:translateX(0)}
+.ach-top{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.ach-name{font-size:14px;font-weight:700;color:var(--text)}
+.ach-pts{font-size:12px;color:var(--green);font-weight:700;margin-top:2px}
+
+/* ─── CHAT PAGE ─── */
+#chatPage{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .4s cubic-bezier(.77,0,.18,1)}
+#chatPage.open{transform:translateX(0)}
+#arc-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.06}
+#arc-bg canvas{width:min(500px,80vw);height:min(500px,80vw)}
+.ch-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;
+  border-bottom:1px solid var(--border);background:var(--sb);flex-shrink:0}
+.ch-left{display:flex;align-items:center;gap:10px}
+.ch-ttl{font-size:15px;font-weight:700;color:var(--text)}
+.ch-sub{font-size:11px;color:var(--text2)}
+.ch-cls{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-size:12px;color:var(--text2);font-family:var(--font);transition:all .1s}
+.ch-cls:hover{background:var(--hover)}
+#chatMsgs{flex:1;overflow-y:auto;padding:24px clamp(16px,8vw,160px);display:flex;flex-direction:column;gap:12px;position:relative;z-index:5}
+.msg{max-width:min(640px,85%);padding:12px 16px;border-radius:9px;font-size:14px;line-height:1.65}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.msg{animation:msgIn .25s ease}
+.msg.user{align-self:flex-end;background:var(--text);color:var(--bg)}
+.msg.ai{align-self:flex-start;background:var(--sb);color:var(--text);border:1px solid var(--border)}
+.mlbl{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.msg.user .mlbl{color:rgba(255,255,255,.55)}
+#thinking{display:flex;align-items:center;gap:10px;padding:8px clamp(16px,8vw,160px);
+  font-size:12px;color:var(--text2);flex-shrink:0}
+#thinking.hidden{display:none}
+.tdots{display:flex;gap:4px}
+.tdots span{width:5px;height:5px;background:var(--green);border-radius:50%;animation:tdot 1s infinite}
+.tdots span:nth-child(2){animation-delay:.15s}.tdots span:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,80%,100%{opacity:.2;transform:scale(1)}40%{opacity:1;transform:scale(1.3)}}
+.qchips{display:flex;flex-wrap:wrap;gap:6px;padding:10px clamp(16px,8vw,160px);border-top:1px solid var(--border)}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-size:12px;color:var(--text2);font-family:var(--font);transition:all .1s}
+.chip:hover{background:var(--hover);color:var(--text)}
+.cinput{display:flex;gap:8px;padding:12px clamp(16px,8vw,160px);border-top:1px solid var(--border);background:var(--sb)}
+#chatIn{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);padding:9px 13px;font-family:var(--font);font-size:14px;
+  outline:none;transition:border-color .1s;min-width:0}
+#chatIn:focus{border-color:rgba(55,53,47,.35)}
+#chatIn::placeholder{color:var(--text3)}
+#sendBtn{background:var(--text);color:var(--bg);border:none;border-radius:7px;padding:9px 18px;
+  cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;transition:opacity .1s}
+#sendBtn:hover{opacity:.82}
+#sendBtn:disabled{opacity:.3;cursor:not-allowed}
+#aiEngine{background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--text2);
+  padding:5px 8px;font-size:12px;cursor:pointer;font-family:var(--font);outline:none}
+#audio-bars{display:flex;align-items:flex-end;gap:2px;height:44px;
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);opacity:0;z-index:4}
+.abar{width:3px;background:var(--green);min-height:4px;border-radius:2px;transition:height .05s}
+#jarvis-panel{position:absolute;bottom:120px;right:clamp(16px,8vw,160px);z-index:6;
+  background:var(--sb);border:1px solid var(--border);border-radius:9px;padding:10px 14px;
+  font-size:11px;min-width:160px;pointer-events:none}
+.jp-line{display:flex;justify-content:space-between;gap:12px;color:var(--text2);margin-bottom:3px}
+.jp-line span{color:var(--text);font-weight:700}
+
+/* ─── PASSWORD ─── */
+#pw-gate{position:fixed;inset:0;z-index:9000;background:rgba(255,255,255,.97);
+  display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:20px}
+#pw-gate.show{display:flex}
+#pw-gate h2{font-size:20px;font-weight:700;color:var(--text)}
+#pw-gate p{font-size:13px;color:var(--text2);text-align:center;line-height:1.65}
+#pw-input{background:var(--bg);border:1.5px solid var(--border);border-radius:7px;color:var(--text);
+  font-family:var(--font);font-size:18px;padding:10px 16px;width:min(260px,85vw);
+  outline:none;text-align:center;letter-spacing:4px;margin-top:4px}
+#pw-input:focus{border-color:var(--green)}
+.pw-btns{display:flex;gap:8px;margin-top:4px}
+.pw-btn{font-family:var(--font);font-size:13px;font-weight:700;padding:8px 22px;border-radius:7px;
+  background:var(--text);border:none;color:var(--bg);cursor:pointer}
+.pw-btn.cancel{background:transparent;border:1px solid var(--border);color:var(--text)}
+#pw-error{font-size:12px;color:var(--red);opacity:0}
+
+/* ─── FOOTER ─── */
+.pg-footer{padding:24px 80px;border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
+.pg-footer .sep{color:var(--border)}
+
+/* ─── BIG STAT ─── */
+.big-num-box{text-align:center;padding:20px;border-radius:8px;background:rgba(55,53,47,.03);border:1px solid var(--border);margin-bottom:14px}
+.big-num{font-size:54px;font-weight:800;color:var(--text);line-height:1}
+.big-lbl{font-size:11.5px;color:var(--text2);margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+/* ─── POWER CHIP ─── */
+.power-chip{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
+  border-radius:9px;background:var(--green-bg);border:1px solid rgba(45,159,61,.25);margin-bottom:16px}
+.pwr-left .pwr-label{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em}
+.pwr-left .pwr-name{font-size:18px;font-weight:800;color:var(--text);margin:2px 0}
+.pwr-left .pwr-sub{font-size:12px;color:var(--text2)}
+.pwr-num{font-size:44px;font-weight:800;color:var(--text);line-height:1}
+.pwr-unit{font-size:11px;color:var(--text2);text-align:right}
+
+/* ─── SCROLLBAR ─── */
+*{scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+*::-webkit-scrollbar{width:6px}
+*::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  #sb{transform:translateX(-100%)}
+  #main{margin-left:0}
+  .pg-head,.pg-content,.pg-footer{padding-left:20px;padding-right:20px}
+  .two-col,.three-col{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .qa-grid{grid-template-columns:1fr}
+  .sys-grid{grid-template-columns:1fr}
+  .mood-row{grid-template-columns:repeat(5,1fr)}
+}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-logo"><span class="em">⚡</span> AETHER OS</div>
+  <div class="ld-sub">Avi Talpade · JARVIS NEXUS</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+  <div class="ld-msg" id="bootMsg">Initializing...</div>
+</div>
+
+<!-- ACHIEVEMENT -->
+<div id="achievement">
+  <div class="ach-top">🏆 Achievement Unlocked</div>
+  <div class="ach-name" id="ach-name"></div>
+  <div class="ach-pts" id="ach-pts"></div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <div class="sb-ws" onclick="openGate()">
+    <div class="sb-ws-ic">⚡</div>
+    <div class="sb-ws-nm">Avi Talpade</div>
+    <div class="sb-ws-dot">···</div>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sbi act" id="nav-home" onclick="switchView('home',this)">
+    <span class="sbi-ic">🏠</span> Home
+  </div>
+  <div class="sbi" id="nav-data" onclick="switchView('data',this)">
+    <span class="sbi-ic">📊</span> Data
+  </div>
+  <div class="sbi" id="nav-graph" onclick="switchView('graph',this)">
+    <span class="sbi-ic">🧠</span> Brain
+  </div>
+  <div class="sbi" id="nav-system" onclick="switchView('system',this)">
+    <span class="sbi-ic">⚙️</span> System
+  </div>
+  <div class="sbi" id="nav-docs" onclick="switchView('docs',this)">
+    <span class="sbi-ic">📄</span> Docs
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-lbl">Quick Sends</div>
+  <div class="sbi" onclick="quickSend('What should I focus on right now?')">
+    <span class="sbi-ic">⏱️</span> Focus Now
+  </div>
+  <div class="sbi" onclick="quickSend('Give me my daily briefing')">
+    <span class="sbi-ic">📋</span> Daily Brief
+  </div>
+  <div class="sbi" onclick="quickSend('Analyze my productivity this week')">
+    <span class="sbi-ic">🔍</span> Analyze Week
+  </div>
+  <div class="sbi" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')">
+    <span class="sbi-ic">💥</span> Power Surge
+  </div>
+  <div class="sb-btm">
+    <button class="sb-jarvis" onclick="openChat()">
+      <div class="jdot"></div>
+      Open J.A.R.V.I.S
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="breadcrumb">
+      <span>Avi Talpade</span>
+      <span class="sep">›</span>
+      <span class="cur" id="tb-bc">Home</span>
+    </div>
+    <div class="tbfill"></div>
+    <div id="workerStatus">
+      <div class="wsdot" id="wsdot"></div>
+      <span id="wstext">Connecting...</span>
+    </div>
+    <span style="width:14px"></span>
+    <div id="tbclk">--:--:--</div>
+    <span style="width:10px"></span>
+    <select id="uni-select" onchange="changeUniverse(this.value)">
+      <option value="aether">Universe 616</option>
+      <option value="iron">Iron Man</option>
+      <option value="anime">Anime Nexus</option>
+      <option value="cyber">Cyberpunk 7</option>
+    </select>
+    <span style="width:8px"></span>
+    <button class="tb-btn pri" onclick="openChat()">⚡ JARVIS</button>
+  </div>
+
+  <!-- PAGE TABS -->
+  <div id="page-tabs">
+    <button class="ptab on" id="ptab-home" onclick="switchView('home',this)"><span class="ptab-ic">🏠</span> Home</button>
+    <button class="ptab" id="ptab-data" onclick="switchView('data',this)"><span class="ptab-ic">📊</span> Data</button>
+    <button class="ptab" id="ptab-graph" onclick="switchView('graph',this)"><span class="ptab-ic">🧠</span> Brain</button>
+    <button class="ptab" id="ptab-system" onclick="switchView('system',this)"><span class="ptab-ic">⚙️</span> System</button>
+    <button class="ptab" id="ptab-docs" onclick="switchView('docs',this)"><span class="ptab-ic">📄</span> Docs</button>
+  </div>
+
+   <!-- COVER -->
+  <div class="pg-cover"></div>
+
+  <!-- PAGE HEADER -->
+  <div class="pg-head">
+    <div class="pg-icon">⚡</div>
+    <div class="pg-title">Avi Talpade</div>
+    <div class="pg-sub">AETHER OS · JARVIS NEXUS · Universe-616</div>
+    <div class="pg-props">
+      <div class="prop-row">
+        <div class="prop-k">🔋 Power Level</div>
+        <div class="prop-v"><strong id="powerNum">0</strong> <span style="color:var(--text2)">XP</span></div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">📅 Status</div>
+        <div class="prop-v"><span class="tag tg">🟢 Active</span></div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">🔥 Streak</div>
+        <div class="prop-v"><span id="wStreak">—</span> days</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">🎯 AI Score</div>
+        <div class="prop-v"><span id="wScore">—</span> / 100 &nbsp;<span class="tag tg">PEAK ZONE</span></div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">⏰ Sessions</div>
+        <div class="prop-v"><span id="wSessions">—</span> total</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">🏆 Quests Done</div>
+        <div class="prop-v"><span id="wGoals">—</span> completed</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">🕐 Date</div>
+        <div class="prop-v" id="date">—</div>
+      </div>
+      <div class="prop-row">
+        <div class="prop-k">🌐 API Status</div>
+        <div class="prop-v" id="wsInline"><span class="tag tgr">Connecting...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="pg-content">
+
+    <!-- ══ HOME ══ -->
+    <div class="view on" id="view-home">
+
+      <div class="callout cb" style="margin-bottom:20px">
+        <div class="c-ic">⚡</div>
+        <div>
+          <div class="c-ttl">Good day, sir. AETHER OS is fully operational.</div>
+          <div class="c-bod">Worker v2 live · ML pipeline active · 12 bot commands ready. Your power index is at <strong>7.4 / 10</strong> — peak zone.</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="nh2">⚡ Energy Core</div>
+          <div class="ndiv"></div>
+          <div class="big-num-box">
+            <div class="big-num" id="energyNum">7.4</div>
+            <div class="big-lbl">Power Index / 10</div>
+          </div>
+          <div class="npr"><div class="nprh"><span class="nprl">Focus</span><span class="nprv" id="focusPct">82%</span></div><div class="nprt"><div class="nprf" id="focusBar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Mood</span><span class="nprv" id="moodPct">68%</span></div><div class="nprt"><div class="nprf dim" id="moodBar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Sleep</span><span class="nprv" id="sleepPct">74%</span></div><div class="nprt"><div class="nprf dim" id="sleepBar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Productivity</span><span class="nprv" id="prodPct">91%</span></div><div class="nprt"><div class="nprf" id="prodBar"></div></div></div>
+
+          <div class="ndiv"></div>
+          <div class="nh3">😶 Today's Mood</div>
+          <div class="mood-row">
+            <button class="mood-btn sel" onclick="setMood(this)"><div class="mood-em">😤</div><div class="mood-lbl">Focused</div></button>
+            <button class="mood-btn" onclick="setMood(this)"><div class="mood-em">😊</div><div class="mood-lbl">Good</div></button>
+            <button class="mood-btn" onclick="setMood(this)"><div class="mood-em">😐</div><div class="mood-lbl">Neutral</div></button>
+            <button class="mood-btn" onclick="setMood(this)"><div class="mood-em">😴</div><div class="mood-lbl">Tired</div></button>
+            <button class="mood-btn" onclick="setMood(this)"><div class="mood-em">🔥</div><div class="mood-lbl">Hyper</div></button>
+          </div>
+        </div>
+
+        <div>
+          <div class="nh2">📋 Recent Missions</div>
+          <div class="ndiv"></div>
+          <table class="ntbl">
+            <thead><tr><th>Mission</th><th>Type</th><th>Time</th></tr></thead>
+            <tbody>
+              <tr><td>Neural Networks — Chapter 4</td><td><span class="tag tb">LEARN</span></td><td>47 min</td></tr>
+              <tr><td>ML Pipeline Build</td><td><span class="tag tg">CODE</span></td><td>2.1h</td></tr>
+              <tr><td>Cloudflare Worker v2 Deploy</td><td><span class="tag tgr">OPS</span></td><td>38 min</td></tr>
+              <tr><td>Feature Extraction Script</td><td><span class="tag tg">CODE</span></td><td>1.3h</td></tr>
+              <tr><td>AI Insight Review</td><td><span class="tag tgr">ANALYSIS</span></td><td>22 min</td></tr>
+            </tbody>
+          </table>
+
+          <div class="nh3" style="margin-top:20px">☑️ Active Quests</div>
+          <div class="ndiv"></div>
+          <div class="ncheck-item"><div class="nchk done" onclick="toggleGoal(this)">✓</div><div class="ncht done">Complete ML feature extractor</div><span class="tag tg" style="font-size:11px">CODE</span></div>
+          <div class="ncheck-item"><div class="nchk done" onclick="toggleGoal(this)">✓</div><div class="ncht done">Study Chapter 4 deep learning</div><span class="tag tb" style="font-size:11px">LEARN</span></div>
+          <div class="ncheck-item"><div class="nchk" onclick="toggleGoal(this)"></div><div class="ncht">Add GITHUB_TOKEN to CF Worker</div><span class="tag ty" style="font-size:11px">OPS</span></div>
+          <div class="ncheck-item"><div class="nchk" onclick="toggleGoal(this)"></div><div class="ncht">Log 30+ clean training events</div><span class="tag tgr" style="font-size:11px">DATA</span></div>
+        </div>
+      </div>
+
+      <div class="nh2" style="margin-top:28px">📊 Character Stats — Today</div>
+      <div class="ndiv"></div>
+      <div class="stat-row">
+        <div class="sc"><div class="sc-n">6.2h</div><div class="sc-l">Deep Work</div><div class="sc-s">+0.8h vs avg ↑</div></div>
+        <div class="sc"><div class="sc-n">12</div><div class="sc-l">Tasks Done</div><div class="sc-s">87% complete</div></div>
+        <div class="sc"><div class="sc-n">4</div><div class="sc-l">GH Commits</div><div class="sc-s">main + dev</div></div>
+        <div class="sc"><div class="sc-n">94</div><div class="sc-l">AI Score</div><div class="sc-s">Peak Zone</div></div>
+      </div>
+
+      <div class="two-col" style="margin-top:28px">
+        <div>
+          <div class="nh2">🎯 Mission Queue</div>
+          <div class="ndiv"></div>
+          <div class="npipe-item"><div class="npipe-ic">🔴</div><div><div class="npipe-nm">Send 10+ clean messages to bot</div><div class="npipe-sub">Mix energy levels, topics, goals</div></div><div class="npfill"></div><span class="tag tr">URGENT</span></div>
+          <div class="npipe-item"><div class="npipe-ic">🔴</div><div><div class="npipe-nm">Add GITHUB_TOKEN to Cloudflare</div><div class="npipe-sub">Worker variables — workflow scope</div></div><div class="npfill"></div><span class="tag tr">URGENT</span></div>
+          <div class="npipe-item"><div class="npipe-ic">🟡</div><div><div class="npipe-nm">Add /exercise /sleep /food /spend</div><div class="npipe-sub">Commands to CF Worker</div></div><div class="npfill"></div><span class="tag ty">THIS WEEK</span></div>
+          <div class="npipe-item"><div class="npipe-ic">🟡</div><div><div class="npipe-nm">Set up dev branch + wrangler.toml</div><div class="npipe-sub">Separate KV for dev environment</div></div><div class="npfill"></div><span class="tag ty">THIS WEEK</span></div>
+          <div class="npipe-item"><div class="npipe-ic">🟡</div><div><div class="npipe-nm">CF Vectorize + AES-256 encryption</div><div class="npipe-sub">Semantic memory + data security</div></div><div class="npfill"></div><span class="tag ty">THIS WEEK</span></div>
+          <div class="npipe-item"><div class="npipe-ic">⚪</div><div><div class="npipe-nm">MLflow + Colab + APK + Calendar</div></div><div class="npfill"></div><span class="tag tgr">SEASON 2</span></div>
+
+          <div class="nh2" style="margin-top:22px">⚡ Quick Actions</div>
+          <div class="ndiv"></div>
+          <div class="qa-grid">
+            <div class="qa" onclick="quickSend('Give me a 25-minute Pomodoro study plan for neural networks')">
+              <div class="qa-ic">⏱️</div>
+              <div class="qa-ttl">Pomodoro Strike</div>
+              <div class="qa-sub">25-min focus burst</div>
+              <div class="qa-tag">50 MP · TIME MASTERY</div>
+            </div>
+            <div class="qa" onclick="quickSend('Analyze my week and give me a detailed insight report')">
+              <div class="qa-ic">🔍</div>
+              <div class="qa-ttl">Intel Scan</div>
+              <div class="qa-sub">Weekly analysis</div>
+              <div class="qa-tag">80 MP · PERCEPTION</div>
+            </div>
+            <div class="qa" onclick="quickSend('What should I study tomorrow based on my current progress?')">
+              <div class="qa-ic">🗺️</div>
+              <div class="qa-ttl">Mission Planner</div>
+              <div class="qa-sub">AI schedule builder</div>
+              <div class="qa-tag">60 MP · STRATEGY</div>
+            </div>
+            <div class="qa" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')">
+              <div class="qa-ic">💥</div>
+              <div class="qa-ttl">Power Surge</div>
+              <div class="qa-sub">Neural boost</div>
+              <div class="qa-tag">100 MP · WILLPOWER</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="nh2">🧠 JARVIS Insights</div>
+          <div class="ndiv"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="callout cg">
+              <div class="c-ic">🧠</div>
+              <div>
+                <div class="c-ttl">Peak Focus Window Detected</div>
+                <div class="c-bod">Your deep work sessions between 10AM–2PM show 34% higher output. Schedule complex ML tasks in this window.</div>
+                <div class="c-tag">HIGH VALUE</div>
+              </div>
+            </div>
+            <div class="callout cr">
+              <div class="c-ic">⚡</div>
+              <div>
+                <div class="c-ttl">Streak at Risk</div>
+                <div class="c-bod">You've coded 11 days straight. Missing today would reset your streak and lower AI score by 12 points.</div>
+                <div class="c-tag">CRITICAL</div>
+              </div>
+            </div>
+            <div class="callout cy">
+              <div class="c-ic">📈</div>
+              <div>
+                <div class="c-ttl">ML Pipeline Ready for Real Data</div>
+                <div class="c-bod">Infrastructure 100% done. The model needs 30+ clean events for reliable predictions.</div>
+                <div class="c-tag">ACTION NEEDED</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="nh2" style="margin-top:22px">🧬 Neural Memory Log</div>
+          <div class="ndiv"></div>
+          <div class="ntl-item"><div class="ntl-dot"></div><div><div class="ntl-txt">Worker v2 live — 9 routes, Llama 3 + Whisper + LLaVA</div><div class="ntl-time">2 days ago</div></div></div>
+          <div class="ntl-item"><div class="ntl-dot"></div><div><div class="ntl-txt">ML pipeline complete — pull → clean → train → predict</div><div class="ntl-time">3 days ago</div></div></div>
+          <div class="ntl-item"><div class="ntl-dot"></div><div><div class="ntl-txt">AES-256 encryption module drafted</div><div class="ntl-time">4 days ago</div></div></div>
+          <div class="ntl-item"><div class="ntl-dot"></div><div><div class="ntl-txt">MLflow tracking on DagsHub configured</div><div class="ntl-time">5 days ago</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DATA ══ -->
+    <div class="view" id="view-data">
+      <div class="nh2">📡 Neural Waveform — Live Signal</div>
+      <div class="ndiv"></div>
+      <canvas id="waveCanvas" height="80" style="width:100%;border-radius:7px;background:rgba(55,53,47,.02);border:1px solid var(--border);margin-bottom:24px"></canvas>
+
+      <div class="two-col" style="margin-bottom:24px">
+        <div>
+          <div class="nh2">📅 Weekly Deep Work (hours)</div>
+          <div class="ndiv"></div>
+          <div class="week-wrap"><canvas id="weekChart"></canvas></div>
+        </div>
+        <div>
+          <div class="nh2">🥧 Time Split — This Week</div>
+          <div class="ndiv"></div>
+          <div style="max-width:180px;margin:0 auto"><canvas id="donutChart"></canvas></div>
+          <div class="clegend" style="margin-top:14px;justify-content:center">
+            <div class="li"><div class="ldot" style="background:rgba(45,159,61,.75)"></div><div class="lname">Coding</div><div class="lpct">42%</div></div>
+            <div class="li"><div class="ldot" style="background:rgba(45,159,61,.48)"></div><div class="lname">Learning</div><div class="lpct">28%</div></div>
+            <div class="li"><div class="ldot" style="background:rgba(45,159,61,.27)"></div><div class="lname">Research</div><div class="lpct">18%</div></div>
+            <div class="li"><div class="ldot" style="background:rgba(45,159,61,.13)"></div><div class="lname">Other</div><div class="lpct">12%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nh2">🚀 Build Progress</div>
+      <div class="ndiv"></div>
+      <div class="two-col">
+        <div>
+          <div class="npr"><div class="nprh"><span class="nprl">Infrastructure</span><span class="nprv">100%</span></div><div class="nprt"><div class="nprf" id="infra-bar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Data Ingestion</span><span class="nprv">90%</span></div><div class="nprt"><div class="nprf" id="ingest-bar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Dashboard UI</span><span class="nprv">85%</span></div><div class="nprt"><div class="nprf" id="ui-bar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">ML Pipeline</span><span class="nprv">70%</span></div><div class="nprt"><div class="nprf dim" id="ml-bar"></div></div></div>
+        </div>
+        <div>
+          <div class="npr"><div class="nprh"><span class="nprl">AI Intelligence</span><span class="nprv">50%</span></div><div class="nprt"><div class="nprf dim" id="ai-bar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Security</span><span class="nprv">10%</span></div><div class="nprt"><div class="nprf dim" id="sec-bar"></div></div></div>
+          <div class="npr"><div class="nprh"><span class="nprl">Mobile APK</span><span class="nprv">20%</span></div><div class="nprt"><div class="nprf dim" id="apk-bar"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BRAIN ══ -->
+    <div class="view" id="view-graph">
+      <div class="nh2">🧠 Neural Nexus — Interactive Brain Map</div>
+      <div class="ndiv"></div>
+      <div class="gc-row">
+        <button class="gcb on" onclick="setGraphMode('neural',this)">Neural</button>
+        <button class="gcb" onclick="setGraphMode('cluster',this)">Cluster</button>
+        <button class="gcb" onclick="setGraphMode('flow',this)">Flow</button>
+        <button class="gcb" onclick="resetGraph()">Reset</button>
+      </div>
+      <canvas id="graphCanvas" style="width:100%;height:65vh;border:1px solid var(--border);border-radius:9px;display:block;cursor:crosshair;background:rgba(55,53,47,.02)"></canvas>
+    </div>
+
+    <!-- ══ SYSTEM ══ -->
+    <div class="view" id="view-system">
+      <div class="two-col">
+        <div>
+          <div class="nh2">🏗️ System Architecture — AETHER OS</div>
+          <div class="ndiv"></div>
+          <div class="sys-grid">
+            <div class="sysc"><div class="sysc-k">Frontend</div><div class="sysc-v">Cloudflare Pages</div><div class="sysc-s">site/index.html</div></div>
+            <div class="sysc"><div class="sysc-k">API Layer</div><div class="sysc-v">CF Worker</div><div class="sysc-s">learning-bot.talpadeavi0303</div></div>
+            <div class="sysc"><div class="sysc-k">AI Model</div><div class="sysc-v">Claude Sonnet</div><div class="sysc-s">via Anthropic API</div></div>
+            <div class="sysc"><div class="sysc-k">ML Model</div><div class="sysc-v">RandomForest</div><div class="sysc-s">productivity_model.pkl</div></div>
+            <div class="sysc"><div class="sysc-k">Data Ingestion</div><div class="sysc-v">Telegram Bot</div><div class="sysc-s">→ GitHub Actions pipeline</div></div>
+            <div class="sysc"><div class="sysc-k">Data Store</div><div class="sysc-v">CSV / Parquet</div><div class="sysc-s">data/raw/events.csv</div></div>
+            <div class="sysc"><div class="sysc-k">Pipelines</div><div class="sysc-v">GitHub Actions</div><div class="sysc-s">ingest.yml, daily.yml</div></div>
+            <div class="sysc"><div class="sysc-k">Dashboard Data</div><div class="sysc-v">dashboard.json</div><div class="sysc-s">site/data/ — auto-generated</div></div>
+          </div>
+
+          <div class="nh2" style="margin-top:22px">🔀 Data Flow</div>
+          <div class="ndiv"></div>
+          <pre class="dflow">Telegram → CF Worker → GitHub dispatch
+  → nlp_parser.py → events.csv
+  → feature_extractor.py → behavior.parquet
+  → train_models.py → productivity_model.pkl
+  → predict.py → dashboard.json → UI</pre>
+        </div>
+        <div>
+          <div class="nh2">🔄 Pipeline Status</div>
+          <div class="ndiv"></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">Worker v2 — 9 routes</div><div class="npipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">CF AI — Llama 3 + Whisper + LLaVA</div><div class="npipe-sub">All free, zero cost</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">ML pipeline — 5 scripts</div><div class="npipe-sub">pull → clean → train → predict</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">⏳</div><div><div class="npipe-nm">GITHUB_TOKEN in Cloudflare</div><div class="npipe-sub">Add to enable auto ML trigger</div></div><div class="npfill"></div><span class="tag ty">NOW</span></div>
+          <div class="npipe-item"><div class="npipe-ic">⏳</div><div><div class="npipe-nm">Log 30+ clean events</div><div class="npipe-sub">Need for real ML predictions</div></div><div class="npfill"></div><span class="tag ty">NOW</span></div>
+          <div class="npipe-item"><div class="npipe-ic">❌</div><div><div class="npipe-nm">AES-256 encryption + login</div><div class="npipe-sub">Data encryption + CF Access</div></div><div class="npfill"></div><span class="tag tgr">NEXT</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DOCS ══ -->
+    <div class="view" id="view-docs">
+      <div class="nh2">📄 Documentation</div>
+      <div class="ndiv"></div>
+      <div class="dtabs">
+        <button class="dtab on" onclick="showDoc('plan',this)">Master Plan</button>
+        <button class="dtab" onclick="showDoc('arch',this)">Architecture</button>
+        <button class="dtab" onclick="showDoc('progress',this)">Progress</button>
+      </div>
+
+      <div id="doc-plan" class="doc-frame on">
+        <div class="callout cb" style="margin-bottom:16px">
+          <div class="c-ic">📋</div>
+          <div>
+            <div class="c-ttl">AETHER OS — Mission Documentation</div>
+            <div class="c-bod">Open the full plan pages for detailed architecture, security, ML pipeline, cost breakand roadmap.</div>
+          </div>
+        </div>
+        <a href="/aether-plan.html" target="_blank" class="nlink">📌 Master Plan — Architecture, Security, MLflow, Roadmap <span class="nlink-arr">↗</span></a>
+        <a href="/aether-architecture.html" target="_blank" class="nlink">🏗️ Architecture — Full system map with all components <span class="nlink-arr">↗</span></a>
+        <a href="/aether-progress.html" target="_blank" class="nlink">📈 Progress — Changes made, version history, completion % <span class="nlink-arr">↗</span></a>
+        <a href="/aether-vision.html" target="_blank" class="nlink">🔭 Vision — Datasets, cost, prod/dev, full roadmap <span class="nlink-arr">↗</span></a>
+        <div class="ndiv"></div>
+        <div class="nh3">Status Tracker</div>
+        <div style="margin-top:8px">
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">Worker v2 — 9 routes live</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">CF AI — Llama 3 + Whisper + LLaVA</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">ML pipeline — 5 scripts built</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">Dashboard live data + PWA</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">✅</div><div><div class="npipe-nm">12 bot commands + 4 daily briefings</div></div><div class="npfill"></div><span class="tag tg">DONE</span></div>
+          <div class="npipe-item"><div class="npipe-ic">⏳</div><div><div class="npipe-nm">GITHUB_TOKEN in Cloudflare</div></div><div class="npfill"></div><span class="tag ty">NOW</span></div>
+          <div class="npipe-item"><div class="npipe-ic">⏳</div><div><div class="npipe-nm">Log 30+ clean events</div></div><div class="npfill"></div><span class="tag ty">NOW</span></div>
+          <div class="npipe-item"><div class="npipe-ic">❌</div><div><div class="npipe-nm">Data encryption + password login</div></div><div class="npfill"></div><span class="tag tgr">NEXT</span></div>
+          <div class="npipe-item"><div class="npipe-ic">❌</div><div><div class="npipe-nm">Health + finance commands</div><div class="npipe-sub">/exercise /sleep /food /spend</div></div><div class="npfill"></div><span class="tag tgr">NEXT</span></div>
+          <div class="npipe-item"><div class="npipe-ic">❌</div><div><div class="npipe-nm">MLflow + Colab pipeline</div><div class="npipe-sub">DagsHub free experiment tracking</div></div><div class="npfill"></div><span class="tag tgr">MONTH 2</span></div>
+        </div>
+      </div>
+
+      <div id="doc-arch" class="doc-frame">
+        <div class="npipe-item"><div class="npipe-ic">💬</div><div><div class="npipe-nm">Text / Voice / Image / Check-in / GitHub</div></div><div class="npfill"></div><span class="tag tb">INPUT</span></div>
+        <div class="npipe-item"><div class="npipe-ic">⚙️</div><div><div class="npipe-nm">Cloudflare Worker — 9 routes</div><div class="npipe-sub">learning-bot.talpadeavi0303.workers.dev</div></div><div class="npfill"></div><span class="tag tg">BRAIN</span></div>
+        <div class="npipe-item"><div class="npipe-ic">🦙</div><div><div class="npipe-nm">Llama 3 + Whisper + LLaVA</div></div><div class="npfill"></div><span class="tag tg">FREE AI</span></div>
+        <div class="npipe-item"><div class="npipe-ic">🗄️</div><div><div class="npipe-nm">Cloudflare KV</div><div class="npipe-sub">events · state · dashboard · goals</div></div><div class="npfill"></div><span class="tag tgr">STORAGE</span></div>
+        <div class="npipe-item"><div class="npipe-ic">🔬</div><div><div class="npipe-nm">ML Pipeline — GitHub Actions</div></div><div class="npfill"></div><span class="tag tb">NIGHTLY</span></div>
+        <div class="npipe-item"><div class="npipe-ic">📱</div><div><div class="npipe-nm">Dashboard PWA + Telegram Bot</div></div><div class="npfill"></div><span class="tag tg">OUTPUT</span></div>
+      </div>
+
+      <div id="doc-progress" class="doc-frame">
+        <div class="npr"><div class="nprh"><span class="nprl">Infrastructure</span><span class="nprv">100%</span></div><div class="nprt"><div class="nprf" style="width:100%;transition:none"></div></div></div>
+        <div class="npr"><div class="nprh"><span class="nprl">Data Ingestion</span><span class="nprv">90%</span></div><div class="nprt"><div class="nprf" style="width:90%;transition:none"></div></div></div>
+        <div class="npr"><div class="nprh"><span class="nprl">Dashboard UI</span><span class="nprv">85%</span></div><div class="nprt"><div class="nprf" style="width:85%;transition:none"></div></div></div>
+        <div class="npr"><div class="nprh"><span class="nprl">ML Pipeline</span><span class="nprv">70%</span></div><div class="nprt"><div class="nprf dim" style="width:70%;transition:none"></div></div></div>
+        <div class="npr"><div class="nprh"><span class="nprl">AI Intelligence</span><span class="nprv">50%</span></div><div class="nprt"><div class="nprf dim" style="width:50%;transition:none"></div></div></div>
+        <div class="npr"><div class="nprh"><span class="nprl">Security</span><span class="nprv">10%</span></div><div class="nprt"><div class="nprf dim" style="width:10%;transition:none"></div></div></div>
+        <div class="npr"><div class="nprh"><span class="nprl">Mobile APK</span><span class="nprv">20%</span></div><div class="nprt"><div class="nprf dim" style="width:20%;transition:none"></div></div></div>
+      </div>
+    </div>
+
+  </div><!-- /pg-content -->
+
+  <!-- FOOTER -->
+  <div class="pg-footer">
+    <span>⚡ JARVIS NEXUS</span><span class="sep">·</span>
+    <span>Universe-616</span><span class="sep">·</span>
+    <span>v3.0</span><span class="sep">·</span>
+    <span>Cloudflare · Anthropic · GitHub</span>
+  </div>
+
+</div><!-- /main -->
+
+<!-- JARVIS CHAT -->
+<div id="chatPage">
+  <div id="arc-bg"><canvas id="arc-canvas"></canvas></div>
+  <div id="audio-bars"></div>
+  <div class="ch-hd">
+    <div class="ch-left">
+      <div class="jdot"></div>
+      <div>
+        <div class="ch-ttl">J.A.R.V.I.S</div>
+        <div class="ch-sub">Just A Rather Very Intelligent System</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <select id="aiEngine">
+        <option value="hybrid">Hybrid Engine</option>
+        <option value="ml">ML Engine</option>
+        <option value="worker">Worker Only</option>
+      </select>
+      <button class="ch-cls" onclick="closeChat()">✕ Close</button>
+    </div>
+  </div>
+  <div id="chatMsgs">
+    <div class="msg ai"><div class="mlbl">J.A.R.V.I.S</div>Good day. I am online and operational. AETHER OS running — Worker v2, ML pipeline active, 12 bot commands live. How may I assist you today, sir?</div>
+  </div>
+  <div id="thinking" class="hidden">
+    <span style="font-size:12px;color:var(--text2)">JARVIS is thinking</span>
+    <div class="tdots"><span></span><span></span><span></span></div>
+  </div>
+  <div class="qchips">
+    <button class="chip" onclick="quickSend('What should I focus on right now?')">Focus now</button>
+    <button class="chip" onclick="quickSend('Give me my daily briefing')">Daily brief</button>
+    <button class="chip" onclick="quickSend('Start a 25min Pomodoro')">Pomodoro</button>
+    <button class="chip" onclick="quickSend('Analyze my productivity this week')">Analyze week</button>
+    <button class="chip" onclick="quickSend('What are my biggest bottlenecks?')">Bottlenecks</button>
+    <button class="chip" onclick="quickSend('Avengers assemble — give me a heroic motivation speech')">🦸 Avengers Mode</button>
+  </div>
+  <div class="cinput">
+    <input id="chatIn" placeholder="Ask J.A.R.V.I.S anything..." autocomplete="off">
+    <button id="sendBtn" onclick="sendChat()">Send</button>
+  </div>
+  <div id="jarvis-panel">
+    <div class="jp-line">Reactor Core <span id="jp-power">98.6%</span></div>
+    <div class="jp-line">System Link <span style="color:var(--green)">Stable</span></div>
+    <div class="jp-line">AI Engine <span id="jp-engine">Hybrid</span></div>
+    <div class="jp-line">Uptime <span id="jp-uptime">00:00:00</span></div>
+  </div>
+</div>
+
+<!-- PASSWORD GATE -->
+<div id="pw-gate">
+  <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">🔒 Secure Access</div>
+  <h2>Enter Passkey</h2>
+  <p>Neural data protected with AES-256.<br>Enter your passkey to decrypt.</p>
+  <input id="pw-input" type="password" placeholder="••••••••">
+  <div class="pw-btns">
+    <button onclick="checkPassword()" class="pw-btn">Unlock</button>
+    <button onclick="closeGate()" class="pw-btn cancel">Cancel</button>
+  </div>
+  <div id="pw-error">Access denied. Try again.</div>
+</div>
+
+<script>
+const WORKER_URL='https://learning-bot.talpadeavi0303.workers.dev';
+const D={
+  metrics:{energy:7.4,focus:82,mood:68,sleep:74,productivity:91},
+  activity:[{label:'Neural Networks Ch4',mins:47,tag:'LEARN'},{label:'ML Pipeline Build',mins:126,tag:'CODE'},{label:'CF Worker v2 Deploy',mins:38,tag:'OPS'}],
+  goals:{today:['complete ML extractor','study chapter 4','add github token','log 30 events']},
+  weekly:[4.2,5.8,6.1,3.9,7.0,6.8,6.2]
+};
+const UNIVERSES={aether:{name:'Universe-616'},iron:{name:'Iron Man Verse'},anime:{name:'Anime Nexus'},cyber:{name:'Cyberpunk-7'}};
+function changeUniverse(id){showAchievement('Universe Shifted',(UNIVERSES[id]||UNIVERSES.aether).name+' · +150 XP')}
+
+// CLOCK
+const startTime=Date.now();
+function tick(){
+  const n=new Date();
+  const c=document.getElementById('tbclk');if(c)c.textContent=n.toTimeString().slice(0,8);
+  const d=document.getElementById('date');if(d)d.textContent=n.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const up=Math.floor((Date.now()-startTime)/1000);
+  const h=String(Math.floor(up/3600)).padStart(2,'0'),m=String(Math.floor(up%3600/60)).padStart(2,'0'),s=String(up%60).padStart(2,'0');
+  const el=document.getElementById('jp-uptime');if(el)el.textContent=`${h}:${m}:${s}`;
+}
+tick();setInterval(tick,1000);
+
+// LOADER
+const bootMsgs=['Connecting to worker...','Loading ML pipeline...','Syncing KV store...','Calibrating JARVIS core...','System ready.'];
+let mi=0;const bmEl=document.getElementById('bootMsg');
+function bootAnim(){
+  if(mi<bootMsgs.length){if(bmEl)bmEl.textContent=bootMsgs[mi++];setTimeout(bootAnim,420)}
+  else setTimeout(()=>{
+    document.getElementById('loader').classList.add('gone');
+    animateBars();initCharts();initWaveform();initGraphCanvas();
+    setTimeout(()=>showAchievement('System Boot Complete','+500 XP'),1000);
+  },300);
+}
+bootAnim();
+
+// ACHIEVEMENT
+let achT=null;
+function showAchievement(name,pts){
+  const el=document.getElementById('achievement');
+  document.getElementById('ach-name').textContent=name;
+  document.getElementById('ach-pts').textContent=pts;
+  el.classList.add('show');clearTimeout(achT);
+  achT=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+// COUNT-UP
+function countUp(id,target){
+  let v=0;const el=document.getElementById(id);if(!el)return;
+  const t=setInterval(()=>{v=Math.min(v+Math.ceil(target/40),target);el.textContent=v;if(v>=target)clearInterval(t)},28);
+}
+setTimeout(()=>{countUp('wSessions',47);countUp('wGoals',8);countUp('wStreak',11);countUp('wScore',94)},700);
+let pv=0;const pEl=document.getElementById('powerNum');
+const pt=setInterval(()=>{pv=Math.min(pv+Math.ceil(9400/60),9400);pEl.textContent=pv.toLocaleString();if(pv>=9400)clearInterval(pt)},25);
+
+// BARS
+function animateBars(){
+  [['focusBar','82'],['moodBar','68'],['sleepBar','74'],['prodBar','91'],
+   ['infra-bar','100'],['ingest-bar','90'],['ui-bar','85'],['ml-bar','70'],
+   ['ai-bar','50'],['sec-bar','10'],['apk-bar','20']
+  ].forEach(([id,w])=>{const el=document.getElementById(id);if(el)setTimeout(()=>el.style.width=w+'%',200)});
+}
+
+// CHARTS
+let chartsInit=false;
+function initCharts(){
+  if(chartsInit)return;chartsInit=true;
+  const wc=document.getElementById('weekChart');
+  if(wc)new Chart(wc,{type:'bar',data:{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{data:D.weekly,
+      backgroundColor:D.weekly.map(v=>v>6?'rgba(45,159,61,.55)':v>5?'rgba(45,159,61,.3)':'rgba(45,159,61,.14)'),
+      borderColor:'rgba(45,159,61,.35)',borderWidth:1,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#37352f',bodyColor:'#787774',borderColor:'rgba(55,53,47,.1)',borderWidth:1,callbacks:{label:c=>c.parsed.y+'h deep work'}}},
+      scales:{x:{ticks:{color:'#787774',font:{family:'Plus Jakarta Sans',size:11}},grid:{color:'rgba(55,53,47,.05)'}},
+              y:{ticks:{color:'#787774',font:{family:'Plus Jakarta Sans',size:11}},grid:{color:'rgba(55,53,47,.05)'},max:8}}}});
+  const dc=document.getElementById('donutChart');
+  if(dc)new Chart(dc,{type:'doughnut',data:{datasets:[{data:[42,28,18,12],
+    backgroundColor:['rgba(45,159,61,.68)','rgba(45,159,61,.44)','rgba(45,159,61,.25)','rgba(45,159,61,.11)'],
+    borderColor:['rgba(45,159,61,.8)','rgba(45,159,61,.5)','rgba(45,159,61,.3)','rgba(45,159,61,.15)'],borderWidth:1}]},
+    options:{responsive:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',bodyColor:'#37352f',borderColor:'rgba(55,53,47,.1)',borderWidth:1}}}});
+}
+
+// WAVEFORM
+function initWaveform(){
+  const c=document.getElementById('waveCanvas');if(!c)return;
+  const ctx=c.getContext('2d');
+  let W=c.offsetWidth||800,H=80;
+  c.width=W*devicePixelRatio;c.height=H*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);
+  let t=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    [{color:'rgba(45,159,61,.45)',amp:12,freq:.04,speed:.05,phase:0},
+     {color:'rgba(45,159,61,.22)',amp:7,freq:.065,speed:.07,phase:2},
+     {color:'rgba(45,159,61,.1)',amp:5,freq:.09,speed:.04,phase:4}
+    ].forEach(w=>{
+      ctx.beginPath();
+      for(let x=0;x<W;x++){const y=H/2+Math.sin(x*w.freq+t*w.speed+w.phase)*w.amp+Math.sin(x*.02+t*.03)*4;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}
+      ctx.strokeStyle=w.color;ctx.lineWidth=1.5;ctx.stroke();
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// GRAPH
+let graphNodes=[],graphEdges=[],graphMode='neural',graphT=0,graphDragging=null,graphCanvas,graphCtx;
+const GNODES=[
+  {id:'avi',label:'Avi',icon:'⚡',x:.5,y:.5,r:30,color:'#2d9f3d'},
+  {id:'ml',label:'ML Pipeline',icon:'🤖',x:.2,y:.25,r:22,color:'#2d9f3d'},
+  {id:'worker',label:'CF Worker',icon:'☁️',x:.75,y:.22,r:22,color:'#2d9f3d'},
+  {id:'tg',label:'Telegram',icon:'📱',x:.15,y:.65,r:18,color:'#787774'},
+  {id:'gh',label:'GitHub',icon:'💻',x:.38,y:.78,r:18,color:'#787774'},
+  {id:'kv',label:'KV Store',icon:'🗄️',x:.65,y:.78,r:18,color:'#787774'},
+  {id:'claude',label:'Claude',icon:'🧠',x:.83,y:.52,r:18,color:'#2383e2'},
+  {id:'data',label:'Dashboard',icon:'📊',x:.28,y:.44,r:16,color:'#787774'},
+  {id:'jarvis',label:'JARVIS',icon:'🦾',x:.6,y:.38,r:22,color:'#2d9f3d'},
+];
+const GEDGES=[['avi','jarvis'],['avi','ml'],['avi','worker'],['worker','claude'],['worker','kv'],['ml','gh'],['ml','data'],['tg','worker'],['jarvis','worker'],['gh','kv']];
+function initGraphCanvas(){
+  graphCanvas=document.getElementById('graphCanvas');if(!graphCanvas)return;
+  graphCtx=graphCanvas.getContext('2d');
+  const rect=()=>graphCanvas.getBoundingClientRect();
+  graphNodes=GNODES.map(n=>({...n,px:n.x*rect().width,py:n.y*rect().height,vx:0,vy:0}));
+  graphEdges=GEDGES.map(([a,b])=>({a:graphNodes.find(n=>n.id===a),b:graphNodes.find(n=>n.id===b)}));
+  graphCanvas.addEventListener('mousedown',e=>{const bb=rect();const mx=e.clientX-bb.left,my=e.clientY-bb.top;graphDragging=graphNodes.find(n=>Math.hypot(n.px-mx,n.py-my)<n.r+6)||null});
+  graphCanvas.addEventListener('mousemove',e=>{if(!graphDragging)return;const bb=rect();graphDragging.px=e.clientX-bb.left;graphDragging.py=e.clientY-bb.top});
+  graphCanvas.addEventListener('mouseup',()=>graphDragging=null);
+  drawGraph();
+}
+function drawGraph(){
+  if(!graphCanvas)return;
+  const W=graphCanvas.offsetWidth,H=graphCanvas.offsetHeight;
+  if(graphCanvas.width!==W*devicePixelRatio){graphCanvas.width=W*devicePixelRatio;graphCanvas.height=H*devicePixelRatio;graphCtx.scale(devicePixelRatio,devicePixelRatio)}
+  graphCtx.clearRect(0,0,W,H);graphT+=.005;
+  if(!graphDragging){
+    graphNodes.forEach(n=>{
+      if(n.id!=='avi'){n.px+=Math.sin(graphT+n.r)*.25;n.py+=Math.cos(graphT+n.r*.7)*.25;}
+      else{n.px=W/2+Math.sin(graphT*.3)*6;n.py=H/2+Math.cos(graphT*.22)*6;}
+    });
+  }
+  graphEdges.forEach(e=>{
+    if(!e.a||!e.b)return;
+    graphCtx.beginPath();graphCtx.moveTo(e.a.px,e.a.py);graphCtx.lineTo(e.b.px,e.b.py);
+    graphCtx.strokeStyle='rgba(55,53,47,.1)';graphCtx.lineWidth=1.5;graphCtx.stroke();
+    const t2=((graphT*50)%100)/100;const mx=e.a.px+(e.b.px-e.a.px)*t2,my2=e.a.py+(e.b.py-e.a.py)*t2;
+    graphCtx.beginPath();graphCtx.arc(mx,my2,2.5,0,Math.PI*2);graphCtx.fillStyle='rgba(45,159,61,.55)';graphCtx.fill();
+  });
+  graphNodes.forEach(n=>{
+    const grd=graphCtx.createRadialGradient(n.px,n.py,0,n.px,n.py,n.r);
+    if(n.id==='avi'||n.color==='#2d9f3d'){grd.addColorStop(0,'rgba(45,159,61,.14)');grd.addColorStop(1,'rgba(45,159,61,.02)');}
+    else if(n.color==='#2383e2'){grd.addColorStop(0,'rgba(35,131,226,.14)');grd.addColorStop(1,'rgba(35,131,226,.02)');}
+    else{grd.addColorStop(0,'rgba(55,53,47,.07)');grd.addColorStop(1,'rgba(55,53,47,.01)');}
+    graphCtx.beginPath();graphCtx.arc(n.px,n.py,n.r,0,Math.PI*2);
+    graphCtx.fillStyle=grd;graphCtx.fill();
+    graphCtx.strokeStyle=n.id==='avi'?'rgba(45,159,61,.5)':n.color==='#2383e2'?'rgba(35,131,226,.3)':'rgba(55,53,47,.15)';
+    graphCtx.lineWidth=n.id==='avi'?2:1;graphCtx.stroke();
+    graphCtx.font=`${n.r*.7}px serif`;graphCtx.textAlign='center';graphCtx.textBaseline='middle';
+    graphCtx.fillText(n.icon,n.px,n.py-1);
+    graphCtx.font=`500 10px Plus Jakarta Sans`;graphCtx.fillStyle='rgba(55,53,47,.55)';
+    graphCtx.fillText(n.label,n.px,n.py+n.r+11);
+  });
+  requestAnimationFrame(drawGraph);
+}
+function setGraphMode(m,btn){
+  graphMode=m;document.querySelectorAll('.gcb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  showAchievement('Brain Mode',m.toUpperCase()+' · +25 XP');
+}
+function resetGraph(){
+  if(!graphCanvas)return;const W=graphCanvas.offsetWidth,H=graphCanvas.offsetHeight;
+  graphNodes.forEach(n=>{n.px=n.x*W;n.py=n.y*H});
+}
+
+// ARC REACTOR
+let arcCtx2,arcSpeaking=false,arcAudioLevel=0,arcT=0;
+function initArcReactor(){
+  const c=document.getElementById('arc-canvas');if(!c)return;
+  const s=Math.min(c.parentElement.offsetWidth,c.parentElement.offsetHeight);
+  c.width=s*devicePixelRatio;c.height=s*devicePixelRatio;
+  arcCtx2=c.getContext('2d');arcCtx2.scale(devicePixelRatio,devicePixelRatio);
+  if(!arcCtx2._running){arcCtx2._running=true;drawArc();}
+}
+function drawArc(){
+  if(!arcCtx2)return;
+  const c=document.getElementById('arc-canvas');if(!c)return;
+  const s=Math.min(c.offsetWidth,c.offsetHeight);const cx=s/2,cy=s/2;arcT+=.008;
+  arcCtx2.clearRect(0,0,s,s);
+  for(let i=0;i<6;i++){
+    arcCtx2.beginPath();arcCtx2.arc(cx,cy,s*(.15+i*.065),arcT*(i%2?1:-1),arcT*(i%2?1:-1)+Math.PI*(1.2+Math.sin(arcT+i)*.3));
+    arcCtx2.strokeStyle=`rgba(45,159,61,${(.05-i*.007)*(1+arcAudioLevel*.5)})`;arcCtx2.lineWidth=1;arcCtx2.stroke();
+  }
+  if(arcSpeaking){for(let w=0;w<2;w++){const wR=s*(.50+w*.05)+Math.sin(arcT*8+w*2)*arcAudioLevel*s*.08;arcCtx2.beginPath();arcCtx2.arc(cx,cy,wR,0,Math.PI*2);arcCtx2.strokeStyle=`rgba(45,159,61,${(.07-w*.03)*arcAudioLevel})`;arcCtx2.lineWidth=1.5;arcCtx2.stroke();}}
+  requestAnimationFrame(drawArc);
+}
+const audioBarsEl=document.getElementById('audio-bars');
+for(let i=0;i<40;i++){const b=document.createElement('div');b.className='abar';b.style.minHeight='4px';audioBarsEl.appendChild(b)}
+const abars=audioBarsEl.querySelectorAll('.abar');
+function animAudioBars(speaking){
+  if(!speaking){abars.forEach(b=>{b.style.height='4px';audioBarsEl.style.opacity='0'});return}
+  audioBarsEl.style.opacity='1';
+  abars.forEach((b,i)=>{b.style.height=(Math.abs(Math.sin(Date.now()*.003+i*.4+Math.random()*.2))*40+4)+'px'});
+}
+let audioAnim=null;
+function startSpeaking(){arcSpeaking=true;function pulse(){arcAudioLevel=Math.abs(Math.sin(Date.now()*.004))*.8+.2;animAudioBars(true);audioAnim=requestAnimationFrame(pulse)}pulse()}
+function stopSpeaking(){arcSpeaking=false;arcAudioLevel=0;animAudioBars(false);if(audioAnim)cancelAnimationFrame(audioAnim)}
+
+// VIEW SWITCHING
+const bcNames={home:'Home',data:'Data',graph:'Brain',system:'System',docs:'Docs'};
+function switchView(name,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('#sb .sbi').forEach(t=>t.classList.remove('act'));
+  document.querySelectorAll('#page-tabs .ptab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('view-'+name).classList.add('on');
+  // Highlight sidebar item
+  const navEl=document.getElementById('nav-'+name);if(navEl)navEl.classList.add('act');
+  // Highlight page tab
+  const ptabEl=document.getElementById('ptab-'+name);if(ptabEl)ptabEl.classList.add('on');
+  const bc=document.getElementById('tb-bc');if(bc)bc.textContent=bcNames[name]||name;
+  if(name==='data'){setTimeout(()=>{animateBars();initCharts();initWaveform()},50)}
+  if(name==='graph'){setTimeout(initGraphCanvas,50)}
+}
+function showDoc(name,tab){
+  document.querySelectorAll('.doc-frame').forEach(d=>d.classList.remove('on'));
+  document.getElementById('doc-'+name).classList.add('on');
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+}
+
+// INTERACTIVE
+function setMood(btn){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');showAchievement('Mood Updated','+10 XP')}
+function toggleGoal(check){
+  check.classList.toggle('done');check.textContent=check.classList.contains('done')?'✓':'';
+  const txt=check.nextElementSibling;if(txt)txt.classList.toggle('done');
+  if(check.classList.contains('done'))showAchievement('Quest Complete','+100 XP');
+}
+
+// PASSWORD
+function openGate(){document.getElementById('pw-gate').classList.add('show')}
+function closeGate(){document.getElementById('pw-gate').classList.remove('show')}
+function checkPassword(){
+  const v=document.getElementById('pw-input').value;const err=document.getElementById('pw-error');
+  if(v==='aether2024'){closeGate()}else{err.style.opacity='1';setTimeout(()=>err.style.opacity='0',2000)}
+}
+document.addEventListener('DOMContentLoaded',()=>{const inp=document.getElementById('pw-input');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword()})});
+
+// CHAT
+let chatOpen=false;
+function openChat(){if(chatOpen)return;chatOpen=true;document.getElementById('chatPage').classList.add('open');setTimeout(()=>{initArcReactor();document.getElementById('chatIn').focus()},100)}
+function closeChat(){if(!chatOpen)return;chatOpen=false;stopSpeaking();document.getElementById('chatPage').classList.remove('open')}
+function quickSend(t){openChat();setTimeout(()=>{document.getElementById('chatIn').value=t;sendChat()},chatOpen?0:650)}
+const hist=[];
+async function sendChat(){
+  const inp=document.getElementById('chatIn');const txt=inp.value.trim();if(!txt)return;
+  inp.value='';addMsg('user',txt);hist.push({role:'user',content:txt});
+  document.getElementById('thinking').classList.remove('hidden');
+  document.getElementById('sendBtn').disabled=true;startSpeaking();
+  const engine=(document.getElementById('aiEngine')||{}).value||'hybrid';
+  const el=document.getElementById('jp-engine');if(el)el.textContent=engine;
+  try{
+    const r=await fetch(WORKER_URL+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:txt,history:hist,metrics:D.metrics,activity:D.activity,goals:D.goals.today,engine})});
+    const data=await r.json();const reply=data.reply||data.error||'Neural pathway disrupted, sir.';
+    hist.push({role:'assistant',content:reply});
+    document.getElementById('thinking').classList.add('hidden');document.getElementById('sendBtn').disabled=false;typeMsg(reply);
+  }catch(err){
+    stopSpeaking();document.getElementById('thinking').classList.add('hidden');document.getElementById('sendBtn').disabled=false;
+    addMsg('ai','Worker offline. Connection disrupted.');
+  }
+}
+function addMsg(role,text){
+  const box=document.getElementById('chatMsgs');const el=document.createElement('div');el.className='msg '+role;
+  el.innerHTML=`<div class="mlbl">${role==='user'?'You':'J.A.R.V.I.S'}</div>${text}`;
+  box.appendChild(el);box.scrollTop=box.scrollHeight;
+}
+function typeMsg(text){
+  const box=document.getElementById('chatMsgs');const el=document.createElement('div');el.className='msg ai';
+  const lb=document.createElement('div');lb.className='mlbl';lb.textContent='J.A.R.V.I.S';
+  const sp=document.createElement('span');const cur2=document.createElement('span');
+  cur2.textContent='▌';cur2.style.animation='blink .5s infinite';
+  el.appendChild(lb);el.appendChild(sp);el.appendChild(cur2);box.appendChild(el);let i=0;
+  function type(){
+    if(i<text.length){sp.textContent+=text[i++];box.scrollTop=box.scrollHeight;arcAudioLevel=0.2+Math.random()*.5;setTimeout(type,12)}
+    else{cur2.remove();stopSpeaking();showAchievement('JARVIS Responded','+20 XP')}
+  }
+  type();
+}
+
+// WORKER HEALTH
+async function checkWorker(){
+  try{
+    const r=await fetch(WORKER_URL+'/health',{signal:AbortSignal.timeout(5000)});
+    if(r.ok){
+      const dot=document.getElementById('wsdot');if(dot)dot.classList.add('on');
+      const txt=document.getElementById('wstext');if(txt)txt.textContent='API Online';
+      const inl=document.getElementById('wsInline');if(inl)inl.innerHTML='<span class="tag tg">🟢 API Online</span>';
+    }
+  }catch(e){
+    const txt=document.getElementById('wstext');if(txt)txt.textContent='Offline';
+    const inl=document.getElementById('wsInline');if(inl)inl.innerHTML='<span class="tag tr">🔴 Offline</span>';
+  }
+}
+setTimeout(checkWorker,2500);
+window.addEventListener('resize',()=>{if(chatOpen)initArcReactor()});
+</script>
+</body>
+</html>
