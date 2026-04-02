@@ -418,17 +418,7 @@ await sendTelegram(chatId, message, env);
     case '/workout': {
       const actType = args.replace(/[0-9]+/g, '').trim() || 'workout';
       const mins    = parseInt(args.match(/[0-9]+/)?.[0]) || 30;
-      await saveEvent({
-        input_type: 'health', raw_text: text, topic: 'Exercise',
-        topics: ['health', 'fitness'], energy_signal: 0.75, stress_signal: 0.1,
-        focus_signal: 0.6, motivation_signal: 0.8, dominant_emotion: 'energized',
-        is_study_session: false, is_goal_mention: false, estimated_minutes: mins,
-        health_type: 'exercise', activity: actType, duration_mins: mins,
-        summary: `Exercise: ${actType} ${mins}min`,
-      }, env);
-      await sendTelegram(chatId, `💪 *Exercise logged*\n\n${actType} — ${mins} min\nEnergy: +0.75 recorded 🔥`, env);
-      return true;
-    }
+      
 
     case '/sleep': {
       const hrs     = parseFloat(args) || 7;
