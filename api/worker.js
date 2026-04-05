@@ -650,16 +650,36 @@ export default {
         const patterns = analyzePatterns(events);
 
         const patternText = `
-      📊 Pattern Insight:
-      Best hour: ${patterns.bestHour}:00
-      Trend: ${patterns.trend}
-      `;
+        📊 Pattern Insight:
+        Best hour: ${patterns.bestHour || "--"}:00
+        Trend: ${patterns.trend || "collecting"}
+        `;
 
         // 🔹 Helpers
         function energyLabel(e) {
           if (e > 0.7) return "high";
           if (e > 0.4) return "moderate";
           return "low";
+        }
+
+        function formatState(state) {
+          if (state === "flow_ready") return "🚀 FLOW READY";
+          if (state === "low_focus") return "⚠️ LOW FOCUS";
+          if (state === "burnout") return "🧠 BURNOUT";
+          return "😐 MODERATE";
+        }
+
+        function getAdvice(state, energy, focus) {
+          if (state === "flow_ready") {
+            return "Start deep work NOW (45–90 min block)";
+          }
+          if (energy < 0.4) {
+            return "Take a 10 min reset (walk/stretch)";
+          }
+          if (focus < 0.4) {
+            return "Remove distractions — pick ONE task";
+          }
+          return "Continue current task with focus";
         }
 
         function getTrend(events) {
@@ -674,6 +694,7 @@ export default {
         }
 
         const energyText = energyLabel(analysis.energy);
+        const advice = getAdvice(analysis.state, analysis.energy, analysis.focus);
         const trend = getTrend(events);
 
         let response = "";
@@ -698,17 +719,32 @@ export default {
         // 🔥 FINAL OUTPUT (NOW WITH PATTERNS)
         const finalResponse = `🧠 JARVIS CORE
 
-      ⚡ Energy: ${energyText}
-      🔥 State: ${analysis.state}
-      📈 Trend: ${trend}
+        ⚡ Energy: ${energyText} (${analysis.energy.toFixed(2)})
+        🔥 State: ${formatState(analysis.state)}
+        📈 Trend: ${patterns.trend || "stable"}
 
-      📌 Recommendation:
-      ${response}
+        💡 Insight:
+        You are in a ${analysis.state.replace("_", " ")} zone.
 
-      ${patternText}
-      `;
+        🧭 Next Action:
+        ${response || advice}
+
+        ${patternText}
+        `;
         console.log("PATTERN:", patternText);
-        return new Response(JSON.stringify({ reply: finalResponse }), {
+
+        // 🔥 TIMELINE (NEW)
+        const timeline = events.slice(-10).map(e => ({
+          time: e.timestamp,
+          summary: e.summary,
+          energy: e.energy_signal
+        }));
+
+        // 🔥 RETURN UPDATED
+        return new Response(JSON.stringify({
+          reply: finalResponse,
+          timeline
+        }), {
           headers: { "Content-Type": "application/json" }
         });
       }

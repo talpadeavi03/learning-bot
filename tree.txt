@@ -658,6 +658,12 @@
 │   └── realtime
 │       └── state_updater.py
 ├── site
+│   ├── css
+│   │   ├── base.css
+│   │   ├── chat.css
+│   │   ├── components.css
+│   │   ├── extra.css
+│   │   └── layout.css
 │   ├── data
 │   │   ├── code_graph.json
 │   │   └── sw.js
@@ -668,6 +674,11 @@
 │   ├── index-old-v3.html
 │   ├── index.html
 │   ├── index.html.bk
+│   ├── js
+│   │   ├── app.js
+│   │   ├── canvas.js
+│   │   ├── config.js
+│   │   └── ui.js
 │   ├── manifest.json
 │   ├── sw.js
 │   ├── system-brain.html
@@ -679,4 +690,4 @@
 ├── tree.txt
 └── wrangler.toml
 
-105 directories, 575 files
+107 directories, 584 files
