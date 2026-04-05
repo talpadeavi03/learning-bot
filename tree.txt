@@ -1,25 +1,14 @@
 .
-├── analytics
-│   ├── daily_insights.md
-│   ├── dashboard.md
-│   ├── heatmap.md
-│   └── weekly-summary.md
 ├── api
 │   └── worker.js
 ├── commands
 ├── data
 │   ├── code_graph.json
 │   ├── features
-│   │   ├── behavior_features.parquet
-│   │   ├── daily_behavior.parquet
-│   │   └── daily_state_vector.parquet
 │   ├── graph
-│   │   └── memory_graph.json
 │   ├── insights
 │   ├── processed
-│   │   └── events_clean.csv
 │   ├── raw
-│   │   └── events.csv
 │   └── vector
 │       ├── event_index.faiss
 │       └── event_metadata.json
@@ -27,17 +16,16 @@
 │   ├── MASTER_PLAN.md
 │   ├── PROJECT_MAP.md
 │   ├── aether-architecture.html
+│   ├── aether-live-architecture.html
 │   ├── aether-progress.html
 │   ├── aether-vision.html
+│   ├── all_details.md
+│   ├── dashboard_improvement_plan.md
+│   ├── devops_mlops_pipeline.md
+│   ├── ml_daily_data_guide.md
 │   └── secrets.md
 ├── experiments
 │   └── mlruns
-├── models
-│   ├── energy_regressor.pkl
-│   ├── productivity_model.pkl
-│   ├── saved_models
-│   │   └── productivity_model.pkl
-│   └── training_stats.json
 ├── node_modules
 │   ├── @babel
 │   │   ├── code-frame
@@ -671,19 +659,17 @@
 │       └── state_updater.py
 ├── site
 │   ├── data
-│   │   ├── aether_response.json
-│   │   ├── daily_plan.json
-│   │   ├── dashboard.json
-│   │   ├── habits.json
-│   │   ├── insights.json
-│   │   ├── patterns.json
-│   │   ├── state.json
+│   │   ├── code_graph.json
 │   │   └── sw.js
 │   ├── icons
 │   │   ├── icon-192.png
 │   │   └── icon-512.png
+│   ├── index-latest.html
+│   ├── index-old-v3.html
 │   ├── index.html
+│   ├── index.html.bk
 │   ├── manifest.json
+│   ├── sw.js
 │   ├── system-brain.html
 │   └── timeline.html
 ├── state
@@ -693,4 +679,4 @@
 ├── tree.txt
 └── wrangler.toml
 
-108 directories, 586 files
+105 directories, 575 files

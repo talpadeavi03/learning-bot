@@ -11,6 +11,8 @@ const WORKER_URL    = 'https://learning-bot.talpadeavi0303.workers.dev';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/checkin.html',
+  'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap',
 ];
 
 // ─── Install — cache static assets ───────────────────────────────
@@ -70,7 +72,7 @@ self.addEventListener('fetch', event => {
       }).catch(() => {
         // Offline fallback — return cached index.html
         if (event.request.destination === 'document') {
-          return caches.match('/site/index.html');
+          return caches.match('/index.html');
         }
       });
     })
@@ -121,8 +123,8 @@ self.addEventListener('push', event => {
 
   const options = {
     body:    data.body || 'AETHER has an update for you.',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon:    '/icons/icon-192.png',
+    badge:   '/icons/icon-192.png',
     vibrate: [100, 50, 100],
     data:    { url: data.url || '/' },
     actions: [
@@ -189,3 +191,13 @@ function deleteRecord(db, store, id) {
     req.onerror   = e => reject(e.target.error);
   });
 }
+
+self.addEventListener("push", event => {
+  const data = event.data.json();
+
+  self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: "/icon.png",
+    badge: "/icon.png"
+  });
+});

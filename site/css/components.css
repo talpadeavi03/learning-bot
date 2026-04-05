@@ -1,0 +1,755 @@
+}
+
+/* ─── CONTENT ─── */
+.pg-content {
+  padding: 0 80px 80px
+}
+
+.view {
+  display: none
+}
+
+.view.on {
+  display: block;
+  animation: fsld .22s ease
+}
+
+@keyframes fsld {
+  from {
+    opacity: 0;
+    transform: translateY(5px)
+  }
+
+  to {
+    opacity: 1;
+    transform: none
+  }
+}
+
+/* ─── NOTION HEADINGS ─── */
+.nh1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 28px 0 8px
+}
+
+.nh2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 22px 0 4px
+}
+
+.nh3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 14px 0 4px
+}
+
+.ndiv {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 5px;
+  margin: 8px 0
+}
+
+.cg {
+  background: var(--green-bg)
+}
+
+.cy {
+  background: var(--yellow-bg)
+}
+
+.cr {
+  background: var(--red-bg)
+}
+
+.cb {
+  background: var(--blue-bg)
+}
+
+.cgr {
+  background: rgba(55, 53, 47, .04)
+}
+
+.c-ic {
+  font-size: 17px;
+  flex-shrink: 0;
+  margin-top: 1px
+}
+
+.c-ttl {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 3px
+}
+
+.c-bod {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65
+}
+
+.c-tag {
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 5px;
+  display: inline-block
+}
+
+.cg .c-tag {
+  color: var(--green)
+}
+
+.cy .c-tag {
+  color: var(--yellow)
+}
+
+.cr .c-tag {
+  color: var(--red)
+}
+
+.cb .c-tag {
+  color: var(--blue)
+}
+
+/* ─── DYNAMIC TABS ─── */
+.tab {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  animation: fadeIn 0.3s ease;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.tab.flow {
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 10px rgba(0,255,0,0.1);
+}
+.tab.distraction {
+  border-color: var(--red);
+  color: var(--red);
+  box-shadow: 0 0 10px rgba(255,0,0,0.1);
+}
+
+/* ─── STAT ROW ─── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 12px 0
+}
+
+.sc {
+  background: var(--bg);
+  padding: 16px
+}
+
+.sc-n {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1
+}
+
+.sc-l {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-top: 2px
+}
+
+.sc-s {
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 600;
+  margin-top: 3px
+}
+
+/* ─── PROGRESS ─── */
+.npr {
+  margin: 9px 0
+}
+
+.nprh {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px
+}
+
+.nprl {
+  font-size: 13px;
+  color: var(--text)
+}
+
+.nprv {
+  font-size: 12px;
+  color: var(--text2);
+  font-weight: 500
+}
+
+.nprt {
+  height: 6px;
+  background: rgba(55, 53, 47, .07);
+  border-radius: 3px;
+  overflow: hidden
+}
+
+.nprf {
+  height: 100%;
+  border-radius: 3px;
+  width: 0;
+  transition: width 1.5s cubic-bezier(.4, 0, .2, 1);
+  background: var(--green)
+}
+
+.nprf.dim {
+  background: rgba(45, 159, 61, .35)
+}
+
+/* ─── TABLE ─── */
+.ntbl {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0
+}
+
+.ntbl th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border)
+}
+
+.ntbl td {
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border)
+}
+
+.ntbl tr:last-child td {
+  border-bottom: none
+}
+
+.ntbl tr:hover td {
+  background: var(--hover)
+}
+
+/* ─── CHECKLIST ─── */
+.ncheck-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 5px;
+  border-radius: 4px;
+  transition: background .1s
+}
+
+.ncheck-item:hover {
+  background: var(--hover)
+}
+
+.nchk {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(55, 53, 47, .3);
+  border-radius: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  transition: all .15s
+}
+
+.nchk.done {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff
+}
+
+.ncht {
+  font-size: 13.5px;
+  color: var(--text);
+  flex: 1
+}
+
+.ncht.done {
+  text-decoration: line-through;
+  color: var(--text2)
+}
+
+/* ─── TIMELINE ─── */
+.ntl-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 7px 5px;
+  border-radius: 4px;
+  transition: background .1s
+}
+
+.ntl-item:hover {
+  background: var(--hover)
+}
+
+.ntl-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-top: 6px;
+  flex-shrink: 0
+}
+
+.ntl-txt {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.45
+}
+
+.ntl-time {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px
+}
+
+/* ─── PIPELINE ─── */
+.npipe-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: 4px;
+  transition: background .1s
+}
+
+.npipe-item:hover {
+  background: var(--hover)
+}
+
+.npipe-ic {
+  font-size: 16px;
+  flex-shrink: 0
+}
+
+.npipe-nm {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text)
+}
+
+.npipe-sub {
+  font-size: 11px;
+  color: var(--text2)
+}
+
+.npfill {
+  flex: 1
+}
+
+/* ─── QUICK ACTIONS ─── */
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 12px 0
+}
+
+.qa {
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px
+}
+
+.qa:hover {
+  background: var(--hover);
+  border-color: rgba(55, 53, 47, .2);
+  box-shadow: 0 2px 10px rgba(55, 53, 47, .07)
+}
+
+.qa-ic {
+  font-size: 18px;
+  margin-bottom: 4px
+}
+
+.qa-ttl {
+  font-size: 13.5px;
+  font-weight: 700
+}
+
+.qa-sub {
+  font-size: 12px;
+  color: var(--text2)
+}
+
+.qa-tag {
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 600
+}
+
+/* ─── MOOD ─── */
+.mood-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 10px 0
+}
+
+.mood-btn {
+  padding: 10px 6px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  font-family: var(--font)
+}
+
+.mood-btn:hover {
+  background: var(--hover);
+  border-color: rgba(55, 53, 47, .18)
+}
+
+.mood-btn.sel {
+  border-color: var(--green);
+  background: var(--green-bg)
+}
+
+.mood-em {
+  font-size: 20px;
+  line-height: 1
+}
+
+.mood-lbl {
+  font-size: 10px;
+  color: var(--text2);
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .02em
+}
+
+.mood-btn.sel .mood-lbl {
+  color: var(--green)
+}
+
+/* ─── SYS GRID ─── */
+.sys-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 12px 0
+}
+
+.sysc {
+  padding: 12px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--border)
+}
+
+.sysc-k {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 3px
+}
+
+.sysc-v {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.sysc-s {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px
+}
+
+/* ─── TWO/THREE COL ─── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px
+}
+
+/* ─── CHARTS ─── */
+.week-wrap {
+  height: 180px;
+  position: relative
+}
+
+.clegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px
+}
+
+.li {
+  display: flex;
+  align-items: center;
+  gap: 6px
+}
+
+.ldot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%
+}
+
+.lname {
+  font-size: 12px;
+  color: var(--text2)
+}
+
+.lpct {
+  font-size: 12px;
+  color: var(--text3)
+}
+
+/* ─── GRAPH ─── */
+.gc-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px
+}
+
+.gcb {
+  padding: 6px 13px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text2);
+  font-family: var(--font);
+  font-weight: 500;
+  transition: all .1s
+}
+
+.gcb:hover {
+  background: var(--hover);
+  color: var(--text)
+}
+
+.gcb.on {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text)
+}
+
+/* ─── PAGE TABS (main nav) ─── */
+#page-tabs {
+  position: sticky;
+  top: 44px;
+  z-index: 49;
+  background: rgba(255, 255, 255, .95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 80px;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none
+}
+
+#page-tabs::-webkit-scrollbar {
+  display: none
+}
+
+.ptab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: var(--font);
+  transition: color .12s;
+  white-space: nowrap;
+  flex-shrink: 0
+}
+
+.ptab:hover {
+  color: var(--text);
+  background: var(--hover)
+}
+
+.ptab.on {
+  color: var(--text);
+  border-bottom-color: var(--text);
+  font-weight: 600
+}
+
+.ptab-ic {
+  font-size: 14px
+}
+
+/* ─── DOCS ─── */
+.dtabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px
+}
+
+.dtab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: var(--font);
+  transition: color .1s
+}
+
+.dtab:hover {
+  color: var(--text)
+}
+
+.dtab.on {
+  color: var(--text);
+  border-bottom-color: var(--text);
+  font-weight: 600
+}
+
+.doc-frame {
+  display: none
+}
+
+.doc-frame.on {
+  display: block
+}
+
+.nlink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13.5px;
+  margin: 4px 0;
+  transition: all .1s
+}
+
+.nlink:hover {
+  background: var(--hover);
+  border-color: rgba(55, 53, 47, .18)
+}
+
+.nlink-arr {
+  color: var(--text2)
+}
+
+.dflow {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.85;
+  background: rgba(55, 53, 47, .03);
+  padding: 16px;
+  border-radius: 7px;
+  overflow-x: auto
+}
+
+/* ─── ACHIEVEMENT ─── */
+#achievement {
+  position: fixed;
+  top: 58px;
+  right: 16px;
+  z-index: 9000;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 16px;
+  min-width: 240px;
+  box-shadow: 0 8px 28px rgba(55, 53, 47, .12);
+  transform: translateX(130%);
+  transition: transform .35s cubic-bezier(.2, 1, .3, 1)
+}
+
+#achievement.show {
+  transform: translateX(0)
+}
+
+.ach-top {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 2px
+}
+
+.ach-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.ach-pts {
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 700;
+  margin-top: 2px
+}
+
