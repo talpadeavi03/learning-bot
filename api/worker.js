@@ -205,6 +205,40 @@ async function handleCommand(text, chatId, env) {
 
       await sendTelegram(chatId, message, env);
     }
+    
+    
+    case '/must': {
+      if (!args) {
+        await sendTelegram(chatId, '🔴 Usage: /must [task] — adds a must-complete priority\n\nExample: /must Submit assignment by 6pm', env);
+        return true;
+      }
+      const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+      priorities.unshift({ id: Date.now(), text: args, done: false, created: new Date().toISOString() });
+      await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
+      await sendTelegram(chatId, `🔴 *MUST-DO ADDED*\n\n"${args}"\n\nThis is locked in. No excuses.`, env);
+      return true;
+    }
+
+    case '/done': {
+      if (!args) {
+        const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+        const pending = priorities.filter(p => !p.done);
+        if (pending.length === 0) { await sendTelegram(chatId, '✅ No pending priorities. Clean slate!', env); return true; }
+        const list = pending.map((p, i) => `${i + 1}. ${p.text}`).join('\n');
+        await sendTelegram(chatId, `🔴 *Pending Must-Dos:*\n\n${list}\n\nReply /done [number] to mark complete`, env);
+        return true;
+      }
+      const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+      const pending = priorities.filter(p => !p.done);
+      const idx = parseInt(args) - 1;
+      if (isNaN(idx) || !pending[idx]) { await sendTelegram(chatId, '❌ Invalid number. Use /done to see list.', env); return true; }
+      const task = pending[idx];
+      task.done = true;
+      task.completedAt = new Date().toISOString();
+      await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
+      await sendTelegram(chatId, `✅ *DONE: "${task.text}"*\n\nTask crushed. Keep going. 💪`, env);
+      return true;
+    }
 
     case '/goal': {
       if (!args) {
@@ -545,7 +579,7 @@ async function handleCommand(text, chatId, env) {
     case '/commands': {
       await sendTelegram(chatId,
         `*AETHER Commands* 🤖\n\n` +
-        `*📊 CORE*\n/goal [text] — set today goal\n/mood [1-5] — quick mood log\n/stats — weekly summary\n/flow — current flow state\n\n` +
+        `*📊 CORE*\\n/must [task] — add must-complete priority\\n/done [num] — mark priority done\\n/goal [text] — set today goal\\n/mood [1-5] — quick mood log\\n/stats — weekly summary\\n/flow — current flow state\\n\\n` +
         `*💪 HEALTH*\n/exercise [mins] [type]\n/sleep [hours]\n/food [description]\n/water [litres]\n/weight [kg]\n\n` +
         `*💰 MONEY*\n/spend [amount] [category]\n/income [amount] [source]\n\n` +
         `*💼 CAREER*\n/job [company] — log application\n/interview [company]\n\n` +
@@ -740,6 +774,9 @@ export default {
       if (url.pathname === '/log-github' && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger' && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health' && request.method === 'GET') return handleHealth(request, env);
+      if (url.pathname === '/priorities' && request.method === 'GET') return handleGetPriorities(request, env);
+      if (url.pathname === '/priorities' && request.method === 'POST') return handleAddPriority(request, env);
+      if (url.pathname === '/priorities/done' && request.method === 'POST') return handleDonePriority(request, env);
       if (url.pathname === '/tabs' && request.method === 'GET') {
         const tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
         return new Response(JSON.stringify({ tabs }), {
@@ -1108,6 +1145,38 @@ async function handleChat(request, env) {
 
   return jsonResp({ reply });
 }
+
+
+async function handleGetPriorities(request, env) {
+  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+  return new Response(JSON.stringify(priorities), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
+async function handleAddPriority(request, env) {
+  const { text } = await request.json();
+  if (!text?.trim()) return new Response(JSON.stringify({ error: 'No text' }), { status: 400 });
+  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+  const item = { id: Date.now(), text: text.trim(), done: false, created: new Date().toISOString() };
+  priorities.unshift(item);
+  await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
+  return new Response(JSON.stringify({ ok: true, item }), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
+async function handleDonePriority(request, env) {
+  const { id } = await request.json();
+  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+  const item = priorities.find(p => p.id === id);
+  if (item) { item.done = true; item.completedAt = new Date().toISOString(); }
+  await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
 
 // ═════════════════════════════════════════════════════════════════
 // 3. LOG STATE

@@ -239,3 +239,87 @@ document.querySelectorAll('.ptab').forEach(tab => {
     if (window.innerWidth <= 768) closeSidebar();
   });
 });
+
+
+// ─── PRIORITY QUEUE ───────────────────────────────────────────────
+async function loadPriorities() {
+  try {
+    const res = await fetch(WORKER_URL + '/priorities');
+    const data = await res.json();
+    renderPriorities(data);
+  } catch(e) { console.warn('Priority load failed', e); }
+}
+
+function renderPriorities(list) {
+  const el = document.getElementById('priority-list');
+  const empty = document.getElementById('priority-empty');
+  const count = document.getElementById('priority-count');
+  if (!el) return;
+
+  const pending = list.filter(p => !p.done);
+  const done = list.filter(p => p.done);
+
+  count.textContent = `${pending.length} pending · ${done.length} done`;
+
+  if (list.length === 0) {
+    empty.style.display = 'block';
+    el.innerHTML = '';
+    el.appendChild(empty);
+    return;
+  }
+  empty.style.display = 'none';
+
+  el.innerHTML = pending.map(p => `
+    <div id="pri-${p.id}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;background:var(--red-bg);border:1px solid rgba(212,76,71,.18);transition:opacity .3s">
+      <button onclick="markPriorityDone(${p.id})" title="Mark done"
+        style="width:20px;height:20px;border-radius:50%;border:2px solid var(--red);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--red)">○</button>
+      <span style="flex:1;font-size:13.5px;font-weight:600;color:var(--text)">${p.text}</span>
+      <span style="font-size:10.5px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.04em">MUST DO</span>
+    </div>
+  `).join('') + (done.length > 0 ? `
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      ${done.slice(0,3).map(p => `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 12px;opacity:.5">
+          <span style="color:var(--green);font-size:14px">✓</span>
+          <span style="text-decoration:line-through;font-size:13px;color:var(--text2)">${p.text}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '');
+}
+
+async function addPriority() {
+  const input = document.getElementById('priority-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  try {
+    const res = await fetch(WORKER_URL + '/priorities', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      showAchievement('Priority Locked In', '🔴 Must-do added');
+      loadPriorities();
+    }
+  } catch(e) { console.warn('Add priority failed', e); }
+}
+
+async function markPriorityDone(id) {
+  const el = document.getElementById('pri-' + id);
+  if (el) el.style.opacity = '0.3';
+  try {
+    await fetch(WORKER_URL + '/priorities/done', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    showAchievement('Task Crushed! 💪', '+50 XP');
+    setTimeout(loadPriorities, 400);
+  } catch(e) { console.warn('Done priority failed', e); }
+}
+
+// Load on startup
+loadPriorities();
