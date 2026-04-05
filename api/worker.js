@@ -649,11 +649,7 @@ export default {
         // 🔹 Pattern engine (AFTER events)
         const patterns = analyzePatterns(events);
 
-        const patternText = `
-        📊 Pattern Insight:
-        Best hour: ${patterns.bestHour || "--"}:00
-        Trend: ${patterns.trend || "collecting"}
-        `;
+        const patternText = `📊 Pattern Insight:\nBest hour: ${patterns.bestHour}:00\nTrend: ${patterns.trend}`;
 
         // 🔹 Helpers
         function energyLabel(e) {
@@ -717,20 +713,8 @@ export default {
         }
 
         // 🔥 FINAL OUTPUT (NOW WITH PATTERNS)
-        const finalResponse = `🧠 JARVIS CORE
+        const finalResponse = `🧠 JARVIS CORE\n\n⚡ Energy: ${energyText}\n🔥 State: ${analysis.state.toUpperCase()}\n📈 Trend: ${trend}\n\n📌 ${response}\n\n${patternText}`;
 
-        ⚡ Energy: ${energyText} (${analysis.energy.toFixed(2)})
-        🔥 State: ${formatState(analysis.state)}
-        📈 Trend: ${patterns.trend || "stable"}
-
-        💡 Insight:
-        You are in a ${analysis.state.replace("_", " ")} zone.
-
-        🧭 Next Action:
-        ${response || advice}
-
-        ${patternText}
-        `;
         console.log("PATTERN:", patternText);
 
         // 🔥 TIMELINE (NEW)
@@ -1079,17 +1063,10 @@ async function handleWebhook(request, env) {
   // original logging reply
   const baseReply = buildTelegramReply(parsed, inputType, rawText);
 
-  const jarvisReply = `
-
-  🧠 *JARVIS*
-  ⚡ Energy: ${analysis.energy.toFixed(2)}
-  🔥 State: ${analysis.state}
-
-  ${analysis.advice}
-  `;
+  const jarvisReply = `🧠 *JARVIS*\n⚡ Energy: ${analysis.energy.toFixed(2)}\n🔥 State: ${analysis.state.toUpperCase()}\n\n${analysis.advice}`;
 
   // send combined response
-  await sendTelegram(chatId, baseReply + jarvisReply, env);
+  await sendTelegram(chatId, baseReply + '\n\n' + jarvisReply, env);
 
   return textResp('OK', 200);
 }
