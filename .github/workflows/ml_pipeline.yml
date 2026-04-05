@@ -1,5 +1,9 @@
 name: AETHER ML Pipeline
 
+concurrency:
+  group: aether-ml-pipeline
+  cancel-in-progress: true
+  
 on:
   schedule:
     - cron: '30 19 * * *'   # 01:00 IST
