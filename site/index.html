@@ -52,6 +52,9 @@
     <div class="ach-pts" id="ach-pts"></div>
   </div>
 
+  <!-- SIDEBAR BACKDROP (mobile overlay) -->
+  <div id="sb-backdrop" onclick="closeSidebar()"></div>
+
   <!-- SIDEBAR -->
   <div id="sb">
     <div class="sb-ws" onclick="openGate()">
@@ -102,6 +105,7 @@
 
     <!-- TOPBAR -->
     <div id="topbar">
+      <button id="sb-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
       <div class="breadcrumb">
         <span>Avi Talpade</span>
         <span class="sep">›</span>

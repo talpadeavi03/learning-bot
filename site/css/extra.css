@@ -99,53 +99,201 @@
   border-radius: 3px
 }
 
-/* ─── RESPONSIVE ─── */
-@media(max-width:768px) {
-  #sb {
-    transform: translateX(-100%)
-  }
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — Mobile-first fixes
+   All breakpoints in one place. Edit here only.
+═══════════════════════════════════════════════ */
 
-  #main {
-    margin-left: 0
-  }
+/* ── Hamburger button (hidden on desktop) ── */
+#sb-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 8px;
+  color: var(--text);
+  line-height: 1;
+  flex-shrink: 0
+}
+
+/* ── Sidebar overlay backdrop ── */
+#sb-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 99;
+  backdrop-filter: blur(2px)
+}
+
+#sb-backdrop.show {
+  display: block
+}
+
+/* ── Tablet — 900px ── */
+@media (max-width: 900px) {
+  :root { --sbw: 220px }
 
   .pg-head,
   .pg-content,
   .pg-footer {
-    padding-left: 20px;
-    padding-right: 20px
+    padding-left: 40px;
+    padding-right: 40px
   }
 
-  .two-col,
   .three-col {
-    grid-template-columns: 1fr
-  }
-
-  .stat-row {
     grid-template-columns: repeat(2, 1fr)
   }
+}
 
-  .qa-grid {
-    grid-template-columns: 1fr
+/* ── Mobile — 768px ── */
+@media (max-width: 768px) {
+
+  /* Sidebar becomes off-canvas drawer */
+  #sb {
+    transform: translateX(-100%);
+    z-index: 200;
+    width: 260px;
+    box-shadow: 4px 0 24px rgba(0,0,0,.12)
   }
 
+  #sb.open {
+    transform: translateX(0)
+  }
+
+  /* Main fills full width */
+  #main {
+    margin-left: 0;
+    width: 100%;
+    min-width: 0
+  }
+
+  /* Show hamburger, hide breadcrumb text clutter */
+  #sb-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center
+  }
+
+  /* Topbar: compact, no overflow */
+  #topbar {
+    padding: 0 12px;
+    gap: 6px;
+    height: 48px;
+    overflow-x: auto;
+    overflow-y: hidden
+  }
+
+  #topbar::-webkit-scrollbar { display: none }
+
+  .breadcrumb { font-size: 12px }
+
+  /* Clock: hide on very small screens */
+  #tbclk { display: none }
+
+  /* Universe select: smaller */
+  #uni-select { font-size: 11px; padding: 2px 4px }
+
+  /* Page tabs: scrollable row */
+  #page-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 8px
+  }
+
+  #page-tabs::-webkit-scrollbar { display: none }
+
+  .ptab {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 7px 12px;
+    font-size: 12px
+  }
+
+  /* Page header: less padding, smaller title */
+  .pg-head,
+  .pg-content,
+  .pg-footer {
+    padding-left: 16px;
+    padding-right: 16px
+  }
+
+  .pg-icon { font-size: 40px }
+
+  .pg-title { font-size: 26px }
+
+  .pg-sub { font-size: 13px }
+
+  /* Cover: smaller on mobile */
+  .pg-cover { height: 100px }
+
+  /* Grids collapse to single column */
+  .two-col,
+  .three-col,
+  .qa-grid,
   .sys-grid {
     grid-template-columns: 1fr
   }
 
+  /* Stats: 2 columns on mobile */
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px
+  }
+
+  /* Mood row: fit 5 emojis */
   .mood-row {
     grid-template-columns: repeat(5, 1fr)
   }
+
+  /* Big numbers: smaller */
+  .big-num { font-size: 38px }
+  .pwr-num { font-size: 32px }
+
+  /* Tables: horizontal scroll */
+  .ntbl-wrap, table {
+    overflow-x: auto;
+    display: block;
+    -webkit-overflow-scrolling: touch
+  }
+
+  /* Footer: less padding */
+  .pg-footer { padding: 16px }
 }
 
+/* ── Small phones — 480px ── */
+@media (max-width: 480px) {
+
+  /* Stats: single column on very small */
+  .stat-row {
+    grid-template-columns: 1fr
+  }
+
+  .pg-title { font-size: 22px }
+
+  .pg-icon { font-size: 34px }
+
+  /* Power chip: stack vertically */
+  .power-chip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px
+  }
+
+  /* Chat panel: full screen on tiny phones */
+  #chatPage {
+    width: 100% !important;
+    right: 0 !important;
+    border-radius: 0 !important
+  }
+}
+
+/* ─── ANIMATIONS ─── */
 @keyframes blink {
-
-  0%,
-  100% {
-    opacity: 1
-  }
-
-  50% {
-    opacity: .2
-  }
+  0%, 100% { opacity: 1 }
+  50%       { opacity: .2 }
 }

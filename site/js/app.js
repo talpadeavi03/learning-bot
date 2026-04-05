@@ -208,3 +208,34 @@ async function checkWorker() {
 }
 setTimeout(checkWorker, 2500);
 window.addEventListener('resize', () => { if (chatOpen) initArcReactor() });
+
+// ─── SIDEBAR TOGGLE (mobile) ──────────────────────────────────────
+function toggleSidebar() {
+  const sb = document.getElementById('sb');
+  const bd = document.getElementById('sb-backdrop');
+  if (sb.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    sb.classList.add('open');
+    bd.classList.add('show');
+  }
+}
+
+function closeSidebar() {
+  document.getElementById('sb').classList.remove('open');
+  document.getElementById('sb-backdrop').classList.remove('show');
+}
+
+// Close sidebar when a nav item is clicked on mobile
+document.querySelectorAll('.sbi').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
+
+// Close sidebar when a page tab is clicked on mobile
+document.querySelectorAll('.ptab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
