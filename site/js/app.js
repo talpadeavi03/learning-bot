@@ -66,6 +66,37 @@ async function decryptText(base64Str, passkey) {
   }
 }
 
+// populate Learning tab stat chips
+const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+const m = data.metrics || {};
+set('ld-energy', (m.focus || 0) + '%');
+set('ld-focus',  (m.learning || 0) + '%');
+set('ld-stress', (100 - (m.mood || 70)) + '%');
+set('ld-events', data.metrics?.total_events || 0);
+set('ld-streak', (data.streak || 0) + ' 🔥');
+set('ld-flow',   data.flowLabel || 'NOMINAL');
+
+// Life dimensions mini bars in Learning tab
+const dimEl = document.getElementById('ld-dims-chart');
+if (dimEl && data.lifeStats?.dimensions) {
+  const dims = [
+    ['📚','Study','study'],['💪','Fitness','fitness'],['🧠','Mental','mental'],
+    ['🤝','Social','social'],['💰','Finance','finance'],['🚀','Career','career'],['😴','Sleep','sleep']
+  ];
+  dimEl.innerHTML = dims.map(([ic,label,key]) => {
+    const v = data.lifeStats.dimensions[key] || 0;
+    const col = v >= 70 ? 'var(--green)' : v >= 40 ? 'var(--yellow)' : v === 0 ? 'var(--border)' : 'var(--red)';
+    return `<div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:14px;width:20px">${ic}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text);width:70px">${label}</span>
+      <div style="flex:1;height:6px;border-radius:3px;background:var(--border)">
+        <div style="height:100%;border-radius:3px;background:${col};width:${v}%"></div>
+      </div>
+      <span style="font-size:12px;font-weight:700;color:${col};width:28px;text-align:right">${v||'—'}</span>
+    </div>`;
+  }).join('');
+}
+
 // CHAT
 let chatOpen = false;
 async function loadTabs() {
