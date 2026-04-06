@@ -66,17 +66,8 @@
     <div class="sbi act" id="nav-home" onclick="switchView('home',this)">
       <span class="sbi-ic">🏠</span> Home
     </div>
-    <div class="sbi" id="nav-data" onclick="switchView('data',this)">
-      <span class="sbi-ic">📊</span> Data
-    </div>
-    <div class="sbi" id="nav-graph" onclick="switchView('graph',this)">
-      <span class="sbi-ic">🧠</span> Brain
-    </div>
-    <div class="sbi" id="nav-system" onclick="switchView('system',this)">
-      <span class="sbi-ic">⚙️</span> System
-    </div>
-    <div class="sbi" id="nav-docs" onclick="switchView('docs',this)">
-      <span class="sbi-ic">📄</span> Docs
+    <div class="sbi" id="nav-learning" onclick="switchView('learning',this)">
+      <span class="sbi-ic">📚</span><span>Learning</span>
     </div>
     <div class="sb-div"></div>
     <div class="sb-lbl">Quick Sends</div>
@@ -223,277 +214,148 @@
           </div>
         </div>
 
-        <div class="two-col">
-          <div>
-            <div class="nh2">⚡ Energy Core</div>
-            <div class="ndiv"></div>
-            <div class="big-num-box">
-              <div class="big-num" id="energyNum">7.4</div>
-              <div class="big-lbl">Power Index / 10</div>
-            </div>
-            <div class="npr">
-              <div class="nprh"><span class="nprl">Focus</span><span class="nprv" id="focusPct">82%</span></div>
-              <div class="nprt">
-                <div class="nprf" id="focusBar"></div>
-              </div>
-            </div>
-            <div class="npr">
-              <div class="nprh"><span class="nprl">Mood</span><span class="nprv" id="moodPct">68%</span></div>
-              <div class="nprt">
-                <div class="nprf dim" id="moodBar"></div>
-              </div>
-            </div>
-            <div class="npr">
-              <div class="nprh"><span class="nprl">Sleep</span><span class="nprv" id="sleepPct">74%</span></div>
-              <div class="nprt">
-                <div class="nprf dim" id="sleepBar"></div>
-              </div>
-            </div>
-            <div class="npr">
-              <div class="nprh"><span class="nprl">Productivity</span><span class="nprv" id="prodPct">91%</span></div>
-              <div class="nprt">
-                <div class="nprf" id="prodBar"></div>
-              </div>
-            </div>
-
-            <div class="ndiv"></div>
-            <div class="nh3">😶 Today's Mood</div>
-            <div class="mood-row">
-              <button class="mood-btn sel" onclick="setMood(this)">
-                <div class="mood-em">😤</div>
-                <div class="mood-lbl">Focused</div>
-              </button>
-              <button class="mood-btn" onclick="setMood(this)">
-                <div class="mood-em">😊</div>
-                <div class="mood-lbl">Good</div>
-              </button>
-              <button class="mood-btn" onclick="setMood(this)">
-                <div class="mood-em">😐</div>
-                <div class="mood-lbl">Neutral</div>
-              </button>
-              <button class="mood-btn" onclick="setMood(this)">
-                <div class="mood-em">😴</div>
-                <div class="mood-lbl">Tired</div>
-              </button>
-              <button class="mood-btn" onclick="setMood(this)">
-                <div class="mood-em">🔥</div>
-                <div class="mood-lbl">Hyper</div>
-              </button>
-            </div>
+        <!-- SOLO LEVELING STATS -->
+        <div class="two-col" style="margin-bottom:20px">
+          <div style="border:1px solid var(--border);border-radius:10px;padding:20px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Solo Leveling</div>
+            <div style="font-size:28px;font-weight:800;color:var(--text)" id="sl-level">LV —</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:16px" id="sl-xp">Loading stats...</div>
+            <div id="sl-stats" style="display:flex;flex-direction:column;gap:8px"></div>
           </div>
-
-          <div>
-            <div class="nh2">📋 Recent Missions</div>
-            <div class="ndiv"></div>
-            <table class="ntbl">
-              <thead>
-                <tr>
-                  <th>Mission</th>
-                  <th>Type</th>
-                  <th>Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Neural Networks — Chapter 4</td>
-                  <td><span class="tag tb">LEARN</span></td>
-                  <td>47 min</td>
-                </tr>
-                <tr>
-                  <td>ML Pipeline Build</td>
-                  <td><span class="tag tg">CODE</span></td>
-                  <td>2.1h</td>
-                </tr>
-                <tr>
-                  <td>Cloudflare Worker v2 Deploy</td>
-                  <td><span class="tag tgr">OPS</span></td>
-                  <td>38 min</td>
-                </tr>
-                <tr>
-                  <td>Feature Extraction Script</td>
-                  <td><span class="tag tg">CODE</span></td>
-                  <td>1.3h</td>
-                </tr>
-                <tr>
-                  <td>AI Insight Review</td>
-                  <td><span class="tag tgr">ANALYSIS</span></td>
-                  <td>22 min</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div class="nh3" style="margin-top:20px">☑️ Active Quests</div>
-            <div class="ndiv"></div>
-            <div class="ncheck-item">
-              <div class="nchk done" onclick="toggleGoal(this)">✓</div>
-              <div class="ncht done">Complete ML feature extractor</div><span class="tag tg"
-                style="font-size:11px">CODE</span>
-            </div>
-            <div class="ncheck-item">
-              <div class="nchk done" onclick="toggleGoal(this)">✓</div>
-              <div class="ncht done">Study Chapter 4 deep learning</div><span class="tag tb"
-                style="font-size:11px">LEARN</span>
-            </div>
-            <div class="ncheck-item">
-              <div class="nchk" onclick="toggleGoal(this)"></div>
-              <div class="ncht">Add GITHUB_TOKEN to CF Worker</div><span class="tag ty"
-                style="font-size:11px">OPS</span>
-            </div>
-            <div class="ncheck-item">
-              <div class="nchk" onclick="toggleGoal(this)"></div>
-              <div class="ncht">Log 30+ clean training events</div><span class="tag tgr"
-                style="font-size:11px">DATA</span>
-            </div>
+          <div style="border:1px solid var(--border);border-radius:10px;padding:20px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">Life Dimensions — Today</div>
+            <div id="life-dims" style="display:flex;flex-direction:column;gap:10px"></div>
           </div>
         </div>
 
-        <div class="nh2" style="margin-top:28px">📊 Character Stats — Today</div>
+        <!-- NEGATIVES + WINS -->
+        <div class="two-col" style="margin-bottom:20px">
+          <div style="border:1.5px solid var(--red);border-radius:10px;padding:18px;background:var(--red-bg)">
+            <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">⚠️ What's Holding You Back</div>
+            <div id="negatives-panel"><div style="color:var(--text3);font-size:13px">Loading patterns...</div></div>
+          </div>
+          <div style="border:1.5px solid var(--green);border-radius:10px;padding:18px;background:var(--green-bg)">
+            <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">🏆 Recent Wins</div>
+            <div id="wins-panel"><div style="color:var(--text3);font-size:13px">Loading wins...</div></div>
+          </div>
+        </div>
+
+        <!-- TODAY STATS -->
+        <div class="stat-row" style="margin-bottom:20px">
+          <div class="sc"><div class="sc-n" id="sd-energy">—</div><div class="sc-l">Energy %</div></div>
+          <div class="sc"><div class="sc-n" id="sd-focus">—</div><div class="sc-l">Focus %</div></div>
+          <div class="sc"><div class="sc-n" id="sd-stress">—</div><div class="sc-l">Stress %</div></div>
+          <div class="sc"><div class="sc-n" id="sd-events">—</div><div class="sc-l">Events Today</div></div>
+          <div class="sc"><div class="sc-n" id="sd-streak">—</div><div class="sc-l">Streak 🔥</div></div>
+          <div class="sc"><div class="sc-n" id="sd-wins">—</div><div class="sc-l">Total Wins</div></div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="nh2">⚡ Quick Actions</div>
         <div class="ndiv"></div>
-        <div class="stat-row">
-          <div class="sc">
-            <div class="sc-n">6.2h</div>
-            <div class="sc-l">Deep Work</div>
-            <div class="sc-s">+0.8h vs avg ↑</div>
+        <div class="qa-grid" style="margin-bottom:24px">
+          <div class="qa" onclick="quickSend('Give me a 25-minute Pomodoro plan')">
+            <div class="qa-ic">⏱️</div><div class="qa-ttl">Pomodoro</div>
+            <div class="qa-sub">25-min focus burst</div>
           </div>
-          <div class="sc">
-            <div class="sc-n">12</div>
-            <div class="sc-l">Tasks Done</div>
-            <div class="sc-s">87% complete</div>
+          <div class="qa" onclick="quickSend('Analyze my week and give insights')">
+            <div class="qa-ic">🔍</div><div class="qa-ttl">Intel Scan</div>
+            <div class="qa-sub">Weekly analysis</div>
           </div>
-          <div class="sc">
-            <div class="sc-n">4</div>
-            <div class="sc-l">GH Commits</div>
-            <div class="sc-s">main + dev</div>
+          <div class="qa" onclick="quickSend('What should I work on right now?')">
+            <div class="qa-ic">🎯</div><div class="qa-ttl">Next Mission</div>
+            <div class="qa-sub">AI recommendation</div>
           </div>
-          <div class="sc">
-            <div class="sc-n">94</div>
-            <div class="sc-l">AI Score</div>
-            <div class="sc-s">Peak Zone</div>
+          <div class="qa" onclick="quickSend('Give me motivation based on my stats')">
+            <div class="qa-ic">💥</div><div class="qa-ttl">Power Surge</div>
+            <div class="qa-sub">Neural boost</div>
           </div>
         </div>
 
-        <div class="two-col" style="margin-top:28px">
-          <div>
-            <div class="nh2">🎯 Mission Queue</div>
-            <div class="ndiv"></div>
-            <div class="npipe-item">
-              <div class="npipe-ic">🔴</div>
-              <div>
-                <div class="npipe-nm">Send 10+ clean messages to bot</div>
-                <div class="npipe-sub">Mix energy levels, topics, goals</div>
-              </div>
-              <div class="npfill"></div><span class="tag tr">URGENT</span>
-            </div>
-            <div class="npipe-item">
-              <div class="npipe-ic">🔴</div>
-              <div>
-                <div class="npipe-nm">Add GITHUB_TOKEN to Cloudflare</div>
-                <div class="npipe-sub">Worker variables — workflow scope</div>
-              </div>
-              <div class="npfill"></div><span class="tag tr">URGENT</span>
-            </div>
-            <div class="npipe-item">
-              <div class="npipe-ic">🟡</div>
-              <div>
-                <div class="npipe-nm">Add /exercise /sleep /food /spend</div>
-                <div class="npipe-sub">Commands to CF Worker</div>
-              </div>
-              <div class="npfill"></div><span class="tag ty">THIS WEEK</span>
-            </div>
-            <div class="npipe-item">
-              <div class="npipe-ic">🟡</div>
-              <div>
-                <div class="npipe-nm">Set up dev branch + wrangler.toml</div>
-                <div class="npipe-sub">Separate KV for dev environment</div>
-              </div>
-              <div class="npfill"></div><span class="tag ty">THIS WEEK</span>
-            </div>
-            <div class="npipe-item">
-              <div class="npipe-ic">🟡</div>
-              <div>
-                <div class="npipe-nm">CF Vectorize + AES-256 encryption</div>
-                <div class="npipe-sub">Semantic memory + data security</div>
-              </div>
-              <div class="npfill"></div><span class="tag ty">THIS WEEK</span>
-            </div>
-            <div class="npipe-item">
-              <div class="npipe-ic">⚪</div>
-              <div>
-                <div class="npipe-nm">MLflow + Colab + APK + Calendar</div>
-              </div>
-              <div class="npfill"></div><span class="tag tgr">SEASON 2</span>
-            </div>
+        <!-- JARVIS INSIGHTS (real data) -->
+        <div class="nh2">🧠 JARVIS Insights</div>
+        <div class="ndiv"></div>
+        <div id="insights-panel" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+          <div style="color:var(--text3);font-size:13px">Analyzing your patterns...</div>
+        </div>
 
-            <div class="nh2" style="margin-top:22px">⚡ Quick Actions</div>
+      </div>
+
+
+      <!-- ══ LEARNING ══ -->
+      <div class="view" id="view-learning">
+
+        <!-- DATA SECTION -->
+        <div class="nh2">📊 Data & Charts</div>
+        <div class="ndiv"></div>
+        <canvas id="waveCanvas" height="80" style="width:100%;border-radius:7px;background:rgba(55,53,47,.02);border:1px solid var(--border);margin-bottom:24px"></canvas>
+        <div class="two-col" style="margin-bottom:24px">
+          <div>
+            <div class="nh2">📅 Weekly Energy</div>
             <div class="ndiv"></div>
-            <div class="qa-grid">
-              <div class="qa" onclick="quickSend('Give me a 25-minute Pomodoro study plan for neural networks')">
-                <div class="qa-ic">⏱️</div>
-                <div class="qa-ttl">Pomodoro Strike</div>
-                <div class="qa-sub">25-min focus burst</div>
-                <div class="qa-tag">50 MP · TIME MASTERY</div>
-              </div>
-              <div class="qa" onclick="quickSend('Analyze my week and give me a detailed insight report')">
-                <div class="qa-ic">🔍</div>
-                <div class="qa-ttl">Intel Scan</div>
-                <div class="qa-sub">Weekly analysis</div>
-                <div class="qa-tag">80 MP · PERCEPTION</div>
-              </div>
-              <div class="qa" onclick="quickSend('What should I study tomorrow based on my current progress?')">
-                <div class="qa-ic">🗺️</div>
-                <div class="qa-ttl">Mission Planner</div>
-                <div class="qa-sub">AI schedule builder</div>
-                <div class="qa-tag">60 MP · STRATEGY</div>
-              </div>
-              <div class="qa" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')">
-                <div class="qa-ic">💥</div>
-                <div class="qa-ttl">Power Surge</div>
-                <div class="qa-sub">Neural boost</div>
-                <div class="qa-tag">100 MP · WILLPOWER</div>
-              </div>
-            </div>
+            <div class="week-wrap"><canvas id="weekChart"></canvas></div>
           </div>
-
           <div>
-            <div class="nh2">🧠 JARVIS Insights</div>
+            <div class="nh2">🥧 Time Split</div>
             <div class="ndiv"></div>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <div class="callout cg">
-                <div class="c-ic">🧠</div>
-                <div>
-                  <div class="c-ttl">Peak Focus Window Detected</div>
-                  <div class="c-bod">Your deep work sessions between 10AM–2PM show 34% higher output. Schedule complex
-                    ML tasks in this window.</div>
-                  <div class="c-tag">HIGH VALUE</div>
-                </div>
-              </div>
-              <div class="callout cr">
-                <div class="c-ic">⚡</div>
-                <div>
-                  <div class="c-ttl">Streak at Risk</div>
-                  <div class="c-bod">You've coded 11 days straight. Missing today would reset your streak and lower AI
-                    score by 12 points.</div>
-                  <div class="c-tag">CRITICAL</div>
-                </div>
-              </div>
-              <div class="callout cy">
-                <div class="c-ic">📈</div>
-                <div>
-                  <div class="c-ttl">ML Pipeline Ready for Real Data</div>
-                  <div class="c-bod">Infrastructure 100% done. The model needs 30+ clean events for reliable
-                    predictions.</div>
-                  <div class="c-tag">ACTION NEEDED</div>
-                </div>
-              </div>
-            </div>
+            <div style="max-width:180px;margin:0 auto"><canvas id="donutChart"></canvas></div>
+          </div>
+        </div>
 
-            <div class="nh2" style="margin-top:22px">🧬 Neural Memory Log</div>
+        <!-- BRAIN SECTION -->
+        <div class="nh2" style="margin-top:32px">🧠 Neural Memory — Code Graph</div>
+        <div class="ndiv"></div>
+        <div class="gc-row">
+          <button class="gcb on" onclick="setGraphMode('neural',this)">Neural</button>
+          <button class="gcb" onclick="setGraphMode('cluster',this)">Cluster</button>
+          <button class="gcb" onclick="setGraphMode('flow',this)">Flow</button>
+          <button class="gcb" onclick="resetGraph()">Reset</button>
+        </div>
+        <canvas id="graphCanvas" style="width:100%;height:55vh;border:1px solid var(--border);border-radius:9px;display:block;cursor:crosshair;background:rgba(55,53,47,.02);margin-bottom:32px"></canvas>
+
+        <!-- SYSTEM SECTION -->
+        <div class="nh2" style="margin-top:8px">⚙️ System & Pipeline</div>
+        <div class="ndiv"></div>
+        <div class="two-col" style="margin-bottom:32px">
+          <div>
+            <div class="sys-grid">
+              <div class="sysc"><div class="sysc-k">Frontend</div><div class="sysc-v">Cloudflare Pages</div></div>
+              <div class="sysc"><div class="sysc-k">API</div><div class="sysc-v">CF Worker v2</div></div>
+              <div class="sysc"><div class="sysc-k">Database</div><div class="sysc-v">Supabase Postgres</div></div>
+              <div class="sysc"><div class="sysc-k">ML Runner</div><div class="sysc-v">Railway</div></div>
+              <div class="sysc"><div class="sysc-k">Ingestion</div><div class="sysc-v">Telegram Bot</div></div>
+              <div class="sysc"><div class="sysc-k">AI Model</div><div class="sysc-v">Llama 3 + Whisper</div></div>
+            </div>
+            <div class="nh2" style="margin-top:16px">🔀 Data Flow</div>
             <div class="ndiv"></div>
-            <div id="neuralMemoryFeed">
-              <div style="font-size:12px; color:var(--text2); padding:10px 0;">Loading neural link memory...</div>
+            <pre class="dflow">Telegram → CF Worker → Supabase + KV
+  → Railway (every 6h)
+  → feature_extractor → train_models
+  → predict → push_dashboard → UI</pre>
+          </div>
+          <div>
+            <div class="nh2">🔄 Pipeline Status</div>
+            <div class="ndiv"></div>
+            <div id="pipeline-status">
+              <div class="npipe-item"><div class="npipe-ic">📥</div><div><div class="npipe-nm">pull_events.py</div><div class="npipe-sub">Supabase → events.csv</div></div><div class="npfill"></div><span class="tag tg">OK</span></div>
+              <div class="npipe-item"><div class="npipe-ic">🧹</div><div><div class="npipe-nm">data_cleaner.py</div><div class="npipe-sub">Remove bad events</div></div><div class="npfill"></div><span class="tag tg">OK</span></div>
+              <div class="npipe-item"><div class="npipe-ic">🏋</div><div><div class="npipe-nm">train_models.py</div><div class="npipe-sub">RandomForest · 15 features</div></div><div class="npfill"></div><span class="tag ty" id="train-status">WAITING</span></div>
+              <div class="npipe-item"><div class="npipe-ic">🔮</div><div><div class="npipe-nm">predict.py</div><div class="npipe-sub">Flow + peak hour</div></div><div class="npfill"></div><span class="tag ty" id="predict-status">WAITING</span></div>
+              <div class="npipe-item"><div class="npipe-ic">📤</div><div><div class="npipe-nm">push_dashboard.py</div><div class="npipe-sub">Predictions → Supabase + KV</div></div><div class="npfill"></div><span class="tag tg">OK</span></div>
             </div>
           </div>
         </div>
+
+        <!-- DOCS SECTION -->
+        <div class="nh2" style="margin-top:8px">📄 Docs & Plan</div>
+        <div class="ndiv"></div>
+        <div class="dtabs">
+          <button class="dtab on" onclick="showDoc('plan',this)">Master Plan</button>
+          <button class="dtab" onclick="showDoc('arch',this)">Architecture</button>
+          <button class="dtab" onclick="showDoc('progress',this)">Progress</button>
+        </div>
+        <!-- paste your existing doc-plan, doc-arch, doc-progress divs here from the old view-docs -->
+
       </div>
 
       <!-- ══ DATA ══ -->
