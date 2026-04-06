@@ -52,51 +52,12 @@
     <div class="ach-pts" id="ach-pts"></div>
   </div>
 
-  <!-- SIDEBAR BACKDROP (mobile overlay) -->
-  <div id="sb-backdrop" onclick="closeSidebar()"></div>
-
-  <!-- SIDEBAR -->
-  <div id="sb">
-    <div class="sb-ws" onclick="openGate()">
-      <div class="sb-ws-ic">⚡</div>
-      <div class="sb-ws-nm">Avi Talpade</div>
-      <div class="sb-ws-dot">···</div>
-    </div>
-    <div class="sb-div"></div>
-    <div class="sbi act" id="nav-home" onclick="switchView('home',this)">
-      <span class="sbi-ic">🏠</span> Home
-    </div>
-    <div class="sbi" id="nav-learning" onclick="switchView('learning',this)">
-      <span class="sbi-ic">📚</span><span>Learning</span>
-    </div>
-    <div class="sb-div"></div>
-    <div class="sb-lbl">Quick Sends</div>
-    <div class="sbi" onclick="quickSend('What should I focus on right now?')">
-      <span class="sbi-ic">⏱️</span> Focus Now
-    </div>
-    <div class="sbi" onclick="quickSend('Give me my daily briefing')">
-      <span class="sbi-ic">📋</span> Daily Brief
-    </div>
-    <div class="sbi" onclick="quickSend('Analyze my productivity this week')">
-      <span class="sbi-ic">🔍</span> Analyze Week
-    </div>
-    <div class="sbi" onclick="quickSend('I need motivation. Give me a powerful message based on my stats.')">
-      <span class="sbi-ic">💥</span> Power Surge
-    </div>
-    <div class="sb-btm">
-      <button class="sb-jarvis" onclick="openChat()">
-        <div class="jdot"></div>
-        Open J.A.R.V.I.S
-      </button>
-    </div>
-  </div>
-
+  
   <!-- MAIN -->
   <div id="main">
 
     <!-- TOPBAR -->
     <div id="topbar">
-      <button id="sb-toggle" onclick="toggleSidebar()" aria-label="Menu">☰</button>
       <div class="breadcrumb">
         <span>Avi Talpade</span>
         <span class="sep">›</span>

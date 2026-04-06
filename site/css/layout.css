@@ -148,7 +148,7 @@
 
 /* ─── MAIN ─── */
 #main {
-  margin-left: var(--sbw);
+  margin-left: 0;
   flex: 1;
   min-height: 100vh;
   display: flex;

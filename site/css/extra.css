@@ -104,33 +104,6 @@
    All breakpoints in one place. Edit here only.
 ═══════════════════════════════════════════════ */
 
-/* ── Hamburger button (hidden on desktop) ── */
-#sb-toggle {
-  display: none;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 6px 8px;
-  color: var(--text);
-  line-height: 1;
-  flex-shrink: 0
-}
-
-/* ── Sidebar overlay backdrop ── */
-#sb-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.35);
-  z-index: 99;
-  backdrop-filter: blur(2px)
-}
-
-#sb-backdrop.show {
-  display: block
-}
-
 /* ── Tablet — 900px ── */
 @media (max-width: 900px) {
   :root { --sbw: 220px }
@@ -150,32 +123,7 @@
 /* ── Mobile — 768px ── */
 @media (max-width: 768px) {
 
-  /* Sidebar becomes off-canvas drawer */
-  #sb {
-    transform: translateX(-100%);
-    z-index: 200;
-    width: 260px;
-    box-shadow: 4px 0 24px rgba(0,0,0,.12)
-  }
-
-  #sb.open {
-    transform: translateX(0)
-  }
-
-  /* Main fills full width */
-  #main {
-    margin-left: 0;
-    width: 100%;
-    min-width: 0
-  }
-
-  /* Show hamburger, hide breadcrumb text clutter */
-  #sb-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center
-  }
-
+  
   /* Topbar: compact, no overflow */
   #topbar {
     padding: 0 12px;

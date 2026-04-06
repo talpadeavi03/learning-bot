@@ -16,7 +16,6 @@
   --red-bg: #fbe8e8;
   --blue: #2383e2;
   --blue-bg: #e8f2fe;
-  --sbw: 240px;
   --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -29,7 +28,7 @@
 }
 
 html {
-  font-size: 15px;
+  font-size: 21px;
   scroll-behavior: smooth
 }
 
