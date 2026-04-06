@@ -16,105 +16,74 @@ permissions:
 
 jobs:
   build_graph:
-
     runs-on: ubuntu-latest
-
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Cache GitNexus
+        uses: actions/cache@v4
+        with:
+          path: GitNexus
+          key: gitnexus-${{ runner.os }}
 
-    # Cache GitNexus
-    - name: Cache GitNexus
-      uses: actions/cache@v4
-      with:
-        path: GitNexus
-        key: gitnexus-${{ runner.os }}
+      - name: Clone GitNexus if missing
+        run: |
+          if [ ! -d "GitNexus" ]; then
+            git clone https://github.com/abhigyanpatwari/GitNexus.git
+          fi
 
-    - name: Clone GitNexus if missing
-      run: |
-        if [ ! -d "GitNexus" ]; then
-          git clone https://github.com/abhigyanpatwari/GitNexus.git
-        fi
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
 
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: "npm"
+      - name: Install GitNexus
+        run: |
+          cd GitNexus/gitnexus
+          npm install
 
-    - name: Install GitNexus
-      run: |
-        cd GitNexus/gitnexus
-        npm install
+      - name: Ensure directories
+        run: mkdir -p data site/data docs
 
-    - name: Ensure graph directories
-      run: |
-        mkdir -p data
-        mkdir -p site/data
+      - name: Run GitNexus analysis
+        run: |
+          cd GitNexus/gitnexus
+          echo "Running GitNexus..."
+          npx gitnexus analyze $GITHUB_WORKSPACE --format json > tmp_graph.json || true
+          if [ -s tmp_graph.json ]; then
+            echo "Graph generated successfully"
+            mv tmp_graph.json $GITHUB_WORKSPACE/data/code_graph.json
+          else
+            echo "Graph empty — using fallback"
+            echo '{"nodes":[{"id":"init","label":"init"}],"edges":[]}' > $GITHUB_WORKSPACE/data/code_graph.json
+          fi
 
-    # SAFE GRAPH GENERATION
-    - name: Run GitNexus analysis
-      run: |
-        cd GitNexus/gitnexus
+      - name: Copy graph to site
+        run: cp data/code_graph.json site/data/code_graph.json
 
-        echo "Running GitNexus..."
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-        npx gitnexus analyze $GITHUB_WORKSPACE --format json > tmp_graph.json || true
+      - name: Install Python deps
+        run: pip install networkx
 
-        if [ -s tmp_graph.json ]; then
-          echo "Graph generated"
-          mv tmp_graph.json $GITHUB_WORKSPACE/data/code_graph.json
-        else
-          echo "Graph empty — keeping previous graph"
-        fi
+      - name: Generate architecture diagram
+        run: python scripts/analytics/generate_architecture.py
 
-    - name: Copy graph to site
-      run: |
-        mkdir -p site/data
-        cp data/code_graph.json site/data/code_graph.json
-
-    # Ensure graph file always exists
-    - name: Validate graph
-      run: |
-        if [ ! -f data/code_graph.json ]; then
-          echo '{"nodes":[{"id":"init","label":"init"}],"edges":[]}' > data/code_graph.json
-        fi
-
-    # Copy graph to site for frontend
-    - name: Copy graph to site
-      run: |
-        cp data/code_graph.json site/data/code_graph.json
-
-    # Setup Python
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-
-    - name: Install Python deps
-      run: |
-        pip install networkx
-
-    - name: Ensure docs directory
-      run: mkdir -p docs
-
-    - name: Generate architecture diagram
-      run: |
-        python scripts/analytics/generate_architecture.py
-
-    # Commit outputs
-    - name: Commit graph and architecture
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-        git add data/ || true
-        git add site/data/ || true
-        git add docs/ || true
-
-        git diff --staged --quiet || git commit -m "update system brain graph [skip ci]"
-
-        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} HEAD:master
+      - name: Commit and push
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/ site/data/ docs/ || true
+          git diff --staged --quiet && echo "Nothing to commit" && exit 0
+          git commit -m "update system brain graph [skip ci]"
+          git pull --rebase https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} master
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} HEAD:master
