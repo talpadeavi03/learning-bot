@@ -285,10 +285,14 @@
 
 /* ─── PAGE HEADER ─── */
 .pg-head {
-  padding: 0 80px;
+  padding: 0 48px;
   margin-top: -32px;
   position: relative;
-  z-index: 1
+  z-index: 1;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%
 }
 
 .pg-icon {
