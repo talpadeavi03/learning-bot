@@ -205,40 +205,6 @@ async function handleCommand(text, chatId, env) {
 
       await sendTelegram(chatId, message, env);
     }
-    
-    
-    case '/must': {
-      if (!args) {
-        await sendTelegram(chatId, '🔴 Usage: /must [task] — adds a must-complete priority\n\nExample: /must Submit assignment by 6pm', env);
-        return true;
-      }
-      const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
-      priorities.unshift({ id: Date.now(), text: args, done: false, created: new Date().toISOString() });
-      await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
-      await sendTelegram(chatId, `🔴 *MUST-DO ADDED*\n\n"${args}"\n\nThis is locked in. No excuses.`, env);
-      return true;
-    }
-
-    case '/done': {
-      if (!args) {
-        const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
-        const pending = priorities.filter(p => !p.done);
-        if (pending.length === 0) { await sendTelegram(chatId, '✅ No pending priorities. Clean slate!', env); return true; }
-        const list = pending.map((p, i) => `${i + 1}. ${p.text}`).join('\n');
-        await sendTelegram(chatId, `🔴 *Pending Must-Dos:*\n\n${list}\n\nReply /done [number] to mark complete`, env);
-        return true;
-      }
-      const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
-      const pending = priorities.filter(p => !p.done);
-      const idx = parseInt(args) - 1;
-      if (isNaN(idx) || !pending[idx]) { await sendTelegram(chatId, '❌ Invalid number. Use /done to see list.', env); return true; }
-      const task = pending[idx];
-      task.done = true;
-      task.completedAt = new Date().toISOString();
-      await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
-      await sendTelegram(chatId, `✅ *DONE: "${task.text}"*\n\nTask crushed. Keep going. 💪`, env);
-      return true;
-    }
 
     case '/goal': {
       if (!args) {
@@ -579,7 +545,7 @@ async function handleCommand(text, chatId, env) {
     case '/commands': {
       await sendTelegram(chatId,
         `*AETHER Commands* 🤖\n\n` +
-        `*📊 CORE*\\n/must [task] — add must-complete priority\\n/done [num] — mark priority done\\n/goal [text] — set today goal\\n/mood [1-5] — quick mood log\\n/stats — weekly summary\\n/flow — current flow state\\n\\n` +
+        `*📊 CORE*\n/goal [text] — set today goal\n/mood [1-5] — quick mood log\n/stats — weekly summary\n/flow — current flow state\n\n` +
         `*💪 HEALTH*\n/exercise [mins] [type]\n/sleep [hours]\n/food [description]\n/water [litres]\n/weight [kg]\n\n` +
         `*💰 MONEY*\n/spend [amount] [category]\n/income [amount] [source]\n\n` +
         `*💼 CAREER*\n/job [company] — log application\n/interview [company]\n\n` +
@@ -683,33 +649,17 @@ export default {
         // 🔹 Pattern engine (AFTER events)
         const patterns = analyzePatterns(events);
 
-        const patternText = `📊 Pattern Insight:\nBest hour: ${patterns.bestHour}:00\nTrend: ${patterns.trend}`;
+        const patternText = `
+      📊 Pattern Insight:
+      Best hour: ${patterns.bestHour}:00
+      Trend: ${patterns.trend}
+      `;
 
         // 🔹 Helpers
         function energyLabel(e) {
           if (e > 0.7) return "high";
           if (e > 0.4) return "moderate";
           return "low";
-        }
-
-        function formatState(state) {
-          if (state === "flow_ready") return "🚀 FLOW READY";
-          if (state === "low_focus") return "⚠️ LOW FOCUS";
-          if (state === "burnout") return "🧠 BURNOUT";
-          return "😐 MODERATE";
-        }
-
-        function getAdvice(state, energy, focus) {
-          if (state === "flow_ready") {
-            return "Start deep work NOW (45–90 min block)";
-          }
-          if (energy < 0.4) {
-            return "Take a 10 min reset (walk/stretch)";
-          }
-          if (focus < 0.4) {
-            return "Remove distractions — pick ONE task";
-          }
-          return "Continue current task with focus";
         }
 
         function getTrend(events) {
@@ -724,7 +674,6 @@ export default {
         }
 
         const energyText = energyLabel(analysis.energy);
-        const advice = getAdvice(analysis.state, analysis.energy, analysis.focus);
         const trend = getTrend(events);
 
         let response = "";
@@ -747,22 +696,19 @@ export default {
         }
 
         // 🔥 FINAL OUTPUT (NOW WITH PATTERNS)
-        const finalResponse = `🧠 JARVIS CORE\n\n⚡ Energy: ${energyText}\n🔥 State: ${analysis.state.toUpperCase()}\n📈 Trend: ${trend}\n\n📌 ${response}\n\n${patternText}`;
+        const finalResponse = `🧠 JARVIS CORE
 
+      ⚡ Energy: ${energyText}
+      🔥 State: ${analysis.state}
+      📈 Trend: ${trend}
+
+      📌 Recommendation:
+      ${response}
+
+      ${patternText}
+      `;
         console.log("PATTERN:", patternText);
-
-        // 🔥 TIMELINE (NEW)
-        const timeline = events.slice(-10).map(e => ({
-          time: e.timestamp,
-          summary: e.summary,
-          energy: e.energy_signal
-        }));
-
-        // 🔥 RETURN UPDATED
-        return new Response(JSON.stringify({
-          reply: finalResponse,
-          timeline
-        }), {
+        return new Response(JSON.stringify({ reply: finalResponse }), {
           headers: { "Content-Type": "application/json" }
         });
       }
@@ -774,9 +720,6 @@ export default {
       if (url.pathname === '/log-github' && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger' && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health' && request.method === 'GET') return handleHealth(request, env);
-      if (url.pathname === '/priorities' && request.method === 'GET') return handleGetPriorities(request, env);
-      if (url.pathname === '/priorities' && request.method === 'POST') return handleAddPriority(request, env);
-      if (url.pathname === '/priorities/done' && request.method === 'POST') return handleDonePriority(request, env);
       if (url.pathname === '/tabs' && request.method === 'GET') {
         const tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
         return new Response(JSON.stringify({ tabs }), {
@@ -1100,10 +1043,17 @@ async function handleWebhook(request, env) {
   // original logging reply
   const baseReply = buildTelegramReply(parsed, inputType, rawText);
 
-  const jarvisReply = `🧠 *JARVIS*\n⚡ Energy: ${analysis.energy.toFixed(2)}\n🔥 State: ${analysis.state.toUpperCase()}\n\n${analysis.advice}`;
+  const jarvisReply = `
+
+  🧠 *JARVIS*
+  ⚡ Energy: ${analysis.energy.toFixed(2)}
+  🔥 State: ${analysis.state}
+
+  ${analysis.advice}
+  `;
 
   // send combined response
-  await sendTelegram(chatId, baseReply + '\n\n' + jarvisReply, env);
+  await sendTelegram(chatId, baseReply + jarvisReply, env);
 
   return textResp('OK', 200);
 }
@@ -1145,38 +1095,6 @@ async function handleChat(request, env) {
 
   return jsonResp({ reply });
 }
-
-
-async function handleGetPriorities(request, env) {
-  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
-  return new Response(JSON.stringify(priorities), {
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-  });
-}
-
-async function handleAddPriority(request, env) {
-  const { text } = await request.json();
-  if (!text?.trim()) return new Response(JSON.stringify({ error: 'No text' }), { status: 400 });
-  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
-  const item = { id: Date.now(), text: text.trim(), done: false, created: new Date().toISOString() };
-  priorities.unshift(item);
-  await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
-  return new Response(JSON.stringify({ ok: true, item }), {
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-  });
-}
-
-async function handleDonePriority(request, env) {
-  const { id } = await request.json();
-  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
-  const item = priorities.find(p => p.id === id);
-  if (item) { item.done = true; item.completedAt = new Date().toISOString(); }
-  await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-  });
-}
-
 
 // ═════════════════════════════════════════════════════════════════
 // 3. LOG STATE

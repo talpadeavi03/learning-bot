@@ -1,40 +1,60 @@
-import json
-import pandas as pd
-from pathlib import Path
-
-STATE_FILE = "state/current_state.json"
-DATA_FILE = "data/processed/events_clean.csv"
+from scripts.db.supabase_client import supabase
 
 
-def update_state():
+def calculate_stats(events):
+    stats = {
+        "STR": 0,
+        "INT": 0,
+        "VIT": 0,
+        "AGI": 0,
+        "SEN": 0
+    }
 
-    if not Path(DATA_FILE).exists():
-        return
+    xp = 0
 
-    df = pd.read_csv(DATA_FILE)
+    for e in events:
+        impact = e.get("stat_impact") or {}
 
-    if df.empty:
-        return
+        for k, v in impact.items():
+            if k in stats:
+                stats[k] += v
+                xp += v * 10
 
-    latest = df.iloc[-1]
+    return stats, xp
 
-    state = {}
 
-    if Path(STATE_FILE).exists():
-        with open(STATE_FILE) as f:
-            state = json.load(f)
+def update_state_db(user_id, stats, xp):
+    level = int(xp / 100) + 1
 
-    state["last_activity"] = latest.get("topic", "unknown")
-    state["last_event_time"] = latest.get("timestamp")
+    supabase.table("state").upsert({
+        "user_id": user_id,
+        "xp": xp,
+        "level": level,
+        "str": stats["STR"],
+        "int_stat": stats["INT"],
+        "vit": stats["VIT"],
+        "agi": stats["AGI"],
+        "sen": stats["SEN"]
+    }).execute()
 
-    state["energy"] = float(latest.get("energy_signal", 0.5))
-    state["focus"] = float(latest.get("focus_signal", 0.5))
 
-    with open(STATE_FILE, "w") as f:
-        json.dump(state, f, indent=2)
+def run_state_update():
+    events = supabase.table("events") \
+        .select("*") \
+        .eq("user_id", "talpadeavi03") \
+        .execute().data
 
-    print("[AETHER] state updated")
+    print(f"Found {len(events)} events")
+
+    stats, xp = calculate_stats(events)
+
+    print("Stats:", stats)
+    print("XP:", xp)
+
+    update_state_db("avi_001", stats, xp)
+
+    print("State updated successfully")
 
 
 if __name__ == "__main__":
-    update_state()
+    run_state_update()

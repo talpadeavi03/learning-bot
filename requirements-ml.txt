@@ -1,12 +1,22 @@
-# AETHER ML Pipeline dependencies
-# Install: pip install -r requirements-ml.txt
+# AETHER OS — ML Pipeline dependencies
+# Used by Railway Docker container + local dev
 
-pandas>=2.0.0
+# Core ML
 scikit-learn>=1.3.0
+pandas>=2.0.0
 numpy>=1.24.0
-requests>=2.31.0
 joblib>=1.3.0
-pyarrow>=12.0.0
-mlflow
 
-## requirements-ml file name
+# Database
+supabase>=2.0.0
+python-dotenv>=1.0.0
+
+# HTTP
+requests>=2.31.0
+
+# Experiment tracking (optional)
+mlflow>=2.8.0
+
+# Analytics
+matplotlib>=3.7.0
+seaborn>=0.12.0

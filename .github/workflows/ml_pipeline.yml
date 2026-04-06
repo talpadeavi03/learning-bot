@@ -1,132 +1,30 @@
-name: AETHER ML Pipeline
+name: AETHER — Trigger ML Pipeline
 
-concurrency:
-  group: aether-ml-pipeline
-  cancel-in-progress: true
-  
 on:
-  schedule:
-    - cron: '30 19 * * *'   # 01:00 IST
+  # Manual trigger from GitHub UI
   workflow_dispatch:
+
+  # Telegram batch trigger from worker.js
   repository_dispatch:
     types: [telegram_batch]
 
+  # Fallback daily schedule (Railway handles the 6-hourly runs)
+  schedule:
+    - cron: "0 18 * * *"   # 11:30 PM IST
+
 jobs:
-  ml_pipeline:
+  trigger-railway:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
     steps:
-
-      # --------------------------------
-      # Checkout repository
-      # --------------------------------
-
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      # --------------------------------
-      # Setup Python
-      # --------------------------------
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      # --------------------------------
-      # Install dependencies
-      # --------------------------------
-
-      - name: Install dependencies
+      - name: Trigger Railway deployment
         run: |
-          pip install -r requirements-ml.txt
-          pip install -r requirements-analytics.txt || true
-          pip install -r requirements-ingest.txt || true
-          pip install mlflow
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"environmentId":"${{ secrets.RAILWAY_ENVIRONMENT_ID }}"}' \
+            https://backboard.railway.app/graphql/v2
+        # Note: replace with Railway CLI trigger once you have the token
+        # railway run --service aether-pipeline
 
-      # --------------------------------
-      # Pull events from Worker
-      # --------------------------------
-
-      - name: Pull events
-        env:
-          WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
-        run: python scripts/pipeline/pull_events.py
-
-      # --------------------------------
-      # Clean dataset
-      # --------------------------------
-
-      - name: Clean data
-        run: python scripts/pipeline/data_cleaner.py
-
-      # --------------------------------
-      # Train ML models
-      # --------------------------------
-
-      - name: Train models
-        env:
-          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
-          DAGSHUB_USER: talpadeavi03
-          DAGSHUB_REPO: learning-bot
-        run: python scripts/ml/train_models.py
-
-      # --------------------------------
-      # Predict productivity
-      # --------------------------------
-
-      - name: Predict
-        run: python scripts/ml/predict.py
-
-      # --------------------------------
-      # Generate insights
-      # --------------------------------
-
-      - name: Generate insights
-        run: python scripts/analytics/insight_engine.py
-
-      # --------------------------------
-      # Detect behavior patterns
-      # --------------------------------
-
-      - name: Pattern engine
-        run: python scripts/analytics/pattern_engine.py
-
-      # Habit Tracker
-      - name: Habit tracker
-        run: python scripts/analytics/habit_tracker.py
-
-      # --------------------------------
-      # Build memory graph
-      # --------------------------------
-
-      - name: Build memory graph
-        run: python scripts/analytics/memory_graph_builder.py
-
-      # --------------------------------
-      # Push dashboard to Worker
-      # --------------------------------
-
-      - name: Push dashboard
-        env:
-          WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
-        run: python scripts/pipeline/push_dashboard.py
-
-      # --------------------------------
-      # Commit safe artifacts
-      # --------------------------------
-
-      - name: Commit results
-        run: |
-          git config --local user.email "aether-bot@noreply.com"
-          git config --local user.name "AETHER Bot"
-
-          git add data/raw/ || true
-          git add data/processed/ || true
-          git add data/graph/ || true
-          git add models/training_stats.json || true
-          git add site/data/ || true
-
-          git diff --staged --quiet || git commit -m "chore: nightly AETHER ML update [skip ci]"
-          git push || true
+      - name: Log trigger
+        run: echo "Pipeline triggered at $(date -u)"

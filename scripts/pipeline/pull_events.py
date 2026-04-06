@@ -1,50 +1,48 @@
 """
-pull_events.py
-Pulls events from Cloudflare KV via the /events worker endpoint
-Saves to data/raw/events.csv for the ML pipeline
+AETHER OS — pull_events.py
+Pulls events from Supabase → saves to data/raw/events.csv for ML pipeline
 """
-import os
-import csv
-import requests
+import os, sys, json
+from pathlib import Path
+from datetime import datetime, timedelta
 
-WORKER_URL = os.environ.get('WORKER_URL', 'https://learning-bot.talpadeavi0303.workers.dev')
+import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from supabase.client import get_recent_events
+
+OUTPUT_PATH = Path("data/raw/events.csv")
+OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 def pull():
-    print(f"[AETHER] Pulling events from {WORKER_URL}/events ...")
-    try:
-        r = requests.get(f"{WORKER_URL}/events?limit=500", timeout=30)
-        r.raise_for_status()
-        events = r.json().get('events', [])
-    except Exception as e:
-        print(f"[AETHER] ERROR pulling events: {e}")
-        return 0
+    print("[pull_events] Fetching from Supabase...")
+    events = get_recent_events(limit=1000)
 
-    print(f"[AETHER] Received {len(events)} events")
     if not events:
-        print("[AETHER] No events yet — keep logging via Telegram!")
-        return 0
+        print("[pull_events] No events found in Supabase.")
+        # fallback: try existing csv
+        if OUTPUT_PATH.exists():
+            print("[pull_events] Using existing events.csv as fallback.")
+        return
 
-    os.makedirs('data/raw', exist_ok=True)
+    df = pd.DataFrame(events)
 
-    fieldnames = [
-        'timestamp', 'input_type', 'raw_text', 'topic', 'topics',
-        'sentiment', 'energy_signal', 'stress_signal', 'focus_signal',
-        'motivation_signal', 'dominant_emotion', 'is_study_session',
-        'is_goal_mention', 'is_complaint', 'estimated_minutes', 'summary',
-        'state_label', 'flow_class', 'energy', 'stress', 'mood', 'flow_prob',
-    ]
+    # Normalise column names
+    if "created_at" in df.columns and "timestamp" not in df.columns:
+        df["timestamp"] = df["created_at"]
 
-    with open('data/raw/events.csv', 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
-        writer.writeheader()
-        writer.writerows(events)
+    # Flatten stat_impact jsonb → separate columns
+    if "stat_impact" in df.columns:
+        stat_df = df["stat_impact"].apply(
+            lambda x: x if isinstance(x, dict) else {}
+        ).apply(pd.Series).add_prefix("stat_")
+        df = pd.concat([df.drop("stat_impact", axis=1), stat_df], axis=1)
 
-    print(f"[AETHER] Saved {len(events)} events to data/raw/events.csv")
-    return len(events)
+    df.to_csv(OUTPUT_PATH, index=False)
+    print(f"[pull_events] Saved {len(df)} events → {OUTPUT_PATH}")
+    print(f"[pull_events] Date range: {df['timestamp'].min()} → {df['timestamp'].max()}")
 
-if __name__ == '__main__':
-    n = pull()
-    if n < 10:
-        print(f"[AETHER] Need at least 10 events to train ML. Have {n}. Keep logging!")
-    else:
-        print(f"[AETHER] Ready for ML pipeline with {n} events.")
+if __name__ == "__main__":
+    pull()
