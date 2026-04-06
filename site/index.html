@@ -7,7 +7,8 @@
   <title>Avi Talpade — AETHER OS</title>
 
   <!-- FONTS -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
   <!-- SCRIPTS (external libs) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -26,6 +27,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/chat.css">
   <link rel="stylesheet" href="css/extra.css">
+  <link rel="stylesheet" href="css/jobs.css">
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
@@ -52,7 +54,7 @@
     <div class="ach-pts" id="ach-pts"></div>
   </div>
 
-  
+
   <!-- MAIN -->
   <div id="main">
 
@@ -85,10 +87,13 @@
     <!-- PAGE TABS -->
     <div id="page-tabs">
       <button class="ptab on" id="ptab-home" onclick="switchView('home',this)">
-       <span class="ptab-ic">🏠</span> Home
+        <span class="ptab-ic">🏠</span> Home
       </button>
       <button class="ptab" id="ptab-learning" onclick="switchView('learning',this)">
-       <span class="ptab-ic">📚</span> Learning
+        <span class="ptab-ic">📚</span> Learning
+      </button>
+      <button class="ptab" id="ptab-jobs" onclick="switchView('jobs',this)">
+        <span class="ptab-ic">💼</span> Jobs
       </button>
     </div>
 
@@ -143,8 +148,10 @@
       <div class="view on" id="view-home">
 
         <!-- 🔴 PRIORITY QUEUE -->
-        <div id="priority-panel" style="margin-bottom:20px;border:1.5px solid var(--red);border-radius:10px;overflow:hidden;">
-          <div style="background:var(--red-bg);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(212,76,71,.15)">
+        <div id="priority-panel"
+          style="margin-bottom:20px;border:1.5px solid var(--red);border-radius:10px;overflow:hidden;">
+          <div
+            style="background:var(--red-bg);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(212,76,71,.15)">
             <div style="font-weight:700;font-size:14px;color:var(--red);display:flex;align-items:center;gap:8px">
               🔴 MUST COMPLETE — Priority Queue
             </div>
@@ -156,7 +163,8 @@
                 style="flex:1;border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:13px;font-family:var(--font);outline:none;background:var(--bg);color:var(--text)"
                 onkeydown="if(event.key==='Enter')addPriority()">
               <button onclick="addPriority()"
-                style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:13px">+ Add</button>
+                style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:13px">+
+                Add</button>
             </div>
             <div id="priority-list" style="display:flex;flex-direction:column;gap:6px;min-height:24px">
               <div style="color:var(--text3);font-size:13px;text-align:center;padding:8px 0" id="priority-empty">
@@ -171,20 +179,25 @@
           <div>
             <div class="c-ttl">Good day, sir. AETHER OS is fully operational.</div>
             <div class="c-bod">Worker v2 live · ML pipeline active · 12 bot commands ready. Your power index is at
-              <strong>7.4 / 10</strong> — peak zone.</div>
+              <strong>7.4 / 10</strong> — peak zone.
+            </div>
           </div>
         </div>
 
         <!-- SOLO LEVELING STATS -->
         <div class="two-col" style="margin-bottom:20px">
           <div style="border:1px solid var(--border);border-radius:10px;padding:20px">
-            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Solo Leveling</div>
+            <div
+              style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">
+              Solo Leveling</div>
             <div style="font-size:28px;font-weight:800;color:var(--text)" id="sl-level">LV —</div>
             <div style="font-size:12px;color:var(--text2);margin-bottom:16px" id="sl-xp">Loading stats...</div>
             <div id="sl-stats" style="display:flex;flex-direction:column;gap:8px"></div>
           </div>
           <div style="border:1px solid var(--border);border-radius:10px;padding:20px">
-            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">Life Dimensions — Today</div>
+            <div
+              style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">
+              Life Dimensions — Today</div>
             <div id="life-dims" style="display:flex;flex-direction:column;gap:10px"></div>
           </div>
         </div>
@@ -192,23 +205,49 @@
         <!-- NEGATIVES + WINS -->
         <div class="two-col" style="margin-bottom:20px">
           <div style="border:1.5px solid var(--red);border-radius:10px;padding:18px;background:var(--red-bg)">
-            <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">⚠️ What's Holding You Back</div>
-            <div id="negatives-panel"><div style="color:var(--text3);font-size:13px">Loading patterns...</div></div>
+            <div
+              style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">
+              ⚠️ What's Holding You Back</div>
+            <div id="negatives-panel">
+              <div style="color:var(--text3);font-size:13px">Loading patterns...</div>
+            </div>
           </div>
           <div style="border:1.5px solid var(--green);border-radius:10px;padding:18px;background:var(--green-bg)">
-            <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">🏆 Recent Wins</div>
-            <div id="wins-panel"><div style="color:var(--text3);font-size:13px">Loading wins...</div></div>
+            <div
+              style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">
+              🏆 Recent Wins</div>
+            <div id="wins-panel">
+              <div style="color:var(--text3);font-size:13px">Loading wins...</div>
+            </div>
           </div>
         </div>
 
         <!-- TODAY STATS -->
         <div class="stat-row" style="margin-bottom:20px">
-          <div class="sc"><div class="sc-n" id="sd-energy">—</div><div class="sc-l">Energy %</div></div>
-          <div class="sc"><div class="sc-n" id="sd-focus">—</div><div class="sc-l">Focus %</div></div>
-          <div class="sc"><div class="sc-n" id="sd-stress">—</div><div class="sc-l">Stress %</div></div>
-          <div class="sc"><div class="sc-n" id="sd-events">—</div><div class="sc-l">Events Today</div></div>
-          <div class="sc"><div class="sc-n" id="sd-streak">—</div><div class="sc-l">Streak 🔥</div></div>
-          <div class="sc"><div class="sc-n" id="sd-wins">—</div><div class="sc-l">Total Wins</div></div>
+          <div class="sc">
+            <div class="sc-n" id="sd-energy">—</div>
+            <div class="sc-l">Energy %</div>
+          </div>
+          <div class="sc">
+            <div class="sc-n" id="sd-focus">—</div>
+            <div class="sc-l">Focus %</div>
+          </div>
+          <div class="sc">
+            <div class="sc-n" id="sd-stress">—</div>
+            <div class="sc-l">Stress %</div>
+          </div>
+          <div class="sc">
+            <div class="sc-n" id="sd-events">—</div>
+            <div class="sc-l">Events Today</div>
+          </div>
+          <div class="sc">
+            <div class="sc-n" id="sd-streak">—</div>
+            <div class="sc-l">Streak 🔥</div>
+          </div>
+          <div class="sc">
+            <div class="sc-n" id="sd-wins">—</div>
+            <div class="sc-l">Total Wins</div>
+          </div>
         </div>
 
         <!-- QUICK ACTIONS -->
@@ -216,19 +255,23 @@
         <div class="ndiv"></div>
         <div class="qa-grid" style="margin-bottom:24px">
           <div class="qa" onclick="quickSend('Give me a 25-minute Pomodoro plan')">
-            <div class="qa-ic">⏱️</div><div class="qa-ttl">Pomodoro</div>
+            <div class="qa-ic">⏱️</div>
+            <div class="qa-ttl">Pomodoro</div>
             <div class="qa-sub">25-min focus burst</div>
           </div>
           <div class="qa" onclick="quickSend('Analyze my week and give insights')">
-            <div class="qa-ic">🔍</div><div class="qa-ttl">Intel Scan</div>
+            <div class="qa-ic">🔍</div>
+            <div class="qa-ttl">Intel Scan</div>
             <div class="qa-sub">Weekly analysis</div>
           </div>
           <div class="qa" onclick="quickSend('What should I work on right now?')">
-            <div class="qa-ic">🎯</div><div class="qa-ttl">Next Mission</div>
+            <div class="qa-ic">🎯</div>
+            <div class="qa-ttl">Next Mission</div>
             <div class="qa-sub">AI recommendation</div>
           </div>
           <div class="qa" onclick="quickSend('Give me motivation based on my stats')">
-            <div class="qa-ic">💥</div><div class="qa-ttl">Power Surge</div>
+            <div class="qa-ic">💥</div>
+            <div class="qa-ttl">Power Surge</div>
             <div class="qa-sub">Neural boost</div>
           </div>
         </div>
@@ -249,7 +292,8 @@
         <!-- DATA SECTION -->
         <div class="nh2">📊 Data & Charts</div>
         <div class="ndiv"></div>
-        <canvas id="waveCanvas" height="80" style="width:100%;border-radius:7px;background:rgba(55,53,47,.02);border:1px solid var(--border);margin-bottom:24px"></canvas>
+        <canvas id="waveCanvas" height="80"
+          style="width:100%;border-radius:7px;background:rgba(55,53,47,.02);border:1px solid var(--border);margin-bottom:24px"></canvas>
         <div class="two-col" style="margin-bottom:24px">
           <div>
             <div class="nh2">📅 Weekly Energy</div>
@@ -272,7 +316,8 @@
           <button class="gcb" onclick="setGraphMode('flow',this)">Flow</button>
           <button class="gcb" onclick="resetGraph()">Reset</button>
         </div>
-        <canvas id="graphCanvas" style="width:100%;height:55vh;border:1px solid var(--border);border-radius:9px;display:block;cursor:crosshair;background:rgba(55,53,47,.02);margin-bottom:32px"></canvas>
+        <canvas id="graphCanvas"
+          style="width:100%;height:55vh;border:1px solid var(--border);border-radius:9px;display:block;cursor:crosshair;background:rgba(55,53,47,.02);margin-bottom:32px"></canvas>
 
         <!-- SYSTEM SECTION -->
         <div class="nh2" style="margin-top:8px">⚙️ System & Pipeline</div>
@@ -280,12 +325,30 @@
         <div class="two-col" style="margin-bottom:32px">
           <div>
             <div class="sys-grid">
-              <div class="sysc"><div class="sysc-k">Frontend</div><div class="sysc-v">Cloudflare Pages</div></div>
-              <div class="sysc"><div class="sysc-k">API</div><div class="sysc-v">CF Worker v2</div></div>
-              <div class="sysc"><div class="sysc-k">Database</div><div class="sysc-v">Supabase Postgres</div></div>
-              <div class="sysc"><div class="sysc-k">ML Runner</div><div class="sysc-v">Railway</div></div>
-              <div class="sysc"><div class="sysc-k">Ingestion</div><div class="sysc-v">Telegram Bot</div></div>
-              <div class="sysc"><div class="sysc-k">AI Model</div><div class="sysc-v">Llama 3 + Whisper</div></div>
+              <div class="sysc">
+                <div class="sysc-k">Frontend</div>
+                <div class="sysc-v">Cloudflare Pages</div>
+              </div>
+              <div class="sysc">
+                <div class="sysc-k">API</div>
+                <div class="sysc-v">CF Worker v2</div>
+              </div>
+              <div class="sysc">
+                <div class="sysc-k">Database</div>
+                <div class="sysc-v">Supabase Postgres</div>
+              </div>
+              <div class="sysc">
+                <div class="sysc-k">ML Runner</div>
+                <div class="sysc-v">Railway</div>
+              </div>
+              <div class="sysc">
+                <div class="sysc-k">Ingestion</div>
+                <div class="sysc-v">Telegram Bot</div>
+              </div>
+              <div class="sysc">
+                <div class="sysc-k">AI Model</div>
+                <div class="sysc-v">Llama 3 + Whisper</div>
+              </div>
             </div>
             <div class="nh2" style="margin-top:16px">🔀 Data Flow</div>
             <div class="ndiv"></div>
@@ -298,11 +361,46 @@
             <div class="nh2">🔄 Pipeline Status</div>
             <div class="ndiv"></div>
             <div id="pipeline-status">
-              <div class="npipe-item"><div class="npipe-ic">📥</div><div><div class="npipe-nm">pull_events.py</div><div class="npipe-sub">Supabase → events.csv</div></div><div class="npfill"></div><span class="tag tg">OK</span></div>
-              <div class="npipe-item"><div class="npipe-ic">🧹</div><div><div class="npipe-nm">data_cleaner.py</div><div class="npipe-sub">Remove bad events</div></div><div class="npfill"></div><span class="tag tg">OK</span></div>
-              <div class="npipe-item"><div class="npipe-ic">🏋</div><div><div class="npipe-nm">train_models.py</div><div class="npipe-sub">RandomForest · 15 features</div></div><div class="npfill"></div><span class="tag ty" id="train-status">WAITING</span></div>
-              <div class="npipe-item"><div class="npipe-ic">🔮</div><div><div class="npipe-nm">predict.py</div><div class="npipe-sub">Flow + peak hour</div></div><div class="npfill"></div><span class="tag ty" id="predict-status">WAITING</span></div>
-              <div class="npipe-item"><div class="npipe-ic">📤</div><div><div class="npipe-nm">push_dashboard.py</div><div class="npipe-sub">Predictions → Supabase + KV</div></div><div class="npfill"></div><span class="tag tg">OK</span></div>
+              <div class="npipe-item">
+                <div class="npipe-ic">📥</div>
+                <div>
+                  <div class="npipe-nm">pull_events.py</div>
+                  <div class="npipe-sub">Supabase → events.csv</div>
+                </div>
+                <div class="npfill"></div><span class="tag tg">OK</span>
+              </div>
+              <div class="npipe-item">
+                <div class="npipe-ic">🧹</div>
+                <div>
+                  <div class="npipe-nm">data_cleaner.py</div>
+                  <div class="npipe-sub">Remove bad events</div>
+                </div>
+                <div class="npfill"></div><span class="tag tg">OK</span>
+              </div>
+              <div class="npipe-item">
+                <div class="npipe-ic">🏋</div>
+                <div>
+                  <div class="npipe-nm">train_models.py</div>
+                  <div class="npipe-sub">RandomForest · 15 features</div>
+                </div>
+                <div class="npfill"></div><span class="tag ty" id="train-status">WAITING</span>
+              </div>
+              <div class="npipe-item">
+                <div class="npipe-ic">🔮</div>
+                <div>
+                  <div class="npipe-nm">predict.py</div>
+                  <div class="npipe-sub">Flow + peak hour</div>
+                </div>
+                <div class="npfill"></div><span class="tag ty" id="predict-status">WAITING</span>
+              </div>
+              <div class="npipe-item">
+                <div class="npipe-ic">📤</div>
+                <div>
+                  <div class="npipe-nm">push_dashboard.py</div>
+                  <div class="npipe-sub">Predictions → Supabase + KV</div>
+                </div>
+                <div class="npfill"></div><span class="tag tg">OK</span>
+              </div>
             </div>
           </div>
         </div>
@@ -318,108 +416,194 @@
         <!-- paste your existing doc-plan, doc-arch, doc-progress divs here from the old view-docs -->
 
       </div>
-        <div id="doc-arch" class="doc-frame">
-          <div class="npipe-item">
-            <div class="npipe-ic">💬</div>
-            <div>
-              <div class="npipe-nm">Text / Voice / Image / Check-in / GitHub</div>
-            </div>
-            <div class="npfill"></div><span class="tag tb">INPUT</span>
+      <div id="doc-arch" class="doc-frame">
+        <div class="npipe-item">
+          <div class="npipe-ic">💬</div>
+          <div>
+            <div class="npipe-nm">Text / Voice / Image / Check-in / GitHub</div>
           </div>
-          <div class="npipe-item">
-            <div class="npipe-ic">⚙️</div>
-            <div>
-              <div class="npipe-nm">Cloudflare Worker — 9 routes</div>
-              <div class="npipe-sub">learning-bot.talpadeavi0303.workers.dev</div>
-            </div>
-            <div class="npfill"></div><span class="tag tg">BRAIN</span>
-          </div>
-          <div class="npipe-item">
-            <div class="npipe-ic">🦙</div>
-            <div>
-              <div class="npipe-nm">Llama 3 + Whisper + LLaVA</div>
-            </div>
-            <div class="npfill"></div><span class="tag tg">FREE AI</span>
-          </div>
-          <div class="npipe-item">
-            <div class="npipe-ic">🗄️</div>
-            <div>
-              <div class="npipe-nm">Cloudflare KV</div>
-              <div class="npipe-sub">events · state · dashboard · goals</div>
-            </div>
-            <div class="npfill"></div><span class="tag tgr">STORAGE</span>
-          </div>
-          <div class="npipe-item">
-            <div class="npipe-ic">🔬</div>
-            <div>
-              <div class="npipe-nm">ML Pipeline — GitHub Actions</div>
-            </div>
-            <div class="npfill"></div><span class="tag tb">NIGHTLY</span>
-          </div>
-          <div class="npipe-item">
-            <div class="npipe-ic">📱</div>
-            <div>
-              <div class="npipe-nm">Dashboard PWA + Telegram Bot</div>
-            </div>
-            <div class="npfill"></div><span class="tag tg">OUTPUT</span>
-          </div>
+          <div class="npfill"></div><span class="tag tb">INPUT</span>
         </div>
-
-        <div id="doc-progress" class="doc-frame">
-          <div class="npr">
-            <div class="nprh"><span class="nprl">Infrastructure</span><span class="nprv">100%</span></div>
-            <div class="nprt">
-              <div class="nprf" style="width:100%;transition:none"></div>
-            </div>
+        <div class="npipe-item">
+          <div class="npipe-ic">⚙️</div>
+          <div>
+            <div class="npipe-nm">Cloudflare Worker — 9 routes</div>
+            <div class="npipe-sub">learning-bot.talpadeavi0303.workers.dev</div>
           </div>
-          <div class="npr">
-            <div class="nprh"><span class="nprl">Data Ingestion</span><span class="nprv">90%</span></div>
-            <div class="nprt">
-              <div class="nprf" style="width:90%;transition:none"></div>
-            </div>
+          <div class="npfill"></div><span class="tag tg">BRAIN</span>
+        </div>
+        <div class="npipe-item">
+          <div class="npipe-ic">🦙</div>
+          <div>
+            <div class="npipe-nm">Llama 3 + Whisper + LLaVA</div>
           </div>
-          <div class="npr">
-            <div class="nprh"><span class="nprl">Dashboard UI</span><span class="nprv">85%</span></div>
-            <div class="nprt">
-              <div class="nprf" style="width:85%;transition:none"></div>
-            </div>
+          <div class="npfill"></div><span class="tag tg">FREE AI</span>
+        </div>
+        <div class="npipe-item">
+          <div class="npipe-ic">🗄️</div>
+          <div>
+            <div class="npipe-nm">Cloudflare KV</div>
+            <div class="npipe-sub">events · state · dashboard · goals</div>
           </div>
-          <div class="npr">
-            <div class="nprh"><span class="nprl">ML Pipeline</span><span class="nprv">70%</span></div>
-            <div class="nprt">
-              <div class="nprf dim" style="width:70%;transition:none"></div>
-            </div>
+          <div class="npfill"></div><span class="tag tgr">STORAGE</span>
+        </div>
+        <div class="npipe-item">
+          <div class="npipe-ic">🔬</div>
+          <div>
+            <div class="npipe-nm">ML Pipeline — GitHub Actions</div>
           </div>
-          <div class="npr">
-            <div class="nprh"><span class="nprl">AI Intelligence</span><span class="nprv">50%</span></div>
-            <div class="nprt">
-              <div class="nprf dim" style="width:50%;transition:none"></div>
-            </div>
+          <div class="npfill"></div><span class="tag tb">NIGHTLY</span>
+        </div>
+        <div class="npipe-item">
+          <div class="npipe-ic">📱</div>
+          <div>
+            <div class="npipe-nm">Dashboard PWA + Telegram Bot</div>
           </div>
-          <div class="npr">
-            <div class="nprh"><span class="nprl">Security</span><span class="nprv">10%</span></div>
-            <div class="nprt">
-              <div class="nprf dim" style="width:10%;transition:none"></div>
-            </div>
-          </div>
-          <div class="npr">
-            <div class="nprh"><span class="nprl">Mobile APK</span><span class="nprv">20%</span></div>
-            <div class="nprt">
-              <div class="nprf dim" style="width:20%;transition:none"></div>
-            </div>
-          </div>
+          <div class="npfill"></div><span class="tag tg">OUTPUT</span>
         </div>
       </div>
 
-    </div><!-- /pg-content -->
-
-    <!-- FOOTER -->
-    <div class="pg-footer">
-      <span>⚡ JARVIS NEXUS</span><span class="sep">·</span>
-      <span>Universe-616</span><span class="sep">·</span>
-      <span>v3.0</span><span class="sep">·</span>
-      <span>Cloudflare · Anthropic · GitHub</span>
+      <div id="doc-progress" class="doc-frame">
+        <div class="npr">
+          <div class="nprh"><span class="nprl">Infrastructure</span><span class="nprv">100%</span></div>
+          <div class="nprt">
+            <div class="nprf" style="width:100%;transition:none"></div>
+          </div>
+        </div>
+        <div class="npr">
+          <div class="nprh"><span class="nprl">Data Ingestion</span><span class="nprv">90%</span></div>
+          <div class="nprt">
+            <div class="nprf" style="width:90%;transition:none"></div>
+          </div>
+        </div>
+        <div class="npr">
+          <div class="nprh"><span class="nprl">Dashboard UI</span><span class="nprv">85%</span></div>
+          <div class="nprt">
+            <div class="nprf" style="width:85%;transition:none"></div>
+          </div>
+        </div>
+        <div class="npr">
+          <div class="nprh"><span class="nprl">ML Pipeline</span><span class="nprv">70%</span></div>
+          <div class="nprt">
+            <div class="nprf dim" style="width:70%;transition:none"></div>
+          </div>
+        </div>
+        <div class="npr">
+          <div class="nprh"><span class="nprl">AI Intelligence</span><span class="nprv">50%</span></div>
+          <div class="nprt">
+            <div class="nprf dim" style="width:50%;transition:none"></div>
+          </div>
+        </div>
+        <div class="npr">
+          <div class="nprh"><span class="nprl">Security</span><span class="nprv">10%</span></div>
+          <div class="nprt">
+            <div class="nprf dim" style="width:10%;transition:none"></div>
+          </div>
+        </div>
+        <div class="npr">
+          <div class="nprh"><span class="nprl">Mobile APK</span><span class="nprv">20%</span></div>
+          <div class="nprt">
+            <div class="nprf dim" style="width:20%;transition:none"></div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- ══ JOBS ══ -->
+    <div class="view" id="view-jobs">
+
+      <!-- CALLOUT -->
+      <div class="callout cb" style="margin-bottom:20px">
+        <div class="c-ic">💼</div>
+        <div>
+          <div class="c-ttl">Jobs Intelligence</div>
+          <div class="c-bod">Paste a recruiter email below — JARVIS will extract company, role, salary, and score your
+            fit. All data stays local.</div>
+        </div>
+      </div>
+
+      <!-- ANALYZE INPUT -->
+      <div class="jobs-analyze">
+        <div class="jobs-analyze-head">
+          <div class="jobs-analyze-title">📩 Analyze Email</div>
+          <button class="jobs-btn jobs-btn-outline" onclick="syncGmail()">🔄 Sync Gmail</button>
+        </div>
+        <textarea id="job-email-input" placeholder="Paste a recruiter email, job description, or LinkedIn message here...
+
+Example:
+Hi Avi, We have an exciting DevOps Engineer role at Barclays in Pune.
+The role involves CI/CD pipelines, Kubernetes, and Terraform.
+Salary: 15-18 LPA. Interested?"></textarea>
+        <div class="jobs-analyze-actions">
+          <div class="jobs-analyze-hint">JARVIS extracts: company, role, location, salary, fit score, and drafts a
+            reply.</div>
+          <button id="job-analyze-btn" class="jobs-btn jobs-btn-primary" onclick="analyzeJobEmail()">⚡ Analyze</button>
+        </div>
+      </div>
+
+      <!-- LOADING -->
+      <div id="job-loading" style="display:none" class="jobs-analyzing">
+        <div class="jdot"></div>
+        JARVIS is analyzing the email...
+      </div>
+
+      <!-- STATS -->
+      <div class="jobs-stats">
+        <div class="jobs-stat">
+          <div class="jobs-stat-num" id="js-total">0</div>
+          <div class="jobs-stat-label">Total Jobs</div>
+        </div>
+        <div class="jobs-stat">
+          <div class="jobs-stat-num" id="js-high">0</div>
+          <div class="jobs-stat-label">High Fit</div>
+        </div>
+        <div class="jobs-stat">
+          <div class="jobs-stat-num" id="js-pending">0</div>
+          <div class="jobs-stat-label">Pending</div>
+        </div>
+        <div class="jobs-stat">
+          <div class="jobs-stat-num" id="js-avg">—</div>
+          <div class="jobs-stat-label">Avg Score</div>
+        </div>
+      </div>
+
+      <!-- FILTERS -->
+      <div class="nh2">📊 Applications</div>
+      <div class="ndiv"></div>
+      <div class="jobs-toolbar">
+        <div class="jobs-filters">
+          <button class="jobs-filter on" data-filter="all" onclick="filterJobs('all',this)">All <span
+              class="jobs-filter-count">0</span></button>
+          <button class="jobs-filter" data-filter="high" onclick="filterJobs('high',this)">High Fit <span
+              class="jobs-filter-count">0</span></button>
+          <button class="jobs-filter" data-filter="pending" onclick="filterJobs('pending',this)">Pending <span
+              class="jobs-filter-count">0</span></button>
+          <button class="jobs-filter" data-filter="replied" onclick="filterJobs('replied',this)">Replied <span
+              class="jobs-filter-count">0</span></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="jobs-count" id="jobs-count">0 jobs</span>
+          <select id="jobs-sort" class="jobs-sort" onchange="sortJobsChanged()">
+            <option value="date">Sort: Date</option>
+            <option value="score">Sort: Score</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- JOB LIST -->
+      <div class="jobs-list" id="jobs-list"></div>
+
+      <!-- EMPTY STATE -->
+      <div class="jobs-empty" id="jobs-empty">
+        <div class="jobs-empty-icon">💼</div>
+        <div class="jobs-empty-title">No jobs analyzed yet</div>
+        <div class="jobs-empty-sub">Paste a recruiter email above and click <strong>Analyze</strong> to get
+          started.<br>JARVIS will extract details and score your fit.</div>
+      </div>
+
+    </div>
+
+  </div><!-- /pg-content -->
 
   </div><!-- /main -->
 
@@ -503,5 +687,41 @@
   <script src="js/ui.js"></script>
   <script src="js/canvas.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/jobs.js"></script>
+
+  <!-- JOBS REPLY MODAL -->
+  <div class="jobs-modal-bg" id="jobs-modal">
+    <div class="jobs-modal">
+      <div class="jobs-modal-head">
+        <div class="jobs-modal-title" id="jm-title">Reply Preview</div>
+        <button class="jobs-modal-close" onclick="closeJobModal()">✕</button>
+      </div>
+      <div class="jobs-modal-meta">
+        <div class="jobs-modal-meta-row">
+          <div class="jobs-modal-meta-k">Company</div>
+          <div class="jobs-modal-meta-v" id="jm-company">—</div>
+        </div>
+        <div class="jobs-modal-meta-row">
+          <div class="jobs-modal-meta-k">Role</div>
+          <div class="jobs-modal-meta-v" id="jm-role">—</div>
+        </div>
+        <div class="jobs-modal-meta-row">
+          <div class="jobs-modal-meta-k">Fit Score</div>
+          <div class="jobs-modal-meta-v" id="jm-score">—</div>
+        </div>
+        <div class="jobs-modal-meta-row">
+          <div class="jobs-modal-meta-k">Reason</div>
+          <div class="jobs-modal-meta-v" id="jm-reason">—</div>
+        </div>
+      </div>
+      <div class="jobs-modal-reply" id="jm-reply-text">—</div>
+      <div class="jobs-modal-footer">
+        <button class="jobs-btn jobs-btn-outline" onclick="copyJobReply()">📋 Copy Reply</button>
+        <button class="jobs-btn jobs-btn-primary" onclick="markJobReplied()">✅ Mark as Replied</button>
+      </div>
+    </div>
+  </div>
+
+</body>
 
 </html>

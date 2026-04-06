@@ -1,0 +1,563 @@
+/* ═══════════════════════════════════════════
+   JOBS INTELLIGENCE TAB
+   Notion-style — uses only existing :root vars
+   ═══════════════════════════════════════════ */
+
+/* ─── ANALYZE INPUT AREA ─── */
+.jobs-analyze {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  background: rgba(55, 53, 47, .02)
+}
+
+.jobs-analyze-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px
+}
+
+.jobs-analyze-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px
+}
+
+.jobs-analyze textarea {
+  width: 100%;
+  min-height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color .15s
+}
+
+.jobs-analyze textarea:focus {
+  border-color: rgba(55, 53, 47, .3)
+}
+
+.jobs-analyze textarea::placeholder {
+  color: var(--text3)
+}
+
+.jobs-analyze-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 10px
+}
+
+.jobs-analyze-hint {
+  font-size: 12px;
+  color: var(--text3);
+  flex: 1
+}
+
+.jobs-btn {
+  padding: 7px 16px;
+  border-radius: 5px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all .12s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px
+}
+
+.jobs-btn-primary {
+  background: var(--text);
+  color: var(--bg)
+}
+
+.jobs-btn-primary:hover {
+  opacity: .82
+}
+
+.jobs-btn-primary:disabled {
+  opacity: .4;
+  cursor: not-allowed
+}
+
+.jobs-btn-outline {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border)
+}
+
+.jobs-btn-outline:hover {
+  background: var(--hover);
+  color: var(--text)
+}
+
+/* ─── FILTER BAR ─── */
+.jobs-filters {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px
+}
+
+.jobs-filter {
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: var(--font);
+  transition: color .1s
+}
+
+.jobs-filter:hover {
+  color: var(--text)
+}
+
+.jobs-filter.on {
+  color: var(--text);
+  border-bottom-color: var(--text);
+  font-weight: 600
+}
+
+.jobs-filter-count {
+  font-size: 11px;
+  color: var(--text3);
+  margin-left: 4px;
+  font-weight: 400
+}
+
+.jobs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px
+}
+
+.jobs-sort {
+  font-family: var(--font);
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: var(--text2);
+  cursor: pointer;
+  outline: none
+}
+
+.jobs-count {
+  font-size: 12px;
+  color: var(--text3)
+}
+
+/* ─── JOB CARDS (Notion Table Rows) ─── */
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0
+}
+
+.job-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  transition: background .1s;
+  cursor: default
+}
+
+.job-row:first-child {
+  border-top: 1px solid var(--border)
+}
+
+.job-row:hover {
+  background: var(--hover)
+}
+
+.job-fit {
+  width: 44px;
+  flex-shrink: 0;
+  text-align: center
+}
+
+.job-fit-num {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1
+}
+
+.job-fit-num.high { color: var(--green) }
+.job-fit-num.mid  { color: var(--yellow) }
+.job-fit-num.low  { color: var(--red) }
+
+.job-fit-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text3);
+  margin-top: 1px
+}
+
+.job-info {
+  flex: 1;
+  min-width: 0
+}
+
+.job-role {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis
+}
+
+.job-company {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap
+}
+
+.job-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap
+}
+
+.job-meta-item {
+  font-size: 11.5px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 3px
+}
+
+.job-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0
+}
+
+.job-reply-btn {
+  padding: 5px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all .1s
+}
+
+.job-reply-btn:hover {
+  background: var(--hover);
+  color: var(--text);
+  border-color: rgba(55, 53, 47, .2)
+}
+
+.job-delete-btn {
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 12px;
+  color: var(--text3);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all .1s
+}
+
+.job-delete-btn:hover {
+  background: var(--red-bg);
+  color: var(--red);
+  border-color: rgba(212, 76, 71, .2)
+}
+
+/* ─── FIT SCORE BAR ─── */
+.job-fit-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(55, 53, 47, .07);
+  border-radius: 2px;
+  margin-top: 3px;
+  overflow: hidden
+}
+
+.job-fit-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width .8s cubic-bezier(.4, 0, .2, 1)
+}
+
+.job-fit-fill.high { background: var(--green) }
+.job-fit-fill.mid  { background: var(--yellow) }
+.job-fit-fill.low  { background: var(--red) }
+
+/* ─── EMPTY STATE ─── */
+.jobs-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text3)
+}
+
+.jobs-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: .6
+}
+
+.jobs-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 6px
+}
+
+.jobs-empty-sub {
+  font-size: 13px;
+  line-height: 1.6
+}
+
+/* ─── REPLY MODAL ─── */
+.jobs-modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, .75);
+  backdrop-filter: blur(4px);
+  z-index: 8000;
+  display: none;
+  align-items: center;
+  justify-content: center
+}
+
+.jobs-modal-bg.show {
+  display: flex
+}
+
+.jobs-modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-width: 580px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(55, 53, 47, .12);
+  padding: 28px
+}
+
+.jobs-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px
+}
+
+.jobs-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text)
+}
+
+.jobs-modal-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .1s
+}
+
+.jobs-modal-close:hover {
+  background: var(--hover)
+}
+
+.jobs-modal-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border)
+}
+
+.jobs-modal-meta-row {
+  display: flex;
+  align-items: center;
+  min-height: 26px
+}
+
+.jobs-modal-meta-k {
+  font-size: 12px;
+  color: var(--text2);
+  width: 90px;
+  flex-shrink: 0
+}
+
+.jobs-modal-meta-v {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500
+}
+
+.jobs-modal-reply {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.75;
+  white-space: pre-wrap;
+  background: rgba(55, 53, 47, .02);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px
+}
+
+.jobs-modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end
+}
+
+/* ─── STATS ROW ─── */
+.jobs-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 20px
+}
+
+.jobs-stat {
+  background: var(--bg);
+  padding: 16px
+}
+
+.jobs-stat-num {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1
+}
+
+.jobs-stat-label {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-top: 2px
+}
+
+/* ─── LOADING STATE ─── */
+.jobs-analyzing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--blue-bg);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--blue);
+  font-weight: 600;
+  animation: fadeIn .3s ease
+}
+
+.jobs-analyzing .jdot {
+  background: var(--blue)
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px) }
+  to   { opacity: 1; transform: none }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .jobs-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px
+  }
+
+  .job-row {
+    flex-wrap: wrap;
+    gap: 10px
+  }
+
+  .job-actions {
+    width: 100%;
+    justify-content: flex-end
+  }
+
+  .job-meta {
+    width: 100%
+  }
+
+  .jobs-modal {
+    width: 95%;
+    padding: 20px
+  }
+
+  .jobs-analyze-actions {
+    flex-direction: column;
+    align-items: stretch
+  }
+
+  .jobs-analyze-hint {
+    text-align: center
+  }
+}
+
+@media (max-width: 480px) {
+  .jobs-stats {
+    grid-template-columns: 1fr
+  }
+
+  .jobs-filters {
+    overflow-x: auto;
+    scrollbar-width: none
+  }
+
+  .jobs-filters::-webkit-scrollbar {
+    display: none
+  }
+}

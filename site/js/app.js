@@ -1,5 +1,5 @@
 // VIEW SWITCHING
-const bcNames = { home: 'Home', learning: 'Learning' };
+const bcNames = { home: 'Home', learning: 'Learning', jobs: 'Jobs' };
 function switchView(name, el) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   document.querySelectorAll('#sb .sbi').forEach(t => t.classList.remove('act'));
