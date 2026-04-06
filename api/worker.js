@@ -912,9 +912,75 @@ For reply_email: Write a brief, professional reply expressing interest if fit_sc
         }
       }
 
+      // ─── JOBS: Ingest from Python pipeline ──────────────────────
+      if (url.pathname === '/jobs/ingest' && request.method === 'POST') {
+        try {
+          const job = await request.json();
+          if (!job || !job.company) return jsonResp({ error: 'Invalid job data' }, 400);
+          job.ingested_at = new Date().toISOString();
+          job.id = job.id || `${job.source || 'unknown'}_${Date.now()}`;
+
+          const existing = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
+          const filtered = existing.filter(j => j.id !== job.id);
+          const updated  = [job, ...filtered].slice(0, 200);
+          await env.AETHER_KV.put('jobs_feed', JSON.stringify(updated));
+
+          const s = JSON.parse(await env.AETHER_KV.get('jobs_stats') || '{}');
+          await env.AETHER_KV.put('jobs_stats', JSON.stringify({
+            total:         (s.total || 0) + 1,
+            auto_applied:  (s.auto_applied || 0) + (job.applied ? 1 : 0),
+            manual_queued: (s.manual_queued || 0) + (job.apply_type === 'manual' ? 1 : 0),
+            high_fit:      (s.high_fit || 0) + ((job.fit_score || 0) >= 7 ? 1 : 0),
+            last_run:      new Date().toISOString(),
+          }));
+          return jsonResp({ ok: true, total: updated.length });
+        } catch (err) {
+          return jsonResp({ error: 'Ingest failed', detail: err.message }, 500);
+        }
+      }
+
+      // ─── JOBS: Feed for dashboard ────────────────────────────────
+      if (url.pathname === '/jobs/feed' && request.method === 'GET') {
+        try {
+          const jobs  = JSON.parse(await env.AETHER_KV.get('jobs_feed')  || '[]');
+          const stats = JSON.parse(await env.AETHER_KV.get('jobs_stats') || '{}');
+
+          const status   = url.searchParams.get('status');
+          const source   = url.searchParams.get('source');
+          const minScore = parseInt(url.searchParams.get('min_score') || '0');
+          const limit    = parseInt(url.searchParams.get('limit') || '50');
+
+          let out = jobs;
+          if (status)   out = out.filter(j => j.status === status);
+          if (source)   out = out.filter(j => j.source === source);
+          if (minScore) out = out.filter(j => (j.fit_score || 0) >= minScore);
+
+          return jsonResp({
+            jobs: out.slice(0, limit),
+            stats: {
+              total:         stats.total         || jobs.length,
+              auto_applied:  stats.auto_applied  || 0,
+              manual_queued: stats.manual_queued || 0,
+              high_fit:      stats.high_fit      || 0,
+              last_run:      stats.last_run      || null,
+            }
+          });
+        } catch (err) {
+          return jsonResp({ error: 'Feed failed', detail: err.message }, 500);
+        }
+      }
+
+      // ─── JOBS: Clear (admin reset) ───────────────────────────────
+      if (url.pathname === '/jobs/clear' && request.method === 'POST') {
+        await env.AETHER_KV.put('jobs_feed',  '[]');
+        await env.AETHER_KV.put('jobs_stats', '{}');
+        return jsonResp({ ok: true });
+      }
+
       if (url.pathname.startsWith('/api')) {
         return jsonResp({ status: 'AETHER API ONLINE', version: '2.1' });
       }
+
 
       return env.ASSETS.fetch(request);
 
