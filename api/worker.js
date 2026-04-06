@@ -79,7 +79,10 @@ function analyzePatterns(events) {
   };
 }
 
-async function getRecentEvents(env, limit = 20) {
+async function getRecentEvents(envOrLimit, limitOrEnv) {
+  // handle both getRecentEvents(env, 20) and getRecentEvents(20, env)
+  const env  = typeof envOrLimit === 'number' ? limitOrEnv : envOrLimit;
+  const limit = typeof envOrLimit === 'number' ? envOrLimit : (limitOrEnv || 20);
   const events = await env.AETHER_KV.get("events:list", { type: "json" }) || [];
   return events.slice(-limit);
 }
@@ -170,40 +173,28 @@ async function handleCommand(text, chatId, env) {
     }
 
     case '/flow': {
+      const events = await getRecentEvents(env, 20);
       const state = await getLatestState(env);
-      const events = await getRecentEvents(5, env);
       const recentEnergy = events.length > 0
         ? events.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / events.length : 0.5;
       const recentStress = events.length > 0
         ? events.reduce((s, e) => s + (e.stress_signal || 0.2), 0) / events.length : 0.2;
 
       let flowStatus, advice;
-      if (state) {
-        flowStatus = state.flow_class || 'UNKNOWN';
-        if (flowStatus === 'FLOW') advice = 'You are in flow. Protect this time — no distractions.';
+      if (state?.flow_class) {
+        flowStatus = state.flow_class;
+        if (flowStatus === 'FLOW') advice = 'You are in flow. Protect this time.';
         else if (flowStatus === 'PRE_FLOW') advice = 'Almost there. One focused task to enter flow.';
         else if (flowStatus === 'ANXIETY') advice = 'Challenge too high. Break the task into smaller pieces.';
         else if (flowStatus === 'RECOVERY') advice = 'Rest mode. Light tasks only.';
         else advice = 'Log your state with the check-in to get a flow reading.';
       } else if (recentEnergy > 0.7 && recentStress < 0.3) {
-        flowStatus = 'FLOW';
-        advice = 'Recent messages suggest flow. Stay focused!';
+        flowStatus = 'FLOW'; advice = 'Recent messages suggest flow. Stay focused!';
       } else {
-        flowStatus = 'NOMINAL';
-        advice = 'Open the AETHER dashboard and log your state for a precise reading.';
+        flowStatus = 'NOMINAL'; advice = 'Open the AETHER dashboard and log your state for a precise reading.';
       }
-
-      // 🎯 only important states
-      if (!["flow_ready", "burnout", "low_focus"].includes(analysis.state)) {
-        return;
-      }
-
-      const canSend = await shouldSendUpdate(env, analysis.state);
-      const allowed = await checkCooldown(env, 300);
-
-      if (!canSend || !allowed) return;
-
-      await sendTelegram(chatId, message, env);
+      await sendTelegram(chatId, `🎯 *Flow State: ${flowStatus}*\n\n${advice}\n\nEnergy: ${Math.round(recentEnergy * 100)}% · Stress: ${Math.round(recentStress * 100)}%`, env);
+      return true;
     }
 
     case '/goal': {
@@ -418,6 +409,20 @@ async function handleCommand(text, chatId, env) {
     case '/workout': {
       const actType = args.replace(/[0-9]+/g, '').trim() || 'workout';
       const mins = parseInt(args.match(/[0-9]+/)?.[0]) || 30;
+      const strGain = Math.min(10, Math.round(mins / 6));
+      await saveEvent({
+        timestamp: new Date().toISOString(),
+        input_type: 'health', raw_text: text, topic: 'Exercise',
+        topics: ['health', 'fitness', actType],
+        life_dimension: 'fitness',
+        stat_impact: { INT: 0, STR: mins / 60, VIT: 0.3, AGI: 0.2, SEN: 0 },
+        energy_signal: 0.8, stress_signal: 0.1, focus_signal: 0.7, motivation_signal: 0.85,
+        dominant_emotion: 'energized', is_study_session: false, is_goal_mention: true, is_win: mins >= 30,
+        health_type: 'exercise', exercise_minutes: mins, exercise_type: actType,
+        summary: `Exercise: ${actType} for ${mins} min`,
+      }, env);
+      await sendTelegram(chatId, `💪 *Workout logged*\n\n[STR +${strGain}] Strength building\n${actType} · ${mins} min\n\n${mins >= 45 ? '🔥 Solid session!' : '✅ Done!'}`, env);
+      return true;
     }
 
 
@@ -544,12 +549,14 @@ async function handleCommand(text, chatId, env) {
 
     case '/commands': {
       await sendTelegram(chatId,
-        `*AETHER Commands* 🤖\n\n` +
-        `*📊 CORE*\n/goal [text] — set today goal\n/mood [1-5] — quick mood log\n/stats — weekly summary\n/flow — current flow state\n\n` +
-        `*💪 HEALTH*\n/exercise [mins] [type]\n/sleep [hours]\n/food [description]\n/water [litres]\n/weight [kg]\n\n` +
-        `*💰 MONEY*\n/spend [amount] [category]\n/income [amount] [source]\n\n` +
-        `*💼 CAREER*\n/job [company] — log application\n/interview [company]\n\n` +
-        `*📈 INSIGHTS*\n/week /streak /morning /evening`, env);
+        `*AETHER Life OS* 🤖\n\n` +
+        `*📚 STUDY*\n/study [mins] [subject]\n/reflect [thoughts]\n\n` +
+        `*💪 FITNESS*\n/exercise [mins] [type]\n/sleep [hours]\n/food [meal]\n/water [litres]\n/weight [kg]\n\n` +
+        `*🧠 MENTAL*\n/mood [1-5]\n/grateful [what]\n/win [achievement]\n/negative [pattern]\n\n` +
+        `*📵 PATTERNS*\n/distract [what]\n/procrastinate [task]\n\n` +
+        `*🤝 LIFE*\n/social [who/what]\n/goal [text]\n/must [task]\n/done [num]\n\n` +
+        `*💰 FINANCE*\n/spend [amount] [cat]\n/income [amount] [src]\n\n` +
+        `*📊 INSIGHTS*\n/stats · /week · /streak · /flow · /morning · /evening`, env);
       return true;
     }
 
@@ -649,11 +656,7 @@ export default {
         // 🔹 Pattern engine (AFTER events)
         const patterns = analyzePatterns(events);
 
-        const patternText = `
-      📊 Pattern Insight:
-      Best hour: ${patterns.bestHour}:00
-      Trend: ${patterns.trend}
-      `;
+        const patternText = `📊 Pattern Insight:\nBest hour: ${patterns.bestHour}:00\nTrend: ${patterns.trend}`;
 
         // 🔹 Helpers
         function energyLabel(e) {
@@ -696,17 +699,7 @@ export default {
         }
 
         // 🔥 FINAL OUTPUT (NOW WITH PATTERNS)
-        const finalResponse = `🧠 JARVIS CORE
-
-      ⚡ Energy: ${energyText}
-      🔥 State: ${analysis.state}
-      📈 Trend: ${trend}
-
-      📌 Recommendation:
-      ${response}
-
-      ${patternText}
-      `;
+        const finalResponse = `🧠 JARVIS CORE\n\n⚡ Energy: ${energyText}\n🔥 State: ${analysis.state.toUpperCase()}\n📈 Trend: ${trend}\n\n📌 ${response}\n\n${patternText}`;
         console.log("PATTERN:", patternText);
         return new Response(JSON.stringify({ reply: finalResponse }), {
           headers: { "Content-Type": "application/json" }
@@ -720,6 +713,9 @@ export default {
       if (url.pathname === '/log-github' && request.method === 'POST') return handleGitHubLog(request, env);
       if (url.pathname === '/trigger' && request.method === 'POST') return handleTrigger(request, env);
       if (url.pathname === '/health' && request.method === 'GET') return handleHealth(request, env);
+      if (url.pathname === '/priorities' && request.method === 'GET') return handleGetPriorities(request, env);
+      if (url.pathname === '/priorities' && request.method === 'POST') return handleAddPriority(request, env);
+      if (url.pathname === '/priorities/done' && request.method === 'POST') return handleDonePriority(request, env);
       if (url.pathname === '/tabs' && request.method === 'GET') {
         const tabs = await env.AETHER_KV.get("tabs:active", { type: "json" }) || [];
         return new Response(JSON.stringify({ tabs }), {
@@ -991,6 +987,45 @@ async function handleWebhook(request, env) {
   };
   await saveEvent(event, env);
 
+  // Dual-write to Supabase for ML pipeline
+fetch(`${env.SUPABASE_URL}/rest/v1/events`, {
+  method: 'POST',
+  headers: {
+    'apikey': env.SUPABASE_KEY,
+    'Authorization': `Bearer ${env.SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  },
+  body: JSON.stringify({
+    user_id:            'avi',
+    input_text:         event.raw_text || '',
+    raw_text:           event.raw_text || '',
+    source:             event.input_type || 'telegram',
+    input_type:         event.input_type || 'text',
+    topic:              event.topic || null,
+    life_dimension:     event.life_dimension || 'general',
+    energy_signal:      event.energy_signal || 0.5,
+    stress_signal:      event.stress_signal || 0.2,
+    focus_signal:       event.focus_signal || 0.5,
+    motivation_signal:  event.motivation_signal || 0.5,
+    stat_impact:        event.stat_impact || {},
+    sentiment:          event.sentiment || 'neutral',
+    dominant_emotion:   event.dominant_emotion || 'neutral',
+    is_win:             !!event.is_win,
+    is_procrastination: !!event.is_procrastination,
+    is_distraction:     !!event.is_distraction,
+    is_negative_self:   !!event.is_negative_self,
+    is_study_session:   !!event.is_study_session,
+    is_goal_mention:    !!event.is_goal_mention,
+    estimated_minutes:  event.estimated_minutes || null,
+    summary:            event.summary || null,
+    word_count:         event.word_count || null,
+    hour_utc:           event.hour_utc || null,
+    day_of_week:        event.day_of_week || null,
+    created_at:         event.timestamp,
+  })
+}).catch(e => console.warn('[AETHER] Supabase write failed:', e.message));
+
   // 🔥 JARVIS INTELLIGENCE
   const events = await getRecentEvents(env);
 
@@ -1043,17 +1078,8 @@ async function handleWebhook(request, env) {
   // original logging reply
   const baseReply = buildTelegramReply(parsed, inputType, rawText);
 
-  const jarvisReply = `
-
-  🧠 *JARVIS*
-  ⚡ Energy: ${analysis.energy.toFixed(2)}
-  🔥 State: ${analysis.state}
-
-  ${analysis.advice}
-  `;
-
-  // send combined response
-  await sendTelegram(chatId, baseReply + jarvisReply, env);
+  const jarvisReply = `🧠 *JARVIS*\n⚡ Energy: ${analysis.energy.toFixed(2)}\n🔥 State: ${analysis.state.toUpperCase()}\n\n${analysis.advice}`;
+  await sendTelegram(chatId, baseReply + '\n\n' + jarvisReply, env);
 
   return textResp('OK', 200);
 }
@@ -1094,6 +1120,37 @@ async function handleChat(request, env) {
   }
 
   return jsonResp({ reply });
+}
+
+
+async function handleGetPriorities(request, env) {
+  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+  return new Response(JSON.stringify(priorities), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
+async function handleAddPriority(request, env) {
+  const { text } = await request.json();
+  if (!text?.trim()) return new Response(JSON.stringify({ error: 'No text' }), { status: 400 });
+  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+  const item = { id: Date.now(), text: text.trim(), done: false, created: new Date().toISOString() };
+  priorities.unshift(item);
+  await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
+  return new Response(JSON.stringify({ ok: true, item }), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
+}
+
+async function handleDonePriority(request, env) {
+  const { id } = await request.json();
+  const priorities = await env.AETHER_KV.get('priorities:list', { type: 'json' }) || [];
+  const item = priorities.find(p => p.id === id);
+  if (item) { item.done = true; item.completedAt = new Date().toISOString(); }
+  await env.AETHER_KV.put('priorities:list', JSON.stringify(priorities));
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+  });
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -1253,6 +1310,45 @@ async function handleDashboard(request, env) {
         { icon: '🔮', name: 'predict.py', sub: 'Flow + peak hour', status: events.length >= 10 ? 'OK' : 'WAITING', cls: events.length >= 10 ? 'ps-ok' : 'ps-warn' },
         { icon: '📤', name: 'push_dashboard.py', sub: 'Predictions → KV', status: 'OK', cls: 'ps-ok' },
       ],
+    };
+
+    // ── Life Stats (Solo Leveling) ──────────────────────────────
+    const dimScores = { study:0, fitness:0, mental:0, social:0, finance:0, career:0, sleep:0 };
+    const dimCounts = { ...dimScores };
+    const negatives = { procrastination:0, distraction:0, negative_self:0 };
+    const wins = [];
+    const statTotals = { INT:0, STR:0, VIT:0, AGI:0, SEN:0 };
+
+    events.forEach(e => {
+      const d = e.life_dimension;
+      if (d && dimScores[d] !== undefined) {
+        dimScores[d] += (e.energy_signal||0.5) * (e.focus_signal||0.5);
+        dimCounts[d]++;
+      }
+      if (e.is_procrastination) negatives.procrastination++;
+      if (e.is_distraction)     negatives.distraction++;
+      if (e.is_negative_self)   negatives.negative_self++;
+      if (e.is_win && e.summary) wins.push({ text: e.summary, ts: e.timestamp });
+      if (e.stat_impact && typeof e.stat_impact === 'object') {
+        Object.entries(e.stat_impact).forEach(([k,v]) => { if (statTotals[k]!==undefined) statTotals[k] += (v||0); });
+      }
+    });
+
+    const maxStat = Math.max(...Object.values(statTotals), 1);
+    const soloStats = Object.fromEntries(
+      Object.entries(statTotals).map(([k,v]) => [k, Math.min(100, Math.round(v/maxStat*100))])
+    );
+    const level = Math.max(1, Math.floor(Object.values(soloStats).reduce((s,v)=>s+v,0)/50));
+
+    dash.lifeStats = {
+      dimensions: Object.fromEntries(
+        Object.entries(dimScores).map(([d,s]) => [d, dimCounts[d]>0 ? Math.round(s/dimCounts[d]*100) : 0])
+      ),
+      soloStats,
+      level,
+      negatives,
+      recentWins: wins.slice(-5).reverse(),
+      topNegative: Object.entries(negatives).sort((a,b)=>b[1]-a[1])[0]?.[0] || null,
     };
 
     return new Response(JSON.stringify(dash, null, 2), {
