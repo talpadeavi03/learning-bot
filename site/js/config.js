@@ -1,10 +1,25 @@
 const WORKER_URL = 'https://learning-bot.talpadeavi0303.workers.dev';
-const D = {
-  metrics: { energy: 7.4, focus: 82, mood: 68, sleep: 74, productivity: 91 },
-  activity: [{ label: 'Neural Networks Ch4', mins: 47, tag: 'LEARN' }, { label: 'ML Pipeline Build', mins: 126, tag: 'CODE' }, { label: 'CF Worker v2 Deploy', mins: 38, tag: 'OPS' }],
-  goals: { today: ['complete ML extractor', 'study chapter 4', 'add github token', 'log 30 events'] },
-  weekly: [4.2, 5.8, 6.1, 3.9, 7.0, 6.8, 6.2]
-};
-const UNIVERSES = { aether: { name: 'Universe-616' }, iron: { name: 'Iron Man Verse' }, anime: { name: 'Anime Nexus' }, cyber: { name: 'Cyberpunk-7' } };
-function changeUniverse(id) { showAchievement('Universe Shifted', (UNIVERSES[id] || UNIVERSES.aether).name + ' · +150 XP') }
 
+// Default data — overridden by loadDashboard() with live API data
+const D = {
+  metrics: { energy: 0, focus: 0, mood: 0, sleep: 0, productivity: 0 },
+  activity: [],
+  goals: { today: [] },
+  weekly: [0, 0, 0, 0, 0, 0, 0]
+};
+
+const UNIVERSES = {
+  aether: { name: 'Universe-616', accent: '45,159,61', bg: '#181818', card: '#1e1e1e' },
+  iron:   { name: 'Iron Man Verse', accent: '220,53,53', bg: '#1a0a0a', card: '#2a1515' },
+  anime:  { name: 'Anime Nexus', accent: '138,43,226', bg: '#12081e', card: '#1e1028' },
+  cyber:  { name: 'Cyberpunk-7', accent: '0,255,255', bg: '#0a1a1a', card: '#0f2828' },
+};
+
+function changeUniverse(id) {
+  const u = UNIVERSES[id] || UNIVERSES.aether;
+  document.documentElement.style.setProperty('--g', `rgba(${u.accent},.85)`);
+  document.documentElement.style.setProperty('--g2', `rgba(${u.accent},.15)`);
+  document.documentElement.style.setProperty('--bg', u.bg);
+  document.documentElement.style.setProperty('--card', u.card);
+  showAchievement('Universe Shifted', u.name + ' · +150 XP');
+}

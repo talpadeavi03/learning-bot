@@ -277,9 +277,20 @@ function markJobReplied() {
   }
 }
 
-// ─── GMAIL SYNC (placeholder) ────────────
-function syncGmail() {
-  showAchievement('Gmail Sync', 'Connect worker to Gmail API to enable');
+// ─── GMAIL SYNC ──────────────────────────
+async function syncGmail() {
+  try {
+    const res = await fetch(WORKER_URL + '/jobs/gmail', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    if (res.ok) {
+      const data = await res.json();
+      showAchievement('Gmail Synced ✅', (data.count || 0) + ' new messages processed');
+      loadJobs();
+    } else {
+      showAchievement('Gmail Sync', 'Worker returned ' + res.status + ' — check server logs');
+    }
+  } catch (e) {
+    showAchievement('Gmail Sync Failed', 'Worker offline or endpoint not configured');
+  }
 }
 
 // ─── INIT ────────────────────────────────

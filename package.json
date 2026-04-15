@@ -1,6 +1,19 @@
 {
+  "name": "learning-bot",
+  "version": "2.2.0",
+  "description": "AETHER OS — Personal intelligence system powered by Cloudflare Workers",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev api/worker.js --local",
+    "deploy": "wrangler deploy api/worker.js",
+    "tail": "wrangler tail",
+    "health": "curl -s https://learning-bot.talpadeavi0303.workers.dev/health | jq"
+  },
   "dependencies": {
     "@babel/parser": "^7.29.2",
     "@babel/traverse": "^7.29.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.76.0"
   }
 }

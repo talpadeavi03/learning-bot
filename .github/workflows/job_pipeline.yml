@@ -1,0 +1,58 @@
+name: AETHER Job Bot Pipeline
+
+on:
+  schedule:
+    # Runs at 7:00, 13:00, 19:00 IST (1:30, 7:30, 13:30 UTC)
+    - cron: '30 1 * * *'
+    - cron: '30 7 * * *'
+    - cron: '30 13 * * *'
+  workflow_dispatch:  # manual trigger from GitHub UI
+
+jobs:
+  job-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        working-directory: job-bot
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium --with-deps
+
+      - name: Run Job Pipeline
+        working-directory: job-bot
+        env:
+          # ── Supabase ──────────────────────────────
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY:              ${{ secrets.SUPABASE_KEY }}
+          # ── AI Scoring ────────────────────────────
+          CLAUDE_API_KEY:            ${{ secrets.CLAUDE_API_KEY }}
+          WORKER_URL:                ${{ secrets.WORKER_URL }}
+          # ── Gmail ─────────────────────────────────
+          GMAIL_TOKEN_JSON:          ${{ secrets.GMAIL_TOKEN_JSON }}
+          # ── Telegram alerts ───────────────────────
+          TELEGRAM_BOT_TOKEN:        ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:          ${{ secrets.TELEGRAM_CHAT_ID }}
+          # ── Site credentials ──────────────────────
+          NAUKRI_COOKIES_JSON:       ${{ secrets.NAUKRI_COOKIES_JSON }}
+          LINKEDIN_COOKIES_JSON:     ${{ secrets.LINKEDIN_COOKIES_JSON }}
+          HIRIST_API_KEY:            ${{ secrets.HIRIST_API_KEY }}
+        run: python main.py
+
+      - name: Upload pipeline log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-log-${{ github.run_id }}
+          path: job-bot/*.log
+          retention-days: 7

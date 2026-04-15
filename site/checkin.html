@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AETHER Check-in</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#181818;color:#e8e8e6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#1e1e1e;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:28px;max-width:380px;width:100%}
+h1{font-size:18px;font-weight:700;margin-bottom:4px}
+.sub{font-size:12px;color:#787774;margin-bottom:20px}
+.field{margin-bottom:18px}
+label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:#a8a8a4}
+input[type=range]{width:100%;accent-color:#2d9f3d}
+.val{font-size:20px;font-weight:700;color:#2d9f3d;text-align:center;margin-top:4px}
+textarea{width:100%;background:#252525;border:1px solid rgba(255,255,255,.06);border-radius:8px;color:#e8e8e6;padding:10px;font-size:13px;resize:vertical;min-height:60px;font-family:inherit}
+button{width:100%;padding:12px;background:#2d9f3d;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px}
+button:hover{background:#37b348}
+.done{text-align:center;padding:30px 0;font-size:16px;color:#2d9f3d;font-weight:700}
+</style>
+</head>
+<body>
+<div class="card" id="form">
+  <h1>⚡ Quick Check-in</h1>
+  <div class="sub">How are you right now? Slide to rate.</div>
+  <div class="field">
+    <label>🔋 Energy</label>
+    <input type="range" id="energy" min="0" max="100" value="50" oninput="document.getElementById('ev').textContent=this.value+'%'">
+    <div class="val" id="ev">50%</div>
+  </div>
+  <div class="field">
+    <label>🎯 Focus</label>
+    <input type="range" id="focus" min="0" max="100" value="50" oninput="document.getElementById('fv').textContent=this.value+'%'">
+    <div class="val" id="fv">50%</div>
+  </div>
+  <div class="field">
+    <label>😤 Stress</label>
+    <input type="range" id="stress" min="0" max="100" value="20" oninput="document.getElementById('sv').textContent=this.value+'%'">
+    <div class="val" id="sv">20%</div>
+  </div>
+  <div class="field">
+    <label>📝 Quick note (optional)</label>
+    <textarea id="note" placeholder="What are you working on?"></textarea>
+  </div>
+  <button onclick="submit()">Log Check-in →</button>
+</div>
+<div class="done" id="done" style="display:none">
+  ✅ Logged! You can close this tab.
+</div>
+<script>
+const WORKER_URL = 'https://learning-bot.talpadeavi0303.workers.dev';
+async function submit() {
+  const body = {
+    energy: parseInt(document.getElementById('energy').value),
+    focus: parseInt(document.getElementById('focus').value),
+    stress: parseInt(document.getElementById('stress').value),
+    note: document.getElementById('note').value.trim()
+  };
+  try {
+    await fetch(WORKER_URL + '/log-state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  } catch(e) {}
+  document.getElementById('form').style.display = 'none';
+  document.getElementById('done').style.display = 'block';
+}
+</script>
+</body>
+</html>

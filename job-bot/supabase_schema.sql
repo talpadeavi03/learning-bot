@@ -76,3 +76,29 @@ GROUP BY status, source;
 ALTER TABLE jobs         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pipeline_runs ENABLE ROW LEVEL SECURITY;
+
+-- Policies: allow service_role full access (used by job-bot pipeline and CF Worker)
+CREATE POLICY "Service role full access on jobs"
+  ON jobs FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+CREATE POLICY "Service role full access on applications"
+  ON applications FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+CREATE POLICY "Service role full access on pipeline_runs"
+  ON pipeline_runs FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+-- Read-only for anon (dashboard reads)
+CREATE POLICY "Anon read jobs"
+  ON jobs FOR SELECT
+  USING (true);
+
+CREATE POLICY "Anon read pipeline_runs"
+  ON pipeline_runs FOR SELECT
+  USING (true);
+

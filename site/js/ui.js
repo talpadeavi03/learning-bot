@@ -38,9 +38,10 @@ function countUp(id, target) {
   let v = 0; const el = document.getElementById(id); if (!el) return;
   const t = setInterval(() => { v = Math.min(v + Math.ceil(target / 40), target); el.textContent = v; if (v >= target) clearInterval(t) }, 28);
 }
-setTimeout(() => { countUp('wSessions', 47); countUp('wGoals', 8); countUp('wStreak', 11); countUp('wScore', 94) }, 700);
-let pv = 0; const pEl = document.getElementById('powerNum');
-const pt = setInterval(() => { pv = Math.min(pv + Math.ceil(9400 / 60), 9400); pEl.textContent = pv.toLocaleString(); if (pv >= 9400) clearInterval(pt) }, 25);
+// Initial countUp with zeros — will be overridden by loadDashboard() with live data
+setTimeout(() => { countUp('wSessions', 0); countUp('wGoals', 0); countUp('wStreak', 0); countUp('wScore', 0) }, 700);
+const pEl = document.getElementById('powerNum');
+if (pEl) pEl.textContent = '—';
 
 // BARS
 function animateBars() {

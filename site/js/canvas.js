@@ -23,8 +23,9 @@ function initCharts() {
   const dc = document.getElementById('donutChart');
   if (dc) new Chart(dc, {
     type: 'doughnut', data: {
+      labels: ['Study', 'Code', 'Ops', 'Other'],
       datasets: [{
-        data: [42, 28, 18, 12],
+        data: D.donut || [42, 28, 18, 12],
         backgroundColor: ['rgba(45,159,61,.68)', 'rgba(45,159,61,.44)', 'rgba(45,159,61,.25)', 'rgba(45,159,61,.11)'],
         borderColor: ['rgba(45,159,61,.8)', 'rgba(45,159,61,.5)', 'rgba(45,159,61,.3)', 'rgba(45,159,61,.15)'], borderWidth: 1
       }]
@@ -91,26 +92,38 @@ function drawGraph() {
       else { n.px = W / 2 + Math.sin(graphT * .3) * 6; n.py = H / 2 + Math.cos(graphT * .22) * 6; }
     });
   }
+  // Mode-dependent rendering
+  const edgeAlpha = graphMode === 'cluster' ? '.2' : '.1';
+  const nodeGlow = graphMode === 'flow';
+  const clusterPulse = graphMode === 'cluster';
+
   graphEdges.forEach(e => {
     if (!e.a || !e.b) return;
     graphCtx.beginPath(); graphCtx.moveTo(e.a.px, e.a.py); graphCtx.lineTo(e.b.px, e.b.py);
-    graphCtx.strokeStyle = 'rgba(55,53,47,.1)'; graphCtx.lineWidth = 1.5; graphCtx.stroke();
+    graphCtx.strokeStyle = `rgba(55,53,47,${edgeAlpha})`; graphCtx.lineWidth = graphMode === 'flow' ? 2 : 1.5; graphCtx.stroke();
     const t2 = ((graphT * 50) % 100) / 100; const mx = e.a.px + (e.b.px - e.a.px) * t2, my2 = e.a.py + (e.b.py - e.a.py) * t2;
-    graphCtx.beginPath(); graphCtx.arc(mx, my2, 2.5, 0, Math.PI * 2); graphCtx.fillStyle = 'rgba(45,159,61,.55)'; graphCtx.fill();
+    graphCtx.beginPath(); graphCtx.arc(mx, my2, graphMode === 'flow' ? 4 : 2.5, 0, Math.PI * 2);
+    graphCtx.fillStyle = graphMode === 'flow' ? 'rgba(45,159,61,.8)' : 'rgba(45,159,61,.55)'; graphCtx.fill();
   });
   graphNodes.forEach(n => {
-    const grd = graphCtx.createRadialGradient(n.px, n.py, 0, n.px, n.py, n.r);
+    const pulseR = clusterPulse ? n.r + Math.sin(graphT * 3 + n.r) * 3 : n.r;
+    const grd = graphCtx.createRadialGradient(n.px, n.py, 0, n.px, n.py, pulseR);
     if (n.id === 'avi' || n.color === '#2d9f3d') { grd.addColorStop(0, 'rgba(45,159,61,.14)'); grd.addColorStop(1, 'rgba(45,159,61,.02)'); }
     else if (n.color === '#2383e2') { grd.addColorStop(0, 'rgba(35,131,226,.14)'); grd.addColorStop(1, 'rgba(35,131,226,.02)'); }
     else { grd.addColorStop(0, 'rgba(55,53,47,.07)'); grd.addColorStop(1, 'rgba(55,53,47,.01)'); }
-    graphCtx.beginPath(); graphCtx.arc(n.px, n.py, n.r, 0, Math.PI * 2);
+    graphCtx.beginPath(); graphCtx.arc(n.px, n.py, pulseR, 0, Math.PI * 2);
     graphCtx.fillStyle = grd; graphCtx.fill();
+    if (nodeGlow) {
+      graphCtx.shadowColor = n.id === 'avi' ? 'rgba(45,159,61,.6)' : 'rgba(55,53,47,.2)';
+      graphCtx.shadowBlur = 12;
+    }
     graphCtx.strokeStyle = n.id === 'avi' ? 'rgba(45,159,61,.5)' : n.color === '#2383e2' ? 'rgba(35,131,226,.3)' : 'rgba(55,53,47,.15)';
     graphCtx.lineWidth = n.id === 'avi' ? 2 : 1; graphCtx.stroke();
-    graphCtx.font = `${n.r * .7}px serif`; graphCtx.textAlign = 'center'; graphCtx.textBaseline = 'middle';
+    graphCtx.shadowBlur = 0;
+    graphCtx.font = `${pulseR * .7}px serif`; graphCtx.textAlign = 'center'; graphCtx.textBaseline = 'middle';
     graphCtx.fillText(n.icon, n.px, n.py - 1);
     graphCtx.font = `500 10px Plus Jakarta Sans`; graphCtx.fillStyle = 'rgba(55,53,47,.55)';
-    graphCtx.fillText(n.label, n.px, n.py + n.r + 11);
+    graphCtx.fillText(n.label, n.px, n.py + pulseR + 11);
   });
   requestAnimationFrame(drawGraph);
 }

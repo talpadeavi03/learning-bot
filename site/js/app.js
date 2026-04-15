@@ -145,10 +145,13 @@ async function loadNeuralMemory() {
   } catch(e) { console.error("Neural memory init failed", e); }
 }
 
-setInterval(loadTabs, 5000);
-setInterval(loadNeuralMemory, 5000);
+setInterval(loadTabs, 10000);
 setTimeout(loadTabs, 1000);
-setTimeout(loadNeuralMemory, 1000);
+// Only run neuralMemory poll if element exists
+if (document.getElementById('neuralMemoryFeed')) {
+  setInterval(loadNeuralMemory, 10000);
+  setTimeout(loadNeuralMemory, 1000);
+}
 
 function openChat() { if (chatOpen) return; chatOpen = true; document.getElementById('chatPage').classList.add('open'); setTimeout(() => { initArcReactor(); document.getElementById('chatIn').focus() }, 100) }
 function closeChat() { if (!chatOpen) return; chatOpen = false; stopSpeaking(); document.getElementById('chatPage').classList.remove('open') }
@@ -213,6 +216,7 @@ window.addEventListener('resize', () => { if (chatOpen) initArcReactor() });
 function toggleSidebar() {
   const sb = document.getElementById('sb');
   const bd = document.getElementById('sb-backdrop');
+  if (!sb || !bd) return;
   if (sb.classList.contains('open')) {
     closeSidebar();
   } else {
@@ -222,8 +226,10 @@ function toggleSidebar() {
 }
 
 function closeSidebar() {
-  document.getElementById('sb').classList.remove('open');
-  document.getElementById('sb-backdrop').classList.remove('show');
+  const sb = document.getElementById('sb');
+  const bd = document.getElementById('sb-backdrop');
+  if (sb) sb.classList.remove('open');
+  if (bd) bd.classList.remove('show');
 }
 
 // Close sidebar when a nav item is clicked on mobile
@@ -323,3 +329,122 @@ async function markPriorityDone(id) {
 
 // Load on startup
 loadPriorities();
+
+// ═══════════════════════════════════════════════════════════════
+// BUG-05 FIX: LIVE DASHBOARD DATA LOADER
+// Fetches from /dashboard API and populates all stat elements
+// ═══════════════════════════════════════════════════════════════
+
+let dashboardData = null;
+
+async function loadDashboard() {
+  try {
+    const res = await fetch(WORKER_URL + '/dashboard', { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return;
+    dashboardData = await res.json();
+    populateDashboard(dashboardData);
+  } catch (e) {
+    console.warn('[AETHER] Dashboard fetch failed:', e.message);
+  }
+}
+
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function populateDashboard(d) {
+  if (!d) return;
+
+  // ── Today Stats Cards ──
+  setEl('sd-energy', (d.metrics?.energy ?? '—') + '%');
+  setEl('sd-focus', (d.metrics?.focus ?? '—') + '%');
+  setEl('sd-stress', (d.metrics?.stress ?? '—') + '%');
+  setEl('sd-events', d.metrics?.events ?? d.timeline?.length ?? '—');
+  setEl('sd-streak', (d.streak ?? 0) + 'd');
+
+  // Count wins from today's events
+  const winsCount = (d.timeline || []).filter(t => t.event?.includes('win')).length;
+  setEl('sd-wins', winsCount || (d.insights || []).filter(i => i.tagClass === 'tag-ok').length || '0');
+
+  // ── Flow State ──
+  const flowEl = document.getElementById('flow-label');
+  if (flowEl) flowEl.textContent = d.state?.flow_class || d.metrics?.flowLabel || 'NOMINAL';
+  const flowProbEl = document.getElementById('flow-prob');
+  if (flowProbEl) flowProbEl.textContent = (d.metrics?.flowProb ?? '—') + '%';
+
+  // ── Solo Leveling Stats ──
+  if (d.metrics) {
+    const level = Math.floor(((d.metrics.energy || 0) + (d.metrics.focus || 0)) / 20) + 1;
+    const xp = ((d.metrics.energy || 0) + (d.metrics.focus || 0)) * 10;
+    setEl('sl-level', level);
+    setEl('sl-xp', xp + ' XP');
+    const slStats = document.getElementById('sl-stats');
+    if (slStats) {
+      slStats.innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>INT</span><span>${Math.round((d.metrics.focus || 50) / 10)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>VIT</span><span>${Math.round((d.metrics.energy || 50) / 10)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span>AGI</span><span>${Math.round((100 - (d.metrics.stress || 20)) / 10)}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px"><span>SEN</span><span>${Math.round((d.metrics.mood || 50) / 10)}</span></div>
+      `;
+    }
+  }
+
+  // ── Life Dimensions ──
+  const lifeDims = document.getElementById('life-dims');
+  if (lifeDims && d.activity && d.activity.length > 0) {
+    lifeDims.innerHTML = d.activity.map(a => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;font-weight:600">${a.topic}</span>
+        <span style="font-size:12px;color:var(--text2)">${a.minutes}min</span>
+      </div>
+    `).join('');
+  }
+
+  // ── Insights ──
+  const insightsPanel = document.getElementById('insights-panel');
+  if (insightsPanel && d.insights && d.insights.length > 0) {
+    insightsPanel.innerHTML = d.insights.map(i => `
+      <div style="padding:8px 10px;border-radius:6px;background:var(--card);border:1px solid var(--border);margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <span>${i.icon || '💡'}</span>
+          <span style="font-weight:600;font-size:12.5px">${i.title}</span>
+          <span class="tag ${i.tagClass || 'tg'}" style="margin-left:auto;font-size:10px">${i.tag}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2)">${i.body}</div>
+      </div>
+    `).join('');
+  }
+
+  // ── Goals ──
+  if (d.goals) {
+    const todayGoalEl = document.getElementById('today-goal');
+    if (todayGoalEl && d.goals.today) {
+      todayGoalEl.textContent = d.goals.today;
+    }
+  }
+
+  // ── Weekly Chart Data ──
+  if (d.weekData && typeof D !== 'undefined') {
+    D.weekly = d.weekData;
+  }
+
+  // ── Timeline ──
+  const timelineEl = document.getElementById('timeline-feed');
+  if (timelineEl && d.timeline && d.timeline.length > 0) {
+    timelineEl.innerHTML = d.timeline.map(t => `
+      <div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0">
+        <span style="font-size:11px;color:var(--text2);min-width:42px;font-family:monospace">${t.time}</span>
+        <span style="font-size:12.5px;color:var(--text)">${t.event}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── Summary counts ──
+  setEl('wSessions', d.metrics?.studySessions ?? d.timeline?.length ?? 0);
+  setEl('wStreak', d.streak ?? 0);
+}
+
+// Load dashboard on page load and refresh every 30s
+setTimeout(loadDashboard, 500);
+setInterval(loadDashboard, 30000);

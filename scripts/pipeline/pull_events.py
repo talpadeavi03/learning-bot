@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from supabase.client import get_recent_events
+from scripts.db.supabase_client import get_recent_events
 
 OUTPUT_PATH = Path("data/raw/events.csv")
 OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)

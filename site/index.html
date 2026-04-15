@@ -413,7 +413,34 @@
           <button class="dtab" onclick="showDoc('arch',this)">Architecture</button>
           <button class="dtab" onclick="showDoc('progress',this)">Progress</button>
         </div>
-        <!-- paste your existing doc-plan, doc-arch, doc-progress divs here from the old view-docs -->
+        <div id="doc-plan" class="doc-frame on">
+          <div style="padding:8px 0">
+            <div class="nh2" style="margin-bottom:8px">🎯 Master Plan</div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:12px">The AETHER OS roadmap — from foundation to autonomous intelligence.</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="padding:8px 12px;border-radius:6px;background:rgba(45,159,61,.08);border:1px solid rgba(45,159,61,.15)">
+                <span class="tag tg" style="font-size:10px">PHASE 1 ✅</span>
+                <div style="font-size:13px;font-weight:600;margin-top:4px">Foundation — Data Pipeline</div>
+                <div style="font-size:12px;color:var(--text2)">Telegram → CF Worker → KV + Supabase. NLP extraction, voice/image input.</div>
+              </div>
+              <div style="padding:8px 12px;border-radius:6px;background:rgba(45,159,61,.08);border:1px solid rgba(45,159,61,.15)">
+                <span class="tag tg" style="font-size:10px">PHASE 2 ✅</span>
+                <div style="font-size:13px;font-weight:600;margin-top:4px">Intelligence — ML & Dashboard</div>
+                <div style="font-size:12px;color:var(--text2)">JARVIS chat engine, flow detection, live dashboard, PWA with push.</div>
+              </div>
+              <div style="padding:8px 12px;border-radius:6px;background:rgba(35,131,226,.08);border:1px solid rgba(35,131,226,.15)">
+                <span class="tag tb" style="font-size:10px">PHASE 3 🔄</span>
+                <div style="font-size:13px;font-weight:600;margin-top:4px">Automation — Job Bot & Integrations</div>
+                <div style="font-size:12px;color:var(--text2)">Multi-source job scraping, LLM scoring, Gmail reader, auto-apply pipeline.</div>
+              </div>
+              <div style="padding:8px 12px;border-radius:6px;background:rgba(120,119,116,.08);border:1px solid rgba(120,119,116,.15)">
+                <span style="font-size:10px;color:var(--text2)">PHASE 4 ⏳</span>
+                <div style="font-size:13px;font-weight:600;margin-top:4px">Autonomy — Self-Improving System</div>
+                <div style="font-size:12px;color:var(--text2)">Model retraining, pattern prediction, proactive nudges, multi-user support.</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
       <div id="doc-arch" class="doc-frame">

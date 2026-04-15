@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from supabase.client import upsert_state, insert_insight, get_client
+from scripts.db.supabase_client import upsert_state, insert_insight, get_client
 
 PREDICTIONS_PATH  = Path("data/processed/predictions.json")
 INSIGHTS_PATH     = Path("data/insights/latest.json")

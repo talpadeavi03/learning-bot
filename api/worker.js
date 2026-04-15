@@ -10,8 +10,12 @@
 async function sendJarvisAlert(env, chatId, type, message) {
   const lastAlert = await env.AETHER_KV.get("last_alert");
 
-  // ❌ prevent spam (same alert)
+  // ❌ prevent spam (same alert type)
   if (lastAlert === type) return;
+
+  // ❌ cooldown: no more than 1 alert per 5 minutes
+  const canSend = await checkCooldown(env, 300);
+  if (!canSend) return;
 
   // ✅ Telegram (primary)
   await sendTelegram(chatId, message, env);
@@ -92,43 +96,61 @@ async function getDashboard(env) {
 }
 
 function analyzeState(events, dashboard) {
-  if (!events.length) return { state: "unknown" };
+  if (!events.length) return { state: "unknown", energy: 0, stress: 0, focus: 0, motivation: 0, advice: "No data yet. Send messages to AETHER to start tracking." };
 
-  const last = events[events.length - 1];
-
-  const energy = last.energy_signal ?? dashboard.avg_energy ?? 0.5;
-  const stress = last.stress_signal ?? dashboard.avg_stress ?? 0.3;
-  const focus = last.focus_signal ?? 0.5;
+  const recentSlice = events.slice(-5);
+  const energy = recentSlice.reduce((s, e) => s + (e.energy_signal ?? 0.5), 0) / recentSlice.length;
+  const stress = recentSlice.reduce((s, e) => s + (e.stress_signal ?? 0.2), 0) / recentSlice.length;
+  const focus = recentSlice.reduce((s, e) => s + (e.focus_signal ?? 0.5), 0) / recentSlice.length;
+  const motivation = recentSlice.reduce((s, e) => s + (e.motivation_signal ?? 0.5), 0) / recentSlice.length;
 
   let state = "neutral";
   let advice = "";
 
-  // 🧠 CORE DECISION LOGIC
   if (energy < 0.3 && stress > 0.6) {
     state = "burnout";
-    advice = "You’re mentally drained. Take a full break. No heavy tasks.";
+    advice = "You're mentally drained. Take a full break, hydrate, no screens for 30 min.";
+  }
+  else if (stress > 0.65) {
+    state = "high_stress";
+    advice = "Stress is elevated. Break your task into 3 smaller steps. Try a 5-min breathing exercise.";
+  }
+  else if (energy < 0.35 && stress < 0.4) {
+    state = "recovery";
+    advice = "Low energy but not stressed. Light tasks only: reading, organizing, or a short walk.";
+  }
+  else if (focus < 0.4 && energy > 0.5) {
+    state = "distracted";
+    advice = "Energy is there but focus is scattered. Close tabs, phone away, pick ONE task for 25 min.";
   }
   else if (focus < 0.4) {
     state = "low_focus";
-    advice = "Your focus is low. Do small tasks or reset (walk, water, no screens).";
+    advice = "Focus is low. Pick the smallest task and just start. Momentum builds focus.";
   }
-  else if (energy > 0.7 && focus > 0.6) {
+  else if (energy > 0.7 && focus > 0.6 && stress < 0.3) {
     state = "flow_ready";
-    advice = "You are in peak state. Start deep work NOW.";
+    advice = "Peak state: high energy, high focus, low stress. Start deep work NOW. Protect this window.";
+  }
+  else if (energy > 0.6 && focus > 0.5) {
+    state = "productive";
+    advice = "Good working state. Solid energy and focus. Tackle your most important task now.";
+  }
+  else if (energy > 0.5 && motivation > 0.6) {
+    state = "motivated";
+    advice = "Motivation is high. Channel it into a concrete task before it fades.";
+  }
+  else if (energy > 0.4 && energy <= 0.6 && stress <= 0.4) {
+    state = "steady";
+    advice = "Steady state. Good for routine work, reviews, and learning.";
   }
   else {
     state = "moderate";
-    advice = "Maintain momentum. Avoid distractions and continue current work.";
+    advice = "Signals are mixed. Pick one clear task, set a 25-min timer, commit fully.";
   }
 
-  return {
-    state,
-    energy,
-    stress,
-    focus,
-    advice
-  };
+  return { state, energy, stress, focus, motivation, advice };
 }
+
 
 async function handleCommand(text, chatId, env) {
   const parts = text.trim().split(' ');
@@ -581,10 +603,19 @@ async function handleCommand(text, chatId, env) {
 const MAX_EVENTS = 500;
 const MAX_HISTORY = 20;
 
+// Admin auth check — protects destructive endpoints
+function checkAdminAuth(request, env) {
+  const adminKey = env.ADMIN_KEY;
+  if (!adminKey) return true; // no key set = allow (dev mode)
+  const provided = request.headers.get('X-Admin-Key') || '';
+  return provided === adminKey;
+}
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Key',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://learning-bot.talpadeavi0303.workers.dev; img-src 'self' data:;",
 };
 
 function jsonResp(data, status = 200) {
@@ -621,89 +652,11 @@ export default {
     console.log("PATH:", url.pathname);
 
     try {
-      if (url.pathname === '/knowledge') {
-        const data = await env.AETHER_KV.get("knowledge_graph");
-
-        if (!data) {
-          return new Response(JSON.stringify({
-            nodes: [
-              { id: "learning", type: "concept", mentions: 5 },
-              { id: "coding", type: "activity", mentions: 8 },
-              { id: "github", type: "tool", mentions: 6 }
-            ]
-          }), {
-            headers: { "Content-Type": "application/json" }
-          });
-        }
-
-        return new Response(data, {
-          headers: { "Content-Type": "application/json" }
-        });
-      }
+      // First /knowledge handled below at GET check
       if (url.pathname === '/webhook' && request.method === 'POST') return handleWebhook(request, env);
       if (url.pathname === "/chat" && request.method === "POST") {
-        console.log("✅ NEW JARVIS CORE HIT");
-
-        const body = await request.json();
-        const userMessage = body.message?.toLowerCase() || "";
-
-        // 🔹 Get data FIRST
-        const events = await getRecentEvents(env);
-        const dashboard = await getDashboard(env);
-
-        const analysis = analyzeState(events, dashboard);
-
-        // 🔹 Pattern engine (AFTER events)
-        const patterns = analyzePatterns(events);
-
-        const patternText = `📊 Pattern Insight:\nBest hour: ${patterns.bestHour}:00\nTrend: ${patterns.trend}`;
-
-        // 🔹 Helpers
-        function energyLabel(e) {
-          if (e > 0.7) return "high";
-          if (e > 0.4) return "moderate";
-          return "low";
-        }
-
-        function getTrend(events) {
-          if (events.length < 5) return "stable";
-
-          const recent = events.slice(-5).map(e => e.energy_signal || 0.5);
-          const diff = recent[recent.length - 1] - recent[0];
-
-          if (diff > 0.1) return "increasing";
-          if (diff < -0.1) return "decreasing";
-          return "stable";
-        }
-
-        const energyText = energyLabel(analysis.energy);
-        const trend = getTrend(events);
-
-        let response = "";
-
-        // 🎯 INTENT HANDLING
-        if (userMessage.includes("what should i do")) {
-          response = analysis.advice;
-        }
-        else if (userMessage.includes("status")) {
-          response = `🧠 JARVIS STATUS
-
-      ⚡ Energy: ${energyText} (${analysis.energy.toFixed(2)})
-      🔥 State: ${analysis.state}
-      😤 Stress: ${analysis.stress.toFixed(2)}
-      🎯 Focus: ${analysis.focus.toFixed(2)}
-      📈 Trend: ${trend}`;
-        }
-        else {
-          response = analysis.advice;
-        }
-
-        // 🔥 FINAL OUTPUT (NOW WITH PATTERNS)
-        const finalResponse = `🧠 JARVIS CORE\n\n⚡ Energy: ${energyText}\n🔥 State: ${analysis.state.toUpperCase()}\n📈 Trend: ${trend}\n\n📌 ${response}\n\n${patternText}`;
-        console.log("PATTERN:", patternText);
-        return new Response(JSON.stringify({ reply: finalResponse }), {
-          headers: { "Content-Type": "application/json" }
-        });
+        console.log("✅ JARVIS CHAT → handleChat()");
+        return handleChat(request, env);
       }
       if (url.pathname === '/log-state' && request.method === 'POST') return handleLogState(request, env);
       if (url.pathname === '/dashboard' && request.method === 'GET') return handleDashboard(request, env);
@@ -727,12 +680,12 @@ export default {
 
         if (!data) {
           return new Response(JSON.stringify({ nodes: [] }), {
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json", ...CORS_HEADERS }
           });
         }
 
         return new Response(data, {
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json", ...CORS_HEADERS }
         });
       }
 
@@ -972,6 +925,9 @@ For reply_email: Write a brief, professional reply expressing interest if fit_sc
 
       // ─── JOBS: Clear (admin reset) ───────────────────────────────
       if (url.pathname === '/jobs/clear' && request.method === 'POST') {
+        if (!checkAdminAuth(request, env)) {
+          return jsonResp({ error: 'Unauthorized. Set X-Admin-Key header.' }, 401);
+        }
         await env.AETHER_KV.put('jobs_feed',  '[]');
         await env.AETHER_KV.put('jobs_stats', '{}');
         return jsonResp({ ok: true });
@@ -1603,22 +1559,24 @@ async function handleEvents(request, env) {
 
 async function handleHealth(request, env) {
   const kvOk = !!env.AETHER_KV;
-  const openaiOk = !!env.OPENAI_API_KEY;
+  const supabaseOk = !!env.SUPABASE_URL && !!env.SUPABASE_KEY;
   const telegramOk = !!env.TELEGRAM_BOT_TOKEN;
   const chatIdOk = !!env.TELEGRAM_CHAT_ID;
+  const encryptOk = !!env.ENCRYPT_KEY;
   const eventCount = await getEventCount(env);
   const coreReady = kvOk && !!env.AI && telegramOk && chatIdOk;
 
   return jsonResp({
     status: coreReady ? 'AETHER ONLINE ✅' : 'AETHER PARTIAL ⚠️',
-    version: '2.1',
+    version: '2.2',
     timestamp: new Date().toISOString(),
     services: {
       kv: kvOk ? 'OK' : '❌ MISSING',
       cf_ai: env.AI ? 'OK' : '❌ MISSING — add [ai] to wrangler.toml',
       telegram_token: telegramOk ? 'OK' : '❌ MISSING',
       telegram_chat_id: chatIdOk ? 'OK' : '❌ MISSING',
-      openai: openaiOk ? 'OK' : '⚪ OPTIONAL',
+      supabase: supabaseOk ? 'OK' : '⚠️ NOT SET — dual write disabled',
+      encryption: encryptOk ? 'OK' : '⚠️ USING DEFAULT KEY — set ENCRYPT_KEY',
     },
     data: { total_events: eventCount },
   });
@@ -1771,6 +1729,9 @@ async function handleGitHubLog(request, env) {
 
 async function handleResetData(request, env) {
   try {
+    if (!checkAdminAuth(request, env)) {
+      return jsonResp({ error: 'Unauthorized. Set X-Admin-Key header.' }, 401);
+    }
     const body = await request.json();
     if (body.confirm !== 'RESET_ALL_EVENTS') {
       return jsonResp({ error: 'Confirmation required: send confirm: RESET_ALL_EVENTS' }, 400);
@@ -1792,6 +1753,9 @@ async function handleResetData(request, env) {
 
 async function handleUpdateDashboard(request, env) {
   try {
+    if (!checkAdminAuth(request, env)) {
+      return jsonResp({ error: 'Unauthorized. Set X-Admin-Key header.' }, 401);
+    }
     const dash = await request.json();
     await env.AETHER_KV.put('dashboard:latest', JSON.stringify(dash));
     return jsonResp({ ok: true, message: 'Dashboard updated from ML pipeline' });
@@ -1843,22 +1807,156 @@ Return ONLY this JSON, no other text:
 
 function fallbackNLP(text) {
   const lower = text.toLowerCase();
-  const energyWords = ['excited', 'great', 'amazing', 'productive', 'focused', 'motivated', 'energy'];
-  const stressWords = ['stressed', 'tired', 'overwhelmed', 'anxious', 'worried', 'stuck', 'confused'];
-  const studyWords = ['learned', 'studied', 'reading', 'course', 'practice', 'revision', 'chapter'];
-  const energyScore = energyWords.filter(w => lower.includes(w)).length / energyWords.length;
-  const stressScore = stressWords.filter(w => lower.includes(w)).length / stressWords.length;
+
+  // ── ENERGY: positive words push energy UP ──
+  const highEnergyWords = ['excited', 'great', 'amazing', 'productive', 'focused', 'motivated',
+    'energized', 'pumped', 'awesome', 'fantastic', 'killing it', 'crushing', 'on fire',
+    'built', 'deployed', 'shipped', 'completed', 'finished', 'achieved', 'nailed',
+    'workout', 'gym', 'exercise', 'run', 'morning routine', 'woke up early'];
+  const lowEnergyWords = ['tired', 'exhausted', 'drained', 'sleepy', 'lazy', 'slow',
+    'fatigue', 'burnt', 'burned out', 'no energy', 'can\'t focus', 'recovery',
+    'resting', 'nap', 'crashed', 'wasted', 'procrastinat', 'bored'];
+
+  // ── STRESS: negative pressure words ──
+  const highStressWords = ['stressed', 'overwhelmed', 'anxious', 'worried', 'deadline',
+    'stuck', 'confused', 'panic', 'frustrated', 'angry', 'annoyed', 'pressure',
+    'too much', 'behind', 'failing', 'mess', 'broke', 'error', 'bug', 'crash',
+    'interview nerves', 'rejection', 'lost'];
+  const lowStressWords = ['calm', 'relaxed', 'peaceful', 'chill', 'easy', 'smooth',
+    'good vibes', 'happy', 'content', 'grateful', 'zen', 'meditat'];
+
+  // ── FOCUS: attention indicators ──
+  const highFocusWords = ['coding', 'building', 'studying', 'learning', 'deep work',
+    'focused session', 'reading', 'writing', 'debugging', 'practicing', 'research',
+    'terraform', 'kubernetes', 'docker', 'pipeline', 'deploying', 'configuring',
+    'implemented', 'refactored', 'optimized', 'pomodoro'];
+  const lowFocusWords = ['distracted', 'scrolling', 'youtube', 'netflix', 'instagram',
+    'social media', 'phone', 'procrastinat', 'can\'t concentrate', 'multitask',
+    'getting sidetracked', 'lost track', 'wandering'];
+
+  // ── MOTIVATION ──
+  const highMotivationWords = ['goal', 'target', 'plan', 'going to', 'want to',
+    'excited about', 'looking forward', 'motivated', 'determined', 'progress',
+    'milestone', 'next step', 'challenge accepted', 'let\'s go', 'ready'];
+  const lowMotivationWords = ['giving up', 'pointless', 'why bother', 'no point',
+    'hopeless', 'don\'t care', 'whatever', 'meh', 'unmotivated', 'lost interest'];
+
+  // ── STUDY ──
+  const studyWords = ['learned', 'studied', 'reading', 'course', 'practice', 'revision',
+    'chapter', 'tutorial', 'lesson', 'documentation', 'notes', 'cert', 'exam',
+    'learning', 'coding', 'building', 'lab', 'hands-on', 'project'];
+
+  // ── LIFE DIMENSIONS ──
+  const dimMap = {
+    study: ['study', 'learn', 'course', 'exam', 'cert', 'book', 'chapter', 'tutorial', 'reading'],
+    fitness: ['gym', 'workout', 'exercise', 'run', 'walk', 'yoga', 'pushup', 'plank', 'sports'],
+    mental: ['meditat', 'journal', 'therapy', 'mental', 'anxiety', 'stress', 'mindful', 'breath'],
+    career: ['job', 'interview', 'resume', 'apply', 'offer', 'salary', 'company', 'recruiter'],
+    social: ['friend', 'family', 'call', 'meet', 'hang out', 'date', 'party', 'chat with'],
+    finance: ['money', 'invest', 'budget', 'salary', 'saving', 'expense', 'spent', 'bought'],
+  };
+
+  // Count matches
+  const countMatches = (words) => words.filter(w => lower.includes(w)).length;
+
+  const highE = countMatches(highEnergyWords);
+  const lowE = countMatches(lowEnergyWords);
+  const highS = countMatches(highStressWords);
+  const lowS = countMatches(lowStressWords);
+  const highF = countMatches(highFocusWords);
+  const lowF = countMatches(lowFocusWords);
+  const highM = countMatches(highMotivationWords);
+  const lowM = countMatches(lowMotivationWords);
   const isStudy = studyWords.some(w => lower.includes(w));
+
+  // Compute signals with distinct scoring
+  let energy = 0.5;
+  if (highE > 0 || lowE > 0) energy = Math.max(0.05, Math.min(0.95, 0.5 + highE * 0.15 - lowE * 0.2));
+
+  let stress = 0.2;
+  if (highS > 0 || lowS > 0) stress = Math.max(0.05, Math.min(0.95, 0.2 + highS * 0.2 - lowS * 0.1));
+
+  let focus = 0.5;
+  if (highF > 0 || lowF > 0) focus = Math.max(0.1, Math.min(0.95, 0.5 + highF * 0.15 - lowF * 0.2));
+  else if (isStudy) focus = 0.75;
+
+  let motivation = 0.5;
+  if (highM > 0 || lowM > 0) motivation = Math.max(0.05, Math.min(0.95, 0.5 + highM * 0.15 - lowM * 0.25));
+
+  // Detect sentiment
+  const posScore = highE + lowS + highM;
+  const negScore = lowE + highS + lowM;
+  const sentiment = negScore > posScore + 1 ? 'negative' : posScore > negScore + 1 ? 'positive' : 'neutral';
+
+  // Detect emotion
+  let emotion = 'neutral';
+  if (lower.match(/happy|joy|excited|amazing|love|awesome/)) emotion = 'joy';
+  else if (lower.match(/sad|depressed|down|lonely|miss/)) emotion = 'sadness';
+  else if (lower.match(/angry|furious|annoyed|pissed|hate/)) emotion = 'anger';
+  else if (lower.match(/scared|afraid|nervous|anxious|panic/)) emotion = 'fear';
+  else if (lower.match(/wow|surprised|unexpected|crazy|insane/)) emotion = 'surprise';
+
+  // Detect life dimension
+  let life_dimension = 'general';
+  let bestDimCount = 0;
+  for (const [dim, words] of Object.entries(dimMap)) {
+    const c = countMatches(words);
+    if (c > bestDimCount) { bestDimCount = c; life_dimension = dim; }
+  }
+
+  // Smart topic extraction
+  let topic = 'general';
+  const topicPatterns = [
+    [/(?:learning|studying|reading about)\s+([\w\s]+)/i, 1],
+    [/(?:working on|building|deploying|configuring)\s+([\w\s]+)/i, 1],
+    [/(?:terraform|kubernetes|docker|python|azure|aws|jenkins|github|linux)/i, 0],
+  ];
+  for (const [pattern, group] of topicPatterns) {
+    const m = lower.match(pattern);
+    if (m) { topic = (group === 0 ? m[0] : m[group]).trim().slice(0, 30); break; }
+  }
+  if (topic === 'general' && isStudy) topic = 'learning';
+  if (topic === 'general' && highF > 0) topic = 'focused work';
+
+  // Detect wins and negatives
+  const isWin = lower.match(/completed|finished|achieved|shipped|deployed|passed|got the job|nailed|promoted/) !== null;
+  const isProcrastination = lower.match(/procrastinat|wasted time|didn't do|avoided|put off|scrolling/) !== null;
+  const isDistraction = lower.match(/distracted|sidetrack|youtube|netflix|instagram|scrolling|phone/) !== null;
+  const isNegativeSelf = lower.match(/i suck|i'm bad|useless|worthless|can't do|stupid|idiot|failure/) !== null;
+
+  // Estimate minutes
+  let estimated_minutes = null;
+  const minMatch = lower.match(/(\d+)\s*(?:min|minute|mins|hr|hour|hours|h)/);
+  if (minMatch) {
+    const num = parseInt(minMatch[1]);
+    estimated_minutes = lower.match(/hr|hour/) ? num * 60 : num;
+  }
+
   return {
-    topic: 'general', topics: [],
-    sentiment: stressScore > 0.2 ? 'negative' : energyScore > 0.2 ? 'positive' : 'neutral',
-    energy_signal: Math.min(1, 0.5 + energyScore - stressScore),
-    stress_signal: Math.min(1, stressScore * 2),
-    focus_signal: 0.5, motivation_signal: 0.5, dominant_emotion: 'neutral',
+    topic, topics: topic !== 'general' ? [topic] : [],
+    life_dimension,
+    sentiment,
+    energy_signal: Math.round(energy * 100) / 100,
+    stress_signal: Math.round(stress * 100) / 100,
+    focus_signal: Math.round(focus * 100) / 100,
+    motivation_signal: Math.round(motivation * 100) / 100,
+    dominant_emotion: emotion,
     is_study_session: isStudy,
-    is_goal_mention: lower.includes('goal') || lower.includes('target') || lower.includes('plan'),
-    is_complaint: stressScore > 0.3,
-    estimated_minutes: null, summary: text.slice(0, 80),
+    is_goal_mention: highM > 0,
+    is_complaint: negScore > 2,
+    is_win: isWin,
+    is_procrastination: isProcrastination,
+    is_distraction: isDistraction,
+    is_negative_self: isNegativeSelf,
+    estimated_minutes,
+    summary: text.slice(0, 80),
+    stat_impact: {
+      INT: isStudy ? 2 : 0,
+      STR: lower.match(/gym|workout|exercise|run/) ? 2 : 0,
+      VIT: energy > 0.7 ? 1 : 0,
+      AGI: focus > 0.7 ? 1 : 0,
+      SEN: lower.match(/meditat|journal|gratitude|reflect/) ? 2 : 0,
+    },
   };
 }
 
@@ -2040,15 +2138,6 @@ STRICT RULES:
 6. Be direct, occasionally blunt. You know Avi well.`;
 }
 
-// ── Legacy wrapper (kept for safety, no longer called by handleChat) ──
-async function callOpenAI(systemPrompt, history, env) {
-  if (!env.AI) throw new Error('AI binding missing');
-  const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
-    messages: [{ role: 'system', content: systemPrompt }, ...history],
-    max_tokens: 400,
-  });
-  return result?.response || 'No response from AI.';
-}
 
 // ═════════════════════════════════════════════════════════════════
 // ENGINE: AETHER ML
@@ -2326,7 +2415,11 @@ async function calculateStreak(events) {
 // ═════════════════════════════════════════════════════════════════
 
 async function encryptText(text, env) {
-  const keyMaterial = env.ENCRYPT_KEY || 'AETHER_DEFAULT_KEY_CHANGE_IN_PROD';
+  if (!env.ENCRYPT_KEY) {
+    console.warn('[AETHER] ENCRYPT_KEY not set — storing unencrypted. Run: wrangler secret put ENCRYPT_KEY');
+    return '[UNENCRYPTED]:' + text;
+  }
+  const keyMaterial = env.ENCRYPT_KEY;
   try {
     const keyData = new TextEncoder().encode(keyMaterial.padEnd(32, '0').slice(0, 32));
     const key = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt']);
