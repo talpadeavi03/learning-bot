@@ -12,7 +12,19 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/checkin.html',
-  'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap',
+  '/css/base.css',
+  '/css/layout.css',
+  '/css/components.css',
+  '/css/chat.css',
+  '/css/extra.css',
+  '/css/jobs.css',
+  '/js/config.js',
+  '/js/ui.js',
+  '/js/canvas.js',
+  '/js/app.js',
+  '/js/jobs.js',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
 ];
 
 // ─── Install — cache static assets ───────────────────────────────

@@ -641,6 +641,8 @@ export default {
     if (hour === 15) ctx.waitUntil(sendEveningSummary(env));
     if (hour === 7) ctx.waitUntil(middayNudge(env));
     if (hour === 15 && dayOfWeek === 0) ctx.waitUntil(sendWeeklyReport(env));
+    // MISS-05: Daily backup of events to dated KV key
+    if (hour === 3) ctx.waitUntil(backupEvents(env));
   },
 
   async fetch(request, env) {
@@ -933,8 +935,17 @@ For reply_email: Write a brief, professional reply expressing interest if fit_sc
         return jsonResp({ ok: true });
       }
 
+      // MISS-03: Error monitoring endpoint
+      if (url.pathname === '/errors' && request.method === 'GET') {
+        if (!checkAdminAuth(request, env)) {
+          return jsonResp({ error: 'Unauthorized' }, 401);
+        }
+        const errLog = JSON.parse(await env.AETHER_KV.get('error:log') || '[]');
+        return jsonResp({ errors: errLog, count: errLog.length });
+      }
+
       if (url.pathname.startsWith('/api')) {
-        return jsonResp({ status: 'AETHER API ONLINE', version: '2.1' });
+        return jsonResp({ status: 'AETHER API ONLINE', version: '2.3' });
       }
 
 
@@ -942,6 +953,7 @@ For reply_email: Write a brief, professional reply expressing interest if fit_sc
 
     } catch (err) {
       console.error('[AETHER] Unhandled error:', err);
+      try { await logError(env, 'fetch_handler', err); } catch (_) {}
       return jsonResp({ error: 'Internal server error', detail: err.message }, 500);
     }
   },
@@ -969,6 +981,10 @@ async function handleWebhook(request, env) {
     console.warn('[AETHER] Rejected message from unknown chat:', chatId);
     return textResp('Unauthorized', 200);
   }
+
+  // MISS-06: Extract user identity for multi-user support
+  const userId = msg.from?.username || msg.from?.id?.toString() || 'default';
+  env._currentUserId = userId;
 
   let rawText = '';
   let inputType = 'text';
@@ -1096,7 +1112,7 @@ fetch(`${env.SUPABASE_URL}/rest/v1/events`, {
     'Prefer': 'return=minimal'
   },
   body: JSON.stringify({
-    user_id:            'avi',
+    user_id:            env._currentUserId || 'default',
     input_text:         event.raw_text || '',
     raw_text:           event.raw_text || '',
     source:             event.input_type || 'telegram',
@@ -2041,7 +2057,42 @@ async function getTelegramFileUrl(fileId, env) {
   return `https://api.telegram.org/file/bot${env.TELEGRAM_BOT_TOKEN}/${data.result.file_path}`;
 }
 
-// 🔽 ADD HERE (helper section)
+// 🔽 BACKUP + ERROR TRACKING + MONITORING
+
+// MISS-05: Daily backup of events to dated KV key
+async function backupEvents(env) {
+  try {
+    const events = await env.AETHER_KV.get('events:list');
+    if (!events) return;
+    const dateKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    await env.AETHER_KV.put(`backup:events:${dateKey}`, events, { expirationTtl: 60 * 60 * 24 * 30 }); // 30 day retention
+    const dashboard = await env.AETHER_KV.get('dashboard:latest');
+    if (dashboard) {
+      await env.AETHER_KV.put(`backup:dashboard:${dateKey}`, dashboard, { expirationTtl: 60 * 60 * 24 * 30 });
+    }
+    console.log(`[AETHER] Backup completed for ${dateKey}`);
+  } catch (e) {
+    console.error('[AETHER] Backup failed:', e.message);
+  }
+}
+
+// DEBT-05 + MISS-03: Persistent error logging to KV
+async function logError(env, source, error) {
+  try {
+    const errLog = JSON.parse(await env.AETHER_KV.get('error:log') || '[]');
+    errLog.push({
+      timestamp: new Date().toISOString(),
+      source,
+      message: error?.message || String(error),
+      stack: error?.stack?.slice(0, 200) || null,
+    });
+    // Keep last 50 errors
+    const trimmed = errLog.slice(-50);
+    await env.AETHER_KV.put('error:log', JSON.stringify(trimmed));
+  } catch (e) {
+    console.error('[AETHER] Error logging failed:', e.message);
+  }
+}
 
 async function shouldSendUpdate(env, currentState) {
   const lastState = await env.AETHER_KV.get("last_state");

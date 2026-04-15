@@ -10,8 +10,14 @@ function switchView(name, el) {
   // Highlight page tab
   const ptabEl = document.getElementById('ptab-' + name); if (ptabEl) ptabEl.classList.add('on');
   const bc = document.getElementById('tb-bc'); if (bc) bc.textContent = bcNames[name] || name;
-  if (name === 'data') { setTimeout(() => { animateBars(); initCharts(); initWaveform() }, 50) }
-  if (name === 'graph') { setTimeout(initGraphCanvas, 50) }
+  if (name === 'learning') {
+    setTimeout(() => {
+      animateBars();
+      initCharts();
+      initWaveform();
+      initGraphCanvas();
+    }, 50);
+  }
 }
 function showDoc(name, tab) {
   document.querySelectorAll('.doc-frame').forEach(d => d.classList.remove('on'));
@@ -28,18 +34,31 @@ function toggleGoal(check) {
   if (check.classList.contains('done')) showAchievement('Quest Complete', '+100 XP');
 }
 
-// PASSWORD
+// PASSWORD (hash-based — password is NOT stored in plaintext)
 let AETHER_PASSKEY = null;
 function openGate() { document.getElementById('pw-gate').classList.add('show') }
 function closeGate() { document.getElementById('pw-gate').classList.remove('show') }
-function checkPassword() {
-  const v = document.getElementById('pw-input').value; const err = document.getElementById('pw-error');
-  if (v === 'aether2024') { 
+
+async function hashPassword(pw) {
+  const data = new TextEncoder().encode(pw);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// SHA-256 of the passkey (change this hash to change the password)
+// To generate: echo -n "yourpassword" | sha256sum
+const PASS_HASH = '5e17d8671e68b2f5a0d6c1dbbd04b5e50168b0cf9adcbee8fc4fc7ad637e3285';
+
+async function checkPassword() {
+  const v = document.getElementById('pw-input').value;
+  const err = document.getElementById('pw-error');
+  const inputHash = await hashPassword(v);
+  if (inputHash === PASS_HASH) {
     AETHER_PASSKEY = v;
     closeGate();
-    loadNeuralMemory(); 
-  } else { 
-    err.style.opacity = '1'; setTimeout(() => err.style.opacity = '0', 2000); 
+    loadNeuralMemory();
+  } else {
+    err.style.opacity = '1'; setTimeout(() => err.style.opacity = '0', 2000);
   }
 }
 document.addEventListener('DOMContentLoaded', () => { const inp = document.getElementById('pw-input'); if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword() }) });
@@ -212,39 +231,6 @@ async function checkWorker() {
 setTimeout(checkWorker, 2500);
 window.addEventListener('resize', () => { if (chatOpen) initArcReactor() });
 
-// ─── SIDEBAR TOGGLE (mobile) ──────────────────────────────────────
-function toggleSidebar() {
-  const sb = document.getElementById('sb');
-  const bd = document.getElementById('sb-backdrop');
-  if (!sb || !bd) return;
-  if (sb.classList.contains('open')) {
-    closeSidebar();
-  } else {
-    sb.classList.add('open');
-    bd.classList.add('show');
-  }
-}
-
-function closeSidebar() {
-  const sb = document.getElementById('sb');
-  const bd = document.getElementById('sb-backdrop');
-  if (sb) sb.classList.remove('open');
-  if (bd) bd.classList.remove('show');
-}
-
-// Close sidebar when a nav item is clicked on mobile
-document.querySelectorAll('.sbi').forEach(item => {
-  item.addEventListener('click', () => {
-    if (window.innerWidth <= 768) closeSidebar();
-  });
-});
-
-// Close sidebar when a page tab is clicked on mobile
-document.querySelectorAll('.ptab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    if (window.innerWidth <= 768) closeSidebar();
-  });
-});
 
 
 // ─── PRIORITY QUEUE ───────────────────────────────────────────────
