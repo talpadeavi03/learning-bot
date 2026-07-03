@@ -1,0 +1,26 @@
+# 1. Restore exact old versions into current working tree
+git restore --source=<PARENT_COMMIT> -- \
+  path/file1.yml \
+  path/file2.yml \
+  path/file3.yml \
+  path/file4.yml
+
+# 2. Check what changed
+git status
+git diff
+
+# 3. Stage only these four files
+git add \
+  path/file1.yml \
+  path/file2.yml \
+  path/file3.yml \
+  path/file4.yml
+
+# 4. Review exactly what will be committed
+git diff --cached
+
+# 5. Commit
+git commit -m "Restore deleted pipeline files"
+
+# 6. Push
+git push
