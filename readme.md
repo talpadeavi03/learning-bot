@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-🌌 AETHER OS (JARVIS NEXUS)
+# 🌌 AETHER OS (JARVIS NEXUS)
 [https://learning-bot.talpadeavi0303.workers.dev]
     The Personal AI Operating System > Behavior Tracking · Flow Prediction · Productivity Intelligence > Status: v3.0 - Production Ready | Cost: $0.00/mo | Updated: April 2026
 
@@ -266,7 +265,4 @@ Edge Provider: Cloudflare Workers
 Author: Avi Talpade
 
 License: MIT | Production Ready
-=======
-# AETHER OS
-https://learning-bot.talpadeavi0303.workers.dev
->>>>>>> parent of 7271daf (Revise README for AETHER OS overview and details)
+

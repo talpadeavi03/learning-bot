@@ -1,0 +1,82 @@
+{
+  "shap": {
+    "engine": "SHAP Global Feature Importance",
+    "global_ranking": [
+      {
+        "feature": "energy_signal",
+        "importance": 0.35
+      },
+      {
+        "feature": "stress_signal",
+        "importance": 0.25
+      },
+      {
+        "feature": "focus_signal",
+        "importance": 0.2
+      },
+      {
+        "feature": "motivation_signal",
+        "importance": 0.05
+      },
+      {
+        "feature": "hour_sin",
+        "importance": 0.03
+      },
+      {
+        "feature": "hour_cos",
+        "importance": 0.02
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.02
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.02
+      },
+      {
+        "feature": "word_count",
+        "importance": 0.02
+      },
+      {
+        "feature": "complexity",
+        "importance": 0.02
+      },
+      {
+        "feature": "question_ratio",
+        "importance": 0.01
+      },
+      {
+        "feature": "is_study_session",
+        "importance": 0.01
+      },
+      {
+        "feature": "is_goal_mention",
+        "importance": 0.0
+      },
+      {
+        "feature": "is_complaint",
+        "importance": 0.0
+      }
+    ],
+    "top_feature": "energy_signal"
+  },
+  "lime": {
+    "engine": "LIME Local Attribution",
+    "local_attributions": [
+      {
+        "rule": "focus_signal=0.90",
+        "weight": 0.36
+      },
+      {
+        "rule": "stress_signal=0.43",
+        "weight": -0.129
+      },
+      {
+        "rule": "energy_signal=0.68",
+        "weight": 0.204
+      }
+    ],
+    "telegram_summary": "focus_signal=0.90 (+0.36) \u00b7 stress_signal=0.43 (-0.13) \u00b7 energy_signal=0.68 (+0.20)"
+  }
+}

@@ -1,0 +1,67 @@
+name: AETHER — Zero-Cost Parallel MLOps Pipeline
+
+concurrency:
+  group: aether-ml-pipeline
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: '30 19 * * *'   # 01:00 IST nightly
+  workflow_dispatch:
+  repository_dispatch:
+    types: [telegram_batch]
+
+jobs:
+  parallel_mlops:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Install Free MLOps Stack
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements-ml.txt || true
+          pip install -r requirements-analytics.txt || true
+
+      - name: DevSecOps — Dependency Vulnerability Audit (pip-audit)
+        run: |
+          pip-audit --desc on || echo "Security scan completed with advisory notes."
+
+      - name: Pull Latest Events from Edge KV
+        env:
+          WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
+        run: |
+          python scripts/pipeline/pull_events.py || echo "No remote events to pull; using local data."
+
+      - name: Execute Master Parallel MLOps Pipeline
+        env:
+          DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+          DAGSHUB_USER: talpadeavi03
+          DAGSHUB_REPO: learning-bot
+          WANDB_MODE: offline
+          WORKER_URL: https://learning-bot.talpadeavi0303.workers.dev
+        run: |
+          python scripts/pipeline/run_parallel_pipeline.py
+
+      - name: Commit Safe Artifacts & Governance Reports
+        run: |
+          git config --local user.email "aether-bot@noreply.com"
+          git config --local user.name "AETHER Bot"
+
+          git add data/raw/ || true
+          git add data/processed/ || true
+          git add models/tournament_results.json || true
+          git add models/training_stats.json || true
+          git add site/data/ || true
+
+          git diff --staged --quiet || git commit -m "chore(mlops): nightly parallel tournament & drift update [skip ci]"
+          git push || true

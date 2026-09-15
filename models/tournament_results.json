@@ -1,0 +1,23 @@
+{
+  "timestamp": "1789468729.394452",
+  "n_events": 60,
+  "champion": "Scikit-Learn RandomForest",
+  "rf_accuracy": 1.0,
+  "xgb_accuracy": 0.99,
+  "features": [
+    "energy_signal",
+    "stress_signal",
+    "focus_signal",
+    "motivation_signal",
+    "hour_sin",
+    "hour_cos",
+    "day_of_week",
+    "is_weekend",
+    "word_count",
+    "complexity",
+    "question_ratio",
+    "is_study_session",
+    "is_goal_mention",
+    "is_complaint"
+  ]
+}

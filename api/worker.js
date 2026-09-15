@@ -83,12 +83,23 @@ function analyzePatterns(events) {
   };
 }
 
+function getTodayIST() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  } catch (e) {
+    const now = new Date(Date.now() + 5.5 * 3600 * 1000);
+    return now.toISOString().split('T')[0];
+  }
+}
+
 async function getRecentEvents(envOrLimit, limitOrEnv) {
   // handle both getRecentEvents(env, 20) and getRecentEvents(20, env)
   const env  = typeof envOrLimit === 'number' ? limitOrEnv : envOrLimit;
-  const limit = typeof envOrLimit === 'number' ? envOrLimit : (limitOrEnv || 20);
+  const limit = typeof envOrLimit === 'number' ? envOrLimit : (limitOrEnv || 50);
   const events = await env.AETHER_KV.get("events:list", { type: "json" }) || [];
-  return events.slice(-limit);
+  // Sort descending by timestamp so newest events are always at the start
+  const sorted = [...events].sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+  return sorted.slice(0, limit);
 }
 
 async function getDashboard(env) {
@@ -1547,8 +1558,11 @@ async function handleEvents(request, env) {
       events = [];
     }
 
+    // Sort chronologically for pipeline consumption
+    const sorted = [...events].sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
+
     return new Response(JSON.stringify({
-      events: events.slice(-50)
+      events: sorted.slice(-500)
     }), {
       headers: {
         "Content-Type": "application/json",
@@ -2333,9 +2347,13 @@ async function sendEveningSummary(env) {
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!chatId) return;
 
-  const today = new Date().toISOString().split('T')[0];
-  const events = await getRecentEvents(100, env);
-  const todayEv = events.filter(e => e.timestamp?.startsWith(today));
+  const today = getTodayIST();
+  const events = await getRecentEvents(200, env);
+  const todayEv = events.filter(e => {
+    if (!e.timestamp) return false;
+    const d = new Date(e.timestamp).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    return d === today || e.timestamp.startsWith(today);
+  });
   const goal = await env.AETHER_KV.get(`goal:${today}`).catch(() => null);
 
   if (todayEv.length === 0) {
@@ -2435,12 +2453,20 @@ async function sendWeeklyReport(env) {
 async function middayNudge(env) {
   const chatId = env.TELEGRAM_CHAT_ID;
   if (!chatId) return;
-  const today = new Date().toISOString().split('T')[0];
-  const events = await getRecentEvents(20, env);
-  const todayEv = events.filter(e => e.timestamp?.startsWith(today) && e.input_type !== 'checkin');
+  const today = getTodayIST();
+  const events = await getRecentEvents(100, env);
+  const todayEv = events.filter(e => {
+    if (!e.timestamp) return false;
+    const d = new Date(e.timestamp).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    return d === today || e.timestamp.startsWith(today);
+  });
   if (todayEv.length === 0) {
     await sendTelegram(chatId,
       `🌞 *Midday check*\n\nNo activity logged yet today.\nWhat are you working on?\n\nJust reply or use /goal to set your focus.`, env);
+  } else {
+    const avgEnergy = Math.round(todayEv.reduce((s, e) => s + (e.energy_signal || 0.5), 0) / todayEv.length * 100);
+    const topTopic = todayEv.map(e => e.topic).filter(Boolean)[0] || 'deep work';
+    console.log(`[AETHER] Midday status: ${todayEv.length} events logged today (Energy: ${avgEnergy}%, Focus: ${topTopic})`);
   }
 }
 
@@ -2449,10 +2475,13 @@ async function middayNudge(env) {
 // ═════════════════════════════════════════════════════════════════
 
 async function calculateStreak(events) {
-  const days = new Set(events.map(e => e.timestamp?.split('T')[0]).filter(Boolean));
+  const days = new Set(events.map(e => {
+    if (!e.timestamp) return null;
+    return new Date(e.timestamp).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+  }).filter(Boolean));
   let streak = 0;
   for (let i = 0; i < 365; i++) {
-    const d = new Date();
+    const d = new Date(Date.now() + 5.5 * 3600 * 1000);
     d.setDate(d.getDate() - i);
     const ds = d.toISOString().split('T')[0];
     if (days.has(ds)) streak++;

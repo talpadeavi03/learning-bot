@@ -1,0 +1,47 @@
+{
+  "reference_rows": 45,
+  "current_rows": 15,
+  "dataset_drift": true,
+  "drifted_features": [
+    "stress_signal",
+    "motivation_signal"
+  ],
+  "metrics": {
+    "energy_signal": {
+      "reference_mean": 0.584,
+      "current_mean": 0.643,
+      "drift_score": 0.335,
+      "drift_detected": false
+    },
+    "stress_signal": {
+      "reference_mean": 0.324,
+      "current_mean": 0.401,
+      "drift_score": 0.513,
+      "drift_detected": true
+    },
+    "focus_signal": {
+      "reference_mean": 0.661,
+      "current_mean": 0.714,
+      "drift_score": 0.329,
+      "drift_detected": false
+    },
+    "motivation_signal": {
+      "reference_mean": 0.686,
+      "current_mean": 0.754,
+      "drift_score": 0.527,
+      "drift_detected": true
+    },
+    "complexity": {
+      "reference_mean": 0.498,
+      "current_mean": 0.494,
+      "drift_score": 0.03,
+      "drift_detected": false
+    },
+    "word_count": {
+      "reference_mean": 24.422,
+      "current_mean": 21.467,
+      "drift_score": 0.246,
+      "drift_detected": false
+    }
+  }
+}
