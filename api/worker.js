@@ -1244,7 +1244,7 @@ async function handleChat(request, env) {
     console.error('[AETHER] Chat engine error:', e);
     try {
       const mlFallback = await runAetherML(env);
-      reply = `[J.A.R.V.I.S Telemetry Fallback]\n` + mlFallback;
+      reply = `[J.A.R.V.I.S Telemetry Fallback (${e?.message || e})]\n` + mlFallback;
     } catch {
       return jsonResp({ error: 'AI unavailable: ' + e.message }, 500);
     }
@@ -2263,25 +2263,78 @@ async function runAetherML(env) {
 }
 
 // ═════════════════════════════════════════════════════════════════
-// ENGINE: WORKERS AI (pure Llama-3)
+// WORKERS AI MULTI-MODEL DISPATCHER & CHAT ENGINES
 // ═════════════════════════════════════════════════════════════════
 
-async function runWorkersAI(systemPrompt, history, env) {
+const AI_MODELS = [
+  '@cf/meta/llama-3.1-8b-instruct-fast',
+  '@cf/meta/llama-3.2-3b-instruct',
+  '@cf/meta/llama-3.1-8b-instruct',
+  '@cf/meta/llama-3.1-8b-instruct-fp8',
+  '@cf/meta/llama-3.2-1b-instruct',
+  '@cf/mistral/mistral-7b-instruct-v0.2',
+];
+
+async function callWorkersAI(messages, maxTokens = 400, env) {
   if (!env.AI) throw new Error('AI binding missing');
-  const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-    messages: [{ role: 'system', content: systemPrompt }, ...history],
-    max_tokens: 400,
-  });
-  return `[Workers AI]\n` + (result?.response || 'No response.');
+  let lastError = null;
+
+  const cleanMessages = messages
+    .filter(m => m && typeof m.content === 'string' && m.content.trim())
+    .map(m => ({
+      role: m.role === 'system' ? 'system' : (m.role === 'assistant' ? 'assistant' : 'user'),
+      content: m.content.trim(),
+    }));
+
+  for (const model of AI_MODELS) {
+    try {
+      const result = await env.AI.run(model, {
+        messages: cleanMessages,
+        max_tokens: maxTokens,
+      });
+      const response = result?.response || (typeof result === 'string' ? result : null);
+      if (response && response.trim()) {
+        return response.trim();
+      }
+    } catch (err) {
+      lastError = err;
+      console.warn(`[AETHER] Model ${model} messages failed: ${err.message}`);
+    }
+  }
+
+  // Fallback: prompt completion syntax
+  const promptText = cleanMessages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n') + '\n\nASSISTANT:';
+  for (const model of ['@cf/meta/llama-3.1-8b-instruct-fast', '@cf/meta/llama-3.2-3b-instruct', '@cf/mistral/mistral-7b-instruct-v0.2']) {
+    try {
+      const result = await env.AI.run(model, {
+        prompt: promptText,
+        max_tokens: maxTokens,
+      });
+      const response = result?.response || (typeof result === 'string' ? result : null);
+      if (response && response.trim()) {
+        return response.trim();
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error('All AI models unavailable');
+}
+
+async function runWorkersAI(systemPrompt, history, env) {
+  const reply = await callWorkersAI([
+    { role: 'system', content: systemPrompt },
+    ...history,
+  ], 400, env);
+  return reply;
 }
 
 // ═════════════════════════════════════════════════════════════════
-// ENGINE: HYBRID (ML state injected into Llama-3 context)
+// ENGINE: HYBRID (ML state injected into Llama context)
 // ═════════════════════════════════════════════════════════════════
 
 async function runHybrid(systemPrompt, history, env) {
-  if (!env.AI) throw new Error('AI binding missing');
-
   // Pull live signals to inject as extra context
   const events = await getRecentEvents(10, env);
   const today = new Date().toISOString().split('T')[0];
@@ -2299,11 +2352,11 @@ async function runHybrid(systemPrompt, history, env) {
     mlContext = `\n\n[LIVE ML SIGNALS — ${allEv.length} events] energy:${energy}% focus:${focus}% stress:${stress}% flow:${flow}`;
   }
 
-  const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-    messages: [{ role: 'system', content: systemPrompt + mlContext }, ...history],
-    max_tokens: 400,
-  });
-  return `[Hybrid]\n` + (result?.response || 'No response.');
+  const reply = await callWorkersAI([
+    { role: 'system', content: systemPrompt + mlContext },
+    ...history,
+  ], 400, env);
+  return reply;
 }
 
 // ═════════════════════════════════════════════════════════════════
