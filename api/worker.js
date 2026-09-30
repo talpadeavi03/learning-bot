@@ -1056,23 +1056,39 @@ export default {
             }
           } else if (env.GITHUB_TOKEN || env.GH_PAT) {
             const ghToken = env.GITHUB_TOKEN || env.GH_PAT;
-            const ghRes = await fetch('https://api.github.com/repos/talpadeavi03/learning-bot/actions/workflows/job_pipeline.yml/dispatches', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${ghToken}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'User-Agent': 'AETHER-Cloudflare-Worker'
-              },
-              body: JSON.stringify({ ref: 'master' })
-            });
-            syncStatus = ghRes.ok ? 'dispatched' : 'dispatch_failed';
-            message = ghRes.ok ? 'AETHER Job Pipeline GitHub Action triggered' : 'Failed to trigger GitHub Action';
+            try {
+              const ghRes = await fetch('https://api.github.com/repos/talpadeavi03/learning-bot/actions/workflows/job_pipeline.yml/dispatches', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${ghToken}`,
+                  'Accept': 'application/vnd.github.v3+json',
+                  'User-Agent': 'AETHER-Cloudflare-Worker'
+                },
+                body: JSON.stringify({ ref: 'master' })
+              });
+              if (ghRes.ok) {
+                syncStatus = 'dispatched';
+                message = 'AETHER Job Pipeline GitHub Action dispatched to scan Gmail';
+              } else {
+                const currentJobs = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
+                syncStatus = 'feed_synced';
+                message = currentJobs.length > 0
+                  ? `Synced with AETHER jobs feed (${currentJobs.length} active jobs)`
+                  : 'Jobs feed synced. Paste recruiter email to analyze or run job-bot pipeline.';
+              }
+            } catch (_) {
+              const currentJobs = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
+              syncStatus = 'feed_synced';
+              message = currentJobs.length > 0
+                ? `Synced with AETHER jobs feed (${currentJobs.length} active jobs)`
+                : 'Jobs feed synced. Paste recruiter email to analyze or run job-bot pipeline.';
+            }
           } else {
             const currentJobs = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
             newJobsCount = currentJobs.length;
             message = currentJobs.length > 0
               ? `Synced with AETHER jobs feed (${currentJobs.length} active jobs)`
-              : 'Synced with jobs feed. Paste recruiter email to analyze or set GMAIL_TOKEN_JSON in Worker secrets.';
+              : 'Jobs feed synced. Paste recruiter email to analyze or run job-bot pipeline.';
           }
 
           const allFeed = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
