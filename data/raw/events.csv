@@ -1,0 +1,121 @@
+timestamp,input_type,raw_text,topic,category,sentiment,energy_signal,stress_signal,focus_signal,motivation_signal,dominant_emotion,is_study_session,is_goal_mention,is_complaint,estimated_minutes,summary,word_count,complexity,question_ratio,hour_sin,hour_cos,day_of_week,is_weekend,flow_class
+2026-09-01T19:08:27Z,text,Refactoring data cleaner module and preparing test suites,kubernetes,general,positive,0.71,0.32,0.67,0.76,focus,0.0,0.0,0.0,58,Activity session,30,0.4,0.0,-0.966,0.259,1,0.0,1
+2026-09-02T03:08:27Z,voice,Built and deployed high-performance neural architecture,kubernetes,learning,positive,0.79,0.18,0.87,0.91,flow,1.0,1.0,0.0,41,Activity session,46,0.84,0.0,0.707,0.707,2,0.0,2
+2026-09-02T12:08:27Z,voice,"Burned out and drained, taking time off to recharge",python,general,tired,0.18,0.4,0.19,0.25,recovery,0.0,0.0,0.0,54,Activity session,13,0.39,0.0,0.0,-1.0,2,0.0,-2
+2026-09-02T23:08:27Z,text,"Burned out and drained, taking time off to recharge",devops,general,tired,0.11,0.28,0.17,0.12,recovery,0.0,0.0,0.0,31,Activity session,14,0.36,0.0,-0.259,0.966,2,0.0,-2
+2026-09-03T02:08:27Z,text,Answered team questions and organized project backlog,docker,general,neutral,0.56,0.44,0.47,0.48,steady,0.0,0.0,0.0,65,Activity session,13,0.38,0.0,0.5,0.866,3,0.0,0
+2026-09-03T11:08:27Z,checkin,Crushed the feature refactor with zero distractions,mlops,learning,positive,0.82,0.2,0.81,0.91,flow,1.0,0.0,0.0,53,Activity session,35,0.84,0.0,0.259,-0.966,3,0.0,2
+2026-09-03T16:08:27Z,github,Deep coding session on MLOps pipeline and model tournament,python,learning,positive,0.89,0.11,0.81,0.77,flow,1.0,0.0,0.0,39,Activity session,39,0.81,0.0,-0.866,-0.5,3,0.0,2
+2026-09-03T22:08:27Z,voice,"Low energy, feeling sleepy and unable to focus today",mlops,general,tired,0.21,0.35,0.21,0.24,recovery,0.0,0.0,0.0,67,Activity session,13,0.36,0.0,-0.5,0.866,3,0.0,-2
+2026-09-04T19:08:27Z,github,Casual reading of industry newsletters and documentation,python,general,neutral,0.55,0.37,0.54,0.44,steady,0.0,1.0,0.0,80,Activity session,20,0.39,0.0,-0.966,0.259,4,0.0,0
+2026-09-04T20:08:27Z,github,Crushed the feature refactor with zero distractions,docker,learning,positive,0.79,0.21,0.85,0.84,flow,1.0,0.0,0.0,33,Activity session,49,0.77,0.0,-0.866,0.5,4,0.0,2
+2026-09-04T23:08:27Z,checkin,Answered team questions and organized project backlog,python,general,neutral,0.54,0.28,0.49,0.51,steady,0.0,1.0,0.0,50,Activity session,18,0.47,0.0,-0.259,0.966,4,0.0,0
+2026-09-05T00:08:27Z,text,Answered team questions and organized project backlog,devops,general,neutral,0.48,0.43,0.45,0.52,steady,0.0,1.0,0.0,37,Activity session,14,0.41,0.0,0.0,1.0,5,1.0,0
+2026-09-05T08:08:27Z,github,Built and deployed high-performance neural architecture,python,learning,positive,0.84,0.15,0.86,0.92,flow,1.0,0.0,0.0,58,Activity session,25,0.63,0.0,0.866,-0.5,5,1.0,2
+2026-09-05T09:08:27Z,text,Frustrated with flaky test runs and server connection errors,docker,general,negative,0.55,0.76,0.36,0.36,anxiety,0.0,1.0,1.0,29,Activity session,16,0.49,0.0,0.707,-0.707,5,1.0,-1
+2026-09-05T10:08:27Z,checkin,Frustrated with flaky test runs and server connection errors,kubernetes,general,negative,0.56,0.74,0.22,0.26,anxiety,0.0,0.0,1.0,85,Activity session,14,0.35,0.0,0.5,-0.866,5,1.0,-1
+2026-09-05T11:08:27Z,voice,Setting up baseline benchmarks for model evaluation,mlops,learning,positive,0.74,0.14,0.52,0.66,focus,1.0,0.0,0.0,56,Activity session,30,0.52,0.0,0.259,-0.966,5,1.0,1
+2026-09-06T01:08:27Z,github,Frustrated with flaky test runs and server connection errors,kubernetes,general,negative,0.51,0.86,0.41,0.27,anxiety,0.0,0.0,1.0,61,Activity session,27,0.49,0.0,0.259,0.966,6,1.0,-1
+2026-09-06T12:08:27Z,github,Frustrated with flaky test runs and server connection errors,docker,general,negative,0.62,0.75,0.4,0.3,anxiety,0.0,1.0,1.0,87,Activity session,20,0.55,0.0,0.0,-1.0,6,1.0,-1
+2026-09-06T18:08:27Z,checkin,Steady progress reviewing Kubernetes architecture docs,mlops,learning,positive,0.67,0.2,0.54,0.74,focus,1.0,0.0,0.0,40,Activity session,25,0.45,0.0,-1.0,-0.0,6,1.0,1
+2026-09-06T20:08:27Z,github,Casual reading of industry newsletters and documentation,mlops,general,neutral,0.49,0.27,0.4,0.46,steady,0.0,0.0,0.0,38,Activity session,17,0.47,0.0,-0.866,0.5,6,1.0,0
+2026-09-07T04:08:27Z,text,Steady progress reviewing Kubernetes architecture docs,mlops,learning,positive,0.73,0.22,0.6,0.62,focus,1.0,0.0,0.0,27,Activity session,28,0.58,0.0,0.866,0.5,0,0.0,1
+2026-09-07T07:08:27Z,text,Looming deployment deadline and blocked on dependencies,docker,general,negative,0.5,0.84,0.29,0.42,anxiety,0.0,0.0,1.0,54,Activity session,15,0.37,0.0,0.966,-0.259,0,0.0,-1
+2026-09-07T07:08:27Z,text,Casual reading of industry newsletters and documentation,devops,general,neutral,0.42,0.42,0.47,0.4,steady,0.0,1.0,0.0,61,Activity session,22,0.45,0.0,0.966,-0.259,0,0.0,0
+2026-09-08T01:08:27Z,text,Frustrated with flaky test runs and server connection errors,devops,general,negative,0.42,0.88,0.22,0.22,anxiety,0.0,1.0,1.0,67,Activity session,23,0.54,0.0,0.259,0.966,1,0.0,-1
+2026-09-08T06:08:27Z,text,High stress from production outage and tricky race conditions,kubernetes,general,negative,0.62,0.83,0.35,0.24,anxiety,0.0,0.0,1.0,55,Activity session,17,0.52,0.0,1.0,0.0,1,0.0,-1
+2026-09-08T13:08:27Z,github,"Low energy, feeling sleepy and unable to focus today",docker,general,tired,0.17,0.51,0.31,0.18,recovery,0.0,0.0,0.0,89,Activity session,6,0.39,0.0,-0.259,-0.966,1,0.0,-2
+2026-09-09T01:08:27Z,github,Built and deployed high-performance neural architecture,kubernetes,learning,positive,0.8,0.08,0.76,0.85,flow,1.0,0.0,0.0,33,Activity session,30,0.89,0.0,0.259,0.966,2,0.0,2
+2026-09-09T01:08:27Z,checkin,High stress from production outage and tricky race conditions,docker,general,negative,0.64,0.79,0.3,0.28,anxiety,0.0,0.0,1.0,76,Activity session,17,0.4,0.0,0.259,0.966,2,0.0,-1
+2026-09-09T02:08:27Z,text,High stress from production outage and tricky race conditions,mlops,general,negative,0.63,0.75,0.3,0.23,anxiety,0.0,0.0,1.0,42,Activity session,21,0.6,0.0,0.5,0.866,2,0.0,-1
+2026-09-09T12:08:27Z,github,Built and deployed high-performance neural architecture,kubernetes,learning,positive,0.93,0.2,0.7,0.78,flow,1.0,0.0,0.0,63,Activity session,44,0.82,0.0,0.0,-1.0,2,0.0,2
+2026-09-09T19:08:27Z,voice,Refactoring data cleaner module and preparing test suites,devops,learning,positive,0.72,0.17,0.55,0.74,focus,1.0,0.0,0.0,33,Activity session,29,0.4,0.0,-0.966,0.259,2,0.0,1
+2026-09-09T21:08:27Z,voice,Routine backlog grooming and daily standup check-in,docker,general,neutral,0.5,0.34,0.5,0.56,steady,0.0,0.0,0.0,89,Activity session,17,0.48,0.0,-0.707,0.707,2,0.0,0
+2026-09-10T06:08:27Z,text,Refactoring data cleaner module and preparing test suites,mlops,general,positive,0.68,0.14,0.58,0.8,focus,0.0,1.0,0.0,33,Activity session,25,0.66,0.0,1.0,0.0,3,0.0,1
+2026-09-11T04:08:27Z,github,Routine backlog grooming and daily standup check-in,devops,general,neutral,0.55,0.44,0.42,0.45,steady,0.0,0.0,0.0,33,Activity session,19,0.48,0.0,0.866,0.5,4,0.0,0
+2026-09-11T05:08:27Z,github,"Exhausted after all-night debugging session, resting",devops,general,tired,0.23,0.28,0.18,0.25,recovery,0.0,0.0,0.0,59,Activity session,9,0.23,0.0,0.966,0.259,4,0.0,-2
+2026-09-11T07:08:27Z,checkin,Steady progress reviewing Kubernetes architecture docs,devops,learning,positive,0.7,0.2,0.56,0.77,focus,1.0,0.0,0.0,62,Activity session,33,0.43,0.0,0.966,-0.259,4,0.0,1
+2026-09-11T09:08:27Z,voice,"Exhausted after all-night debugging session, resting",docker,general,tired,0.1,0.46,0.13,0.11,recovery,0.0,0.0,0.0,52,Activity session,11,0.21,0.0,0.707,-0.707,4,0.0,-2
+2026-09-11T10:08:27Z,voice,Casual reading of industry newsletters and documentation,python,general,neutral,0.55,0.3,0.54,0.56,steady,0.0,0.0,0.0,47,Activity session,10,0.36,0.0,0.5,-0.866,4,0.0,0
+2026-09-11T12:08:27Z,voice,Built and deployed high-performance neural architecture,mlops,learning,positive,0.82,0.17,0.8,0.88,flow,1.0,0.0,0.0,69,Activity session,34,0.8,0.0,0.0,-1.0,4,0.0,2
+2026-09-12T12:08:27Z,text,Built and deployed high-performance neural architecture,mlops,learning,positive,0.9,0.2,0.84,0.8,flow,1.0,0.0,0.0,70,Activity session,50,0.72,0.0,0.0,-1.0,5,1.0,2
+2026-09-12T12:08:27Z,text,High stress from production outage and tricky race conditions,docker,general,negative,0.45,0.84,0.29,0.39,anxiety,0.0,0.0,1.0,80,Activity session,21,0.42,0.0,0.0,-1.0,5,1.0,-1
+2026-09-12T13:08:27Z,checkin,Steady progress reviewing Kubernetes architecture docs,mlops,general,positive,0.71,0.22,0.54,0.62,focus,0.0,1.0,0.0,53,Activity session,34,0.44,0.0,-0.259,-0.966,5,1.0,1
+2026-09-12T22:08:27Z,voice,Refactoring data cleaner module and preparing test suites,mlops,general,positive,0.67,0.14,0.66,0.62,focus,0.0,0.0,0.0,58,Activity session,22,0.52,0.0,-0.5,0.866,5,1.0,1
+2026-09-12T23:08:27Z,github,Steady progress reviewing Kubernetes architecture docs,devops,learning,positive,0.72,0.28,0.53,0.77,focus,1.0,0.0,0.0,76,Activity session,32,0.68,0.0,-0.259,0.966,5,1.0,1
+2026-09-13T00:08:27Z,voice,"Low energy, feeling sleepy and unable to focus today",docker,general,tired,0.13,0.48,0.19,0.29,recovery,0.0,0.0,0.0,44,Activity session,8,0.25,0.0,0.0,1.0,6,1.0,-2
+2026-09-13T00:08:27Z,github,"Burned out and drained, taking time off to recharge",mlops,general,tired,0.21,0.36,0.3,0.18,recovery,0.0,0.0,0.0,74,Activity session,16,0.32,0.0,0.0,1.0,6,1.0,-2
+2026-09-13T11:08:27Z,github,Crushed the feature refactor with zero distractions,python,learning,positive,0.87,0.09,0.85,0.92,flow,1.0,0.0,0.0,25,Activity session,44,0.66,0.0,0.259,-0.966,6,1.0,2
+2026-09-13T13:08:27Z,text,"Exhausted after all-night debugging session, resting",devops,general,tired,0.23,0.39,0.28,0.2,recovery,0.0,0.0,0.0,28,Activity session,13,0.3,0.0,-0.259,-0.966,6,1.0,-2
+2026-09-13T18:08:27Z,voice,Answered team questions and organized project backlog,kubernetes,general,neutral,0.47,0.39,0.47,0.5,steady,0.0,0.0,0.0,90,Activity session,13,0.39,0.0,-1.0,-0.0,6,1.0,0
+2026-09-14T02:08:27Z,github,Steady progress reviewing Kubernetes architecture docs,docker,learning,positive,0.7,0.28,0.61,0.67,focus,1.0,0.0,0.0,36,Activity session,32,0.41,0.0,0.5,0.866,0,0.0,1
+2026-09-14T21:08:27Z,voice,"Burned out and drained, taking time off to recharge",docker,general,tired,0.15,0.47,0.21,0.21,recovery,0.0,0.0,0.0,81,Activity session,13,0.38,0.0,-0.707,0.707,0,0.0,-2
+2026-09-15T03:08:27Z,voice,"Exhausted after all-night debugging session, resting",kubernetes,general,tired,0.25,0.43,0.18,0.15,recovery,0.0,0.0,0.0,73,Activity session,10,0.38,0.0,0.707,0.707,1,0.0,-2
+2026-09-15T07:08:27Z,github,Deep coding session on MLOps pipeline and model tournament,mlops,learning,positive,0.91,0.15,0.79,0.78,flow,1.0,0.0,0.0,72,Activity session,50,0.78,0.0,0.966,-0.259,1,0.0,2
+2026-09-15T12:08:27Z,checkin,Answered team questions and organized project backlog,devops,general,neutral,0.55,0.38,0.58,0.52,steady,0.0,0.0,0.0,45,Activity session,19,0.46,0.0,0.0,-1.0,1,0.0,0
+2026-09-15T19:08:27Z,github,Setting up baseline benchmarks for model evaluation,kubernetes,learning,positive,0.69,0.22,0.67,0.64,focus,1.0,0.0,0.0,34,Activity session,26,0.52,0.0,-0.966,0.259,1,0.0,1
+2026-09-16T02:08:27Z,github,Casual reading of industry newsletters and documentation,docker,general,neutral,0.56,0.33,0.55,0.48,steady,0.0,0.0,0.0,44,Activity session,11,0.36,0.0,0.5,0.866,2,0.0,0
+2026-09-16T03:08:27Z,text,Steady progress reviewing Kubernetes architecture docs,python,general,positive,0.68,0.27,0.63,0.8,focus,0.0,0.0,0.0,82,Activity session,28,0.64,0.0,0.707,0.707,2,0.0,1
+2026-09-16T15:08:27Z,checkin,Crushed the feature refactor with zero distractions,kubernetes,learning,positive,0.82,0.14,0.92,0.87,flow,1.0,0.0,0.0,70,Activity session,25,0.86,0.0,-0.707,-0.707,2,0.0,2
+2026-09-16T16:08:27Z,text,Frustrated with flaky test runs and server connection errors,kubernetes,general,negative,0.44,0.9,0.4,0.3,anxiety,0.0,1.0,1.0,85,Activity session,19,0.38,0.0,-0.866,-0.5,2,0.0,-1
+2026-09-17T01:08:27Z,text,Setting up baseline benchmarks for model evaluation,devops,learning,positive,0.64,0.25,0.53,0.63,focus,1.0,1.0,0.0,53,Activity session,20,0.7,0.0,0.259,0.966,3,0.0,1
+2026-09-17T02:08:27Z,text,"Low energy, feeling sleepy and unable to focus today",kubernetes,general,tired,0.17,0.53,0.26,0.21,recovery,0.0,0.0,0.0,60,Activity session,8,0.38,0.0,0.5,0.866,3,0.0,-2
+2026-09-18T03:08:27Z,github,Routine backlog grooming and daily standup check-in,kubernetes,general,neutral,0.43,0.38,0.46,0.46,steady,0.0,0.0,0.0,62,Activity session,21,0.48,0.0,0.707,0.707,4,0.0,0
+2026-09-18T10:08:27Z,voice,Answered team questions and organized project backlog,python,general,neutral,0.53,0.38,0.46,0.51,steady,0.0,1.0,0.0,47,Activity session,19,0.45,0.0,0.5,-0.866,4,0.0,0
+2026-09-18T19:08:27Z,checkin,Routine backlog grooming and daily standup check-in,devops,general,neutral,0.53,0.33,0.43,0.49,steady,0.0,0.0,0.0,28,Activity session,19,0.41,0.0,-0.966,0.259,4,0.0,0
+2026-09-18T21:08:27Z,checkin,Casual reading of industry newsletters and documentation,devops,general,neutral,0.53,0.38,0.55,0.57,steady,0.0,0.0,0.0,33,Activity session,16,0.49,0.0,-0.707,0.707,4,0.0,0
+2026-09-19T16:08:27Z,github,Built and deployed high-performance neural architecture,devops,learning,positive,0.86,0.13,0.81,0.82,flow,1.0,0.0,0.0,49,Activity session,35,0.68,0.0,-0.866,-0.5,5,1.0,2
+2026-09-19T19:08:27Z,checkin,Casual reading of industry newsletters and documentation,docker,general,neutral,0.51,0.34,0.5,0.49,steady,0.0,0.0,0.0,54,Activity session,18,0.37,0.0,-0.966,0.259,5,1.0,0
+2026-09-20T04:08:27Z,github,Setting up baseline benchmarks for model evaluation,kubernetes,learning,positive,0.72,0.31,0.59,0.75,focus,1.0,0.0,0.0,74,Activity session,25,0.55,0.0,0.866,0.5,6,1.0,1
+2026-09-20T05:08:27Z,checkin,"Exhausted after all-night debugging session, resting",devops,general,tired,0.17,0.29,0.23,0.21,recovery,0.0,0.0,0.0,88,Activity session,8,0.24,0.0,0.966,0.259,6,1.0,-2
+2026-09-20T08:08:27Z,voice,Built and deployed high-performance neural architecture,docker,learning,positive,0.9,0.17,0.92,0.92,flow,1.0,0.0,0.0,75,Activity session,27,0.77,0.0,0.866,-0.5,6,1.0,2
+2026-09-20T10:08:27Z,voice,Built and deployed high-performance neural architecture,kubernetes,learning,positive,0.91,0.19,0.76,0.77,flow,1.0,0.0,0.0,54,Activity session,48,0.73,0.0,0.5,-0.866,6,1.0,2
+2026-09-20T11:08:27Z,github,Frustrated with flaky test runs and server connection errors,mlops,general,negative,0.51,0.81,0.28,0.45,anxiety,0.0,1.0,1.0,42,Activity session,28,0.3,0.0,0.259,-0.966,6,1.0,-1
+2026-09-20T11:08:27Z,text,Routine backlog grooming and daily standup check-in,devops,general,neutral,0.57,0.32,0.54,0.44,steady,0.0,1.0,0.0,29,Activity session,12,0.32,0.0,0.259,-0.966,6,1.0,0
+2026-09-20T15:08:27Z,voice,"Low energy, feeling sleepy and unable to focus today",kubernetes,general,tired,0.14,0.46,0.26,0.19,recovery,0.0,0.0,0.0,53,Activity session,9,0.38,0.0,-0.707,-0.707,6,1.0,-2
+2026-09-20T21:08:27Z,text,Setting up baseline benchmarks for model evaluation,mlops,general,positive,0.7,0.23,0.57,0.8,focus,0.0,1.0,0.0,52,Activity session,34,0.58,0.0,-0.707,0.707,6,1.0,1
+2026-09-21T13:08:27Z,github,"Exhausted after all-night debugging session, resting",devops,general,tired,0.26,0.47,0.15,0.16,recovery,0.0,0.0,0.0,31,Activity session,11,0.24,0.0,-0.259,-0.966,0,0.0,-2
+2026-09-21T14:08:27Z,text,"Exhausted after all-night debugging session, resting",mlops,general,tired,0.18,0.47,0.13,0.29,recovery,0.0,1.0,0.0,50,Activity session,16,0.21,0.0,-0.5,-0.866,0,0.0,-2
+2026-09-21T20:08:27Z,github,High stress from production outage and tricky race conditions,mlops,general,negative,0.57,0.75,0.26,0.22,anxiety,0.0,0.0,1.0,32,Activity session,15,0.43,0.0,-0.866,0.5,0,0.0,-1
+2026-09-22T03:08:27Z,voice,Looming deployment deadline and blocked on dependencies,mlops,general,negative,0.55,0.81,0.3,0.28,anxiety,0.0,0.0,1.0,39,Activity session,19,0.4,0.0,0.707,0.707,1,0.0,-1
+2026-09-22T08:08:27Z,text,"Burned out and drained, taking time off to recharge",kubernetes,general,tired,0.16,0.52,0.14,0.13,recovery,0.0,0.0,0.0,84,Activity session,8,0.34,0.0,0.866,-0.5,1,0.0,-2
+2026-09-22T10:08:27Z,voice,"Exhausted after all-night debugging session, resting",kubernetes,general,tired,0.25,0.39,0.18,0.26,recovery,0.0,0.0,0.0,33,Activity session,9,0.2,0.0,0.5,-0.866,1,0.0,-2
+2026-09-23T00:08:27Z,github,Deep coding session on MLOps pipeline and model tournament,kubernetes,learning,positive,0.84,0.19,0.85,0.9,flow,1.0,1.0,0.0,87,Activity session,33,0.76,0.0,0.0,1.0,2,0.0,2
+2026-09-23T12:08:27Z,voice,Built and deployed high-performance neural architecture,kubernetes,learning,positive,0.89,0.11,0.71,0.92,flow,1.0,1.0,0.0,28,Activity session,28,0.83,0.0,0.0,-1.0,2,0.0,2
+2026-09-24T03:08:27Z,github,Looming deployment deadline and blocked on dependencies,kubernetes,general,negative,0.52,0.73,0.3,0.21,anxiety,0.0,0.0,1.0,87,Activity session,12,0.6,0.0,0.707,0.707,3,0.0,-1
+2026-09-24T17:08:27Z,github,Answered team questions and organized project backlog,docker,general,neutral,0.52,0.26,0.53,0.44,steady,0.0,1.0,0.0,35,Activity session,17,0.37,0.0,-0.966,-0.259,3,0.0,0
+2026-09-24T21:08:27Z,checkin,Refactoring data cleaner module and preparing test suites,devops,learning,positive,0.71,0.14,0.61,0.73,focus,1.0,0.0,0.0,71,Activity session,34,0.43,0.0,-0.707,0.707,3,0.0,1
+2026-09-25T03:08:27Z,text,Casual reading of industry newsletters and documentation,mlops,general,neutral,0.45,0.34,0.56,0.42,steady,0.0,1.0,0.0,55,Activity session,11,0.31,0.0,0.707,0.707,4,0.0,0
+2026-09-25T10:08:27Z,checkin,"Low energy, feeling sleepy and unable to focus today",devops,general,tired,0.15,0.54,0.24,0.21,recovery,0.0,1.0,0.0,45,Activity session,11,0.21,0.0,0.5,-0.866,4,0.0,-2
+2026-09-25T15:08:27Z,text,High stress from production outage and tricky race conditions,python,general,negative,0.51,0.87,0.41,0.45,anxiety,0.0,1.0,1.0,81,Activity session,28,0.49,0.0,-0.707,-0.707,4,0.0,-1
+2026-09-25T17:08:27Z,checkin,High stress from production outage and tricky race conditions,docker,general,negative,0.45,0.71,0.33,0.39,anxiety,0.0,1.0,1.0,61,Activity session,18,0.36,0.0,-0.966,-0.259,4,0.0,-1
+2026-09-25T18:08:27Z,checkin,Casual reading of industry newsletters and documentation,docker,general,neutral,0.54,0.42,0.51,0.42,steady,0.0,0.0,0.0,68,Activity session,22,0.31,0.0,-1.0,-0.0,4,0.0,0
+2026-09-25T18:08:27Z,checkin,Looming deployment deadline and blocked on dependencies,kubernetes,general,negative,0.56,0.87,0.23,0.27,anxiety,0.0,0.0,1.0,35,Activity session,16,0.53,0.0,-1.0,-0.0,4,0.0,-1
+2026-09-25T19:08:27Z,github,Frustrated with flaky test runs and server connection errors,mlops,general,negative,0.62,0.71,0.29,0.4,anxiety,0.0,0.0,1.0,78,Activity session,22,0.3,0.0,-0.966,0.259,4,0.0,-1
+2026-09-26T02:08:27Z,voice,Steady progress reviewing Kubernetes architecture docs,mlops,learning,positive,0.64,0.16,0.62,0.79,focus,1.0,1.0,0.0,51,Activity session,25,0.7,0.0,0.5,0.866,5,1.0,1
+2026-09-26T05:08:27Z,checkin,"Low energy, feeling sleepy and unable to focus today",devops,general,tired,0.18,0.33,0.26,0.2,recovery,0.0,0.0,0.0,51,Activity session,10,0.21,0.0,0.966,0.259,5,1.0,-2
+2026-09-26T10:08:27Z,text,"Exhausted after all-night debugging session, resting",devops,general,tired,0.15,0.36,0.18,0.24,recovery,0.0,0.0,0.0,41,Activity session,10,0.21,0.0,0.5,-0.866,5,1.0,-2
+2026-09-26T14:08:27Z,text,Refactoring data cleaner module and preparing test suites,docker,learning,positive,0.73,0.26,0.54,0.61,focus,1.0,0.0,0.0,30,Activity session,22,0.53,0.0,-0.5,-0.866,5,1.0,1
+2026-09-26T16:08:27Z,text,Setting up baseline benchmarks for model evaluation,kubernetes,general,positive,0.74,0.24,0.56,0.63,focus,0.0,1.0,0.0,44,Activity session,31,0.43,0.0,-0.866,-0.5,5,1.0,1
+2026-09-26T20:08:27Z,checkin,Crushed the feature refactor with zero distractions,devops,learning,positive,0.85,0.12,0.68,0.9,flow,1.0,1.0,0.0,26,Activity session,33,0.65,0.0,-0.866,0.5,5,1.0,2
+2026-09-26T20:08:27Z,github,Looming deployment deadline and blocked on dependencies,kubernetes,general,negative,0.51,0.89,0.25,0.27,anxiety,0.0,0.0,1.0,78,Activity session,18,0.44,0.0,-0.866,0.5,5,1.0,-1
+2026-09-27T09:08:27Z,text,Deep coding session on MLOps pipeline and model tournament,kubernetes,learning,positive,0.89,0.11,0.73,0.75,flow,1.0,0.0,0.0,49,Activity session,40,0.78,0.0,0.707,-0.707,6,1.0,2
+2026-09-27T09:08:27Z,text,Setting up baseline benchmarks for model evaluation,docker,learning,positive,0.71,0.22,0.64,0.74,focus,1.0,0.0,0.0,56,Activity session,32,0.64,0.0,0.707,-0.707,6,1.0,1
+2026-09-27T18:08:27Z,github,Deep coding session on MLOps pipeline and model tournament,mlops,learning,positive,0.84,0.14,0.94,0.92,flow,1.0,0.0,0.0,49,Activity session,46,0.71,0.0,-1.0,-0.0,6,1.0,2
+2026-09-28T00:08:27Z,voice,Deep coding session on MLOps pipeline and model tournament,devops,learning,positive,0.79,0.11,0.84,0.89,flow,1.0,0.0,0.0,35,Activity session,37,0.64,0.0,0.0,1.0,0,0.0,2
+2026-09-28T01:08:27Z,github,Built and deployed high-performance neural architecture,devops,learning,positive,0.92,0.14,0.71,0.89,flow,1.0,0.0,0.0,41,Activity session,27,0.87,0.0,0.259,0.966,0,0.0,2
+2026-09-28T12:08:27Z,checkin,Frustrated with flaky test runs and server connection errors,kubernetes,general,negative,0.44,0.83,0.37,0.27,anxiety,0.0,0.0,1.0,90,Activity session,25,0.45,0.0,0.0,-1.0,0,0.0,-1
+2026-09-28T13:08:27Z,checkin,Setting up baseline benchmarks for model evaluation,mlops,general,positive,0.7,0.19,0.65,0.69,focus,0.0,0.0,0.0,50,Activity session,24,0.48,0.0,-0.259,-0.966,0,0.0,1
+2026-09-29T02:08:27Z,github,Casual reading of industry newsletters and documentation,mlops,general,neutral,0.52,0.36,0.42,0.51,steady,0.0,1.0,0.0,72,Activity session,14,0.33,0.0,0.5,0.866,1,0.0,0
+2026-09-29T03:08:27Z,github,Looming deployment deadline and blocked on dependencies,devops,general,negative,0.61,0.71,0.44,0.36,anxiety,0.0,1.0,1.0,86,Activity session,16,0.43,0.0,0.707,0.707,1,0.0,-1
+2026-09-29T08:08:27Z,voice,"Burned out and drained, taking time off to recharge",docker,general,tired,0.14,0.29,0.31,0.22,recovery,0.0,0.0,0.0,55,Activity session,7,0.36,0.0,0.866,-0.5,1,0.0,-2
+2026-09-30T08:15:06Z,voice,"Burned out and drained, taking time off to recharge",docker,general,tired,0.25,0.51,0.2,0.19,recovery,0.0,1.0,0.0,34,Activity session,8,0.27,0.0,0.866,-0.5,2,0.0,-2
+2026-09-30T09:10:57Z,checkin,Looming deployment deadline and blocked on dependencies,devops,general,negative,0.44,0.72,0.37,0.35,anxiety,0.0,0.0,1.0,26,Activity session,24,0.48,0.0,0.707,-0.707,2,0.0,-1
+2026-09-30T09:36:11Z,checkin,Setting up baseline benchmarks for model evaluation,python,learning,positive,0.67,0.13,0.67,0.71,focus,1.0,0.0,0.0,56,Activity session,33,0.52,0.0,0.707,-0.707,2,0.0,1
+2026-09-30T10:03:12Z,voice,Answered team questions and organized project backlog,devops,general,neutral,0.51,0.4,0.48,0.52,steady,0.0,0.0,0.0,31,Activity session,13,0.5,0.0,0.5,-0.866,2,0.0,0
+2026-09-30T10:10:04Z,text,Frustrated with flaky test runs and server connection errors,mlops,general,negative,0.53,0.91,0.29,0.34,anxiety,0.0,0.0,1.0,62,Activity session,23,0.47,0.0,0.5,-0.866,2,0.0,-1
+2026-09-30T10:24:17Z,github,Routine backlog grooming and daily standup check-in,devops,general,neutral,0.47,0.28,0.57,0.47,steady,0.0,0.0,0.0,30,Activity session,16,0.32,0.0,0.5,-0.866,2,0.0,0
+2026-09-30T10:32:19Z,voice,"Burned out and drained, taking time off to recharge",kubernetes,general,tired,0.12,0.52,0.27,0.25,recovery,0.0,0.0,0.0,58,Activity session,7,0.26,0.0,0.5,-0.866,2,0.0,-2
+2026-09-30T10:50:42Z,text,Crushed the feature refactor with zero distractions,devops,learning,positive,0.78,0.12,0.74,0.9,flow,1.0,0.0,0.0,28,Activity session,48,0.87,0.0,0.5,-0.866,2,0.0,2
+2026-09-30T11:04:20Z,github,Crushed the feature refactor with zero distractions,mlops,learning,positive,0.81,0.18,0.72,0.83,flow,1.0,0.0,0.0,29,Activity session,47,0.77,0.0,0.259,-0.966,2,0.0,2
+2026-09-30T14:56:17Z,github,Setting up baseline benchmarks for model evaluation,mlops,learning,positive,0.66,0.24,0.61,0.74,focus,1.0,1.0,0.0,45,Activity session,25,0.53,0.0,-0.5,-0.866,2,0.0,1

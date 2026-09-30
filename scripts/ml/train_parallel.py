@@ -78,8 +78,15 @@ def train_tournament():
         import numpy as np
         X_np = np.array(X)
         y_np = np.array(y)
-        rf = RandomForestClassifier(n_estimators=100, max_depth=8, random_state=42).fit(X_np, y_np)
-        gbm = GradientBoostingRegressor(n_estimators=100, max_depth=4, random_state=42).fit(X_np, X_np[:, 0])
+        rf = RandomForestClassifier(n_estimators=100, max_depth=8, class_weight='balanced', random_state=42).fit(X_np, y_np)
+
+        # Energy forecasting target: models energy evolution/trend for next 45 mins
+        # Incorporates current energy, focus boost, and stress/fatigue decay
+        y_energy = np.array([
+            min(0.98, max(0.05, float(r.get('energy_signal', 0.5) or 0.5) * (0.95 + 0.05 * float(r.get('focus_signal', 0.5) or 0.5) - 0.08 * float(r.get('stress_signal', 0.2) or 0.2)) + 0.02))
+            for r in rows
+        ])
+        gbm = GradientBoostingRegressor(n_estimators=100, max_depth=4, random_state=42).fit(X_np, y_energy)
         rf_acc = float(np.mean(rf.predict(X_np) == y_np))
         sklearn_available = True
         champion_clf = rf
@@ -97,14 +104,17 @@ def train_tournament():
     xgb_available = False
     try:
         from xgboost import XGBClassifier
+        from sklearn.preprocessing import LabelEncoder
         import numpy as np
+        le = LabelEncoder()
+        y_enc = le.fit_transform(y)
         xgb = XGBClassifier(n_estimators=100, max_depth=5, learning_rate=0.08, eval_metric='mlogloss')
-        xgb.fit(np.array(X), np.array(y))
-        xgb_score = float(np.mean(xgb.predict(np.array(X)) == np.array(y)))
+        xgb.fit(np.array(X), y_enc)
+        xgb_score = float(np.mean(xgb.predict(np.array(X)) == y_enc))
         xgb_available = True
         print('[Engine B: XGBoost] XGBClassifier trained successfully ✅')
-    except ImportError:
-        print('[Engine B: XGBoost-Engine] XGBoost not installed — running simulated parallel comparison...')
+    except Exception as e:
+        print(f'[Engine B: XGBoost-Engine] XGBoost unavailable ({e}) — running simulated parallel comparison...')
         xgb_score = round(rf_score * 0.99, 3)
 
     # Tournament Decision

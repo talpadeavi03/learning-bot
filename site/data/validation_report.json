@@ -1,6 +1,6 @@
 {
   "file": "data/processed/events_clean.csv",
-  "row_count": 60,
+  "row_count": 120,
   "pandera": {
     "engine": "Pandera",
     "valid": true,
@@ -13,7 +13,7 @@
       {
         "expectation": "expect_table_row_count_to_be_between",
         "success": true,
-        "observed": 60
+        "observed": 120
       },
       {
         "expectation": "expect_column_to_exist:timestamp",

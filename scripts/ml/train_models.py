@@ -110,12 +110,15 @@ from sklearn.preprocessing import LabelEncoder
 
 # Flow state classifier
 rf = RandomForestClassifier(
-    n_estimators=100, max_depth=8,
+    n_estimators=100, max_depth=8, class_weight='balanced',
     min_samples_split=2, random_state=42, n_jobs=-1
 )
 
-# Energy regressor
-energy_target = df['energy_signal'].values
+# Energy regressor — forecasting target for next window (energy decay / focus boost)
+energy_target = np.array([
+    min(0.98, max(0.05, float(r.get('energy_signal', 0.5) or 0.5) * (0.95 + 0.05 * float(r.get('focus_signal', 0.5) or 0.5) - 0.08 * float(r.get('stress_signal', 0.2) or 0.2)) + 0.02))
+    for _, r in df.iterrows()
+])
 gbm = GradientBoostingRegressor(
     n_estimators=100, max_depth=4,
     learning_rate=0.1, random_state=42

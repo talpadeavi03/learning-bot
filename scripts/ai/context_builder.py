@@ -1,11 +1,12 @@
 import json
 import os
 import sys
-from scripts.analytics.graph_query import query
 
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 )
+
+from scripts.analytics.graph_query import query
 
 from scripts.analytics.vector_query import search
 

@@ -1,0 +1,18 @@
+[
+  {
+    "type": "stress_level",
+    "value": 0.4535,
+    "description": "Average stress level 45%"
+  },
+  {
+    "type": "study_focus",
+    "value": 0.6063157894736841,
+    "description": "Study sessions produce 61% focus"
+  },
+  {
+    "type": "weekend_vs_weekday",
+    "weekend_energy": 0.5746153846153846,
+    "weekday_energy": 0.6738297872340426,
+    "description": "Weekday productivity comparison"
+  }
+]

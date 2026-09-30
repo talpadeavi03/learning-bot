@@ -1,46 +1,43 @@
 {
-  "reference_rows": 45,
+  "reference_rows": 105,
   "current_rows": 15,
-  "dataset_drift": true,
-  "drifted_features": [
-    "stress_signal",
-    "motivation_signal"
-  ],
+  "dataset_drift": false,
+  "drifted_features": [],
   "metrics": {
     "energy_signal": {
-      "reference_mean": 0.584,
-      "current_mean": 0.643,
-      "drift_score": 0.335,
+      "reference_mean": 0.561,
+      "current_mean": 0.51,
+      "drift_score": 0.22,
       "drift_detected": false
     },
     "stress_signal": {
-      "reference_mean": 0.324,
-      "current_mean": 0.401,
-      "drift_score": 0.513,
-      "drift_detected": true
+      "reference_mean": 0.384,
+      "current_mean": 0.426,
+      "drift_score": 0.181,
+      "drift_detected": false
     },
     "focus_signal": {
-      "reference_mean": 0.661,
-      "current_mean": 0.714,
-      "drift_score": 0.329,
+      "reference_mean": 0.487,
+      "current_mean": 0.474,
+      "drift_score": 0.058,
       "drift_detected": false
     },
     "motivation_signal": {
-      "reference_mean": 0.686,
-      "current_mean": 0.754,
-      "drift_score": 0.527,
-      "drift_detected": true
+      "reference_mean": 0.518,
+      "current_mean": 0.49,
+      "drift_score": 0.112,
+      "drift_detected": false
     },
     "complexity": {
-      "reference_mean": 0.498,
-      "current_mean": 0.494,
-      "drift_score": 0.03,
+      "reference_mean": 0.493,
+      "current_mean": 0.469,
+      "drift_score": 0.134,
       "drift_detected": false
     },
     "word_count": {
-      "reference_mean": 24.422,
-      "current_mean": 21.467,
-      "drift_score": 0.246,
+      "reference_mean": 22.686,
+      "current_mean": 22.0,
+      "drift_score": 0.063,
       "drift_detected": false
     }
   }

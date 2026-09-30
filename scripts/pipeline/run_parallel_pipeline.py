@@ -37,40 +37,41 @@ def run_step(description: str, cmd: str, ignore_error: bool = False):
 
 def main():
     total_start = time.time()
+    py = sys.executable
     print("\n" + "#"*65)
     print("🌟 AETHER OS — ZERO-COST PARALLEL MLOPS PIPELINE")
     print("#"*65)
 
     # Stage 1: Graphs & System Brain
-    run_step("Build Code Graph", "python3 scripts/analytics/build_code_graph.py 2>/dev/null || node scripts/analytics/build_code_graph.js 2>/dev/null || true", ignore_error=True)
-    run_step("Generate Architecture Specs", "python3 scripts/analytics/generate_architecture.py", ignore_error=True)
+    run_step("Build Code Graph", f'"{py}" scripts/analytics/build_code_graph.py 2>/dev/null || node scripts/analytics/build_code_graph.js 2>/dev/null || true', ignore_error=True)
+    run_step("Generate Architecture Specs", f'"{py}" scripts/analytics/generate_architecture.py', ignore_error=True)
 
     # Stage 2: Feature Extraction & Cleaning
     if Path("scripts/pipeline/data_cleaner.py").exists():
-        run_step("Clean Dataset", "python3 scripts/pipeline/data_cleaner.py", ignore_error=True)
+        run_step("Clean Dataset", f'"{py}" scripts/pipeline/data_cleaner.py', ignore_error=True)
 
     # Stage 3: Parallel Data Validation (Pandera + Great Expectations)
-    run_step("Parallel Data Quality & Schema Validation", "python3 scripts/pipeline/validate_data.py")
+    run_step("Parallel Data Quality & Schema Validation", f'"{py}" scripts/pipeline/validate_data.py')
 
     # Stage 4: Parallel Model Tournament & Experiment Tracking
-    run_step("Parallel Model Tournament (Scikit-Learn vs XGBoost, Optuna, MLflow)", "python3 scripts/ml/train_parallel.py")
+    run_step("Parallel Model Tournament (Scikit-Learn vs XGBoost, Optuna, MLflow)", f'"{py}" scripts/ml/train_parallel.py')
 
     # Stage 5: Parallel Explainability (SHAP + LIME)
-    run_step("Parallel Explainability Engine (SHAP Global + LIME Local)", "python3 scripts/ai/explain_models.py")
+    run_step("Parallel Explainability Engine (SHAP Global + LIME Local)", f'"{py}" scripts/ai/explain_models.py')
 
     # Stage 6: Drift & Governance Monitoring (Evidently AI + Whylogs)
-    run_step("Drift Detection & Data Profiling (Evidently AI + Whylogs)", "python3 scripts/analytics/drift_monitor.py", ignore_error=True)
+    run_step("Drift Detection & Data Profiling (Evidently AI + Whylogs)", f'"{py}" scripts/analytics/drift_monitor.py', ignore_error=True)
 
     # Stage 7: Analytics & Prediction Outputs
-    run_step("Run Inference & Predictions", "python3 scripts/ml/predict.py")
+    run_step("Run Inference & Predictions", f'"{py}" scripts/ml/predict.py')
     if Path("scripts/analytics/insight_generator.py").exists():
-        run_step("Generate Insights", "python3 scripts/analytics/insight_generator.py", ignore_error=True)
+        run_step("Generate Insights", f'"{py}" scripts/analytics/insight_generator.py', ignore_error=True)
     if Path("scripts/analytics/dashboard_data.py").exists():
-        run_step("Format Dashboard State", "python3 scripts/analytics/dashboard_data.py", ignore_error=True)
+        run_step("Format Dashboard State", f'"{py}" scripts/analytics/dashboard_data.py', ignore_error=True)
 
     # Stage 8: Edge Sync (Push to Worker KV if configured)
     if os.environ.get("WORKER_URL") or os.environ.get("CLOUDFLARE_API_TOKEN"):
-        run_step("Push Results to Cloudflare Edge KV", "python3 scripts/pipeline/push_dashboard.py", ignore_error=True)
+        run_step("Push Results to Cloudflare Edge KV", f'"{py}" scripts/pipeline/push_dashboard.py', ignore_error=True)
     else:
         print("\nℹ️ WORKER_URL / CLOUDFLARE_API_TOKEN not set — skipping edge sync (offline mode)")
 

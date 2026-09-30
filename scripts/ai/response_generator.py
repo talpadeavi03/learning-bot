@@ -39,27 +39,23 @@ def generate_response(question, context):
     # -------------------------
 
     if insights:
-
-        for i in insights[:2]:
-
-            body = i.get("body") or i.get("text")
-
+        insight_list = insights.get("insights", []) if isinstance(insights, dict) else (insights if isinstance(insights, list) else [])
+        for i in insight_list[:3]:
+            body = i if isinstance(i, str) else (i.get("body") or i.get("text") or str(i) if isinstance(i, dict) else str(i))
             if body:
-                lines.append(body)
+                lines.append(f"• {body}")
 
     # -------------------------
     # Patterns
     # -------------------------
 
-    if patterns:
-
-        for p in patterns:
-
-            if p.get("type") == "peak_hour":
-
-                lines.append(
-                    f"Your productivity peaks around {p.get('hour')}:00."
-                )
+    if patterns and isinstance(patterns, list):
+        for p in patterns[:3]:
+            if isinstance(p, dict):
+                if p.get("type") == "peak_hour" and p.get("hour"):
+                    lines.append(f"Your productivity peaks around {p.get('hour')}:00.")
+                elif p.get("description"):
+                    lines.append(f"• {p.get('description')}")
 
     # -------------------------
     # Habits

@@ -59,16 +59,31 @@ def pull_from_supabase():
         print(f"[pull_events] Supabase pull skipped: {e}")
     return []
 
-def generate_bootstrap_events(today_str: str, count: int = 50):
-    print(f"[pull_events] Generating bootstrap activity including today ({today_str})...")
+def compute_flow_label(e, s, f):
+    if e > 0.75 and s < 0.25 and f > 0.65:
+        return 2  # FLOW
+    elif e > 0.60 and s < 0.35:
+        return 1  # PRE_FLOW
+    elif s > 0.65:
+        return -1  # ANXIETY
+    elif e < 0.30:
+        return -2  # RECOVERY
+    else:
+        return 0  # NOMINAL
+
+def generate_bootstrap_events(today_str: str, count: int = 100):
+    print(f"[pull_events] Generating balanced bootstrap activity including today ({today_str})...")
     import random, math
     random.seed(42)
     now_ist = get_current_ist()
     events = []
 
-    # Ensure 5-10 events specifically for today
+    archetypes = ["FLOW", "PRE_FLOW", "NOMINAL", "ANXIETY", "RECOVERY"]
+
     for i in range(count):
-        if i < 8:
+        state_type = archetypes[i % len(archetypes)]
+
+        if i < 10:
             # Events today
             event_time = now_ist - timedelta(hours=random.uniform(0.5, 8.0))
         else:
@@ -76,42 +91,117 @@ def generate_bootstrap_events(today_str: str, count: int = 50):
             event_time = now_ist - timedelta(days=random.randint(1, 28), hours=random.randint(0, 23))
 
         h = event_time.hour
-        e = round(random.uniform(0.65, 0.95) if 9 <= h <= 18 else random.uniform(0.35, 0.7), 2)
-        s = round(random.uniform(0.1, 0.35) if e > 0.7 else random.uniform(0.4, 0.75), 2)
-        f = round(random.uniform(0.6, 0.95) if e > 0.6 else random.uniform(0.3, 0.6), 2)
-        m = round(random.uniform(0.6, 0.9), 2)
+
+        if state_type == "FLOW":
+            e = round(random.uniform(0.78, 0.95), 2)
+            s = round(random.uniform(0.08, 0.22), 2)
+            f = round(random.uniform(0.68, 0.95), 2)
+            m = round(random.uniform(0.75, 0.95), 2)
+            raw_text = random.choice([
+                "Deep coding session on MLOps pipeline and model tournament",
+                "Built and deployed high-performance neural architecture",
+                "Crushed the feature refactor with zero distractions",
+            ])
+            sentiment = "positive"
+            dominant_emotion = "flow"
+            is_study = 1.0
+            is_complaint = 0.0
+            word_count = random.randint(25, 50)
+            complexity = round(random.uniform(0.6, 0.9), 2)
+
+        elif state_type == "PRE_FLOW":
+            e = round(random.uniform(0.63, 0.74), 2)
+            s = round(random.uniform(0.12, 0.32), 2)
+            f = round(random.uniform(0.52, 0.68), 2)
+            m = round(random.uniform(0.60, 0.80), 2)
+            raw_text = random.choice([
+                "Steady progress reviewing Kubernetes architecture docs",
+                "Refactoring data cleaner module and preparing test suites",
+                "Setting up baseline benchmarks for model evaluation",
+            ])
+            sentiment = "positive"
+            dominant_emotion = "focus"
+            is_study = 1.0 if random.random() > 0.3 else 0.0
+            is_complaint = 0.0
+            word_count = random.randint(18, 35)
+            complexity = round(random.uniform(0.4, 0.7), 2)
+
+        elif state_type == "ANXIETY":
+            e = round(random.uniform(0.40, 0.65), 2)
+            s = round(random.uniform(0.68, 0.92), 2)
+            f = round(random.uniform(0.20, 0.45), 2)
+            m = round(random.uniform(0.20, 0.45), 2)
+            raw_text = random.choice([
+                "High stress from production outage and tricky race conditions",
+                "Looming deployment deadline and blocked on dependencies",
+                "Frustrated with flaky test runs and server connection errors",
+            ])
+            sentiment = "negative"
+            dominant_emotion = "anxiety"
+            is_study = 0.0
+            is_complaint = 1.0
+            word_count = random.randint(12, 28)
+            complexity = round(random.uniform(0.3, 0.6), 2)
+
+        elif state_type == "RECOVERY":
+            e = round(random.uniform(0.10, 0.28), 2)
+            s = round(random.uniform(0.25, 0.55), 2)
+            f = round(random.uniform(0.12, 0.32), 2)
+            m = round(random.uniform(0.10, 0.30), 2)
+            raw_text = random.choice([
+                "Exhausted after all-night debugging session, resting",
+                "Burned out and drained, taking time off to recharge",
+                "Low energy, feeling sleepy and unable to focus today",
+            ])
+            sentiment = "tired"
+            dominant_emotion = "recovery"
+            is_study = 0.0
+            is_complaint = 0.0
+            word_count = random.randint(6, 16)
+            complexity = round(random.uniform(0.2, 0.4), 2)
+
+        else:  # NOMINAL
+            e = round(random.uniform(0.42, 0.58), 2)
+            s = round(random.uniform(0.25, 0.45), 2)
+            f = round(random.uniform(0.40, 0.58), 2)
+            m = round(random.uniform(0.40, 0.60), 2)
+            raw_text = random.choice([
+                "Routine backlog grooming and daily standup check-in",
+                "Answered team questions and organized project backlog",
+                "Casual reading of industry newsletters and documentation",
+            ])
+            sentiment = "neutral"
+            dominant_emotion = "steady"
+            is_study = 0.0
+            is_complaint = 0.0
+            word_count = random.randint(10, 22)
+            complexity = round(random.uniform(0.3, 0.5), 2)
 
         events.append({
             "timestamp": event_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "input_type": random.choice(["text", "voice", "github", "checkin"]),
-            "raw_text": random.choice([
-                "Deep coding session on MLOps pipeline and automation",
-                "Reviewed model training accuracy and drift metrics",
-                "Focused work on Cloudflare edge worker refactoring",
-                "Studied Kubernetes architecture and Helm deployment",
-                "Woke up feeling energetic and ready to build",
-            ]),
+            "raw_text": raw_text,
             "topic": random.choice(["mlops", "python", "docker", "kubernetes", "devops"]),
-            "category": "learning",
-            "sentiment": "positive",
+            "category": "learning" if is_study else "general",
+            "sentiment": sentiment,
             "energy_signal": e,
             "stress_signal": s,
             "focus_signal": f,
             "motivation_signal": m,
-            "dominant_emotion": "focus",
-            "is_study_session": 1.0 if random.random() > 0.3 else 0.0,
+            "dominant_emotion": dominant_emotion,
+            "is_study_session": is_study,
             "is_goal_mention": 1.0 if random.random() > 0.7 else 0.0,
-            "is_complaint": 1.0 if s > 0.6 else 0.0,
+            "is_complaint": is_complaint,
             "estimated_minutes": random.randint(25, 90),
-            "summary": "Deep work session",
-            "word_count": random.randint(10, 40),
-            "complexity": round(random.uniform(0.3, 0.8), 2),
+            "summary": "Activity session",
+            "word_count": word_count,
+            "complexity": complexity,
             "question_ratio": 0.0,
             "hour_sin": round(math.sin(2 * math.pi * h / 24), 3),
             "hour_cos": round(math.cos(2 * math.pi * h / 24), 3),
             "day_of_week": event_time.weekday(),
             "is_weekend": 1.0 if event_time.weekday() in [5, 6] else 0.0,
-            "flow_class": 2 if (e > 0.75 and s < 0.25 and f > 0.65) else (1 if e > 0.6 and s < 0.35 else 0)
+            "flow_class": compute_flow_label(e, s, f)
         })
     return events
 
@@ -136,7 +226,7 @@ def pull():
 
     if not events and not existing_events:
         print("[pull_events] No remote or local events — bootstrapping initial dataset...")
-        events = generate_bootstrap_events(today_str, count=60)
+        events = generate_bootstrap_events(today_str, count=120)
     elif not has_today:
         print(f"[pull_events] No events found for today ({today_str}) — synthesizing today's session logs...")
         today_events = generate_bootstrap_events(today_str, count=10)

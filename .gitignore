@@ -27,6 +27,7 @@ data/features/*
 data/vector/*
 data/graph/*
 data/insights/*
+analytics/
 *.parquet
 *.faiss
 *.pkl
@@ -36,6 +37,14 @@ pipeline.log
 *.log
 *.tmp
 *.cache
+
+# Allow baseline trained models & seed datasets in repo
+!models/productivity_model.pkl
+!models/energy_regressor.pkl
+!models/saved_models/*.pkl
+!data/raw/events.csv
+!data/processed/events_clean.csv
+!data/code_graph.json
 
 # ── ML experiments ─────────────────────────────────────────
 experiments/

@@ -4,58 +4,58 @@
     "global_ranking": [
       {
         "feature": "energy_signal",
-        "importance": 0.35
-      },
-      {
-        "feature": "stress_signal",
-        "importance": 0.25
+        "importance": 0.2673
       },
       {
         "feature": "focus_signal",
-        "importance": 0.2
+        "importance": 0.1518
       },
       {
         "feature": "motivation_signal",
-        "importance": 0.05
+        "importance": 0.1325
       },
       {
-        "feature": "hour_sin",
-        "importance": 0.03
-      },
-      {
-        "feature": "hour_cos",
-        "importance": 0.02
-      },
-      {
-        "feature": "day_of_week",
-        "importance": 0.02
-      },
-      {
-        "feature": "is_weekend",
-        "importance": 0.02
-      },
-      {
-        "feature": "word_count",
-        "importance": 0.02
-      },
-      {
-        "feature": "complexity",
-        "importance": 0.02
-      },
-      {
-        "feature": "question_ratio",
-        "importance": 0.01
-      },
-      {
-        "feature": "is_study_session",
-        "importance": 0.01
-      },
-      {
-        "feature": "is_goal_mention",
-        "importance": 0.0
+        "feature": "stress_signal",
+        "importance": 0.131
       },
       {
         "feature": "is_complaint",
+        "importance": 0.1114
+      },
+      {
+        "feature": "complexity",
+        "importance": 0.0764
+      },
+      {
+        "feature": "word_count",
+        "importance": 0.0676
+      },
+      {
+        "feature": "is_study_session",
+        "importance": 0.0377
+      },
+      {
+        "feature": "hour_cos",
+        "importance": 0.0082
+      },
+      {
+        "feature": "hour_sin",
+        "importance": 0.0077
+      },
+      {
+        "feature": "day_of_week",
+        "importance": 0.0045
+      },
+      {
+        "feature": "is_goal_mention",
+        "importance": 0.0022
+      },
+      {
+        "feature": "is_weekend",
+        "importance": 0.0017
+      },
+      {
+        "feature": "question_ratio",
         "importance": 0.0
       }
     ],
@@ -65,18 +65,18 @@
     "engine": "LIME Local Attribution",
     "local_attributions": [
       {
-        "rule": "focus_signal=0.90",
-        "weight": 0.36
+        "rule": "focus_signal=0.61",
+        "weight": 0.244
       },
       {
-        "rule": "stress_signal=0.43",
-        "weight": -0.129
+        "rule": "stress_signal=0.24",
+        "weight": -0.072
       },
       {
-        "rule": "energy_signal=0.68",
-        "weight": 0.204
+        "rule": "energy_signal=0.66",
+        "weight": 0.198
       }
     ],
-    "telegram_summary": "focus_signal=0.90 (+0.36) \u00b7 stress_signal=0.43 (-0.13) \u00b7 energy_signal=0.68 (+0.20)"
+    "telegram_summary": "focus_signal=0.61 (+0.24) \u00b7 stress_signal=0.24 (-0.07) \u00b7 energy_signal=0.66 (+0.20)"
   }
 }

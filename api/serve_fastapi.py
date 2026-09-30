@@ -70,13 +70,28 @@ def load_models():
 
 clf_model, reg_model = load_models()
 
+ALIAS_MAP = {
+    'energy': 'energy_signal',
+    'stress': 'stress_signal',
+    'focus': 'focus_signal',
+    'motivation': 'motivation_signal',
+}
+
+def normalize_payload(payload: dict) -> dict:
+    p = dict(payload)
+    for alias, target in ALIAS_MAP.items():
+        if alias in p and target not in p:
+            p[target] = p[alias]
+    return p
+
 def handle_flow_prediction(payload: dict):
     global clf_model
     if clf_model is None:
         clf_model, _ = load_models()
     telemetry['predictions_flow_total'] += 1
 
-    vec = [float(payload.get(f, 0.0) or 0.0) for f in FEATURES]
+    p = normalize_payload(payload)
+    vec = [float(p.get(f, 0.0) or 0.0) for f in FEATURES]
     pred_class = int(clf_model.predict([vec])[0]) if clf_model else 0
     pred_label = FLOW_LABELS.get(pred_class, 'NOMINAL')
 
@@ -104,8 +119,9 @@ def handle_energy_prediction(payload: dict):
         _, reg_model = load_models()
     telemetry['predictions_energy_total'] += 1
 
-    vec = [float(payload.get(f, 0.0) or 0.0) for f in FEATURES]
-    pred_energy = float(reg_model.predict([vec])[0]) if reg_model else float(payload.get('energy_signal', 0.5))
+    p = normalize_payload(payload)
+    vec = [float(p.get(f, 0.0) or 0.0) for f in FEATURES]
+    pred_energy = float(reg_model.predict([vec])[0]) if reg_model else float(p.get('energy_signal', 0.5))
 
     return {
         'predicted_energy': round(pred_energy, 3),
@@ -114,15 +130,18 @@ def handle_energy_prediction(payload: dict):
     }
 
 def handle_explain(payload: dict):
-    e = float(payload.get('energy_signal', 0.5) or 0.5)
-    s = float(payload.get('stress_signal', 0.3) or 0.3)
-    f = float(payload.get('focus_signal', 0.5) or 0.5)
+    p = normalize_payload(payload)
+    e = float(p.get('energy_signal', 0.5) or 0.5)
+    s = float(p.get('stress_signal', 0.3) or 0.3)
+    f = float(p.get('focus_signal', 0.5) or 0.5)
 
     reasons = []
     if f > 0.65:
         reasons.append(f'High focus signal (+0.35 towards FLOW)')
     if s < 0.30:
         reasons.append(f'Low stress score (+0.25 towards FLOW)')
+    if s > 0.65:
+        reasons.append(f'High stress / pressure marker (+0.40 towards ANXIETY)')
     if e < 0.35:
         reasons.append(f'Low energy state (-0.30 towards RECOVERY)')
     if not reasons:
@@ -149,7 +168,12 @@ try:
 
     @app.get('/health')
     def health():
-        return {'status': 'healthy', 'uptime': round(time.time() - telemetry['start_time'], 1)}
+        return {
+            'status': 'healthy',
+            'serving_engine': 'FastAPI',
+            'uptime': round(time.time() - telemetry['start_time'], 1),
+            'models_loaded': clf_model is not None,
+        }
 
     @app.post('/predict/flow')
     def api_predict_flow(data: dict):
@@ -162,6 +186,15 @@ try:
     @app.post('/explain')
     def api_explain(data: dict):
         return handle_explain(data)
+
+    @app.get('/metrics', response_class=PlainTextResponse)
+    def api_metrics():
+        return (
+            f"# HELP aether_requests_total Total requests\n"
+            f"aether_requests_total {telemetry['requests_total']}\n"
+            f"# HELP aether_predictions_flow_total Flow predictions\n"
+            f"aether_predictions_flow_total {telemetry['predictions_flow_total']}\n"
+        )
 
     fastapi_available = True
 except ImportError:

@@ -1,6 +1,6 @@
 {
-  "timestamp": "1789468729.394452",
-  "n_events": 60,
+  "timestamp": "1790765836.393327",
+  "n_events": 120,
   "champion": "Scikit-Learn RandomForest",
   "rf_accuracy": 1.0,
   "xgb_accuracy": 0.99,

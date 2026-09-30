@@ -1,1 +1,770 @@
-{"nodes":[{"id":"init","label":"init"}],"edges":[]}
+{
+  "nodes": [
+    {
+      "id": "sendJarvisAlert",
+      "label": "sendJarvisAlert"
+    },
+    {
+      "id": "analyzePatterns",
+      "label": "analyzePatterns"
+    },
+    {
+      "id": "getTodayIST",
+      "label": "getTodayIST"
+    },
+    {
+      "id": "getRecentEvents",
+      "label": "getRecentEvents"
+    },
+    {
+      "id": "getDashboard",
+      "label": "getDashboard"
+    },
+    {
+      "id": "analyzeState",
+      "label": "analyzeState"
+    },
+    {
+      "id": "handleCommand",
+      "label": "handleCommand"
+    },
+    {
+      "id": "trace",
+      "label": "trace"
+    },
+    {
+      "id": "checkAdminAuth",
+      "label": "checkAdminAuth"
+    },
+    {
+      "id": "jsonResp",
+      "label": "jsonResp"
+    },
+    {
+      "id": "textResp",
+      "label": "textResp"
+    },
+    {
+      "id": "handleWebhook",
+      "label": "handleWebhook"
+    },
+    {
+      "id": "handleChat",
+      "label": "handleChat"
+    },
+    {
+      "id": "handleGetPriorities",
+      "label": "handleGetPriorities"
+    },
+    {
+      "id": "handleAddPriority",
+      "label": "handleAddPriority"
+    },
+    {
+      "id": "handleDonePriority",
+      "label": "handleDonePriority"
+    },
+    {
+      "id": "handleLogState",
+      "label": "handleLogState"
+    },
+    {
+      "id": "handleDashboard",
+      "label": "handleDashboard"
+    },
+    {
+      "id": "generateInsights",
+      "label": "generateInsights"
+    },
+    {
+      "id": "handleEvents",
+      "label": "handleEvents"
+    },
+    {
+      "id": "handleHealth",
+      "label": "handleHealth"
+    },
+    {
+      "id": "handleTrigger",
+      "label": "handleTrigger"
+    },
+    {
+      "id": "handleGitHubLog",
+      "label": "handleGitHubLog"
+    },
+    {
+      "id": "handleResetData",
+      "label": "handleResetData"
+    },
+    {
+      "id": "handleUpdateDashboard",
+      "label": "handleUpdateDashboard"
+    },
+    {
+      "id": "nlpParse",
+      "label": "nlpParse"
+    },
+    {
+      "id": "fallbackNLP",
+      "label": "fallbackNLP"
+    },
+    {
+      "id": "openaiVisionExtract",
+      "label": "openaiVisionExtract"
+    },
+    {
+      "id": "whisperTranscribe",
+      "label": "whisperTranscribe"
+    },
+    {
+      "id": "triggerMLPipeline",
+      "label": "triggerMLPipeline"
+    },
+    {
+      "id": "getTelegramFileUrl",
+      "label": "getTelegramFileUrl"
+    },
+    {
+      "id": "backupEvents",
+      "label": "backupEvents"
+    },
+    {
+      "id": "logError",
+      "label": "logError"
+    },
+    {
+      "id": "shouldSendUpdate",
+      "label": "shouldSendUpdate"
+    },
+    {
+      "id": "checkCooldown",
+      "label": "checkCooldown"
+    },
+    {
+      "id": "sendTelegram",
+      "label": "sendTelegram"
+    },
+    {
+      "id": "buildTelegramReply",
+      "label": "buildTelegramReply"
+    },
+    {
+      "id": "buildSystemPrompt",
+      "label": "buildSystemPrompt"
+    },
+    {
+      "id": "runAetherML",
+      "label": "runAetherML"
+    },
+    {
+      "id": "runWorkersAI",
+      "label": "runWorkersAI"
+    },
+    {
+      "id": "runHybrid",
+      "label": "runHybrid"
+    },
+    {
+      "id": "sendMorningBriefing",
+      "label": "sendMorningBriefing"
+    },
+    {
+      "id": "sendEveningSummary",
+      "label": "sendEveningSummary"
+    },
+    {
+      "id": "sendWeeklyReport",
+      "label": "sendWeeklyReport"
+    },
+    {
+      "id": "middayNudge",
+      "label": "middayNudge"
+    },
+    {
+      "id": "calculateStreak",
+      "label": "calculateStreak"
+    },
+    {
+      "id": "encryptText",
+      "label": "encryptText"
+    },
+    {
+      "id": "saveEvent",
+      "label": "saveEvent"
+    },
+    {
+      "id": "getEventCount",
+      "label": "getEventCount"
+    },
+    {
+      "id": "getLatestState",
+      "label": "getLatestState"
+    },
+    {
+      "id": "refreshDashboardFromState",
+      "label": "refreshDashboardFromState"
+    },
+    {
+      "id": "floatingBrain",
+      "label": "floatingBrain"
+    },
+    {
+      "id": "updateTabs",
+      "label": "updateTabs"
+    },
+    {
+      "id": "defaultDashboard",
+      "label": "defaultDashboard"
+    },
+    {
+      "id": "scanDir",
+      "label": "scanDir"
+    },
+    {
+      "id": "analyzeFile",
+      "label": "analyzeFile"
+    }
+  ],
+  "edges": [
+    {
+      "from": "sendJarvisAlert",
+      "to": "checkCooldown"
+    },
+    {
+      "from": "sendJarvisAlert",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendJarvisAlert",
+      "to": "analyzePatterns"
+    },
+    {
+      "from": "analyzePatterns",
+      "to": "getTodayIST"
+    },
+    {
+      "from": "analyzePatterns",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "getTodayIST",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "getTodayIST",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "getTodayIST",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "getTodayIST",
+      "to": "getDashboard"
+    },
+    {
+      "from": "getTodayIST",
+      "to": "analyzeState"
+    },
+    {
+      "from": "getRecentEvents",
+      "to": "getDashboard"
+    },
+    {
+      "from": "getRecentEvents",
+      "to": "analyzeState"
+    },
+    {
+      "from": "getDashboard",
+      "to": "analyzeState"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleCommand",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleCommand",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "checkAdminAuth",
+      "to": "jsonResp"
+    },
+    {
+      "from": "checkAdminAuth",
+      "to": "textResp"
+    },
+    {
+      "from": "jsonResp",
+      "to": "textResp"
+    },
+    {
+      "from": "jsonResp",
+      "to": "sendMorningBriefing"
+    },
+    {
+      "from": "jsonResp",
+      "to": "sendEveningSummary"
+    },
+    {
+      "from": "jsonResp",
+      "to": "middayNudge"
+    },
+    {
+      "from": "jsonResp",
+      "to": "sendWeeklyReport"
+    },
+    {
+      "from": "jsonResp",
+      "to": "backupEvents"
+    },
+    {
+      "from": "jsonResp",
+      "to": "handleWebhook"
+    },
+    {
+      "from": "textResp",
+      "to": "sendMorningBriefing"
+    },
+    {
+      "from": "textResp",
+      "to": "sendEveningSummary"
+    },
+    {
+      "from": "textResp",
+      "to": "middayNudge"
+    },
+    {
+      "from": "textResp",
+      "to": "sendWeeklyReport"
+    },
+    {
+      "from": "textResp",
+      "to": "backupEvents"
+    },
+    {
+      "from": "textResp",
+      "to": "handleWebhook"
+    },
+    {
+      "from": "textResp",
+      "to": "handleChat"
+    },
+    {
+      "from": "textResp",
+      "to": "handleChat"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "handleCommand"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleWebhook",
+      "to": "textResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleChat",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleChat",
+      "to": "buildSystemPrompt"
+    },
+    {
+      "from": "handleChat",
+      "to": "runAetherML"
+    },
+    {
+      "from": "handleChat",
+      "to": "runWorkersAI"
+    },
+    {
+      "from": "handleChat",
+      "to": "runHybrid"
+    },
+    {
+      "from": "handleChat",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleChat",
+      "to": "handleGetPriorities"
+    },
+    {
+      "from": "handleGetPriorities",
+      "to": "handleAddPriority"
+    },
+    {
+      "from": "handleGetPriorities",
+      "to": "handleDonePriority"
+    },
+    {
+      "from": "handleAddPriority",
+      "to": "handleDonePriority"
+    },
+    {
+      "from": "handleDonePriority",
+      "to": "handleLogState"
+    },
+    {
+      "from": "handleDonePriority",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleDonePriority",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleLogState",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleLogState",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleLogState",
+      "to": "saveEvent"
+    },
+    {
+      "from": "handleLogState",
+      "to": "refreshDashboardFromState"
+    },
+    {
+      "from": "handleLogState",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleDashboard",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "handleEvents",
+      "to": "handleHealth"
+    },
+    {
+      "from": "handleHealth",
+      "to": "getEventCount"
+    },
+    {
+      "from": "handleHealth",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleHealth",
+      "to": "handleTrigger"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getLatestState"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleTrigger",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "checkAdminAuth"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleResetData",
+      "to": "handleUpdateDashboard"
+    },
+    {
+      "from": "handleResetData",
+      "to": "checkAdminAuth"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "checkAdminAuth"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "jsonResp"
+    },
+    {
+      "from": "handleUpdateDashboard",
+      "to": "nlpParse"
+    },
+    {
+      "from": "openaiVisionExtract",
+      "to": "whisperTranscribe"
+    },
+    {
+      "from": "whisperTranscribe",
+      "to": "triggerMLPipeline"
+    },
+    {
+      "from": "triggerMLPipeline",
+      "to": "getTelegramFileUrl"
+    },
+    {
+      "from": "getTelegramFileUrl",
+      "to": "backupEvents"
+    },
+    {
+      "from": "getTelegramFileUrl",
+      "to": "logError"
+    },
+    {
+      "from": "backupEvents",
+      "to": "logError"
+    },
+    {
+      "from": "logError",
+      "to": "shouldSendUpdate"
+    },
+    {
+      "from": "logError",
+      "to": "checkCooldown"
+    },
+    {
+      "from": "logError",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "shouldSendUpdate",
+      "to": "checkCooldown"
+    },
+    {
+      "from": "shouldSendUpdate",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "shouldSendUpdate",
+      "to": "buildTelegramReply"
+    },
+    {
+      "from": "checkCooldown",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "checkCooldown",
+      "to": "buildTelegramReply"
+    },
+    {
+      "from": "sendTelegram",
+      "to": "buildTelegramReply"
+    },
+    {
+      "from": "runAetherML",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "runAetherML",
+      "to": "getLatestState"
+    },
+    {
+      "from": "runWorkersAI",
+      "to": "runHybrid"
+    },
+    {
+      "from": "runWorkersAI",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "runHybrid",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "runHybrid",
+      "to": "getLatestState"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "sendMorningBriefing",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "getTodayIST"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "sendEveningSummary",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "sendWeeklyReport",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "middayNudge",
+      "to": "getTodayIST"
+    },
+    {
+      "from": "middayNudge",
+      "to": "getRecentEvents"
+    },
+    {
+      "from": "middayNudge",
+      "to": "sendTelegram"
+    },
+    {
+      "from": "middayNudge",
+      "to": "calculateStreak"
+    },
+    {
+      "from": "calculateStreak",
+      "to": "encryptText"
+    },
+    {
+      "from": "encryptText",
+      "to": "saveEvent"
+    },
+    {
+      "from": "saveEvent",
+      "to": "encryptText"
+    },
+    {
+      "from": "saveEvent",
+      "to": "encryptText"
+    },
+    {
+      "from": "getEventCount",
+      "to": "getLatestState"
+    },
+    {
+      "from": "getEventCount",
+      "to": "refreshDashboardFromState"
+    },
+    {
+      "from": "getEventCount",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "getLatestState",
+      "to": "refreshDashboardFromState"
+    },
+    {
+      "from": "getLatestState",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "getLatestState",
+      "to": "floatingBrain"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "refreshDashboardFromState",
+      "to": "floatingBrain"
+    },
+    {
+      "from": "floatingBrain",
+      "to": "updateTabs"
+    },
+    {
+      "from": "floatingBrain",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "updateTabs",
+      "to": "defaultDashboard"
+    },
+    {
+      "from": "scanDir",
+      "to": "analyzeFile"
+    },
+    {
+      "from": "scanDir",
+      "to": "analyzeFile"
+    }
+  ]
+}

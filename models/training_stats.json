@@ -1,9 +1,39 @@
 {
-  "timestamp": "1789468729.394452",
-  "n_events": 60,
-  "champion": "Scikit-Learn RandomForest",
+  "n_events": 120,
+  "n_features": 14,
   "rf_accuracy": 1.0,
-  "xgb_accuracy": 0.99,
+  "cv_score": 1.0,
+  "gbm_rmse": 0.0002235587284332538,
+  "flow_distribution": {
+    "RECOVERY": 24,
+    "ANXIETY": 24,
+    "NOMINAL": 24,
+    "PRE_FLOW": 24,
+    "FLOW": 24
+  },
+  "top_features": [
+    [
+      "energy_signal",
+      0.26731434543562654
+    ],
+    [
+      "focus_signal",
+      0.1518131223528466
+    ],
+    [
+      "motivation_signal",
+      0.13245702745774193
+    ],
+    [
+      "stress_signal",
+      0.13104818016284633
+    ],
+    [
+      "is_complaint",
+      0.11139358478701011
+    ]
+  ],
+  "trained_at": "2026-09-30T16:28:34.621187",
   "features": [
     "energy_signal",
     "stress_signal",

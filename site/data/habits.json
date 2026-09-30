@@ -1,0 +1,22 @@
+{
+  "mlops": {
+    "days_active": 14,
+    "max_streak": 2
+  },
+  "devops": {
+    "days_active": 12,
+    "max_streak": 3
+  },
+  "docker": {
+    "days_active": 7,
+    "max_streak": 1
+  },
+  "kubernetes": {
+    "days_active": 11,
+    "max_streak": 3
+  },
+  "python": {
+    "days_active": 6,
+    "max_streak": 2
+  }
+}

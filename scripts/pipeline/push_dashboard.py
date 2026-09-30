@@ -35,9 +35,9 @@ def push():
     # Build state row
     state_row = {
         "date":           str(date.today()),
-        "energy":         int(dashboard.get("avg_energy", 50)),
-        "focus":          int(dashboard.get("avg_focus",  50)),
-        "stress":         int(dashboard.get("avg_stress", 20)),
+        "energy":         int(round(float(dashboard.get("avg_energy", 0.5)) * 100)) if float(dashboard.get("avg_energy", 50)) <= 1.0 else int(dashboard.get("avg_energy", 50)),
+        "focus":          int(round(float(dashboard.get("avg_focus",  0.5)) * 100)) if float(dashboard.get("avg_focus",  50)) <= 1.0 else int(dashboard.get("avg_focus",  50)),
+        "stress":         int(round(float(dashboard.get("avg_stress", 0.2)) * 100)) if float(dashboard.get("avg_stress", 20)) <= 1.0 else int(dashboard.get("avg_stress", 20)),
         "flow_class":     dashboard.get("flow_label", "NOMINAL"),
         "flow_prob":      float(dashboard.get("flow_prob", 0.2)),
         "level":          int(dashboard.get("level", 1)),

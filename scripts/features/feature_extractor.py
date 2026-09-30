@@ -59,13 +59,13 @@ def process_events(df):
 
     for _, row in df.iterrows():
 
-        text = row["text"]
+        text = str(row.get("raw_text") if "raw_text" in row and pd.notna(row["raw_text"]) else row.get("text", ""))
 
         minutes = extract_minutes(text)
         expense = extract_expense(text)
         topic = extract_topic(text)
 
-        category = row["category"]
+        category = str(row.get("category", "") if pd.notna(row.get("category")) else "")
 
         study_minutes = minutes if category == "learning" else 0
         exercise_minutes = minutes if category == "exercise" else 0

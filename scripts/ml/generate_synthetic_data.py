@@ -39,6 +39,8 @@ for i in range(days):
 
 df = pd.DataFrame(rows)
 
+import os
+os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
 df.to_parquet(OUTPUT_FILE, index=False)
 
 print("Synthetic dataset generated:", len(df), "days")
