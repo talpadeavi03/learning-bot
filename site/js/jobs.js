@@ -17,6 +17,52 @@ function saveJobs() {
   localStorage.setItem(JOBS_KEY, JSON.stringify(allJobs));
 }
 
+let isFetchingRemoteJobs = false;
+async function fetchRemoteJobs() {
+  if (isFetchingRemoteJobs) return;
+  isFetchingRemoteJobs = true;
+  try {
+    const res = await fetch(WORKER_URL + '/jobs/feed', { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data.jobs) && data.jobs.length > 0) {
+        const existingKeys = new Set(allJobs.map(j => ((j.company || '') + '|' + (j.role || '')).toLowerCase()));
+        let added = false;
+        for (const rj of data.jobs) {
+          const key = ((rj.company || '') + '|' + (rj.role || '')).toLowerCase();
+          if (!existingKeys.has(key)) {
+            const formatted = {
+              id: rj.id || Date.now() + Math.floor(Math.random() * 1000),
+              date: rj.date || rj.ingested_at || new Date().toISOString(),
+              company: rj.company || 'Unknown',
+              role: rj.role || 'Unknown',
+              location: rj.location || 'Unknown',
+              salary: rj.salary || 'Not mentioned',
+              job_type: rj.job_type || 'Unknown',
+              fit_score: rj.fit_score || 5,
+              fit_reason: rj.fit_reason || '',
+              sender: rj.sender || '',
+              reply_email: rj.reply_email || '',
+              status: rj.status || ((rj.fit_score || 0) >= 6 ? 'pending' : 'low_fit'),
+              email_body: rj.email_body || rj.description || ''
+            };
+            allJobs.unshift(formatted);
+            existingKeys.add(key);
+            added = true;
+          }
+        }
+        if (added) {
+          saveJobs();
+          renderJobs();
+        }
+      }
+    }
+  } catch (_) {
+  } finally {
+    isFetchingRemoteJobs = false;
+  }
+}
+
 // ─── ANALYZE EMAIL ───────────────────────
 async function analyzeJobEmail() {
   const textarea = document.getElementById('job-email-input');
@@ -60,6 +106,13 @@ async function analyzeJobEmail() {
     textarea.value = '';
     renderJobs();
     showAchievement('Job Analyzed ✅', `${job.company} · Fit: ${job.fit_score}/10`);
+
+    // Sync with worker feed
+    fetch(WORKER_URL + '/jobs/ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(job)
+    }).catch(() => {});
 
   } catch (err) {
     console.error('Job analysis failed:', err);
@@ -279,17 +332,34 @@ function markJobReplied() {
 
 // ─── GMAIL SYNC ──────────────────────────
 async function syncGmail() {
+  const syncBtn = document.querySelector('.jobs-analyze-head button') || document.querySelector('.jobs-sync-btn');
+  const origText = syncBtn ? syncBtn.textContent : '';
+  if (syncBtn) {
+    syncBtn.disabled = true;
+    syncBtn.textContent = '⏳ Syncing...';
+  }
   try {
-    const res = await fetch(WORKER_URL + '/jobs/gmail', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch(WORKER_URL + '/jobs/gmail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
     if (res.ok) {
       const data = await res.json();
-      showAchievement('Gmail Synced ✅', (data.count || 0) + ' new messages processed');
-      loadJobs();
+      const msg = data.message || ((data.count || 0) + ' new messages processed');
+      showAchievement('Gmail Synced ✅', msg);
+      await fetchRemoteJobs();
+      renderJobs();
     } else {
-      showAchievement('Gmail Sync', 'Worker returned ' + res.status + ' — check server logs');
+      const err = await res.json().catch(() => ({}));
+      showAchievement('Gmail Sync', err.error || ('Worker returned ' + res.status));
     }
   } catch (e) {
     showAchievement('Gmail Sync Failed', 'Worker offline or endpoint not configured');
+  } finally {
+    if (syncBtn) {
+      syncBtn.disabled = false;
+      syncBtn.textContent = origText || '🔄 Sync Gmail';
+    }
   }
 }
 
@@ -297,4 +367,5 @@ async function syncGmail() {
 document.addEventListener('DOMContentLoaded', () => {
   loadJobs();
   renderJobs();
+  fetchRemoteJobs();
 });

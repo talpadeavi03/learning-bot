@@ -643,6 +643,102 @@ function textResp(text, status = 200) {
   });
 }
 
+// ─── JOBS INTELLIGENCE HELPERS ─────────────────────────────
+async function parseJobWithAI(emailBody, env) {
+  const profileSummary = `Cloud & DevOps Engineer, 3.6 years Azure at Accenture. Since Aug 2025: MLOps, ML pipelines, GitHub Actions, MLflow. Skills: Azure, AWS, Terraform, Docker, Python, CI/CD, Kubernetes. Targeting: DevOps / MLOps / Cloud Engineer roles in Pune/Remote. Expected CTC: 14-18 LPA.`;
+
+  const messages = [
+    {
+      role: 'system',
+      content: `You are a job analysis assistant. Extract job details from emails and respond ONLY in valid JSON. No markdown, no extra text. Use this exact schema:
+{"is_job_email":true,"company":"string","role":"string","location":"string","salary":"string","job_type":"string","fit_score":1-10,"fit_reason":"string","reply_email":"string"}
+
+Profile to match against: ${profileSummary}
+
+For fit_score: 8-10 = strong match (DevOps/MLOps/Cloud), 5-7 = partial match, 1-4 = poor match.
+For reply_email: Write a brief, professional reply expressing interest if fit_score >= 6. Empty string if not.`
+    },
+    {
+      role: 'user',
+      content: `Analyze this email and extract job details:\n\n${emailBody.substring(0, 2000)}`
+    }
+  ];
+
+  try {
+    const raw = await callWorkersAI(messages, 600, env);
+    const jsonStr = (raw || '').replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.warn('[AETHER] parseJobWithAI fallback:', e.message);
+    return {
+      is_job_email: true,
+      company: 'Unknown',
+      role: 'Unknown',
+      location: 'Unknown',
+      salary: 'Not mentioned',
+      job_type: 'Unknown',
+      fit_score: 5,
+      fit_reason: 'Automated fallback: AI model busy or response format non-standard',
+      reply_email: ''
+    };
+  }
+}
+
+async function getGmailAccessToken(env) {
+  if (env.GMAIL_ACCESS_TOKEN) return env.GMAIL_ACCESS_TOKEN;
+
+  let creds = null;
+  if (env.GMAIL_TOKEN_JSON) {
+    try {
+      creds = typeof env.GMAIL_TOKEN_JSON === 'string' ? JSON.parse(env.GMAIL_TOKEN_JSON) : env.GMAIL_TOKEN_JSON;
+    } catch (_) {}
+  }
+
+  if (!creds && env.GMAIL_REFRESH_TOKEN && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
+    creds = {
+      refresh_token: env.GMAIL_REFRESH_TOKEN,
+      client_id: env.GOOGLE_CLIENT_ID,
+      client_secret: env.GOOGLE_CLIENT_SECRET
+    };
+  }
+
+  if (!creds) return null;
+
+  if (creds.token && (!creds.expiry || new Date(creds.expiry) > new Date())) {
+    return creds.token;
+  }
+  if (creds.access_token && (!creds.expiry || new Date(creds.expiry) > new Date())) {
+    return creds.access_token;
+  }
+
+  const refreshToken = creds.refresh_token;
+  const clientId = creds.client_id;
+  const clientSecret = creds.client_secret;
+
+  if (refreshToken && clientId && clientSecret) {
+    try {
+      const resp = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          grant_type: 'refresh_token',
+          client_id: clientId,
+          client_secret: clientSecret,
+          refresh_token: refreshToken
+        })
+      });
+      if (resp.ok) {
+        const tokenData = await resp.json();
+        return tokenData.access_token;
+      }
+    } catch (e) {
+      console.warn('[AETHER] Gmail token refresh failed:', e.message);
+    }
+  }
+
+  return creds.token || creds.access_token || null;
+}
+
 export default {
 
   async scheduled(event, env, ctx) {
@@ -810,68 +906,9 @@ export default {
           return jsonResp({ error: 'No email body provided' }, 400);
         }
 
-        const profileSummary = `Cloud & DevOps Engineer, 3.6 years Azure at Accenture. Since Aug 2025: MLOps, ML pipelines, GitHub Actions, MLflow. Skills: Azure, AWS, Terraform, Docker, Python, CI/CD, Kubernetes. Targeting: DevOps / MLOps / Cloud Engineer roles in Pune/Remote. Expected CTC: 14-18 LPA.`;
-
         try {
-          if (env.AI) {
-            const aiResponse = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-              messages: [
-                {
-                  role: 'system',
-                  content: `You are a job analysis assistant. Extract job details from emails and respond ONLY in valid JSON. No markdown, no extra text. Use this exact schema:
-{"is_job_email":true,"company":"string","role":"string","location":"string","salary":"string","job_type":"string","fit_score":1-10,"fit_reason":"string","reply_email":"string"}
-
-Profile to match against: ${profileSummary}
-
-For fit_score: 8-10 = strong match (DevOps/MLOps/Cloud), 5-7 = partial match, 1-4 = poor match.
-For reply_email: Write a brief, professional reply expressing interest if fit_score >= 6. Empty string if not.`
-                },
-                {
-                  role: 'user',
-                  content: `Analyze this email and extract job details:\n\n${emailBody.substring(0, 2000)}`
-                }
-              ],
-              max_tokens: 600
-            });
-
-            const raw = (aiResponse.response || '').trim();
-            // Try to parse JSON from the response
-            let parsed;
-            try {
-              // Handle cases where AI wraps in markdown code blocks
-              const jsonStr = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-              parsed = JSON.parse(jsonStr);
-            } catch {
-              // If JSON parsing fails, return basic extraction
-              parsed = {
-                is_job_email: true,
-                company: 'Unknown',
-                role: 'Unknown',
-                location: 'Unknown',
-                salary: 'Not mentioned',
-                job_type: 'Unknown',
-                fit_score: 5,
-                fit_reason: 'AI could not fully parse this email',
-                reply_email: ''
-              };
-            }
-
-            return jsonResp(parsed);
-          }
-
-          // Fallback: no AI binding — basic regex extraction
-          return jsonResp({
-            is_job_email: true,
-            company: 'Unknown (AI not available)',
-            role: 'Unknown',
-            location: 'Unknown',
-            salary: 'Not mentioned',
-            job_type: 'Unknown',
-            fit_score: 5,
-            fit_reason: 'Analyzed offline — AI binding not configured',
-            reply_email: ''
-          });
-
+          const parsed = await parseJobWithAI(emailBody, env);
+          return jsonResp(parsed);
         } catch (err) {
           console.error('[AETHER] Job analysis error:', err);
           return jsonResp({ error: 'Analysis failed', detail: err.message }, 500);
@@ -933,6 +970,122 @@ For reply_email: Write a brief, professional reply expressing interest if fit_sc
           });
         } catch (err) {
           return jsonResp({ error: 'Feed failed', detail: err.message }, 500);
+        }
+      }
+
+      // ─── JOBS: Gmail Sync ────────────────────────────────────────
+      if (url.pathname === '/jobs/gmail' && request.method === 'POST') {
+        try {
+          const accessToken = await getGmailAccessToken(env);
+          let newJobsCount = 0;
+          let syncStatus = 'synced';
+          let message = '';
+
+          if (accessToken) {
+            const q = encodeURIComponent('is:unread (job OR recruiter OR interview OR hiring OR opportunity OR "application")');
+            const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=5`, {
+              headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+
+            if (listRes.ok) {
+              const listData = await listRes.json();
+              const messages = listData.messages || [];
+              const currentJobs = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
+              const existingIds = new Set(currentJobs.map(j => j.id || j.job_id_ext));
+
+              for (const m of messages) {
+                if (existingIds.has(m.id)) continue;
+                try {
+                  const mRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=full`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                  });
+                  if (!mRes.ok) continue;
+                  const mData = await mRes.json();
+                  const headers = {};
+                  for (const h of (mData.payload?.headers || [])) {
+                    headers[h.name.toLowerCase()] = h.value;
+                  }
+                  const subject = headers['subject'] || 'Recruiter message';
+                  const from = headers['from'] || 'Unknown Sender';
+                  let bodyText = mData.snippet || '';
+
+                  if (mData.payload?.parts) {
+                    for (const p of mData.payload.parts) {
+                      if (p.mimeType === 'text/plain' && p.body?.data) {
+                        try {
+                          bodyText = atob(p.body.data.replace(/-/g, '+').replace(/_/g, '/'));
+                        } catch (_) {}
+                        break;
+                      }
+                    }
+                  }
+
+                  const analyzed = await parseJobWithAI(subject + '\n\n' + bodyText, env);
+                  const newJob = {
+                    id: m.id,
+                    job_id_ext: m.id,
+                    source: 'gmail',
+                    date: headers['date'] || new Date().toISOString(),
+                    ingested_at: new Date().toISOString(),
+                    company: analyzed.company || 'Unknown',
+                    role: analyzed.role || subject.substring(0, 50),
+                    location: analyzed.location || 'Unknown',
+                    salary: analyzed.salary || 'Not mentioned',
+                    job_type: analyzed.job_type || 'Unknown',
+                    fit_score: analyzed.fit_score || 5,
+                    fit_reason: analyzed.fit_reason || '',
+                    sender: from,
+                    reply_email: analyzed.reply_email || '',
+                    status: (analyzed.fit_score || 0) >= 6 ? 'pending' : 'low_fit',
+                    email_body: bodyText.substring(0, 1000)
+                  };
+
+                  currentJobs.unshift(newJob);
+                  newJobsCount++;
+                } catch (e) {
+                  console.error('[AETHER] Failed to parse Gmail message', m.id, e);
+                }
+              }
+
+              if (newJobsCount > 0) {
+                await env.AETHER_KV.put('jobs_feed', JSON.stringify(currentJobs.slice(0, 200)));
+              }
+              message = `${newJobsCount} new Gmail recruiter messages processed`;
+            } else {
+              message = `Gmail API returned HTTP ${listRes.status}`;
+            }
+          } else if (env.GITHUB_TOKEN || env.GH_PAT) {
+            const ghToken = env.GITHUB_TOKEN || env.GH_PAT;
+            const ghRes = await fetch('https://api.github.com/repos/talpadeavi03/learning-bot/actions/workflows/job_pipeline.yml/dispatches', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${ghToken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'User-Agent': 'AETHER-Cloudflare-Worker'
+              },
+              body: JSON.stringify({ ref: 'master' })
+            });
+            syncStatus = ghRes.ok ? 'dispatched' : 'dispatch_failed';
+            message = ghRes.ok ? 'AETHER Job Pipeline GitHub Action triggered' : 'Failed to trigger GitHub Action';
+          } else {
+            const currentJobs = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
+            newJobsCount = currentJobs.length;
+            message = currentJobs.length > 0
+              ? `Synced with AETHER jobs feed (${currentJobs.length} active jobs)`
+              : 'Synced with jobs feed. Paste recruiter email to analyze or set GMAIL_TOKEN_JSON in Worker secrets.';
+          }
+
+          const allFeed = JSON.parse(await env.AETHER_KV.get('jobs_feed') || '[]');
+          return jsonResp({
+            ok: true,
+            count: newJobsCount,
+            sync_status: syncStatus,
+            message: message,
+            jobs: allFeed
+          });
+        } catch (err) {
+          console.error('[AETHER] Gmail sync error:', err);
+          return jsonResp({ error: 'Gmail sync error', detail: err.message }, 500);
         }
       }
 
