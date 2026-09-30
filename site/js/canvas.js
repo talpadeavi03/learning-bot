@@ -158,12 +158,15 @@ function drawArc() {
   requestAnimationFrame(drawArc);
 }
 const audioBarsEl = document.getElementById('audio-bars');
-for (let i = 0; i < 40; i++) { const b = document.createElement('div'); b.className = 'abar'; b.style.minHeight = '4px'; audioBarsEl.appendChild(b) }
-const abars = audioBarsEl.querySelectorAll('.abar');
+if (audioBarsEl) {
+  for (let i = 0; i < 40; i++) { const b = document.createElement('div'); b.className = 'abar'; b.style.minHeight = '4px'; audioBarsEl.appendChild(b); }
+}
+const abars = audioBarsEl ? audioBarsEl.querySelectorAll('.abar') : [];
 function animAudioBars(speaking) {
-  if (!speaking) { abars.forEach(b => { b.style.height = '4px'; audioBarsEl.style.opacity = '0' }); return }
+  if (!audioBarsEl) return;
+  if (!speaking) { abars.forEach(b => { b.style.height = '4px'; audioBarsEl.style.opacity = '0'; }); return; }
   audioBarsEl.style.opacity = '1';
-  abars.forEach((b, i) => { b.style.height = (Math.abs(Math.sin(Date.now() * .003 + i * .4 + Math.random() * .2)) * 40 + 4) + 'px' });
+  abars.forEach((b, i) => { b.style.height = (Math.abs(Math.sin(Date.now() * .003 + i * .4 + Math.random() * .2)) * 40 + 4) + 'px'; });
 }
 let audioAnim = null;
 function startSpeaking() { arcSpeaking = true; function pulse() { arcAudioLevel = Math.abs(Math.sin(Date.now() * .004)) * .8 + .2; animAudioBars(true); audioAnim = requestAnimationFrame(pulse) } pulse() }

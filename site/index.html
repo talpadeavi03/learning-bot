@@ -138,6 +138,10 @@
           <div class="prop-v" id="date">—</div>
         </div>
         <div class="prop-row">
+          <div class="prop-k">🌊 Flow State</div>
+          <div class="prop-v"><span class="tag tg" id="flow-label">NOMINAL</span> <span id="flow-prob" style="font-size:12px;color:var(--text2)"></span></div>
+        </div>
+        <div class="prop-row">
           <div class="prop-k">🌐 API Status</div>
           <div class="prop-v" id="wsInline"><span class="tag tgr">Connecting...</span></div>
         </div>
@@ -183,6 +187,10 @@
             <div class="c-ttl">Good day, sir. AETHER OS is fully operational.</div>
             <div class="c-bod">Worker v2 live · ML pipeline active · 12 bot commands ready. Your power index is at
               <strong>7.4 / 10</strong> — peak zone.
+            </div>
+            <div style="margin-top:8px;font-size:12.5px;color:var(--text2);display:flex;align-items:center;gap:6px">
+              <span style="font-weight:700;color:var(--text)">🎯 Directive:</span>
+              <span id="today-goal">Focus on high-priority sprint</span>
             </div>
           </div>
         </div>
@@ -284,6 +292,29 @@
         <div class="ndiv"></div>
         <div id="insights-panel" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
           <div style="color:var(--text3);font-size:13px">Analyzing your patterns...</div>
+        </div>
+
+        <!-- NEURAL MEMORY & ACTIVITY TIMELINE -->
+        <div class="two-col" style="margin-bottom:24px">
+          <div style="border:1px solid var(--border);border-radius:10px;padding:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">
+                🧠 Encrypted Neural Memory
+              </div>
+              <button onclick="openGate()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px;font-weight:600">🔑 Unlock</button>
+            </div>
+            <div id="neuralMemoryFeed" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto">
+              <div style="color:var(--text3);font-size:13px">Loading neural memory...</div>
+            </div>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:10px;padding:18px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">
+              ⏱️ Today's Timeline
+            </div>
+            <div id="timeline-feed" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto">
+              <div style="color:var(--text3);font-size:13px">Loading timeline activity...</div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -445,195 +476,195 @@
           </div>
         </div>
 
-      </div>
-      <div id="doc-arch" class="doc-frame">
-        <div class="npipe-item">
-          <div class="npipe-ic">💬</div>
-          <div>
-            <div class="npipe-nm">Text / Voice / Image / Check-in / GitHub</div>
+        <div id="doc-arch" class="doc-frame">
+          <div class="npipe-item">
+            <div class="npipe-ic">💬</div>
+            <div>
+              <div class="npipe-nm">Text / Voice / Image / Check-in / GitHub</div>
+            </div>
+            <div class="npfill"></div><span class="tag tb">INPUT</span>
           </div>
-          <div class="npfill"></div><span class="tag tb">INPUT</span>
-        </div>
-        <div class="npipe-item">
-          <div class="npipe-ic">⚙️</div>
-          <div>
-            <div class="npipe-nm">Cloudflare Worker — 9 routes</div>
-            <div class="npipe-sub">learning-bot.talpadeavi0303.workers.dev</div>
+          <div class="npipe-item">
+            <div class="npipe-ic">⚙️</div>
+            <div>
+              <div class="npipe-nm">Cloudflare Worker — 9 routes</div>
+              <div class="npipe-sub">learning-bot.talpadeavi0303.workers.dev</div>
+            </div>
+            <div class="npfill"></div><span class="tag tg">BRAIN</span>
           </div>
-          <div class="npfill"></div><span class="tag tg">BRAIN</span>
-        </div>
-        <div class="npipe-item">
-          <div class="npipe-ic">🦙</div>
-          <div>
-            <div class="npipe-nm">Llama 3 + Whisper + LLaVA</div>
+          <div class="npipe-item">
+            <div class="npipe-ic">🦙</div>
+            <div>
+              <div class="npipe-nm">Llama 3.1 + Whisper + LLaVA</div>
+            </div>
+            <div class="npfill"></div><span class="tag tg">FREE AI</span>
           </div>
-          <div class="npfill"></div><span class="tag tg">FREE AI</span>
-        </div>
-        <div class="npipe-item">
-          <div class="npipe-ic">🗄️</div>
-          <div>
-            <div class="npipe-nm">Cloudflare KV</div>
-            <div class="npipe-sub">events · state · dashboard · goals</div>
+          <div class="npipe-item">
+            <div class="npipe-ic">🗄️</div>
+            <div>
+              <div class="npipe-nm">Cloudflare KV</div>
+              <div class="npipe-sub">events · state · dashboard · goals</div>
+            </div>
+            <div class="npfill"></div><span class="tag tgr">STORAGE</span>
           </div>
-          <div class="npfill"></div><span class="tag tgr">STORAGE</span>
-        </div>
-        <div class="npipe-item">
-          <div class="npipe-ic">🔬</div>
-          <div>
-            <div class="npipe-nm">ML Pipeline — GitHub Actions</div>
+          <div class="npipe-item">
+            <div class="npipe-ic">🔬</div>
+            <div>
+              <div class="npipe-nm">ML Pipeline — GitHub Actions</div>
+            </div>
+            <div class="npfill"></div><span class="tag tb">NIGHTLY</span>
           </div>
-          <div class="npfill"></div><span class="tag tb">NIGHTLY</span>
-        </div>
-        <div class="npipe-item">
-          <div class="npipe-ic">📱</div>
-          <div>
-            <div class="npipe-nm">Dashboard PWA + Telegram Bot</div>
+          <div class="npipe-item">
+            <div class="npipe-ic">📱</div>
+            <div>
+              <div class="npipe-nm">Dashboard PWA + Telegram Bot</div>
+            </div>
+            <div class="npfill"></div><span class="tag tg">OUTPUT</span>
           </div>
-          <div class="npfill"></div><span class="tag tg">OUTPUT</span>
         </div>
-      </div>
 
-      <div id="doc-progress" class="doc-frame">
-        <div class="npr">
-          <div class="nprh"><span class="nprl">Infrastructure</span><span class="nprv">100%</span></div>
-          <div class="nprt">
-            <div class="nprf" style="width:100%;transition:none"></div>
+        <div id="doc-progress" class="doc-frame">
+          <div class="npr">
+            <div class="nprh"><span class="nprl">Infrastructure</span><span class="nprv">100%</span></div>
+            <div class="nprt">
+              <div class="nprf" style="width:100%;transition:none"></div>
+            </div>
+          </div>
+          <div class="npr">
+            <div class="nprh"><span class="nprl">Data Ingestion</span><span class="nprv">90%</span></div>
+            <div class="nprt">
+              <div class="nprf" style="width:90%;transition:none"></div>
+            </div>
+          </div>
+          <div class="npr">
+            <div class="nprh"><span class="nprl">Dashboard UI</span><span class="nprv">85%</span></div>
+            <div class="nprt">
+              <div class="nprf" style="width:85%;transition:none"></div>
+            </div>
+          </div>
+          <div class="npr">
+            <div class="nprh"><span class="nprl">ML Pipeline</span><span class="nprv">70%</span></div>
+            <div class="nprt">
+              <div class="nprf dim" style="width:70%;transition:none"></div>
+            </div>
+          </div>
+          <div class="npr">
+            <div class="nprh"><span class="nprl">AI Intelligence</span><span class="nprv">50%</span></div>
+            <div class="nprt">
+              <div class="nprf dim" style="width:50%;transition:none"></div>
+            </div>
+          </div>
+          <div class="npr">
+            <div class="nprh"><span class="nprl">Security</span><span class="nprv">10%</span></div>
+            <div class="nprt">
+              <div class="nprf dim" style="width:10%;transition:none"></div>
+            </div>
+          </div>
+          <div class="npr">
+            <div class="nprh"><span class="nprl">Mobile APK</span><span class="nprv">20%</span></div>
+            <div class="nprt">
+              <div class="nprf dim" style="width:20%;transition:none"></div>
+            </div>
           </div>
         </div>
-        <div class="npr">
-          <div class="nprh"><span class="nprl">Data Ingestion</span><span class="nprv">90%</span></div>
-          <div class="nprt">
-            <div class="nprf" style="width:90%;transition:none"></div>
-          </div>
-        </div>
-        <div class="npr">
-          <div class="nprh"><span class="nprl">Dashboard UI</span><span class="nprv">85%</span></div>
-          <div class="nprt">
-            <div class="nprf" style="width:85%;transition:none"></div>
-          </div>
-        </div>
-        <div class="npr">
-          <div class="nprh"><span class="nprl">ML Pipeline</span><span class="nprv">70%</span></div>
-          <div class="nprt">
-            <div class="nprf dim" style="width:70%;transition:none"></div>
-          </div>
-        </div>
-        <div class="npr">
-          <div class="nprh"><span class="nprl">AI Intelligence</span><span class="nprv">50%</span></div>
-          <div class="nprt">
-            <div class="nprf dim" style="width:50%;transition:none"></div>
-          </div>
-        </div>
-        <div class="npr">
-          <div class="nprh"><span class="nprl">Security</span><span class="nprv">10%</span></div>
-          <div class="nprt">
-            <div class="nprf dim" style="width:10%;transition:none"></div>
-          </div>
-        </div>
-        <div class="npr">
-          <div class="nprh"><span class="nprl">Mobile APK</span><span class="nprv">20%</span></div>
-          <div class="nprt">
-            <div class="nprf dim" style="width:20%;transition:none"></div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- ══ JOBS ══ -->
-    <div class="view" id="view-jobs">
+      </div><!-- /view-learning -->
 
-      <!-- CALLOUT -->
-      <div class="callout cb" style="margin-bottom:20px">
-        <div class="c-ic">💼</div>
-        <div>
-          <div class="c-ttl">Jobs Intelligence</div>
-          <div class="c-bod">Paste a recruiter email below — JARVIS will extract company, role, salary, and score your
-            fit. All data stays local.</div>
-        </div>
-      </div>
+      <!-- ══ JOBS ══ -->
+      <div class="view" id="view-jobs">
 
-      <!-- ANALYZE INPUT -->
-      <div class="jobs-analyze">
-        <div class="jobs-analyze-head">
-          <div class="jobs-analyze-title">📩 Analyze Email</div>
-          <button class="jobs-btn jobs-btn-outline" onclick="syncGmail()">🔄 Sync Gmail</button>
+        <!-- CALLOUT -->
+        <div class="callout cb" style="margin-bottom:20px">
+          <div class="c-ic">💼</div>
+          <div>
+            <div class="c-ttl">Jobs Intelligence</div>
+            <div class="c-bod">Paste a recruiter email below — JARVIS will extract company, role, salary, and score your
+              fit. All data stays local.</div>
+          </div>
         </div>
-        <textarea id="job-email-input" placeholder="Paste a recruiter email, job description, or LinkedIn message here...
+
+        <!-- ANALYZE INPUT -->
+        <div class="jobs-analyze">
+          <div class="jobs-analyze-head">
+            <div class="jobs-analyze-title">📩 Analyze Email</div>
+            <button class="jobs-btn jobs-btn-outline" onclick="syncGmail()">🔄 Sync Gmail</button>
+          </div>
+          <textarea id="job-email-input" placeholder="Paste a recruiter email, job description, or LinkedIn message here...
 
 Example:
 Hi Avi, We have an exciting DevOps Engineer role at Barclays in Pune.
 The role involves CI/CD pipelines, Kubernetes, and Terraform.
 Salary: 15-18 LPA. Interested?"></textarea>
-        <div class="jobs-analyze-actions">
-          <div class="jobs-analyze-hint">JARVIS extracts: company, role, location, salary, fit score, and drafts a
-            reply.</div>
-          <button id="job-analyze-btn" class="jobs-btn jobs-btn-primary" onclick="analyzeJobEmail()">⚡ Analyze</button>
+          <div class="jobs-analyze-actions">
+            <div class="jobs-analyze-hint">JARVIS extracts: company, role, location, salary, fit score, and drafts a
+              reply.</div>
+            <button id="job-analyze-btn" class="jobs-btn jobs-btn-primary" onclick="analyzeJobEmail()">⚡ Analyze</button>
+          </div>
         </div>
-      </div>
 
-      <!-- LOADING -->
-      <div id="job-loading" style="display:none" class="jobs-analyzing">
-        <div class="jdot"></div>
-        JARVIS is analyzing the email...
-      </div>
-
-      <!-- STATS -->
-      <div class="jobs-stats">
-        <div class="jobs-stat">
-          <div class="jobs-stat-num" id="js-total">0</div>
-          <div class="jobs-stat-label">Total Jobs</div>
+        <!-- LOADING -->
+        <div id="job-loading" style="display:none" class="jobs-analyzing">
+          <div class="jdot"></div>
+          JARVIS is analyzing the email...
         </div>
-        <div class="jobs-stat">
-          <div class="jobs-stat-num" id="js-high">0</div>
-          <div class="jobs-stat-label">High Fit</div>
-        </div>
-        <div class="jobs-stat">
-          <div class="jobs-stat-num" id="js-pending">0</div>
-          <div class="jobs-stat-label">Pending</div>
-        </div>
-        <div class="jobs-stat">
-          <div class="jobs-stat-num" id="js-avg">—</div>
-          <div class="jobs-stat-label">Avg Score</div>
-        </div>
-      </div>
 
-      <!-- FILTERS -->
-      <div class="nh2">📊 Applications</div>
-      <div class="ndiv"></div>
-      <div class="jobs-toolbar">
-        <div class="jobs-filters">
-          <button class="jobs-filter on" data-filter="all" onclick="filterJobs('all',this)">All <span
-              class="jobs-filter-count">0</span></button>
-          <button class="jobs-filter" data-filter="high" onclick="filterJobs('high',this)">High Fit <span
-              class="jobs-filter-count">0</span></button>
-          <button class="jobs-filter" data-filter="pending" onclick="filterJobs('pending',this)">Pending <span
-              class="jobs-filter-count">0</span></button>
-          <button class="jobs-filter" data-filter="replied" onclick="filterJobs('replied',this)">Replied <span
-              class="jobs-filter-count">0</span></button>
+        <!-- STATS -->
+        <div class="jobs-stats">
+          <div class="jobs-stat">
+            <div class="jobs-stat-num" id="js-total">0</div>
+            <div class="jobs-stat-label">Total Jobs</div>
+          </div>
+          <div class="jobs-stat">
+            <div class="jobs-stat-num" id="js-high">0</div>
+            <div class="jobs-stat-label">High Fit</div>
+          </div>
+          <div class="jobs-stat">
+            <div class="jobs-stat-num" id="js-pending">0</div>
+            <div class="jobs-stat-label">Pending</div>
+          </div>
+          <div class="jobs-stat">
+            <div class="jobs-stat-num" id="js-avg">—</div>
+            <div class="jobs-stat-label">Avg Score</div>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="jobs-count" id="jobs-count">0 jobs</span>
-          <select id="jobs-sort" class="jobs-sort" onchange="sortJobsChanged()">
-            <option value="date">Sort: Date</option>
-            <option value="score">Sort: Score</option>
-          </select>
+
+        <!-- FILTERS -->
+        <div class="nh2">📊 Applications</div>
+        <div class="ndiv"></div>
+        <div class="jobs-toolbar">
+          <div class="jobs-filters">
+            <button class="jobs-filter on" data-filter="all" onclick="filterJobs('all',this)">All <span
+                class="jobs-filter-count">0</span></button>
+            <button class="jobs-filter" data-filter="high" onclick="filterJobs('high',this)">High Fit <span
+                class="jobs-filter-count">0</span></button>
+            <button class="jobs-filter" data-filter="pending" onclick="filterJobs('pending',this)">Pending <span
+                class="jobs-filter-count">0</span></button>
+            <button class="jobs-filter" data-filter="replied" onclick="filterJobs('replied',this)">Replied <span
+                class="jobs-filter-count">0</span></button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="jobs-count" id="jobs-count">0 jobs</span>
+            <select id="jobs-sort" class="jobs-sort" onchange="sortJobsChanged()">
+              <option value="date">Sort: Date</option>
+              <option value="score">Sort: Score</option>
+            </select>
+          </div>
         </div>
-      </div>
 
-      <!-- JOB LIST -->
-      <div class="jobs-list" id="jobs-list"></div>
+        <!-- JOB LIST -->
+        <div class="jobs-list" id="jobs-list"></div>
 
-      <!-- EMPTY STATE -->
-      <div class="jobs-empty" id="jobs-empty">
-        <div class="jobs-empty-icon">💼</div>
-        <div class="jobs-empty-title">No jobs analyzed yet</div>
-        <div class="jobs-empty-sub">Paste a recruiter email above and click <strong>Analyze</strong> to get
-          started.<br>JARVIS will extract details and score your fit.</div>
-      </div>
+        <!-- EMPTY STATE -->
+        <div class="jobs-empty" id="jobs-empty">
+          <div class="jobs-empty-icon">💼</div>
+          <div class="jobs-empty-title">No jobs analyzed yet</div>
+          <div class="jobs-empty-sub">Paste a recruiter email above and click <strong>Analyze</strong> to get
+            started.<br>JARVIS will extract details and score your fit.</div>
+        </div>
 
-    </div>
+      </div><!-- /view-jobs -->
 
-  </div><!-- /pg-content -->
+    </div><!-- /pg-content -->
 
   </div><!-- /main -->
 
