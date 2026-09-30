@@ -1242,7 +1242,12 @@ async function handleChat(request, env) {
     else reply = await runHybrid(systemPrompt, trimmedHistory, env);
   } catch (e) {
     console.error('[AETHER] Chat engine error:', e);
-    return jsonResp({ error: 'AI unavailable: ' + e.message }, 500);
+    try {
+      const mlFallback = await runAetherML(env);
+      reply = `[J.A.R.V.I.S Telemetry Fallback]\n` + mlFallback;
+    } catch {
+      return jsonResp({ error: 'AI unavailable: ' + e.message }, 500);
+    }
   }
 
   return jsonResp({ reply });
@@ -1816,7 +1821,7 @@ Return ONLY this JSON, no other text:
 
   try {
     if (!env.AI) throw new Error('No AI binding');
-    const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 400,
     });
@@ -2263,7 +2268,7 @@ async function runAetherML(env) {
 
 async function runWorkersAI(systemPrompt, history, env) {
   if (!env.AI) throw new Error('AI binding missing');
-  const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+  const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
     messages: [{ role: 'system', content: systemPrompt }, ...history],
     max_tokens: 400,
   });
@@ -2294,7 +2299,7 @@ async function runHybrid(systemPrompt, history, env) {
     mlContext = `\n\n[LIVE ML SIGNALS — ${allEv.length} events] energy:${energy}% focus:${focus}% stress:${stress}% flow:${flow}`;
   }
 
-  const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+  const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
     messages: [{ role: 'system', content: systemPrompt + mlContext }, ...history],
     max_tokens: 400,
   });
