@@ -1,60 +1,75 @@
+"""
+weekly_summary.py — Weekly Learning Summary Report
+Generates Markdown summary report in analytics/weekly-summary.md from events CSV or markdown log.
+"""
+
 import os
+import csv
+from pathlib import Path
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
-log_file = "logs/learning-log.md"
+LOG_MD = Path("logs/learning-log.md")
+CSV_PROCESSED = Path("data/processed/events_clean.csv")
+CSV_RAW = Path("data/raw/events.csv")
+OUTPUT_FILE = Path("analytics/weekly-summary.md")
 
-if not os.path.exists(log_file):
-    print("No logs available")
-    exit()
+def main():
+    topics = Counter()
+    recent_messages = []
+    total_sessions = 0
 
-# Read log lines
-with open(log_file) as f:
-    lines = f.readlines()
+    csv_file = CSV_PROCESSED if CSV_PROCESSED.exists() else (CSV_RAW if CSV_RAW.exists() else None)
 
-topics = Counter()
-recent_messages = []
+    if csv_file:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+        with open(csv_file, mode="r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                ts_str = row.get("timestamp", "")
+                try:
+                    dt = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                except:
+                    dt = datetime.now(timezone.utc)
 
-today = datetime.now()
-week_ago = today - timedelta(days=7)
+                topic = (row.get("topic") or "General").capitalize()
+                raw = row.get("raw_text") or row.get("summary") or "Learning session"
 
-current_date = None
+                if dt >= cutoff or len(recent_messages) < 10:
+                    topics[topic] += 1
+                    total_sessions += 1
+                    recent_messages.append(f"{dt.strftime('%b %d')}: {raw}")
+    elif LOG_MD.exists():
+        with open(LOG_MD, encoding="utf-8") as f:
+            lines = f.readlines()
+        week_ago = datetime.now() - timedelta(days=7)
+        current_date = None
+        for line in lines:
+            line = line.strip()
+            if line.startswith("## "):
+                try:
+                    current_date = datetime.strptime(line.replace("## ", ""), "%Y-%m-%d")
+                except:
+                    current_date = None
+                continue
+            if current_date and current_date >= week_ago:
+                recent_messages.append(line)
+                if "DO:" in line: topics["DevOps"] += 1
+                if "MO:" in line: topics["MLOps"] += 1
+                if "PR:" in line: topics["Projects"] += 1
+                if "IN:" in line: topics["Interview"] += 1
+        total_sessions = sum(topics.values())
+    else:
+        print("[weekly_summary] No log file or event data found.")
+        return
 
-for line in lines:
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    line = line.strip()
+    topic_rows = ""
+    for top, cnt in topics.most_common():
+        topic_rows += f"| {top} | {cnt} |\n"
 
-    if line.startswith("## "):
-        try:
-            current_date = datetime.strptime(line.replace("## ", ""), "%Y-%m-%d")
-        except:
-            current_date = None
-        continue
-
-    if not line:
-        continue
-
-    if current_date and current_date >= week_ago:
-
-        recent_messages.append(line)
-
-        if "DO:" in line:
-            topics["DevOps"] += 1
-
-        if "MO:" in line:
-            topics["MLOps"] += 1
-
-        if "PR:" in line:
-            topics["Projects"] += 1
-
-        if "IN:" in line:
-            topics["Interview"] += 1
-
-
-total_sessions = sum(topics.values())
-
-report = f"""
-# 📅 Weekly Learning Summary
+    report = f"""# 📅 Weekly Learning Summary
 
 ## 🚀 Overview
 Total Study Sessions: **{total_sessions}**
@@ -65,22 +80,16 @@ Total Study Sessions: **{total_sessions}**
 
 | Category | Sessions |
 |---------|----------|
-| ⚙ DevOps | {topics['DevOps']} |
-| 🤖 MLOps | {topics['MLOps']} |
-| 🚀 Projects | {topics['Projects']} |
-| 🎯 Interview Prep | {topics['Interview']} |
-
+{topic_rows}
 ---
 
 ## 🧠 Key Learning Activities
 
 """
+    for msg in recent_messages[-10:]:
+        report += f"- {msg}\n"
 
-for msg in recent_messages[-10:]:
-    report += f"- {msg}\n"
-
-report += """
-
+    report += """
 ---
 
 ## 📈 Productivity Insight
@@ -88,9 +97,10 @@ report += """
 Great progress this week! Keep maintaining consistent daily learning.
 """
 
-os.makedirs("analytics", exist_ok=True)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        f.write(report)
 
-with open("analytics/weekly-summary.md", "w") as f:
-    f.write(report)
+    print(f"[weekly_summary] Weekly summary generated -> {OUTPUT_FILE} ({total_sessions} sessions) ✅")
 
-print("Weekly summary generated")
+if __name__ == "__main__":
+    main()

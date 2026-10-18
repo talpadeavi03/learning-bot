@@ -111,7 +111,7 @@ from sklearn.preprocessing import LabelEncoder
 # Flow state classifier
 rf = RandomForestClassifier(
     n_estimators=100, max_depth=8, class_weight='balanced',
-    min_samples_split=2, random_state=42, n_jobs=-1
+    min_samples_split=2, random_state=42, n_jobs=1
 )
 
 # Energy regressor — forecasting target for next window (energy decay / focus boost)

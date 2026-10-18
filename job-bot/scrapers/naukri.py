@@ -8,7 +8,10 @@ import time
 import random
 import logging
 import requests
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
 from typing import List, Optional
 
 from config import TARGET_ROLES, TARGET_LOCATIONS, EXPERIENCE_YEARS, RESUME_PDF_PATH
@@ -62,10 +65,12 @@ def search_naukri(role: str, location: str = "India", pages: int = 3) -> List[Na
                 log.info(f"  Naukri [{role}] page {page}: {len(raw_jobs)} jobs")
             else:
                 log.warning(f"  Naukri search failed: HTTP {resp.status_code}")
+                break
         except Exception as e:
             log.error(f"  Naukri error: {e}")
+            break
 
-        time.sleep(random.uniform(2, 5))
+        time.sleep(random.uniform(1, 2))
 
     return jobs
 

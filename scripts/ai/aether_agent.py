@@ -9,8 +9,13 @@ from scripts.ai.agent_router import route
 
 
 def main():
-
-    question = input("Ask AETHER: ")
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ("-i", "--interactive") and sys.stdin.isatty():
+            question = input("Ask AETHER: ")
+        else:
+            question = " ".join(sys.argv[1:])
+    else:
+        question = "What is my current flow state and productivity?"
 
     print("\n--- AETHER RESPONSE ---\n")
 

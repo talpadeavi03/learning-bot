@@ -66,6 +66,11 @@ def load_models():
                     reg = pickle.load(f)
                 break
 
+    if hasattr(clf, 'n_jobs'):
+        clf.n_jobs = 1
+    if hasattr(reg, 'n_jobs'):
+        reg.n_jobs = 1
+
     return clf, reg
 
 clf_model, reg_model = load_models()

@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 
 INDEX_PATH = "data/vector/event_index.faiss"
@@ -48,8 +49,13 @@ def search(query, top_k=5):
 
 
 if __name__ == "__main__":
-    import sys
-    q = sys.argv[1] if len(sys.argv) > 1 else input("Query: ")
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ("-i", "--interactive") and sys.stdin.isatty():
+            q = input("Query: ")
+        else:
+            q = " ".join(sys.argv[1:])
+    else:
+        q = "coding"
 
     results = search(q)
 

@@ -1129,7 +1129,10 @@ export default {
       }
 
 
-      return env.ASSETS.fetch(request);
+      if (env.ASSETS && typeof env.ASSETS.fetch === 'function') {
+        return env.ASSETS.fetch(request);
+      }
+      return new Response('Not Found', { status: 404, headers: CORS_HEADERS });
 
     } catch (err) {
       console.error('[AETHER] Unhandled error:', err);
@@ -1990,11 +1993,16 @@ Return ONLY this JSON, no other text:
 
   try {
     if (!env.AI) throw new Error('No AI binding');
-    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 400,
-    });
-    const raw = result?.response || '{}';
+    let raw = '{}';
+    try {
+      raw = await callWorkersAI([{ role: 'user', content: prompt }], 400, env);
+    } catch {
+      const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 400,
+      });
+      raw = result?.response || '{}';
+    }
     let parsed = null;
     const match = raw.match(/\{[\s\S]*?\}/);
     if (match) { try { parsed = JSON.parse(match[0]); } catch { } }

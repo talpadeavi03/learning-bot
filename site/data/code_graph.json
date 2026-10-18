@@ -45,6 +45,14 @@
       "label": "textResp"
     },
     {
+      "id": "parseJobWithAI",
+      "label": "parseJobWithAI"
+    },
+    {
+      "id": "getGmailAccessToken",
+      "label": "getGmailAccessToken"
+    },
+    {
       "id": "handleWebhook",
       "label": "handleWebhook"
     },
@@ -155,6 +163,10 @@
     {
       "id": "runAetherML",
       "label": "runAetherML"
+    },
+    {
+      "id": "callWorkersAI",
+      "label": "callWorkersAI"
     },
     {
       "id": "runWorkersAI",
@@ -299,64 +311,24 @@
       "to": "textResp"
     },
     {
+      "from": "checkAdminAuth",
+      "to": "parseJobWithAI"
+    },
+    {
       "from": "jsonResp",
       "to": "textResp"
     },
     {
       "from": "jsonResp",
-      "to": "sendMorningBriefing"
-    },
-    {
-      "from": "jsonResp",
-      "to": "sendEveningSummary"
-    },
-    {
-      "from": "jsonResp",
-      "to": "middayNudge"
-    },
-    {
-      "from": "jsonResp",
-      "to": "sendWeeklyReport"
-    },
-    {
-      "from": "jsonResp",
-      "to": "backupEvents"
-    },
-    {
-      "from": "jsonResp",
-      "to": "handleWebhook"
+      "to": "parseJobWithAI"
     },
     {
       "from": "textResp",
-      "to": "sendMorningBriefing"
+      "to": "parseJobWithAI"
     },
     {
-      "from": "textResp",
-      "to": "sendEveningSummary"
-    },
-    {
-      "from": "textResp",
-      "to": "middayNudge"
-    },
-    {
-      "from": "textResp",
-      "to": "sendWeeklyReport"
-    },
-    {
-      "from": "textResp",
-      "to": "backupEvents"
-    },
-    {
-      "from": "textResp",
-      "to": "handleWebhook"
-    },
-    {
-      "from": "textResp",
-      "to": "handleChat"
-    },
-    {
-      "from": "textResp",
-      "to": "handleChat"
+      "from": "parseJobWithAI",
+      "to": "callWorkersAI"
     },
     {
       "from": "handleWebhook",
@@ -413,6 +385,10 @@
     {
       "from": "handleChat",
       "to": "runHybrid"
+    },
+    {
+      "from": "handleChat",
+      "to": "runAetherML"
     },
     {
       "from": "handleChat",
@@ -636,11 +612,19 @@
     },
     {
       "from": "runWorkersAI",
+      "to": "callWorkersAI"
+    },
+    {
+      "from": "runWorkersAI",
       "to": "runHybrid"
     },
     {
       "from": "runWorkersAI",
       "to": "getRecentEvents"
+    },
+    {
+      "from": "runWorkersAI",
+      "to": "getLatestState"
     },
     {
       "from": "runHybrid",
@@ -649,6 +633,10 @@
     {
       "from": "runHybrid",
       "to": "getLatestState"
+    },
+    {
+      "from": "runHybrid",
+      "to": "callWorkersAI"
     },
     {
       "from": "sendMorningBriefing",

@@ -1,22 +1,22 @@
 {
-  "mlops": {
-    "days_active": 14,
-    "max_streak": 2
-  },
-  "devops": {
-    "days_active": 12,
-    "max_streak": 3
-  },
-  "docker": {
-    "days_active": 7,
-    "max_streak": 1
-  },
   "kubernetes": {
-    "days_active": 11,
-    "max_streak": 3
+    "days_active": 20,
+    "max_streak": 7
   },
   "python": {
-    "days_active": 6,
-    "max_streak": 2
+    "days_active": 10,
+    "max_streak": 4
+  },
+  "devops": {
+    "days_active": 20,
+    "max_streak": 5
+  },
+  "docker": {
+    "days_active": 20,
+    "max_streak": 7
+  },
+  "mlops": {
+    "days_active": 19,
+    "max_streak": 6
   }
 }

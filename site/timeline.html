@@ -109,40 +109,52 @@ opacity:.9;
 <script>
 
 async function loadTimeline(){
+  try{
+    const WORKER_URL = "https://learning-bot.talpadeavi0303.workers.dev";
+    let events = [];
+    try {
+      const res = await fetch(WORKER_URL + "/events", { signal: AbortSignal.timeout(6000) });
+      if (res.ok) {
+        const data = await res.json();
+        events = Array.isArray(data) ? data : (data.events || []);
+      }
+    } catch (_) {}
 
-try{
+    if (!events.length) {
+      try {
+        const dashRes = await fetch("data/dashboard.json");
+        if (dashRes.ok) {
+          const dashData = await dashRes.json();
+          events = (dashData.timeline || []).map(t => ({
+            timestamp: t.time ? new Date().toISOString().split("T")[0] + "T" + t.time : new Date().toISOString(),
+            raw_text: t.event
+          }));
+        }
+      } catch (_) {}
+    }
 
-const res = await fetch("https://aether-api.talpadeavi0303.workers.dev/events")
+    const container = document.getElementById("timeline");
+    container.innerHTML = "";
 
-const data = await res.json()
+    if (!events.length) {
+      container.innerHTML = "<p>No timeline data yet. Log messages to see activity here.</p>";
+      return;
+    }
 
-const container = document.getElementById("timeline")
-
-container.innerHTML=""
-
-data.slice(0,30).forEach(e=>{
-
-const div=document.createElement("div")
-
-div.className="event"
-
-div.innerHTML=`
-
-<div class="time">${new Date(e.timestamp).toLocaleTimeString()}</div>
-<div class="text">${e.text}</div>
-
-`
-
-container.appendChild(div)
-
-})
-
-}catch(err){
-
-document.getElementById("timeline").innerHTML="<p>No timeline data yet.</p>"
-
-}
-
+    events.slice(-30).reverse().forEach(e => {
+      const div = document.createElement("div");
+      div.className = "event";
+      const timeStr = e.timestamp ? new Date(e.timestamp).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "Today";
+      const textStr = e.raw_text || e.summary || e.text || "Active event";
+      div.innerHTML = `
+        <div class="time">${timeStr}</div>
+        <div class="text">${textStr}</div>
+      `;
+      container.appendChild(div);
+    });
+  } catch(err) {
+    document.getElementById("timeline").innerHTML = "<p>No timeline data yet.</p>";
+  }
 }
 
 loadTimeline()

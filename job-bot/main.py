@@ -10,7 +10,10 @@ import random
 import logging
 import json
 from datetime import datetime
-from supabase import create_client
+try:
+    from supabase import create_client
+except ImportError:
+    create_client = None
 
 from config import (
     TARGET_ROLES, TARGET_LOCATIONS,
@@ -40,13 +43,31 @@ stats = {
 
 
 def get_supabase():
-    return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
+    if not create_client:
+        log.warning("Supabase package not installed. Running in offline / local cache mode.")
+        return None
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    if not url or not key:
+        log.warning("SUPABASE_URL or SUPABASE_KEY not set. Running in offline / local cache mode.")
+        return None
+    try:
+        return create_client(url, key)
+    except Exception as e:
+        log.warning(f"Could not initialize Supabase client: {e}")
+        return None
 
 
 def already_applied(supabase, job_id: str, source: str) -> bool:
     """Check if we've seen this job before (dedup)."""
-    res = supabase.table("jobs").select("id").eq("source", source).eq("job_id_ext", job_id).execute()
-    return len(res.data) > 0
+    if not supabase:
+        return False
+    try:
+        res = supabase.table("jobs").select("id").eq("source", source).eq("job_id_ext", job_id).execute()
+        return len(res.data) > 0
+    except Exception as e:
+        log.warning(f"Supabase dedup check warning: {e}")
+        return False
 
 
 def save_job(supabase, job_data: dict, analysis: dict, apply_result: dict = None):
@@ -72,11 +93,12 @@ def save_job(supabase, job_data: dict, analysis: dict, apply_result: dict = None
         "applied_at":   datetime.utcnow().isoformat() if ap_ok else None,
     }
 
-    try:
-        supabase.table("jobs").upsert(record, on_conflict="source,job_id_ext").execute()
-    except Exception as e:
-        log.error(f"Supabase save error: {e}")
-        stats["errors"] += 1
+    if supabase:
+        try:
+            supabase.table("jobs").upsert(record, on_conflict="source,job_id_ext").execute()
+        except Exception as e:
+            log.error(f"Supabase save error: {e}")
+            stats["errors"] += 1
 
 
 def log_to_worker(job_record: dict):
@@ -260,6 +282,8 @@ def _do_auto_apply(job_data: dict, source: str) -> dict:
 
 def log_pipeline_run(supabase, duration: int):
     """Save pipeline run summary to Supabase."""
+    if not supabase:
+        return
     try:
         supabase.table("pipeline_runs").insert({
             **stats, "duration_secs": duration,

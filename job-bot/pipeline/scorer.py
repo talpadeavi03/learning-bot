@@ -6,8 +6,10 @@ Uses Cloudflare AI (Llama 3) or Claude API to score job fit
 import os
 import json
 import logging
-import re
-import anthropic
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
 
 from config import PROFILE_SUMMARY, BLACKLIST_COMPANIES, BLACKLIST_KEYWORDS
 
@@ -88,6 +90,9 @@ def score_job(text: str, subject: str = "", source: str = "unknown") -> dict:
 
 def _score_with_claude(text: str, subject: str, api_key: str) -> dict:
     """Score using Claude claude-sonnet-4-5 — best quality."""
+    if not anthropic:
+        log.warning("Anthropic package not installed — falling back to regex")
+        return _score_regex_fallback(text, subject)
     try:
         client = anthropic.Anthropic(api_key=api_key)
         prompt = f"Subject: {subject}\n\nJob posting:\n{text[:3000]}"

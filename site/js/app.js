@@ -75,10 +75,7 @@ async function decryptText(base64Str, passkey) {
     const iv = combined.slice(0, 12);
     const data = combined.slice(12);
     
-    const keyData = new Uint8Array(32);
-    const passEncoded = new TextEncoder().encode(passkey);
-    keyData.set(passEncoded.slice(0, Math.min(passEncoded.length, 32)));
-    
+    const keyData = new TextEncoder().encode((passkey || '').padEnd(32, '0').slice(0, 32));
     const key = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['decrypt']);
     const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
     return new TextDecoder().decode(decrypted);

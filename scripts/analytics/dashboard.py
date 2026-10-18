@@ -1,63 +1,68 @@
+"""
+dashboard.py — Markdown Topic Distribution & ASCII Progress Bar
+"""
+
 import os
+import csv
+from pathlib import Path
 from collections import Counter
 
-log_file = "logs/learning-log.md"
+LOG_MD = Path("logs/learning-log.md")
+CSV_PROCESSED = Path("data/processed/events_clean.csv")
+CSV_RAW = Path("data/raw/events.csv")
+OUTPUT_FILE = Path("analytics/dashboard.md")
 
-if not os.path.exists(log_file):
-    print("No logs yet")
-    exit()
+def main():
+    topics = Counter()
+    csv_file = CSV_PROCESSED if CSV_PROCESSED.exists() else (CSV_RAW if CSV_RAW.exists() else None)
 
-topics = Counter()
+    if csv_file:
+        with open(csv_file, mode="r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                t = (row.get("topic") or "General").capitalize()
+                topics[t] += 1
+    elif LOG_MD.exists():
+        with open(LOG_MD, encoding="utf-8") as f:
+            lines = f.readlines()
+        for line in lines:
+            if "DO:" in line: topics["Devops"] += 1
+            if "MO:" in line: topics["Mlops"] += 1
+            if "PR:" in line: topics["Projects"] += 1
+            if "IN:" in line: topics["Interview"] += 1
+    else:
+        print("[dashboard] No logs yet")
+        return
 
-with open(log_file) as f:
-    lines = f.readlines()
+    total = sum(topics.values())
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-for line in lines:
+    dist_lines = []
+    progress_lines = []
+    for top, cnt in topics.most_common():
+        dist_lines.append(f"{top}: {cnt}\n")
+        blocks = "█" * min(cnt, 30)
+        progress_lines.append(f"{top:<12}: {blocks}")
 
-    if "DO:" in line:
-        topics["DevOps"] += 1
-
-    if "MO:" in line:
-        topics["MLOps"] += 1
-
-    if "PR:" in line:
-        topics["Projects"] += 1
-
-    if "IN:" in line:
-        topics["Interview"] += 1
-
-
-total = sum(topics.values())
-
-dashboard = f"""
-# Learning Dashboard
+    dashboard = f"""# Learning Dashboard
 
 ## Total Study Sessions
 {total}
 
 ## Topic Distribution
 
-DevOps: {topics['DevOps']}
-
-MLOps: {topics['MLOps']}
-
-Projects: {topics['Projects']}
-
-Interview Prep: {topics['Interview']}
-
+{"".join(dist_lines)}
 ---
 
 ## Progress Bar
 
-DevOps   : {'█'*topics['DevOps']}
-MLOps    : {'█'*topics['MLOps']}
-Projects : {'█'*topics['Projects']}
-Interview: {'█'*topics['Interview']}
+{"\n".join(progress_lines)}
 """
 
-os.makedirs("analytics", exist_ok=True)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        f.write(dashboard)
 
-with open("analytics/dashboard.md","w") as f:
-    f.write(dashboard)
+    print(f"[dashboard] Dashboard generated -> {OUTPUT_FILE} ({total} sessions) ✅")
 
-print("Dashboard updated")
+if __name__ == "__main__":
+    main()

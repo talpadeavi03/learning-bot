@@ -10,11 +10,22 @@ import time
 import logging
 from datetime import datetime
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from supabase import create_client, Client
+try:
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from googleapiclient.discovery import build
+except ImportError:
+    Request = None
+    Credentials = None
+    InstalledAppFlow = None
+    build = None
+
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None
+    Client = None
 
 from config import GMAIL_SEARCH_QUERY, GMAIL_MAX_RESULTS
 from pipeline.scorer import score_job
@@ -27,30 +38,53 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
 
 def get_gmail_service():
     """Authenticate and return Gmail API service."""
+    if not build or not Credentials:
+        log.warning("Google API client packages not installed — skipping Gmail service.")
+        return None
+
     creds = None
 
     # Try token from env var first (for GitHub Actions)
     token_json = os.getenv("GMAIL_TOKEN_JSON")
     if token_json:
         import tempfile
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            f.write(token_json)
-            token_path = f.name
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                f.write(token_json)
+                token_path = f.name
+            creds = Credentials.from_authorized_user_file(token_path, SCOPES)
+        except Exception as e:
+            log.warning(f"Failed to load GMAIL_TOKEN_JSON: {e}")
     elif os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        except Exception as e:
+            log.warning(f"Failed to load token.json: {e}")
 
     if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+        if creds and creds.expired and creds.refresh_token and Request:
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                log.warning(f"Failed to refresh Gmail creds: {e}")
+                return None
+        elif os.path.exists("credentials.json") and InstalledAppFlow:
+            try:
+                flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+                creds = flow.run_local_server(port=0)
+                with open("token.json", "w") as f:
+                    f.write(creds.to_json())
+            except Exception as e:
+                log.warning(f"InstalledAppFlow failed: {e}")
+                return None
         else:
-            # Local only — run once to generate token
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open("token.json", "w") as f:
-            f.write(creds.to_json())
+            return None
 
-    return build("gmail", "v1", credentials=creds)
+    try:
+        return build("gmail", "v1", credentials=creds)
+    except Exception as e:
+        log.warning(f"Failed to build gmail service: {e}")
+        return None
 
 
 def get_unread_job_emails(service, max_results=50):
@@ -153,13 +187,19 @@ def run_gmail_pipeline():
     log.info("═══ Gmail Reader Pipeline Starting ═══")
 
     # Init services
-    gmail   = get_gmail_service()
-    supabase = create_client(
-        os.environ["SUPABASE_URL"],
-        os.environ["SUPABASE_KEY"]
-    )
+    gmail = get_gmail_service()
+    if not gmail:
+        log.info("Gmail service not available (credentials or dependencies missing) — skipping Gmail phase.")
+        return {"processed": 0, "saved": 0, "not_job": 0, "errors": 0}
 
-    messages    = get_unread_job_emails(gmail, GMAIL_MAX_RESULTS)
+    supabase = None
+    if create_client and os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_KEY"):
+        try:
+            supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
+        except Exception as e:
+            log.warning(f"Could not connect to Supabase: {e}")
+
+    messages = get_unread_job_emails(gmail, GMAIL_MAX_RESULTS)
     processed   = 0
     saved       = 0
     not_job     = 0

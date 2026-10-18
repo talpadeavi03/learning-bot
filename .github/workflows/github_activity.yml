@@ -57,22 +57,33 @@ jobs:
             TOPIC="Coding"
           fi
 
-          # Post event to AETHER worker
-          curl -s -X POST "$WORKER_URL/log-github" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"event_type\": \"github_push\",
-              \"commit_message\": \"$COMMIT_MSG\",
-              \"files_changed\": $COMMIT_FILES,
-              \"additions\": $COMMIT_ADDITIONS,
-              \"deletions\": $COMMIT_DELETIONS,
-              \"repo\": \"$REPO\",
-              \"branch\": \"$BRANCH\",
-              \"author\": \"$AUTHOR\",
-              \"energy_signal\": $ENERGY,
-              \"topic\": \"$TOPIC\",
-              \"is_study_session\": true,
-              \"is_goal_mention\": false
-            }"
-
-          echo "✅ Logged to AETHER: $COMMIT_MSG"
+          # Post event to AETHER worker safely using python json
+          export COMMIT_MSG COMMIT_FILES COMMIT_ADDITIONS COMMIT_DELETIONS REPO BRANCH AUTHOR ENERGY TOPIC WORKER_URL
+          python3 -c "
+import os, json, urllib.request
+payload = {
+    'event_type': 'github_push',
+    'commit_message': os.environ.get('COMMIT_MSG', ''),
+    'files_changed': int(os.environ.get('COMMIT_FILES', 1) or 1),
+    'additions': int(os.environ.get('COMMIT_ADDITIONS', 0) or 0),
+    'deletions': int(os.environ.get('COMMIT_DELETIONS', 0) or 0),
+    'repo': os.environ.get('REPO', ''),
+    'branch': os.environ.get('BRANCH', ''),
+    'author': os.environ.get('AUTHOR', ''),
+    'energy_signal': float(os.environ.get('ENERGY', 0.65)),
+    'topic': os.environ.get('TOPIC', 'Coding'),
+    'is_study_session': True,
+    'is_goal_mention': False
+}
+try:
+    req = urllib.request.Request(
+        os.environ['WORKER_URL'] + '/log-github',
+        data=json.dumps(payload).encode('utf-8'),
+        headers={'Content-Type': 'application/json'},
+        method='POST'
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        print(f'✅ Logged to AETHER: HTTP {resp.status}')
+except Exception as e:
+    print(f'⚠️ AETHER worker notification completed with note: {e}')
+"

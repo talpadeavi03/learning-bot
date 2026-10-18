@@ -203,3 +203,21 @@ function deleteRecord(db, store, id) {
     req.onerror   = e => reject(e.target.error);
   });
 }
+
+// ── PUSH NOTIFICATION HANDLER ──────────────────────────────
+self.addEventListener('push', event => {
+  try {
+    const data = event.data ? event.data.json() : {};
+    self.registration.showNotification(data.title || 'AETHER OS', {
+      body: data.body || 'New notification',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png'
+    });
+  } catch (e) {
+    self.registration.showNotification('AETHER OS', {
+      body: event.data ? event.data.text() : 'System update',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png'
+    });
+  }
+});

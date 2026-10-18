@@ -51,6 +51,11 @@ def load_models():
         with open(reg_path, "rb") as f:
             reg = pickle.load(f)
 
+    if hasattr(clf, "n_jobs"):
+        clf.n_jobs = 1
+    if hasattr(reg, "n_jobs"):
+        reg.n_jobs = 1
+
     return clf, reg
 
 try:
